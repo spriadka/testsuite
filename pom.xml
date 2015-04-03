@@ -1,16 +1,23 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  
+
   <parent>
     <groupId>org.jboss</groupId>
     <artifactId>jboss-parent</artifactId>
     <version>17</version>
   </parent>
-  
+
   <groupId>org.jboss.as</groupId>
   <artifactId>hal-testsuite</artifactId>
   <version>0.0.1-SNAPSHOT</version>
-  
+
+  <scm>
+    <connection>scm:git:git@github.com:hal/testsuite.git</connection>
+    <developerConnection>scm:git:git@github.com:hal/testsuite.git</developerConnection>
+    <url>https://github.com/hal/testsuite/</url>
+    <tag>HEAD</tag>
+  </scm>
+
   <properties>
     <browser>firefox</browser>
     <jboss.home>${jboss.dist}</jboss.home>
@@ -23,7 +30,7 @@
     <!-- TODO change -DskipTests to something like -PsmokeTests -->
     <arguments>-Pjboss-release -DskipTests</arguments>
   </properties>
-  
+
   <dependencyManagement>
 
     <dependencies>
@@ -246,7 +253,7 @@
         </plugins>
       </build>
     </profile>
-    
+
     <profile>
       <id>wildfly-download</id>
       <activation>
@@ -308,7 +315,7 @@
         </plugins>
       </build>
     </profile>
-    
+
   </profiles>
 
   <build>
@@ -356,7 +363,7 @@
           <useFile />
         </configuration>
       </plugin>
-      
+
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
         <artifactId>findbugs-maven-plugin</artifactId>
@@ -374,7 +381,7 @@
           </execution>
         </executions>
       </plugin>
-      
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-release-plugin</artifactId>
