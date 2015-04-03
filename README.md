@@ -1,5 +1,6 @@
 # Testsuite
-Selenium testsuite for the HAL management console. It uses Arquillian Drone and Graphene extensions.
+Selenium testsuite for the HAL management console. It uses [Drone](https://docs.jboss.org/author/display/ARQ/Drone) 
+and [Graphene](https://docs.jboss.org/author/display/ARQGRA2/Home) Arquillian extensions.
 
 ## Prerequisites
 
@@ -36,9 +37,19 @@ E.g. `-Djboss.dist=/home/user/workspace/wildfly/build/target/wildfly-9.0.0.Alpha
 Path to Firefox binary file. If not provided system default firefox will be used.
 E.g. `-Darq.extension.webdriver.firefox_binary=/home/user/apps/firefox-31.2.0esr/firefox`
 
+## Tips
+
+* If you want tests to be run on background use vncserver. E.g. 
+
+`vncserver :10 -geometry 1920x1080`
+
+`export DISPLAY=:10`
+
+
 ## Known issues
 
 * For `-Pwildfly-domain` profile it's currently necessary to start the domain manually.
+* No sreenshots on test failure neither test error currently (It seems Arquillian unlike Surefire thinks they passed).
 
 ## Problems?
 
