@@ -5,7 +5,6 @@ import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.hal.testsuite.fragment.shared.util.ResourceManager;
 import org.jboss.hal.testsuite.util.PropUtils;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
-import org.jboss.hal.testsuite.cli.CliClient;
 import org.junit.Assert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriverException;
@@ -17,15 +16,7 @@ import org.openqa.selenium.WebElement;
 public class ConfigFragment extends BaseFragment {
 
     public ResourceManager getResourceManager() {
-        return getResourceManager(null, null);
-    }
-
-    public ResourceManager getResourceManager(String dmrPath, CliClient cliClient) {
-        ResourceManager rm = Graphene.createPageFragment(ResourceManager.class, root);
-        rm.setDmrPath(dmrPath);
-        rm.setCliClient(cliClient);
-
-        return rm;
+        return Graphene.createPageFragment(ResourceManager.class, root);
     }
 
     public WebElement getEditButton() {
@@ -74,8 +65,6 @@ public class ConfigFragment extends BaseFragment {
         Graphene.waitModel().until().element(getEditButton()).is().visible();
     }
 
-
-
     /**
      * Calls  {@link #save()}  save} method and asserts the output
      *
@@ -91,39 +80,4 @@ public class ConfigFragment extends BaseFragment {
         }
     }
 
-    public void textAttribute(ResourceManager rm, String name, String value, boolean save) {
-        textAttribute(rm, name, value, value, save);
-    }
-
-    public void textAttribute(ResourceManager rm, String name, String value, String expectedValue, boolean save) {
-        Editor editor = this.edit();
-        editor.text(name, value);
-        this.saveAndAssert(save);
-
-        rm.verifyAttribute(name, expectedValue);
-    }
-
-    public void selectAttribute(ResourceManager rm, String name, String value, boolean save) {
-        selectAttribute(rm, name, value, value, save);
-    }
-
-    public void selectAttribute(ResourceManager rm, String name, String value, String expectedValue, boolean save) {
-        Editor editor = this.edit();
-        editor.select(name, value);
-        this.saveAndAssert(save);
-
-        rm.verifyAttribute(name, expectedValue);
-    }
-
-    public void checkboxAttribute(ResourceManager rm, String name, boolean value, boolean save) {
-        checkboxAttribute(rm, name, value, value, save);
-    }
-
-    public void checkboxAttribute(ResourceManager rm, String name, boolean value, boolean expectedValue, boolean save) {
-        Editor editor = this.edit();
-        editor.checkbox(name, value);
-        this.saveAndAssert(save);
-
-        rm.verifyAttribute(name, String.valueOf(expectedValue));
-    }
 }
