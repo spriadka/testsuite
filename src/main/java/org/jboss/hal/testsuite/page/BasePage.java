@@ -17,7 +17,6 @@ import org.jboss.hal.testsuite.fragment.shared.table.InfoTable;
 import org.jboss.hal.testsuite.fragment.shared.util.ResourceManager;
 import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.PropUtils;
-import org.jboss.hal.testsuite.cli.CliClient;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
@@ -243,15 +242,7 @@ public abstract class BasePage {
     }
 
     public ResourceManager getResourceManager() {
-        return getResourceManager(null, null);
-    }
-
-    public ResourceManager getResourceManager(String dmrPath, CliClient cliClient) {
-        ResourceManager rm = Graphene.createPageFragment(ResourceManager.class, getContentRoot());
-        rm.setDmrPath(dmrPath);
-        rm.setCliClient(cliClient);
-
-        return rm;
+        return Graphene.createPageFragment(ResourceManager.class, getContentRoot());
     }
 
     /**
