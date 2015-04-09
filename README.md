@@ -7,11 +7,17 @@ and [Graphene](https://docs.jboss.org/author/display/ARQGRA2/Home) Arquillian ex
 * JDK 8 or higher
 * Maven 3.0.4 or higher
 * Firefox browser (tested on 31.2.0 esr version, will probably not run with far older or younger versions)
+* Wildfly (9 or higher) or EAP (6.4 or higher)
 
-In order to work on the console you may want running WildFly
-instance on your local host. You can download it here:
+You can download it here:
+<http://wildfly.org/downloads/> or <http://www.jboss.org/products/eap/download/>
 
-<http://www.wildfly.org/download/>
+Currently it's necessary to unsecure the management http-interface to be able to run testsuite.
+E.g. for standalone Wildfly 9 using CLI:
+```
+/core-service=management/management-interface=http-interface:undefine-attribute(name=security-realm)
+:reload
+```
 
 ## How to run tests
 
@@ -48,11 +54,12 @@ E.g. `-Darq.extension.webdriver.firefox_binary=/home/user/apps/firefox-31.2.0esr
 
 ## Known issues
 
-* For `-Pwildfly-domain` profile it's currently necessary to start the domain manually.
+* For either `-Pwildfly` or `-Pwildfly-domain` profile it's currently necessary to start the Wildfly manually.
 * No sreenshots on test failure neither test error currently (It seems Arquillian unlike Surefire thinks they passed).
 
 ## Problems?
 
 Ping us on IRC freenode.net#wildfly-management
+[Issue tracking](https://issues.jboss.org/browse/HAL/)
 
 Have fun.
