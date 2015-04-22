@@ -31,6 +31,10 @@ public class CliConstants {
     public static final String WEB_CONTAINER_CONFIGURATION_ADDRESS = "/subsystem=web/configuration=container";
     public static final String WEB_CONTAINER_STATIC_RESOURCES_ADDRESS = "/subsystem=web/configuration=static-resources";
     public static final String WEB_SUBSYSTEM_ADDRESS = "/subsystem=web";
+    public static final String DATASOURCES_SUBSYSTEM_ADDRESS = "/subsystem=datasources";
+    public static final String DATASOURCES_ADDRESS = "/subsystem=datasources/data-source";
+    public static final String XA_DATASOURCES_ADDRESS = "/subsystem=datasources/xa-data-source";
+    public static final String DEPLOYMENT_ADDRESS = "/deployment";
 
     public static final String UNDEFINED = "undefined";
 }
