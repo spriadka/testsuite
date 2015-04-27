@@ -35,6 +35,9 @@ public class CliConstants {
     public static final String DATASOURCES_ADDRESS = "/subsystem=datasources/data-source";
     public static final String XA_DATASOURCES_ADDRESS = "/subsystem=datasources/xa-data-source";
     public static final String DEPLOYMENT_ADDRESS = "/deployment";
+    public static final String SERVER_GROUP_ADDRESS = "/server-group";
 
     public static final String UNDEFINED = "undefined";
+
+
 }
