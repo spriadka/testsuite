@@ -1,7 +1,5 @@
 package org.jboss.hal.testsuite.fragment.formeditor;
 
-import java.io.File;
-
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.hal.testsuite.fragment.BaseFragment;
@@ -13,6 +11,8 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.File;
 
 /**
  * Created by jcechace on 03/03/14.
@@ -61,8 +61,8 @@ public class Editor extends BaseFragment {
 
     private WebElement findSelect(String identifier) {
         By selector = ByJQuery.selector(
-                "select[id$='" + identifier + "']," +
-                        "select[name='" + identifier + "'], "
+                "select[id$='" + identifier + "']:visible," +
+                        "select[name='" + identifier + "']:visible, "
         );
 
         return findElement(selector, root);
@@ -195,8 +195,8 @@ public class Editor extends BaseFragment {
         } catch (NoSuchElementException ignore) {
             log.debug("not found - looking for textarea '{}'", identifier);
 
-            String byIdSelector = "textarea[id$='" + identifier + "'], ";
-            String byNameSelector = "textarea[name='" + identifier + "'], ";
+            String byIdSelector = "textarea[id$='" + identifier + "']:visible, ";
+            String byNameSelector = "textarea[name='" + identifier + "']:visible, ";
             By selector = ByJQuery.selector(byIdSelector + ", " + byNameSelector);
 
             text = findElement(selector, root);
@@ -215,8 +215,8 @@ public class Editor extends BaseFragment {
     private WebElement findInputElement(String type, String identifier) {
         log.debug("looking for the '{}' input element identified by '{}'", type, identifier);
 
-        String byIdSelector = "input[type='" + type + "'][id$='" + identifier + "'], ";
-        String byNameSelector = "input[type='" + type + "'][name='" + identifier + "'], ";
+        String byIdSelector = "input[type='" + type + "'][id$='" + identifier + "']:visible, ";
+        String byNameSelector = "input[type='" + type + "'][name='" + identifier + "']:visible, ";
         By selector = ByJQuery.selector(byIdSelector + ", " + byNameSelector);
 
         WebElement input = findElement(selector, root);
