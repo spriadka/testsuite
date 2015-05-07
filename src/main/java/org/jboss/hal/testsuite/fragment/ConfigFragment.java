@@ -2,11 +2,13 @@ package org.jboss.hal.testsuite.fragment;
 
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.ByJQuery;
+import org.jboss.hal.testsuite.cli.Library;
+import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.jboss.hal.testsuite.fragment.shared.util.ResourceManager;
 import org.jboss.hal.testsuite.util.PropUtils;
-import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.junit.Assert;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 
@@ -48,7 +50,11 @@ public class ConfigFragment extends BaseFragment {
      * @return True if configuration switched into read-only mode. False otherwise
      */
     public boolean save() {
-        clickButton(PropUtils.get("configarea.save.button.label"));
+        WebElement button = getButton(PropUtils.get("configarea.save.button.label"));
+        if(!button.isDisplayed()){
+            root.sendKeys(Keys.PAGE_DOWN);
+        }
+        button.click();
         try {
             Graphene.waitModel().until().element(getEditButton()).is().visible();
             return true;
@@ -80,4 +86,12 @@ public class ConfigFragment extends BaseFragment {
         }
     }
 
+    public boolean resourceIsPresent(String name) {
+        long start = System.currentTimeMillis();
+        while (getResourceManager().getResourceTable().getRowByText(0, name) == null) {
+            if(System.currentTimeMillis() >= start + 2000) return false;
+            Library.letsSleep(200);
+        }
+        return true;
+    }
 }
