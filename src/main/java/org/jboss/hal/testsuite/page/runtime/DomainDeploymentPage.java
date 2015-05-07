@@ -17,6 +17,9 @@ import org.openqa.selenium.WebElement;
 @Location("#domain-deployments")
 public class DomainDeploymentPage extends BasePage {
 
+    private static final By BACK_BUTTON = By.xpath(".//a[text()='Back']");
+    private static final By CONTENT = ByJQuery.selector("." + PropUtils.get("page.content.rhs.class") + ":visible");
+
     public DeploymentContentRepositoryArea switchToContentRepository() {
         switchTab("Content Repository");
         return getDeploymentContent(DeploymentContentRepositoryArea.class);
@@ -24,7 +27,7 @@ public class DomainDeploymentPage extends BasePage {
 
     public DeploymentServerGroupArea switchToServerGroup(String serverGroup) {
         switchTab("Server Groups");
-        WebElement backAnchor = getContentRoot().findElement(By.xpath(".//a[text()='Back']"));
+        WebElement backAnchor = getContentRoot().findElement(BACK_BUTTON);
         if (backAnchor.isDisplayed()) {
             backAnchor.click();
         }
@@ -33,7 +36,7 @@ public class DomainDeploymentPage extends BasePage {
     }
 
     public <T extends BaseFragment> T getDeploymentContent(Class<T> clazz) {
-        WebElement content = getContentRoot().findElement(ByJQuery.selector("." + PropUtils.get("page.content.rhs.class") + ":visible"));
+        WebElement content = getContentRoot().findElement(CONTENT);
         return Graphene.createPageFragment(clazz, content);
     }
 }

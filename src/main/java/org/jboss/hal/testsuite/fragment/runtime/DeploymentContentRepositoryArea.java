@@ -19,10 +19,11 @@ public class DeploymentContentRepositoryArea extends ConfigFragment {
     }
 
     public void assignDeployment(String deploymentName, String groupName) {
+        By groupSelector = By.xpath(".//div[text()='" + groupName + "']");
         getResourceManager().selectByName(deploymentName);
         clickButton(PropUtils.get("config.deployments.assign.label"));
         WizardWindow window = Console.withBrowser(browser).openedWizard();
-        window.getRoot().findElement(By.xpath(".//div[text()='" + groupName + "']")).click();
+        window.getRoot().findElement(groupSelector).click();
         window.finish();
     }
 }

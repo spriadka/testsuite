@@ -14,10 +14,10 @@ import org.openqa.selenium.WebElement;
 @Location("#deployments")
 public class DeploymentPage extends BasePage {
 
+    private static final By CONTENT = By.className(PropUtils.get("page.content.rhs.class"));
+
     public StandaloneDeploymentsArea getDeploymentContent() {
-        String cssClass = PropUtils.get("page.content.rhs.class");
-        By selector = By.className(cssClass);
-        WebElement content = getContentRoot().findElement(selector);
+        WebElement content = getContentRoot().findElement(CONTENT);
 
         return Graphene.createPageFragment(StandaloneDeploymentsArea.class, content);
     }

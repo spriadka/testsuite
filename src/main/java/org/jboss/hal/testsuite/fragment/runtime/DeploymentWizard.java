@@ -23,14 +23,17 @@ public class DeploymentWizard extends WizardWindow {
     private static final String MANAGED = "Managed";
     private static final String UNMANAGED = "Unmanaged";
 
+    private static final By MANAGED_BUTTON = By.xpath(".//div[text()='"+MANAGED+"']");
+    private static final By UNMANAGED_BUTTON = By.xpath(".//div[text()='"+UNMANAGED+"']");
+
 
     public DeploymentWizard switchToManaged() {
-        root.findElement(By.xpath(".//div[text()='"+MANAGED+"']")).click();
+        root.findElement(MANAGED_BUTTON).click();
         return this;
     }
 
     public DeploymentWizard switchToUnmanaged() {
-        root.findElement(By.xpath(".//div[text()='"+ UNMANAGED +"']")).click();
+        root.findElement(UNMANAGED_BUTTON).click();
         return this;
     }
 

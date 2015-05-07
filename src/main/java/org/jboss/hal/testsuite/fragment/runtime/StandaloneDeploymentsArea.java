@@ -20,7 +20,8 @@ public class StandaloneDeploymentsArea extends BaseFragment {
     }
 
     public WebElement selectDeployment(String name) {
-        WebElement deployment = root.findElement(By.xpath(".//div[text()='" + name + "']"));
+        By deploymentSelector = By.xpath(".//div[text()='" + name + "']");
+        WebElement deployment = root.findElement(deploymentSelector);
         deployment.click();
         return deployment;
     }
