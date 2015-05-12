@@ -26,11 +26,30 @@ package org.jboss.hal.testsuite.cli;
  * @author rhatlapa (rhatlapa@redhat.com)
  */
 public class CliConstants {
+    public static final String UNDEFINED = "undefined";
+
     public static final String WEB_SUBSYSTEM_JSP_CONFIGURATION_ADDRESS = "/subsystem=web/configuration=jsp-configuration";
     public static final String DEFAULT_HOST_VIRTUAL_SERVER_ADDRESS = "/subsystem=web/virtual-server=default-host";
+    public static final String VIRTUAL_SERVER_SUBSYSTEM_ADDRESS = "/subsystem=web/virtual-server";
     public static final String WEB_CONTAINER_CONFIGURATION_ADDRESS = "/subsystem=web/configuration=container";
     public static final String WEB_CONTAINER_STATIC_RESOURCES_ADDRESS = "/subsystem=web/configuration=static-resources";
     public static final String WEB_SUBSYSTEM_ADDRESS = "/subsystem=web";
-
-    public static final String UNDEFINED = "undefined";
+    public static final String DATASOURCES_SUBSYSTEM_ADDRESS = "/subsystem=datasources";
+    public static final String DATASOURCES_ADDRESS = "/subsystem=datasources/data-source";
+    public static final String XA_DATASOURCES_ADDRESS = "/subsystem=datasources/xa-data-source";
+    public static final String DEPLOYMENT_ADDRESS = "/deployment";
+    public static final String MAIN_SERVER_GROUP_DEPLOYMENT_ADDRESS = "/deployment=main-server-group";
+    public static final String SERVER_GROUP_ADDRESS = "/server-group";
+    public static final String INTERFACE_ADDRESS = "/interface";
+    public static final String SOCKET_BINDING_GROUP_ADDRESS = "/socket-binding-group";
+    public static final String DEFAULT_SOCKET_BINDING_GROUP_ADDRESS = "/socket-binding-group=standard-sockets";
+    public static final String DEFAULT_SOCKET_BINDING_INBOUND_ADDRESS = DEFAULT_SOCKET_BINDING_GROUP_ADDRESS + "/socket-binding";
+    public static final String DEFAULT_SOCKET_BINDING_OUTBOUND_LOCAL_ADDRESS = DEFAULT_SOCKET_BINDING_GROUP_ADDRESS + "/local-destination-outbound-socket-binding";
+    public static final String DEFAULT_SOCKET_BINDING_OUTBOUND_REMOTE_ADDRESS = DEFAULT_SOCKET_BINDING_GROUP_ADDRESS + "/remote-destination-outbound-socket-binding";
+    public static final String SYSTEM_PROPERTY_ADDRESS = "/system-property";
+    public static final String MAIL_SESSION_SUBSYSTEM_ADDRESS = "/subsystem=mail/mail-session";
+    public static final String RESOURCE_ADAPTERS_SUBSYSTEM_ADDRESS = "/subsystem=resource-adapters";
+    public static final String RESOURCE_ADAPTER_ADDRESS = "/subsystem=resource-adapters/resource-adapter";
+    public static final String WEB_SERVICES_SUBSYSTEM_ADDRESS = "/subsystem=webservices";
+    public static final String MOD_CLUSTER_CONFIG_ADDRESS = "/subsystem=modcluster/mod-cluster-config=configuration";
 }

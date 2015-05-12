@@ -22,11 +22,10 @@
 
 package org.jboss.hal.testsuite.util;
 
-import java.io.IOException;
-import java.util.Map;
-
 import org.jboss.hal.testsuite.cli.CliClient;
 import org.junit.Assert;
+
+import java.util.Map;
 
 /**
  * Created by pjelinek on Apr 7, 2015
@@ -77,7 +76,7 @@ public class ResourceVerifier {
      * @param name name of the attribute. If the name is camelCase it will be converted to camel-case.
      * @param expectedValue expected value
      */
-    public void verifyAttribute(String name, String expectedValue) throws IOException {
+    public void verifyAttribute(String name, String expectedValue) {
         if (dmrPath == null) {
             throw new IllegalStateException("DMR path not set");
         }
@@ -93,7 +92,7 @@ public class ResourceVerifier {
      *
      * @param pairs Key-Value map of attribute names and values. If name is camelCase it will be coverted to camel-case
      */
-    public void verifyAttributes(Map<String, String> pairs) throws IOException {
+    public void verifyAttributes(Map<String, String> pairs) {
         for (Map.Entry<String, String> p : pairs.entrySet()) {
             verifyAttribute(p.getKey(), p.getValue());
         }

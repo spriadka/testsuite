@@ -214,6 +214,11 @@ public class CliClient {
         return executeForSuccess(command);
     }
 
+    public boolean removeResource(String dmrPath){
+        String command = CliUtils.buildCommand(dmrPath, ":remove");
+        return executeForSuccess(command);
+    }
+
 
     /**
      * Check whether server is in reload-required state.

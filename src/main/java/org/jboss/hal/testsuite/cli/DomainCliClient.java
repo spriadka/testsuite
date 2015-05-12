@@ -63,9 +63,9 @@ public class DomainCliClient extends CliClient {
     public CLI.Result executeCommand(String command) {
         String updatedCommand = command;
         if (command.startsWith("/subsystem")) {
-           updatedCommand = "/profile="+profile + command;
+            updatedCommand = "/profile=" + profile + command;
         }
-        if(command.startsWith("/core-service")) {
+        if (command.startsWith("/core-service")) {
             updatedCommand = "/host=" + domainHost + command;
         }
         return super.executeCommand(updatedCommand);
@@ -73,6 +73,7 @@ public class DomainCliClient extends CliClient {
 
     /**
      * Shutdown and re-start the server only if the server is in restart required state or forced
+     *
      * @param forced whether server should be restarted even when server is not in restart required state
      */
     @Override
@@ -99,7 +100,7 @@ public class DomainCliClient extends CliClient {
      */
     @Override
     public boolean restartRequired() {
-       return restartRequired(domainHost);
+        return restartRequired(domainHost);
     }
 
     /**
@@ -120,7 +121,31 @@ public class DomainCliClient extends CliClient {
      */
     @Override
     public boolean restart() {
-       return restart(domainHost);
+        return restart(domainHost);
+    }
+
+    @Override
+    public boolean reloadRequired() {
+        return reloadRequired(domainHost);
+    }
+
+    @Override
+    public boolean reload() {
+        return reload(domainHost);
+    }
+
+    public boolean reloadRequired(String host) {
+        String result = readAttribute("/host=" + host, "host-state");
+        return result.equals("reload-required");
+    }
+
+    public boolean reload(String host) {
+        String cmd = "/host=" + host + ":reload()";
+        executeCommand(cmd);
+        Library.letsSleep(500);
+
+        DomainManager dm = new DomainManager(this);
+        return dm.waitUntilAvailable();
     }
 
     /**
