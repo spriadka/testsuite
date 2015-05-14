@@ -7,7 +7,9 @@ import org.jboss.hal.testsuite.fragment.shared.table.ResourceTableFragment;
 import org.jboss.hal.testsuite.fragment.WindowFragment;
 import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
 import org.jboss.hal.testsuite.fragment.formeditor.PropertyEditor;
+import org.jboss.hal.testsuite.test.util.ConfigUtils;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Dimension;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
@@ -40,9 +42,10 @@ public class Console {
     /**
      * Wait until the application is loaded.
      */
-    public void waitUntilLoaded() {
+    public Console waitUntilLoaded() {
         // TODO: this should rather wait until the loading box is not present
         Graphene.waitModel().until().element(By.className("header-panel")).is().present();
+        return this;
     }
 
     public void refresh() {
@@ -246,6 +249,17 @@ public class Console {
     public WebElement findElement(By selector, BaseFragment fragment) {
         WebElement root = fragment.getRoot();
         return findElement(selector, root);
+    }
+
+    /**
+     * Workaround for org.openqa.selenium.WebDriver.Window.maximize() not working properly in some environments.
+     */
+    public Console maximizeWindow(){
+        int maxWidth = Integer.parseInt(ConfigUtils.get("window.max.width", "1920"));
+        int maxHeight = Integer.parseInt(ConfigUtils.get("window.max.height", "1080"));
+        Dimension maxDimension = new Dimension(maxWidth, maxHeight);
+        browser.manage().window().setSize(maxDimension);
+        return this;
     }
 
 }
