@@ -6,7 +6,7 @@ import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.page.home.HomePage;
 import org.jboss.hal.testsuite.test.category.Shared;
-import org.jboss.hal.testsuite.test.util.ConfigUtils;
+import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.jboss.hal.testsuite.util.Console;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
