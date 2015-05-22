@@ -7,6 +7,7 @@ import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.junit.InSequence;
 import org.jboss.hal.testsuite.cli.CliClient;
+import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
 import org.jboss.hal.testsuite.page.config.SystemPropertiesPage;
@@ -42,7 +43,7 @@ public class SystemPropertiesTestCase {
     private static final String DMR_KEY2 = SYSTEM_PROPERTY_ADDRESS + "=" + PROPERTY_KEY2;
     private static final String DMR_KEY_INVALID = SYSTEM_PROPERTY_ADDRESS + "=" + PROPERTY_INVALID_KEY;
 
-    private static CliClient client = new CliClient();
+    private static CliClient client = CliClientFactory.getClient();
     private static ResourceVerifier verifier = new ResourceVerifier(DMR_KEY, client);
 
     @Drone

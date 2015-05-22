@@ -6,6 +6,7 @@ import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.cli.CliClient;
+import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.page.config.ModClusterPage;
 import org.jboss.hal.testsuite.test.category.Standalone;
@@ -67,7 +68,7 @@ public class ModClusterTestCase {
     private static final String NUMERIC_VALUE_INVALID = "50" + RandomStringUtils.randomAlphabetic(3);
 
 
-    private CliClient client = new CliClient();
+    private CliClient client = CliClientFactory.getClient();
     private ResourceVerifier verifier = new ResourceVerifier(MOD_CLUSTER_CONFIG_ADDRESS, client);
 
     @Drone

@@ -3,6 +3,7 @@ package org.jboss.hal.testsuite.test.configuration.datasources;
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.cli.CliClient;
+import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.cli.DomainCliClient;
 import org.jboss.hal.testsuite.cli.DomainManager;
 import org.jboss.hal.testsuite.page.config.DatasourcesPage;
@@ -34,8 +35,8 @@ public class DomainTestConnectionTestCase extends AbstractTestConnectionTestCase
     private static final String VALID_URL = "jdbc:h2:mem:test2;DB_CLOSE_DELAY=-1";
     private static final String INVALID_URL = "invalidUrl";
 
-    private static CliClient client = new DomainCliClient("full");
-    private static CliClient fullHaClient = new DomainCliClient("full-ha");
+    private static CliClient client = CliClientFactory.getDomainClient("full");
+    private static CliClient fullHaClient = CliClientFactory.getDomainClient("full-ha");
     private static DataSourcesOperations dsOps = new DataSourcesOperations(client);
     private static DomainManager manager = new DomainManager(client);
 

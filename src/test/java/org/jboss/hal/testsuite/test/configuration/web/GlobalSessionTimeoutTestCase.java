@@ -4,6 +4,7 @@ import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.cli.CliClient;
+import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.cli.CliConstants;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
@@ -40,7 +41,7 @@ public class GlobalSessionTimeoutTestCase {
 
     private String origValue = null;
 
-    private CliClient client = new CliClient();
+    private CliClient client = CliClientFactory.getClient();
     private ResourceVerifier verifier = new ResourceVerifier(WEB_SUBSYSTEM_ADDRESS, client);
 
 
