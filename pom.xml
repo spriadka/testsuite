@@ -125,7 +125,7 @@
     <profile>
       <id>standalone</id>
       <properties>
-        <arquillian.launch>standalone</arquillian.launch>
+        <arquillian.launch>server</arquillian.launch>
         <suite.mode>standalone</suite.mode>
         <suite.server>wildfly</suite.server>
         <test.category>
@@ -145,7 +145,7 @@
     <profile>
       <id>domain</id>
       <properties>
-        <arquillian.launch>domain</arquillian.launch>
+        <arquillian.launch>server</arquillian.launch>
         <suite.mode>domain</suite.mode>
         <suite.server>wildfly</suite.server>
         <arq.managementPort>9999</arq.managementPort>
