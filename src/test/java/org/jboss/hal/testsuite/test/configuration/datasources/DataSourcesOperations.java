@@ -4,7 +4,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.hal.testsuite.cli.CliClient;
 import org.jboss.hal.testsuite.cli.CliConstants;
 import org.jboss.hal.testsuite.cli.CliUtils;
-import org.jboss.hal.testsuite.util.ConfigUtils;
+import org.jboss.hal.testsuite.test.util.ConfigUtils;
 
 /**
  * Created by mkrajcov on 4/13/15.

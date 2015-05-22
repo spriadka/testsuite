@@ -16,7 +16,7 @@ import org.jboss.hal.testsuite.page.runtime.PatchManagementPage;
 import org.jboss.hal.testsuite.page.runtime.TopologyPage;
 import org.jboss.hal.testsuite.test.category.Domain;
 import org.jboss.hal.testsuite.test.category.Shared;
-import org.jboss.hal.testsuite.util.ConfigUtils;
+import org.jboss.hal.testsuite.test.util.ConfigUtils;
 import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.PropUtils;
 import org.junit.Assert;

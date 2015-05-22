@@ -7,7 +7,6 @@ import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.junit.InSequence;
 import org.jboss.hal.testsuite.cli.CliClient;
-import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.fragment.runtime.DeploymentWizard;
 import org.jboss.hal.testsuite.fragment.runtime.StandaloneDeploymentsArea;
 import org.jboss.hal.testsuite.page.runtime.DeploymentPage;
@@ -39,7 +38,7 @@ public class ManagedDeploymentsTestCase {
     private static final String NAME = "n_" + RandomStringUtils.randomAlphanumeric(5) + ".war";
     private static final String RUNTIME_NAME = "rn_" + RandomStringUtils.randomAlphanumeric(5) + ".war";
 
-    private static CliClient client = CliClientFactory.getClient();
+    private static CliClient client = new CliClient();
     private static DeploymentsOperations ops = new DeploymentsOperations(client);
 
     @Drone
