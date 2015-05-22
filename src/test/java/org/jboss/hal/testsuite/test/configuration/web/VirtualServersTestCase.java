@@ -7,6 +7,7 @@ import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.junit.InSequence;
 import org.jboss.hal.testsuite.cli.CliClient;
+import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.fragment.config.web.servlet.VirtualServersFragment;
 import org.jboss.hal.testsuite.fragment.config.web.servlet.VirtualServersWizard;
 import org.jboss.hal.testsuite.page.config.ServletPage;
@@ -36,7 +37,7 @@ public class VirtualServersTestCase {
 
     private static final String DMR_PATH = VIRTUAL_SERVER_SUBSYSTEM_ADDRESS + "=" + NAME;
 
-    private static CliClient client = new CliClient();
+    private static CliClient client = CliClientFactory.getClient();
     private static ResourceVerifier verifier = new ResourceVerifier(DMR_PATH, client);
 
 

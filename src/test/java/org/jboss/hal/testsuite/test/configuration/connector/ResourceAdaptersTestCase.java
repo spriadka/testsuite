@@ -7,6 +7,7 @@ import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.junit.InSequence;
 import org.jboss.hal.testsuite.cli.CliClient;
+import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.fragment.config.resourceadapters.AdminObjectWizard;
 import org.jboss.hal.testsuite.fragment.config.resourceadapters.AdminObjectsFragment;
 import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConfigPropertiesFragment;
@@ -61,7 +62,7 @@ public class ResourceAdaptersTestCase {
     private static final String DMR_ADMIN_OBJ= DMR_ADAPTER_NO + "/admin-objects=" + ADMIN_OBJECT_NAME;
     private static final String DMR_CON_DEF = DMR_ADAPTER_NO + "/connection-definitions=" + CONNECTION_DEFINITION_NAME;
 
-    private static CliClient client = new CliClient();
+    private static CliClient client = CliClientFactory.getClient();
     private static ResourceVerifier verifier = new ResourceVerifier(DMR_ADAPTER_NO, client);
 
     @Drone
