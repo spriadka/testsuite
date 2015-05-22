@@ -35,6 +35,7 @@ import java.util.List;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.*;
 
 /**
+ * Use {@link CliClientFactory} to obtain instance.
  * @author rhatlapa (rhatlapa@redhat.com)
  */
 public class CliClient {
@@ -43,11 +44,11 @@ public class CliClient {
 
     private final CliConfiguration cliConfig;
 
-    public CliClient() {
+    CliClient() {
         cliConfig = new CliConfiguration();
     }
 
-    public CliClient(CliConfiguration cliConfig) {
+    CliClient(CliConfiguration cliConfig) {
         this.cliConfig = cliConfig;
     }
 

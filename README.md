@@ -7,7 +7,7 @@ and [Graphene](https://docs.jboss.org/author/display/ARQGRA2/Home) Arquillian ex
 * JDK 8 or higher
 * Maven 3.0.4 or higher
 * Firefox browser (tested on 31.2.0 esr version, will probably not run with far older or younger versions)
-* Wildfly (9 or higher) or EAP (6.4 or higher)
+* Wildfly (9 or higher) or EAP (7 or higher)
 
 You can download it here:
 <http://wildfly.org/downloads/> or <http://www.jboss.org/products/eap/download/>
@@ -26,16 +26,13 @@ E.g. for standalone Wildfly 9 using CLI:
 ### Required profile parameter
 
 Can be one of those:
-* `-Pwildfly` ... run testsuite against standalone mode of Wildfly (standalone-full-ha)
-* `-Pwildfly-domain`` ... run testsuite against domain mode of Wildfly
-* `-Peap` ... run testsuite against standalone mode of provided EAP (standalone-full-ha)
-* `-Peap-domain` ... run testsuite against domain mode of provided EAP
+* `-Pstandalone` ... run testsuite against standalone mode
+* `-Pdomain`` ... run testsuite against domain mode
 
-### jboss.dist parameter
+### Required jboss.dist parameter
 
-Path to server home folder.
-* Optional for Wildfly. If not provided Wildfly 9.0.0.Beta2 will be downloaded by maven.
-* Required for EAP.
+Path to server home folder. Server is expected to be already manually started. 
+In case of standalone mode standalone-full-ha configuration is expected. 
 E.g. `-Djboss.dist=/home/user/workspace/wildfly/build/target/wildfly-9.0.0.Alpha2-SNAPSHOT/`
 
 ### Optional arq.extension.webdriver.firefox_binary parameter
@@ -54,7 +51,6 @@ E.g. `-Darq.extension.webdriver.firefox_binary=/home/user/apps/firefox-31.2.0esr
 
 ## Known issues
 
-* For either `-Pwildfly` or `-Pwildfly-domain` profile it's currently necessary to start the Wildfly manually.
 * No sreenshots on test failure neither test error currently (It seems Arquillian unlike Surefire thinks they passed).
 
 ## Problems?

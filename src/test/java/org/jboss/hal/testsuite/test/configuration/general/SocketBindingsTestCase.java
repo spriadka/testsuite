@@ -7,6 +7,7 @@ import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.junit.InSequence;
 import org.jboss.hal.testsuite.cli.CliClient;
+import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.config.socketbindings.InboundSocketBindingFragment;
 import org.jboss.hal.testsuite.fragment.config.socketbindings.InboundSocketBindingWizard;
@@ -48,7 +49,7 @@ public class SocketBindingsTestCase {
     private static final String DMR_OUTBOUND_LOCAL= DEFAULT_SOCKET_BINDING_OUTBOUND_LOCAL_ADDRESS+ "=" + OUTBOUND_LOCAL_NAME;
     private static final String DMR_OUTBOUND_REMOTE = DEFAULT_SOCKET_BINDING_OUTBOUND_REMOTE_ADDRESS+ "=" + OUTBOUND_REMOTE_NAME;
 
-    private static CliClient client = new CliClient();
+    private static CliClient client = CliClientFactory.getClient();
     private static ResourceVerifier verifier = new ResourceVerifier(DMR_INBOUND, client);
 
 
