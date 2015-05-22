@@ -23,12 +23,12 @@
     <jboss.home>${jboss.dist}</jboss.home>
     <maven.compiler.target>1.8</maven.compiler.target>
     <maven.compiler.source>1.8</maven.compiler.source>
-    <version.arquillian.container.wildfly>1.0.0.CR1</version.arquillian.container.wildfly>
+    <version.arquillian.container.wildfly>1.0.0.Alpha5</version.arquillian.container.wildfly>
+    <version.arquillian.container.eap>7.2.0.Final</version.arquillian.container.eap>
+    <version.jboss.as.cli>7.2.0.Final</version.jboss.as.cli>
+    <version.wildfly.dist>9.0.0.Beta2</version.wildfly.dist>
     <!-- TODO change -DskipTests to something like -PsmokeTests -->
     <arguments>-Pjboss-release -DskipTests</arguments>
-    <as.managementAddress>127.0.0.1</as.managementAddress>
-    <as.managementPort>9990</as.managementPort>
-    <arq.managementPort>${as.managementPort}</arq.managementPort>
   </properties>
 
   <dependencyManagement>
@@ -38,7 +38,7 @@
       <dependency>
         <groupId>org.jboss.arquillian</groupId>
         <artifactId>arquillian-bom</artifactId>
-        <version>1.1.8.Final</version>
+        <version>1.1.7.Final</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -58,7 +58,7 @@
       <dependency>
         <groupId>org.jboss.arquillian.extension</groupId>
         <artifactId>arquillian-drone-bom</artifactId>
-        <version>1.3.1.Final</version>
+        <version>1.3.0.Final</version>
         <type>pom</type>
         <scope>import</scope>
       </dependency>
@@ -113,19 +113,13 @@
       <version>2.1.0.Alpha2</version>
     </dependency>
 
-    <dependency>
-      <groupId>org.wildfly.core</groupId>
-      <artifactId>wildfly-cli</artifactId>
-      <version>2.0.0.Alpha2</version>
-    </dependency>
-
   </dependencies>
 
   <profiles>
     <profile>
-      <id>standalone</id>
+      <id>wildfly</id>
       <properties>
-        <arquillian.launch>standalone</arquillian.launch>
+        <arquillian.launch>wildfly</arquillian.launch>
         <suite.mode>standalone</suite.mode>
         <suite.server>wildfly</suite.server>
         <test.category>
@@ -143,12 +137,11 @@
     </profile>
 
     <profile>
-      <id>domain</id>
+      <id>wildfly-domain</id>
       <properties>
-        <arquillian.launch>domain</arquillian.launch>
+        <arquillian.launch>wildfly-domain</arquillian.launch>
         <suite.mode>domain</suite.mode>
         <suite.server>wildfly</suite.server>
-        <arq.managementPort>9999</arq.managementPort>
         <test.category>
           org.jboss.hal.testsuite.test.category.Shared,
           org.jboss.hal.testsuite.test.category.Domain
@@ -163,31 +156,170 @@
       </dependencies>
     </profile>
 
+    <profile>
+      <id>eap</id>
+      <properties>
+        <arquillian.launch>eap</arquillian.launch>
+        <suite.mode>standalone</suite.mode>
+        <suite.server>eap</suite.server>
+        <test.category>
+          org.jboss.hal.testsuite.test.category.Shared,
+          org.jboss.hal.testsuite.test.category.Standalone
+        </test.category>
+      </properties>
+      <dependencies>
+        <dependency>
+          <groupId>org.jboss.as</groupId>
+          <artifactId>jboss-as-arquillian-container-managed</artifactId>
+          <version>${version.arquillian.container.eap}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.jboss.as</groupId>
+          <artifactId>jboss-as-cli</artifactId>
+          <version>${version.jboss.as.cli}</version>
+        </dependency>
+      </dependencies>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-enforcer-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>enforce-jboss.dist</id>
+                <goals>
+                  <goal>enforce</goal>
+                </goals>
+                <configuration>
+                  <rules>
+                    <requireProperty>
+                      <property>jboss.dist</property>
+                      <message>You have to set jboss.dist system property when using eap profile!</message>
+                    </requireProperty>
+                  </rules>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>eap-domain</id>
+      <properties>
+        <arquillian.launch>eap-domain</arquillian.launch>
+        <suite.mode>domain</suite.mode>
+        <suite.server>eap</suite.server>
+        <test.category>
+          org.jboss.hal.testsuite.test.category.Shared,
+          org.jboss.hal.testsuite.test.category.Domain
+        </test.category>
+      </properties>
+      <dependencies>
+        <dependency>
+          <groupId>org.jboss.as</groupId>
+          <artifactId>jboss-as-arquillian-container-domain-managed</artifactId>
+          <version>${version.arquillian.container.eap}</version>
+        </dependency>
+        <dependency>
+          <groupId>org.jboss.as</groupId>
+          <artifactId>jboss-as-cli</artifactId>
+          <version>${version.jboss.as.cli}</version>
+        </dependency>
+      </dependencies>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-enforcer-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>enforce-jboss.dist</id>
+                <goals>
+                  <goal>enforce</goal>
+                </goals>
+                <configuration>
+                  <rules>
+                    <requireProperty>
+                      <property>jboss.dist</property>
+                      <message>You have to set jboss.dist system property when using eap-domain profile!</message>
+                    </requireProperty>
+                  </rules>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>wildfly-download</id>
+      <activation>
+        <property>
+          <name>!jboss.dist</name>
+        </property>
+      </activation>
+      <properties>
+        <jboss.home>${project.basedir}/target/wildfly-${version.wildfly.dist}</jboss.home>
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-dependency-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>unpack</id>
+                <phase>test-compile</phase>
+                <goals>
+                  <goal>unpack</goal>
+                </goals>
+                <configuration>
+                  <artifactItems>
+                    <artifactItem>
+                      <groupId>org.wildfly</groupId>
+                      <artifactId>wildfly-dist</artifactId>
+                      <version>${version.wildfly.dist}</version>
+                      <type>zip</type>
+                      <overWrite>false</overWrite>
+                      <outputDirectory>target</outputDirectory>
+                    </artifactItem>
+                  </artifactItems>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <plugin>
+            <groupId>com.google.code.maven-replacer-plugin</groupId>
+            <artifactId>replacer</artifactId>
+            <version>1.5.3</version>
+            <executions>
+              <execution>
+                <id>unsecure</id>
+                <phase>process-test-classes</phase>
+                <goals>
+                  <goal>replace</goal>
+                </goals>
+                <configuration>
+                  <includes>
+                    <include>${project.basedir}/target/wildfly-${version.wildfly.dist}/standalone/configuration/standalone-full-ha.xml</include>
+                    <include>${project.basedir}/target/wildfly-${version.wildfly.dist}/domain/configuration/domain.xml</include>
+                  </includes>
+                  <token>http-interface security-realm=\"ManagementRealm\"</token>
+                  <value>http-interface</value>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
   </profiles>
 
   <build>
     <plugins>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-enforcer-plugin</artifactId>
-        <executions>
-          <execution>
-            <id>enforce-jboss.dist</id>
-            <goals>
-              <goal>enforce</goal>
-            </goals>
-            <configuration>
-              <rules>
-                <requireProperty>
-                  <property>jboss.dist</property>
-                  <message>You have to set jboss.dist system property!</message>
-                </requireProperty>
-              </rules>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -201,9 +333,6 @@
             <suite.mode>${suite.mode}</suite.mode>
             <suite.server>${suite.server}</suite.server>
             <suite.url>http://localhost:9990/console/App.html</suite.url>
-            <as.managementAddress>${as.managementAddress}</as.managementAddress>
-            <as.managementPort>${as.managementPort}</as.managementPort>
-            <arq.managementPort>${arq.managementPort}</arq.managementPort>
           </systemPropertyVariables>
           <argLine>${argLine}</argLine>
           <groups>${test.category}</groups>

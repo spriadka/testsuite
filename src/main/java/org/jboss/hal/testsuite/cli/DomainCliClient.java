@@ -25,30 +25,29 @@ package org.jboss.hal.testsuite.cli;
 import org.jboss.as.cli.scriptsupport.CLI;
 
 /**
- * Use {@link CliClientFactory} to obtain instance.
  * @author rhatlapa (rhatlapa@redhat.com)
  */
 public class DomainCliClient extends CliClient {
     private final String profile;
     private final String domainHost;
 
-    DomainCliClient(String profile) {
+    public DomainCliClient(String profile) {
         this.profile = profile;
         this.domainHost = "master";
     }
 
-    DomainCliClient(String profile, String domainHost) {
+    public DomainCliClient(String profile, String domainHost) {
         this.profile = profile;
         this.domainHost = domainHost;
     }
 
-    DomainCliClient(CliConfiguration cliConfig, String profile) {
+    public DomainCliClient(CliConfiguration cliConfig, String profile) {
         super(cliConfig);
         this.profile = profile;
         this.domainHost = "master";
     }
 
-    DomainCliClient(CliConfiguration cliConfig, String profile, String host) {
+    public DomainCliClient(CliConfiguration cliConfig, String profile, String host) {
         super(cliConfig);
         this.profile = profile;
         this.domainHost = host;

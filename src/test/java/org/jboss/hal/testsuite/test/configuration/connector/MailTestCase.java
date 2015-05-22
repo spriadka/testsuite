@@ -7,7 +7,6 @@ import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.junit.InSequence;
 import org.jboss.hal.testsuite.cli.CliClient;
-import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.fragment.config.mail.MailServerFragment;
 import org.jboss.hal.testsuite.fragment.config.mail.MailServerWizard;
 import org.jboss.hal.testsuite.fragment.config.mail.MailSessionWizard;
@@ -46,7 +45,7 @@ public class MailTestCase {
     private static final String DMR_SESSION_INVALID = MAIL_SESSION_SUBSYSTEM_ADDRESS + "=\"" + MAIL_SESSION_INVALID + "\"";
     private static final String DMR_SERVER = DMR_SESSION + "/server=" + TYPE;
 
-    private static CliClient client = CliClientFactory.getClient();
+    private static CliClient client = new CliClient();
     private static ResourceVerifier verifier = new ResourceVerifier(DMR_SESSION, client);
 
     @Drone

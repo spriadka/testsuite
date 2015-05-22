@@ -7,7 +7,6 @@ import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.junit.InSequence;
 import org.jboss.hal.testsuite.cli.CliClient;
-import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.fragment.config.interfaces.NetworkInterfaceContentFragment;
 import org.jboss.hal.testsuite.fragment.config.interfaces.NetworkInterfaceWizard;
 import org.jboss.hal.testsuite.page.config.NetworkInterfacesPage;
@@ -51,7 +50,7 @@ public class NetworkInterfacesTestCase {
     private static final String DMR_INTERFACE_ANY_IP4 = INTERFACE_ADDRESS + "=" + INTERFACE_ANY_IP4_NAME;
     private static final String DMR_INTERFACE_ANY_IP6 = INTERFACE_ADDRESS + "=" + INTERFACE_ANY_IP6_NAME;
 
-    private static CliClient client = CliClientFactory.getClient();
+    private static CliClient client = new CliClient();
     private static ResourceVerifier verifier = new ResourceVerifier(DMR_INTERFACE,client);
 
     @Drone

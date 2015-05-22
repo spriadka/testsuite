@@ -1,4 +1,4 @@
-package org.jboss.hal.testsuite.util;
+package org.jboss.hal.testsuite.test.util;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -9,6 +9,7 @@ import java.util.Properties;
 
 import org.jboss.arquillian.graphene.page.Location;
 import org.jboss.hal.testsuite.page.BasePage;
+import org.jboss.hal.testsuite.util.PropUtils;
 
 /**
  * Created by jcechace on 21/02/14.

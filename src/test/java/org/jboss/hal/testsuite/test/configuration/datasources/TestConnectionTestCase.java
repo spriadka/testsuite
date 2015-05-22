@@ -4,11 +4,10 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.cli.CliClient;
-import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.cli.DomainCliClient;
 import org.jboss.hal.testsuite.page.config.DatasourcesPage;
 import org.jboss.hal.testsuite.test.category.Shared;
-import org.jboss.hal.testsuite.util.ConfigUtils;
+import org.jboss.hal.testsuite.test.util.ConfigUtils;
 import org.jboss.hal.testsuite.util.Console;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -41,7 +40,11 @@ public class TestConnectionTestCase extends AbstractTestConnectionTestCase {
 
     @BeforeClass
     public static void setup() {  // create needed datasources
-        CliClientFactory.getClient();
+        if (ConfigUtils.isDomain()) {
+            client = new DomainCliClient("full");
+        } else {
+            client = new CliClient();
+        }
         dsOps = new DataSourcesOperations(client);
         dsNameValid = dsOps.createDataSource(VALID_URL);
         dsNameInvalid = dsOps.createDataSource(INVALID_URL);

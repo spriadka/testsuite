@@ -15,7 +15,7 @@ import org.jboss.hal.testsuite.page.runtime.DomainRuntimeEntryPoint;
 import org.jboss.hal.testsuite.page.runtime.StandaloneRuntimeEntryPoint;
 import org.jboss.hal.testsuite.test.category.Domain;
 import org.jboss.hal.testsuite.test.category.Shared;
-import org.jboss.hal.testsuite.util.ConfigUtils;
+import org.jboss.hal.testsuite.test.util.ConfigUtils;
 import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.PropUtils;
 import org.junit.Assert;
