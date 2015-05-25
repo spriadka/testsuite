@@ -5,6 +5,7 @@ import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.cli.CliClient;
+import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.page.config.WebServicesPage;
 import org.jboss.hal.testsuite.test.category.Standalone;
@@ -36,7 +37,7 @@ public class WebServicesTestCase {
     private static final String PORT_VALUE_NEGATIVE = "50";
     private static final String SIMPLE_IP = "127.0.0.2";
 
-    private CliClient client = new CliClient();
+    private CliClient client = CliClientFactory.getClient();
     private ResourceVerifier verifier = new ResourceVerifier(WEB_SERVICES_SUBSYSTEM_ADDRESS, client);
 
     @Drone

@@ -7,6 +7,7 @@ import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.cli.CliClient;
+import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.page.config.ServletPage;
 import org.jboss.hal.testsuite.test.category.Standalone;
@@ -39,7 +40,7 @@ public class JspTestCase {
     private static final String ALPHABETIC_VALUE = RandomStringUtils.randomAlphanumeric(5);
     private static final String NUMBER_NEGATIVE_VALUE = "-60";
 
-    private CliClient client = new CliClient();
+    private CliClient client = CliClientFactory.getClient();
     private ResourceVerifier verifier = new ResourceVerifier(WEB_SUBSYSTEM_JSP_CONFIGURATION_ADDRESS, client);
 
     @Drone

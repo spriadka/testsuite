@@ -7,6 +7,7 @@ import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.junit.InSequence;
 import org.jboss.hal.testsuite.cli.CliClient;
+import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.cli.DomainCliClient;
 import org.jboss.hal.testsuite.fragment.runtime.DeploymentContentRepositoryArea;
 import org.jboss.hal.testsuite.fragment.runtime.DeploymentServerGroupArea;
@@ -41,7 +42,7 @@ public class DomainUnmanagedDeploymentsTestCase {
     private static final String NAME = "n_" + RandomStringUtils.randomAlphanumeric(5) + ".war";
     private static final String RUNTIME_NAME = "rn_" + RandomStringUtils.randomAlphanumeric(5) + ".war";
 
-    private static CliClient client = new DomainCliClient("full-ha");
+    private static CliClient client = CliClientFactory.getDomainClient("full-ha");
     private static DeploymentsOperations ops = new DeploymentsOperations(client);
 
     @Drone
