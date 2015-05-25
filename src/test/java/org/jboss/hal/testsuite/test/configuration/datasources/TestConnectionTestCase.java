@@ -41,7 +41,7 @@ public class TestConnectionTestCase extends AbstractTestConnectionTestCase {
 
     @BeforeClass
     public static void setup() {  // create needed datasources
-        CliClientFactory.getClient();
+        client = CliClientFactory.getClient();
         dsOps = new DataSourcesOperations(client);
         dsNameValid = dsOps.createDataSource(VALID_URL);
         dsNameInvalid = dsOps.createDataSource(INVALID_URL);
