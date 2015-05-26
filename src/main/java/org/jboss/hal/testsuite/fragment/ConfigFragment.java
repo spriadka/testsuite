@@ -53,6 +53,7 @@ public class ConfigFragment extends BaseFragment {
         WebElement button = getButton(PropUtils.get("configarea.save.button.label"));
         if(!button.isDisplayed()){
             root.sendKeys(Keys.PAGE_DOWN);
+            Library.letsSleep(100);
         }
         button.click();
         try {
@@ -67,7 +68,7 @@ public class ConfigFragment extends BaseFragment {
      * Click cancel and switch back to read-only mode.
      */
     public void cancel() {
-        clickButton(PropUtils.get("configarea.save.button.label"));
+        clickButton(PropUtils.get("configarea.cancel.button.label"));
         Graphene.waitModel().until().element(getEditButton()).is().visible();
     }
 
