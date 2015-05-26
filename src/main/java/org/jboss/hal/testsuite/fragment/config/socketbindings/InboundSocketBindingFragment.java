@@ -4,9 +4,9 @@ import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
+import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.PropUtils;
 import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
 /**
@@ -18,7 +18,7 @@ public class InboundSocketBindingFragment extends ConfigFragment {
 
     public void editPortAndSave(String socketBindingName, String value){
         getResourceManager().selectByName(socketBindingName);
-        root.sendKeys(Keys.PAGE_DOWN);
+        Console.withBrowser(browser).pageDown();
         Editor editor = edit();
         editor.text("port", value);
         WebElement saveButton = getButton(PropUtils.get("configarea.save.button.label"));
@@ -29,12 +29,12 @@ public class InboundSocketBindingFragment extends ConfigFragment {
     public void editMulticastAndSave(String socketBindingName, String multicastPort, String multicastAddress){
         getResourceManager().selectByName(socketBindingName);
         Editor editor = edit();
-        root.sendKeys(Keys.PAGE_DOWN);
+        Console.withBrowser(browser).pageDown();
         WebElement multicast = editor.getRoot().findElement(MULTICAST_ANCHOR);
         Graphene.waitGui().until().element(multicast).is().visible();
         multicast.click();
 
-        root.sendKeys(Keys.PAGE_DOWN);
+        Console.withBrowser(browser).pageDown();
         editor.text("multiCastPort", multicastPort);
         editor.text("multiCastAddress", multicastAddress);
         WebElement saveButton = getButton(PropUtils.get("configarea.save.button.label"));

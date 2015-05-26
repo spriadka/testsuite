@@ -3,8 +3,8 @@ package org.jboss.hal.testsuite.fragment.config.interfaces;
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
+import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.PropUtils;
-import org.openqa.selenium.Keys;
 import org.openqa.selenium.WebElement;
 
 /**
@@ -28,7 +28,7 @@ public class NetworkInterfaceContentFragment extends ConfigFragment {
         getResourceManager().selectByName(interfaceName);
         Editor editor = edit();
 
-        root.sendKeys(Keys.PAGE_DOWN);
+        Console.withBrowser(browser).pageDown();
         editor.text(attribute, value);
         WebElement saveButton = getButton(PropUtils.get("configarea.save.button.label"));
         Graphene.waitGui().until().element(saveButton).is().visible();

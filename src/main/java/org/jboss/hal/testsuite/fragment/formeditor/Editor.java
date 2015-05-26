@@ -5,7 +5,6 @@ import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.hal.testsuite.fragment.BaseFragment;
 import org.jboss.hal.testsuite.util.Console;
 import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
@@ -39,6 +38,9 @@ public class Editor extends BaseFragment {
      */
     public void text(String identifier, String value) {
         WebElement input = getText(identifier);
+        if(!input.isDisplayed()){
+            Console.withBrowser(browser).pageDown();
+        }
         input.clear();
         log.debug("setting value '{}' to the text element '{}'", value, identifier);
         Graphene.waitGui().until().element(input).value().equalTo("");
@@ -222,7 +224,7 @@ public class Editor extends BaseFragment {
         WebElement input = findElement(selector, root);
         if (!input.isDisplayed()) {
             // maybe just too long form
-            root.sendKeys(Keys.PAGE_DOWN);
+            Console.withBrowser(browser).pageDown();
         }
         return input;
     }
