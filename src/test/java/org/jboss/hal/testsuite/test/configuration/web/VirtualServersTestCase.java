@@ -16,6 +16,7 @@ import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.ResourceVerifier;
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
@@ -27,6 +28,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author mkrajcov <mkrajcov@redhat.com>
  */
+@Ignore
 @RunWith(Arquillian.class)
 @Category(Standalone.class)
 public class VirtualServersTestCase {

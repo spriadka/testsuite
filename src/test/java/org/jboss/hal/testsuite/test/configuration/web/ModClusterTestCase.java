@@ -7,12 +7,13 @@ import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.cli.CliClient;
 import org.jboss.hal.testsuite.cli.CliClientFactory;
-import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.page.config.ModClusterPage;
 import org.jboss.hal.testsuite.test.category.Standalone;
+import org.jboss.hal.testsuite.test.util.ConfigFragmentUtils;
 import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.ResourceVerifier;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
@@ -70,6 +71,7 @@ public class ModClusterTestCase {
 
     private CliClient client = CliClientFactory.getClient();
     private ResourceVerifier verifier = new ResourceVerifier(MOD_CLUSTER_CONFIG_ADDRESS, client);
+    private ConfigFragmentUtils utils = new ConfigFragmentUtils(verifier);
 
     @Drone
     public WebDriver browser;
@@ -91,29 +93,29 @@ public class ModClusterTestCase {
      */
     @Test
     public void loadBalancingGroup(){
-        changeTextAndAssert(page.getConfig().advertising(), LOAD_BALANCING_GROUP_ID, LOAD_BALANCING_GROUP_VALUE, true);
+        utils.changeTextAndAssert(page.getConfig().advertising(), LOAD_BALANCING_GROUP_ID, LOAD_BALANCING_GROUP_VALUE, true);
     }
 
     @Test
     public void balancer(){
-        changeTextAndAssert(page.getConfig().advertising(), BALANCER_ID, BALANCER_VALUE, true);
+        utils.changeTextAndAssert(page.getConfig().advertising(), BALANCER_ID, BALANCER_VALUE, true);
     }
 
     @Test
     public void advertiseSocket(){
-        changeTextAndAssert(page.getConfig().advertising(), ADVERTISE_SOCKET_ID, ADVERTISE_SOCKET_VALUE, true);
+        utils.changeTextAndAssert(page.getConfig().advertising(), ADVERTISE_SOCKET_ID, ADVERTISE_SOCKET_VALUE, true);
     }
 
     @Test
     public void advertiseKey(){
-        changeTextAndAssert(page.getConfig().advertising(), ADVERTISE_KEY_ID, ADVERTISE_KEY_VALUE, true, "advertise-security-key");
+        utils.changeTextAndAssert(page.getConfig().advertising(), ADVERTISE_KEY_ID, ADVERTISE_KEY_VALUE, true, "advertise-security-key");
     }
 
     @Test
     public void advertise(){
-        changeCheckboxAndAssert(page.getConfig().advertising(), ADVERTISE_ID, false, true);
+        utils.changeCheckboxAndAssert(page.getConfig().advertising(), ADVERTISE_ID, false, true);
 
-        changeCheckboxAndAssert(page.getConfig().advertising(), ADVERTISE_ID, true, true);
+        utils.changeCheckboxAndAssert(page.getConfig().advertising(), ADVERTISE_ID, true, true);
     }
 
     /*
@@ -121,20 +123,20 @@ public class ModClusterTestCase {
      */
     @Test
     public void stickySession(){
-        changeCheckboxAndAssert(page.getConfig().sessions(), STICKY_SESSION_ID, false, true);
-        changeCheckboxAndAssert(page.getConfig().sessions(), STICKY_SESSION_ID, true, true);
+        utils.changeCheckboxAndAssert(page.getConfig().sessions(), STICKY_SESSION_ID, false, true);
+        utils.changeCheckboxAndAssert(page.getConfig().sessions(), STICKY_SESSION_ID, true, true);
     }
 
     @Test
     public void stickySessionRemove(){
-        changeCheckboxAndAssert(page.getConfig().sessions(), STICKY_SESSION_REMOVE_ID, false, true);
-        changeCheckboxAndAssert(page.getConfig().sessions(), STICKY_SESSION_REMOVE_ID, true, true);
+        utils.changeCheckboxAndAssert(page.getConfig().sessions(), STICKY_SESSION_REMOVE_ID, false, true);
+        utils.changeCheckboxAndAssert(page.getConfig().sessions(), STICKY_SESSION_REMOVE_ID, true, true);
     }
 
     @Test
     public void stickySessionForce(){
-        changeCheckboxAndAssert(page.getConfig().sessions(), STICKY_SESSION_FORCE_ID, false, true);
-        changeCheckboxAndAssert(page.getConfig().sessions(), STICKY_SESSION_FORCE_ID, true, true);
+        utils.changeCheckboxAndAssert(page.getConfig().sessions(), STICKY_SESSION_FORCE_ID, false, true);
+        utils.changeCheckboxAndAssert(page.getConfig().sessions(), STICKY_SESSION_FORCE_ID, true, true);
     }
 
     /*
@@ -142,13 +144,13 @@ public class ModClusterTestCase {
      */
     @Test
     public void autoEnableContexts(){
-        changeCheckboxAndAssert(page.getConfig().webContexts(), AUTO_ENABLE_CONTEXTS_ID, false, true);
-        changeCheckboxAndAssert(page.getConfig().webContexts(), AUTO_ENABLE_CONTEXTS_ID, true, true);
+        utils.changeCheckboxAndAssert(page.getConfig().webContexts(), AUTO_ENABLE_CONTEXTS_ID, false, true);
+        utils.changeCheckboxAndAssert(page.getConfig().webContexts(), AUTO_ENABLE_CONTEXTS_ID, true, true);
     }
 
     @Test
     public void excludedContexts(){
-        changeTextAndAssert(page.getConfig().webContexts(), EXCLUDED_CONTEXTS_ID, EXCLUDED_CONTEXTS_VALUE, true);
+        utils.changeTextAndAssert(page.getConfig().webContexts(), EXCLUDED_CONTEXTS_ID, EXCLUDED_CONTEXTS_VALUE, true);
     }
 
     /*
@@ -156,12 +158,13 @@ public class ModClusterTestCase {
      */
     @Test
     public void proxyUrl(){
-        changeTextAndAssert(page.getConfig().proxies(), PROXY_URL_ID, PROXY_URL_VALUE, true);
+        utils.changeTextAndAssert(page.getConfig().proxies(), PROXY_URL_ID, PROXY_URL_VALUE, true);
     }
 
     @Test
+    @Ignore
     public void proxyList(){
-        changeTextAndAssert(page.getConfig().proxies(), PROXY_LIST_ID, PROXY_LIST_VALUE, true);
+        utils.changeTextAndAssert(page.getConfig().proxies(), PROXY_LIST_ID, PROXY_LIST_VALUE, true);
     }
 
     /*
@@ -169,151 +172,127 @@ public class ModClusterTestCase {
      */
     @Test
     public void nodeTimeout(){
-        changeTextAndAssert(page.getConfig().networking(), NODE_TIMEOUT_ID, NODE_TIMEOUT_VALUE, true);
+        utils.changeTextAndAssert(page.getConfig().networking(), NODE_TIMEOUT_ID, NODE_TIMEOUT_VALUE, true);
     }
 
     @Test
     public void nodeTimeoutNegative(){
-        changeTextAndAssert(page.getConfig().networking(), NODE_TIMEOUT_ID, NUMERIC_VALUE_NEGATIVE, false);
+        utils.changeTextAndAssert(page.getConfig().networking(), NODE_TIMEOUT_ID, NUMERIC_VALUE_NEGATIVE, false);
     }
 
     @Test
     public void nodeTimeoutInvalid(){
-        changeTextAndAssert(page.getConfig().networking(), NODE_TIMEOUT_ID, NUMERIC_VALUE_INVALID, false);
+        utils.changeTextAndAssert(page.getConfig().networking(), NODE_TIMEOUT_ID, NUMERIC_VALUE_INVALID, false);
     }
 
     @Test
     public void socketTimeout(){
-        changeTextAndAssert(page.getConfig().networking(), SOCKET_TIMEOUT_ID, SOCKET_TIMEOUT_VALUE, true);
+        utils.changeTextAndAssert(page.getConfig().networking(), SOCKET_TIMEOUT_ID, SOCKET_TIMEOUT_VALUE, true);
     }
 
     @Test
     public void socketTimeoutNegative(){
-        changeTextAndAssert(page.getConfig().networking(), SOCKET_TIMEOUT_ID, NUMERIC_VALUE_NEGATIVE, false);
+        utils.changeTextAndAssert(page.getConfig().networking(), SOCKET_TIMEOUT_ID, NUMERIC_VALUE_NEGATIVE, false);
     }
 
     @Test
     public void socketTimeoutInvalid(){
-        changeTextAndAssert(page.getConfig().networking(), SOCKET_TIMEOUT_ID, NUMERIC_VALUE_INVALID, false);
+        utils.changeTextAndAssert(page.getConfig().networking(), SOCKET_TIMEOUT_ID, NUMERIC_VALUE_INVALID, false);
     }
 
     @Test
     public void stopContextTimeout(){
-        changeTextAndAssert(page.getConfig().networking(), STOP_CONTEXT_TIMEOUT_ID, STOP_CONTEXT_TIMEOUT_VALUE, true);
+        utils.changeTextAndAssert(page.getConfig().networking(), STOP_CONTEXT_TIMEOUT_ID, STOP_CONTEXT_TIMEOUT_VALUE, true);
     }
 
     @Test
     public void stopContextTimeoutNegative(){
-        changeTextAndAssert(page.getConfig().networking(), STOP_CONTEXT_TIMEOUT_ID, NUMERIC_VALUE_NEGATIVE, false);
+        utils.changeTextAndAssert(page.getConfig().networking(), STOP_CONTEXT_TIMEOUT_ID, NUMERIC_VALUE_NEGATIVE, false);
     }
 
     @Test
     public void stopContextTimeoutInvalid(){
-        changeTextAndAssert(page.getConfig().networking(), STOP_CONTEXT_TIMEOUT_ID, NUMERIC_VALUE_INVALID, false);
+        utils.changeTextAndAssert(page.getConfig().networking(), STOP_CONTEXT_TIMEOUT_ID, NUMERIC_VALUE_INVALID, false);
     }
 
     @Test
     public void maxAttempts(){
-        changeTextAndAssert(page.getConfig().networking(), MAX_ATTEMPTS_ID, MAX_ATTEMPTS_VALUE, true, "max-attempts");
+        utils.changeTextAndAssert(page.getConfig().networking(), MAX_ATTEMPTS_ID, MAX_ATTEMPTS_VALUE, true, "max-attempts");
     }
 
     @Test
     public void maxAttemptsNegative(){
-        changeTextAndAssert(page.getConfig().networking(), MAX_ATTEMPTS_ID, NUMERIC_VALUE_NEGATIVE, false);
+        utils.changeTextAndAssert(page.getConfig().networking(), MAX_ATTEMPTS_ID, NUMERIC_VALUE_NEGATIVE, false);
     }
 
     @Test
     public void maxAttemptsInvalid(){
-        changeTextAndAssert(page.getConfig().networking(), MAX_ATTEMPTS_ID, NUMERIC_VALUE_INVALID, false);
+        utils.changeTextAndAssert(page.getConfig().networking(), MAX_ATTEMPTS_ID, NUMERIC_VALUE_INVALID, false);
     }
 
     @Test
     public void flushPackets(){
-        changeCheckboxAndAssert(page.getConfig().networking(), FLUSH_PACKETS_ID, false, true);
-        changeCheckboxAndAssert(page.getConfig().networking(), FLUSH_PACKETS_ID, true, true);
+        utils.changeCheckboxAndAssert(page.getConfig().networking(), FLUSH_PACKETS_ID, false, true);
+        utils.changeCheckboxAndAssert(page.getConfig().networking(), FLUSH_PACKETS_ID, true, true);
     }
 
     @Test
     public void flushWait(){
-        changeTextAndAssert(page.getConfig().networking(), FLUSH_WAIT_ID, FLUSH_WAIT_VALUE, true);
+        utils.changeTextAndAssert(page.getConfig().networking(), FLUSH_WAIT_ID, FLUSH_WAIT_VALUE, true);
     }
 
     @Test
     public void flushWaitNegative(){
-        changeTextAndAssert(page.getConfig().networking(), FLUSH_WAIT_ID, NUMERIC_VALUE_NEGATIVE, false);
+        utils.changeTextAndAssert(page.getConfig().networking(), FLUSH_WAIT_ID, NUMERIC_VALUE_NEGATIVE, false);
     }
 
     @Test
     public void flushWaitInvalid(){
-        changeTextAndAssert(page.getConfig().networking(), FLUSH_WAIT_ID, NUMERIC_VALUE_INVALID, false);
+        utils.changeTextAndAssert(page.getConfig().networking(), FLUSH_WAIT_ID, NUMERIC_VALUE_INVALID, false);
     }
 
     @Test
     public void ping(){
-        changeTextAndAssert(page.getConfig().networking(), PING_ID, PING_VALUE, true);
+        utils.changeTextAndAssert(page.getConfig().networking(), PING_ID, PING_VALUE, true);
     }
 
     @Test
     public void pingNegative(){
-        changeTextAndAssert(page.getConfig().networking(), PING_ID, NUMERIC_VALUE_NEGATIVE, false);
+        utils.changeTextAndAssert(page.getConfig().networking(), PING_ID, NUMERIC_VALUE_NEGATIVE, false);
     }
 
     @Test
     public void pingInvalid(){
-        changeTextAndAssert(page.getConfig().networking(), PING_ID, NUMERIC_VALUE_INVALID, false);
+        utils.changeTextAndAssert(page.getConfig().networking(), PING_ID, NUMERIC_VALUE_INVALID, false);
     }
 
     @Test
     public void ttl(){
-        changeTextAndAssert(page.getConfig().networking(), TTL_ID, TTL_VALUE, true);
+        utils.changeTextAndAssert(page.getConfig().networking(), TTL_ID, TTL_VALUE, true);
     }
 
     @Test
     public void ttlNegative(){
-        changeTextAndAssert(page.getConfig().networking(), TTL_ID, NUMERIC_VALUE_NEGATIVE, false);
+        utils.changeTextAndAssert(page.getConfig().networking(), TTL_ID, NUMERIC_VALUE_NEGATIVE, false);
     }
 
     @Test
     public void ttlInvalid(){
-        changeTextAndAssert(page.getConfig().networking(), TTL_ID, NUMERIC_VALUE_INVALID, false);
+        utils.changeTextAndAssert(page.getConfig().networking(), TTL_ID, NUMERIC_VALUE_INVALID, false);
     }
 
     @Test
     public void workerTimeout(){
-        changeTextAndAssert(page.getConfig().networking(), WORKER_TIMEOUT_ID, WORKER_TIMEOUT_VALUE, true);
+        utils.changeTextAndAssert(page.getConfig().networking(), WORKER_TIMEOUT_ID, WORKER_TIMEOUT_VALUE, true);
     }
 
     @Test
     public void workerTimeoutNegative(){
-        changeTextAndAssert(page.getConfig().networking(), WORKER_TIMEOUT_ID, NUMERIC_VALUE_NEGATIVE, false);
+        utils.changeTextAndAssert(page.getConfig().networking(), WORKER_TIMEOUT_ID, NUMERIC_VALUE_NEGATIVE, false);
     }
 
     @Test
     public void workerTimeoutInvalid(){
-        changeTextAndAssert(page.getConfig().networking(), WORKER_TIMEOUT_ID, NUMERIC_VALUE_INVALID, false);
-    }
-
-    private void changeTextAndAssert(ConfigFragment fragment, String identifier, String value, boolean expected) {
-        changeTextAndAssert(fragment, identifier, value, expected, identifier);
-    }
-
-    private void changeCheckboxAndAssert(ConfigFragment fragment, String identifier, boolean value, boolean expected) {
-        changeCheckboxAndAssert(fragment, identifier, value, expected, identifier);
-    }
-
-    private void changeTextAndAssert(ConfigFragment fragment, String identifier, String value, boolean expected, String dmrAttribute) {
-        fragment.edit().text(identifier, value);
-        fragment.saveAndAssert(expected);
-        if (expected != false) {
-            verifier.verifyAttribute(dmrAttribute, value);
-        }
-    }
-
-    private void changeCheckboxAndAssert(ConfigFragment fragment, String identifier, boolean value, boolean expected, String dmrAttribute) {
-        fragment.edit().checkbox(identifier, value);
-        fragment.saveAndAssert(expected);
-        if (expected != false) {
-            verifier.verifyAttribute(dmrAttribute, String.valueOf(value));
-        }
+        utils.changeTextAndAssert(page.getConfig().networking(), WORKER_TIMEOUT_ID, NUMERIC_VALUE_INVALID, false);
     }
 }

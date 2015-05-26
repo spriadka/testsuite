@@ -17,13 +17,15 @@ import org.jboss.hal.testsuite.util.ResourceVerifier;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
 
 import static org.jboss.hal.testsuite.cli.CliConstants.INTERFACE_ADDRESS;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author mkrajcov <mkrajcov@redhat.com>
@@ -100,6 +102,7 @@ public class NetworkInterfacesTestCase {
 
 
 
+    @Ignore
     @Test
     @InSequence(1)
     public void changeNicAttribute() {
@@ -110,6 +113,7 @@ public class NetworkInterfacesTestCase {
         verifier.verifyAttribute("nic", NEW_NIC);
     }
 
+    @Ignore
     @Test
     @InSequence(2)
     public void changeNicMatchAttribute(){
@@ -120,6 +124,7 @@ public class NetworkInterfacesTestCase {
         verifier.verifyAttribute("nic-match", NEW_NIC_MATCH);
     }
 
+    @Ignore
     @Test
     @InSequence(3)
     public void enableLoopBackAddress(){
@@ -157,6 +162,7 @@ public class NetworkInterfacesTestCase {
         verifier.verifyResource(DMR_INTERFACE_ANY, false);
     }
 
+    @Ignore
     @Test
     public void createInterfaceAnyIPv4Address(){
         NetworkInterfaceContentFragment area = page.getContent();
@@ -175,6 +181,7 @@ public class NetworkInterfacesTestCase {
         verifier.verifyResource(DMR_INTERFACE_ANY_IP4, false);
     }
 
+    @Ignore
     @Test
     public void createInterfaceAnyIPv6Address(){
         NetworkInterfaceContentFragment area = page.getContent();

@@ -14,6 +14,7 @@ import org.jboss.hal.testsuite.test.category.Standalone;
 import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.ResourceVerifier;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
@@ -24,6 +25,7 @@ import static org.jboss.hal.testsuite.cli.CliConstants.WEB_SUBSYSTEM_JSP_CONFIGU
 /**
  * @author mkrajcov <mkrajcov@redhat.com>
  */
+@Ignore
 @RunWith(Arquillian.class)
 @Category(Standalone.class)
 public class JspTestCase {
