@@ -56,7 +56,7 @@ public class DomainUnmanagedDeploymentsTestCase {
         browser.navigate().refresh();
         Graphene.goTo(DomainDeploymentPage.class);
         Console.withBrowser(browser).waitUntilLoaded();
-        browser.manage().window().maximize();
+        Console.withBrowser(browser).maximizeWindow();
     }
 
     @AfterClass

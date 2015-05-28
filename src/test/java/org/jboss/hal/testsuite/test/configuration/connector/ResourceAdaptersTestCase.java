@@ -76,7 +76,7 @@ public class ResourceAdaptersTestCase {
         browser.navigate().refresh();
         Graphene.goTo(ResourceAdaptersPage.class);
         Console.withBrowser(browser).waitUntilLoaded();
-        browser.manage().window().maximize();
+        Console.withBrowser(browser).maximizeWindow();
     }
 
     @After

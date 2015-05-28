@@ -87,7 +87,7 @@ public class ModClusterTestCase {
         browser.navigate().refresh();
         Graphene.goTo(ModClusterPage.class);
         Console.withBrowser(browser).waitUntilLoaded();
-        browser.manage().window().maximize();
+        Console.withBrowser(browser).maximizeWindow();
     }
 
     /*
