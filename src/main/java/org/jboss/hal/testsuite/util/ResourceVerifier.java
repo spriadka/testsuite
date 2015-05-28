@@ -22,7 +22,9 @@
 
 package org.jboss.hal.testsuite.util;
 
+import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.cli.CliClient;
+import org.jboss.hal.testsuite.cli.CliUtils;
 import org.junit.Assert;
 
 import java.util.Map;
@@ -85,6 +87,24 @@ public class ResourceVerifier {
         String actualValue = cliClient.readAttribute(dmrPath, dmrName);
 
         Assert.assertEquals("Attribute value is different in model.", expectedValue, actualValue);
+    }
+
+    /**
+     * Verifies the value of array attribute in model.
+     * @param name name of the attribute. If the name is camelCase it will be converted to camel-case.
+     * @param expectedValues expected values
+     */
+    public void verifyAttribute(String name, String[] expectedValues){
+        if (dmrPath == null) {
+            throw new IllegalStateException("DMR path not set");
+        }
+
+        String dmrName = camelToDash(name);
+        String[] actualValues = cliClient
+                .executeForResponse(CliUtils.buildCommand(dmrPath, ":read-attribute", new String[]{"name=" + dmrName}))
+                .get("result").asList().stream().map(ModelNode::asString).toArray(String[]::new);
+
+        Assert.assertArrayEquals(expectedValues,actualValues);
     }
 
     /**

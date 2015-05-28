@@ -6,10 +6,9 @@ import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.cli.CliClient;
 import org.jboss.hal.testsuite.cli.CliClientFactory;
-import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.page.config.WebServicesPage;
 import org.jboss.hal.testsuite.test.category.Standalone;
-import org.jboss.hal.testsuite.test.util.ConfigFragmentUtils;
+import org.jboss.hal.testsuite.test.util.ConfigAreaUtils;
 import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.ResourceVerifier;
 import org.junit.Before;
@@ -35,12 +34,12 @@ public class WebServicesTestCase {
     private static final String WSDL_SECURE_PORT_ID = "wsdlSecurePort";
 
     private static final String PORT_VALUE = "50";
-    private static final String PORT_VALUE_NEGATIVE = "50";
+    private static final String PORT_VALUE_NEGATIVE = "-50";
     private static final String SIMPLE_IP = "127.0.0.2";
 
     private CliClient client = CliClientFactory.getClient();
     private ResourceVerifier verifier = new ResourceVerifier(WEB_SERVICES_SUBSYSTEM_ADDRESS, client);
-    private ConfigFragmentUtils utils = new ConfigFragmentUtils(verifier);
+    private ConfigAreaUtils utils = new ConfigAreaUtils(verifier);
 
     @Drone
     public WebDriver browser;
@@ -58,33 +57,33 @@ public class WebServicesTestCase {
 
     @Test
     public void modifySoapAddress() {
-        utils.changeCheckboxAndAssert(page.config(), MODIFY_SOAP_ADDRESS_ID, false, true, MODIFY_SOAP_ADDRESS_DMR);
-        utils.changeCheckboxAndAssert(page.config(), MODIFY_SOAP_ADDRESS_ID, true, true, MODIFY_SOAP_ADDRESS_DMR);
+        utils.editCheckboxAndAssert(page, MODIFY_SOAP_ADDRESS_ID, false).dmrAttribute(MODIFY_SOAP_ADDRESS_DMR).invoke();
+        utils.editCheckboxAndAssert(page, MODIFY_SOAP_ADDRESS_ID, true).dmrAttribute(MODIFY_SOAP_ADDRESS_DMR).invoke();
     }
 
     @Test
     public void setWsdlPort() {
-        utils.changeTextAndAssert(page.config(), WSDL_PORT_ID, PORT_VALUE, true);
+        utils.editTextAndAssert(page, WSDL_PORT_ID, PORT_VALUE).invoke();
     }
 
     @Test
     public void setWsdlPortNegative() {
-        utils.changeTextAndAssert(page.config(), WSDL_PORT_ID, PORT_VALUE_NEGATIVE, true);
+        utils.editTextAndAssert(page, WSDL_PORT_ID, PORT_VALUE_NEGATIVE).expectError().invoke();
     }
 
     @Test
     public void setWsdlSecurePort() {
-        utils.changeTextAndAssert(page.config(), WSDL_SECURE_PORT_ID, PORT_VALUE, true);
+        utils.editTextAndAssert(page, WSDL_SECURE_PORT_ID, PORT_VALUE).invoke();
     }
 
     @Test
     public void setWsdlSecurePortNegative() {
-        utils.changeTextAndAssert(page.config(), WSDL_SECURE_PORT_ID, PORT_VALUE_NEGATIVE, true);
+        utils.editTextAndAssert(page, WSDL_SECURE_PORT_ID, PORT_VALUE_NEGATIVE).expectError().invoke();
     }
 
     @Test
     public void setWsdlHostSimpleIP() {
-        utils.changeTextAndAssert(page.config(), WSDL_HOST_ID, SIMPLE_IP, true);
+        utils.editTextAndAssert(page, WSDL_HOST_ID, SIMPLE_IP).invoke();
     }
 
 }
