@@ -3,6 +3,7 @@ package org.jboss.hal.testsuite.test.configuration.general;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.arquillian.junit.InSequence;
 import org.jboss.hal.testsuite.cli.CliClient;
 import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.cli.CliConstants;
@@ -34,6 +35,7 @@ public class WebAccessTestCase {
     }
 
     @Test(expected=TimeoutException.class)
+    @InSequence(0)
     public void disabledAccess(){
         toggleWebConsole(false);
         Graphene.goTo(HomePage.class);
@@ -41,6 +43,7 @@ public class WebAccessTestCase {
     }
 
     @Test
+    @InSequence(1)
     public void enabledAccess(){
         toggleWebConsole(true);
         Graphene.goTo(HomePage.class);
