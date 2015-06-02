@@ -45,7 +45,13 @@ public class Console {
      */
     public Console waitUntilLoaded() {
         // TODO: this should rather wait until the loading box is not present
-        Graphene.waitModel().until().element(By.className("header-panel")).is().present();
+        // revert this after problem with loading pages is fixed
+        try {
+            Graphene.waitModel().withTimeout(5, TimeUnit.SECONDS).until().element(By.className("header-panel")).is().present();
+        } catch (TimeoutException e) {
+            refresh();
+            Graphene.waitModel().until().element(By.className("header-panel")).is().present();
+        }
         return this;
     }
 
