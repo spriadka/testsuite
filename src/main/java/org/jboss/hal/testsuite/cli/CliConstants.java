@@ -38,7 +38,6 @@ public class CliConstants {
     public static final String DATASOURCES_ADDRESS = "/subsystem=datasources/data-source";
     public static final String XA_DATASOURCES_ADDRESS = "/subsystem=datasources/xa-data-source";
     public static final String DEPLOYMENT_ADDRESS = "/deployment";
-    public static final String MAIN_SERVER_GROUP_DEPLOYMENT_ADDRESS = "/deployment=main-server-group";
     public static final String SERVER_GROUP_ADDRESS = "/server-group";
     public static final String INTERFACE_ADDRESS = "/interface";
     public static final String SOCKET_BINDING_GROUP_ADDRESS = "/socket-binding-group";
@@ -52,4 +51,6 @@ public class CliConstants {
     public static final String RESOURCE_ADAPTER_ADDRESS = "/subsystem=resource-adapters/resource-adapter";
     public static final String WEB_SERVICES_SUBSYSTEM_ADDRESS = "/subsystem=webservices";
     public static final String MOD_CLUSTER_CONFIG_ADDRESS = "/subsystem=modcluster/mod-cluster-config=configuration";
+    public static final String DOMAIN_HTTP_INTERFACE_ADDRESS = "/host=master/core-service=management/management-interface=http-interface";
+    public static final String STANDALONE_HTTP_INTERFACE_ADDRESS = "/core-service=management/management-interface=http-interface";
 }
