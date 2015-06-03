@@ -12,6 +12,7 @@ import org.jboss.hal.testsuite.fragment.config.interfaces.NetworkInterfaceConten
 import org.jboss.hal.testsuite.fragment.config.interfaces.NetworkInterfaceWizard;
 import org.jboss.hal.testsuite.page.config.NetworkInterfacesPage;
 import org.jboss.hal.testsuite.test.category.Standalone;
+import org.jboss.hal.testsuite.test.util.ConfigAreaUtils;
 import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.ResourceVerifier;
 import org.junit.After;
@@ -55,6 +56,7 @@ public class NetworkInterfacesTestCase {
 
     private static CliClient client = CliClientFactory.getClient();
     private static ResourceVerifier verifier = new ResourceVerifier(DMR_INTERFACE,client);
+    private static ConfigAreaUtils utils = new ConfigAreaUtils(verifier);
 
     @Drone
     public WebDriver browser;
@@ -102,37 +104,22 @@ public class NetworkInterfacesTestCase {
 
 
 
-    @Ignore
     @Test
     @InSequence(1)
     public void changeNicAttribute() {
-        NetworkInterfaceContentFragment area = page.getContent();
-
-        area.editNicAndSave(INTERFACE_NAME, NEW_NIC);
-
-        verifier.verifyAttribute("nic", NEW_NIC);
+        utils.editTextAndAssert(page, "nic", NEW_NIC).clear("inetAddress").rowName(INTERFACE_NAME).invoke();
     }
 
-    @Ignore
     @Test
     @InSequence(2)
     public void changeNicMatchAttribute(){
-        NetworkInterfaceContentFragment area = page.getContent();
-
-        area.editNicMatchAndSave(INTERFACE_NAME, NEW_NIC_MATCH);
-
-        verifier.verifyAttribute("nic-match", NEW_NIC_MATCH);
+        utils.editTextAndAssert(page, "nicMatch", NEW_NIC_MATCH).clear("nic").rowName(INTERFACE_NAME).invoke();
     }
 
-    @Ignore
     @Test
     @InSequence(3)
     public void enableLoopBackAddress(){
-        NetworkInterfaceContentFragment area = page.getContent();
-
-        area.editLoopbackAddressAndSave(INTERFACE_NAME, NEW_LOOPBACK_ADDRESS);
-
-        verifier.verifyAttribute("loopback-address", NEW_LOOPBACK_ADDRESS);
+        utils.editTextAndAssert(page, "loopbackAddress", NEW_LOOPBACK_ADDRESS).clear("nicMatch").rowName(INTERFACE_NAME).invoke();
     }
 
     @Test
@@ -162,7 +149,7 @@ public class NetworkInterfacesTestCase {
         verifier.verifyResource(DMR_INTERFACE_ANY, false);
     }
 
-    @Ignore
+    @Ignore("Missing IPV4 option")
     @Test
     public void createInterfaceAnyIPv4Address(){
         NetworkInterfaceContentFragment area = page.getContent();
@@ -181,7 +168,7 @@ public class NetworkInterfacesTestCase {
         verifier.verifyResource(DMR_INTERFACE_ANY_IP4, false);
     }
 
-    @Ignore
+    @Ignore("Missing IPV6 option")
     @Test
     public void createInterfaceAnyIPv6Address(){
         NetworkInterfaceContentFragment area = page.getContent();

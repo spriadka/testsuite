@@ -7,6 +7,9 @@ import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.jboss.hal.testsuite.page.ConfigPage;
 import org.jboss.hal.testsuite.util.ResourceVerifier;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author mkrajcov <mkrajcov@redhat.com>
  */
@@ -49,6 +52,7 @@ public class ConfigAreaUtils {
         private String[] lineValues;
         private EditorType type;
 
+        List<String> inputsToClear = new ArrayList<>();
         private boolean defineFirst = false;
         private boolean expectedChange = true;
 
@@ -104,6 +108,11 @@ public class ConfigAreaUtils {
             return this;
         }
 
+        public Builder clear(String input){
+            inputsToClear.add(input);
+            return this;
+        }
+
         public void invoke() {
             if (dmrAttribute == null) dmrAttribute = identifier;
             if (rowName != null) page.getResourceManager().selectByName(rowName);
@@ -116,6 +125,9 @@ public class ConfigAreaUtils {
             Editor edit = fragment.edit();
             if (defineFirst) {
                 edit.checkbox(defineIdentifier, true);
+            }
+            for(String i : inputsToClear){
+                edit.text(i, "");
             }
             switch (type) {
                 case TEXTAREA:
