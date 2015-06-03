@@ -86,7 +86,7 @@ public class TestConnectionTestCase extends AbstractTestConnectionTestCase {
         testConnectionInWizard(dsOps, name, VALID_URL, true);
     }
 
-    @Ignore
+    @Ignore("Test connection fails as stated in [HAL-664]")
     @Test
     public void invalidInWizard() {
         String name = RandomStringUtils.randomAlphabetic(6);
@@ -95,21 +95,21 @@ public class TestConnectionTestCase extends AbstractTestConnectionTestCase {
 
 
     // XA DS tests
-    @Ignore
+    @Ignore("Not able to create xa datasource")
     @Test
     public void validXADatasource() {
         datasourcesPage.switchTab("XA Datasources");
         testConnection(xaDsNameValid, true);
     }
 
-    @Ignore
+    @Ignore("Not able to create xa datasource")
     @Test
     public void invalidXADatasource() {
         datasourcesPage.switchToXA();
         testConnection(xaDsNameInvalid, false);
     }
 
-    @Ignore
+    @Ignore("Can't get further than on step 3/4 in wizard")
     @Test
     public void validXAInWizard() {
         datasourcesPage.switchToXA();
@@ -118,7 +118,7 @@ public class TestConnectionTestCase extends AbstractTestConnectionTestCase {
         testXAConnectionInWizard(dsOps, name, VALID_URL, true);
     }
 
-    @Ignore
+    @Ignore("Can't get further than on step 3/4 in wizard")
     @Test
     public void invalidXAInWizard() {
         datasourcesPage.switchToXA();

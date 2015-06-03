@@ -163,7 +163,7 @@ public class ModClusterTestCase {
     }
 
     @Test
-    @Ignore
+    @Ignore("Unknown error appears after setting proxy list")
     public void proxyList() {
         utils.editTextAndAssert(page, PROXY_LIST_ID, PROXY_LIST_VALUE).tab(PROXIES).invoke();
     }

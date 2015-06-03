@@ -28,7 +28,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author mkrajcov <mkrajcov@redhat.com>
  */
-@Ignore
+@Ignore("This was moved to a different page")
 @RunWith(Arquillian.class)
 @Category(Standalone.class)
 public class VirtualServersTestCase {

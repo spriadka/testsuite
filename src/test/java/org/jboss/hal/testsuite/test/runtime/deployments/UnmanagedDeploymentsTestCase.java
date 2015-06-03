@@ -80,7 +80,7 @@ public class UnmanagedDeploymentsTestCase {
         assertTrue("Deployment should exist", ops.exists(NAME));
     }
 
-    @Ignore
+    @Ignore("Not able to enable deployment")
     @Test
     @InSequence(1)
     public void enableDeployment() {
@@ -91,7 +91,7 @@ public class UnmanagedDeploymentsTestCase {
         assertTrue("Deployment should be enabled", ops.isEnabled(NAME));
     }
 
-    @Ignore
+    @Ignore("Not able to enable deployment")
     @Test
     @InSequence(2)
     public void disableDeployment() {

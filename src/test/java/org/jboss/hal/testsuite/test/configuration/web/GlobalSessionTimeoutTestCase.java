@@ -31,7 +31,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author mkrajcov <mkrajcov@redhat.com>
  */
-@Ignore
+@Ignore("This was moved to a different page")
 @RunWith(Arquillian.class)
 @Category(Shared.class)
 public class GlobalSessionTimeoutTestCase {
