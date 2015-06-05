@@ -13,11 +13,11 @@ import java.util.List;
 /**
  * @author mkrajcov <mkrajcov@redhat.com>
  */
-public class ConfigAreaUtils {
+public class ConfigAreaChecker {
 
     private ResourceVerifier verifier;
 
-    public ConfigAreaUtils(ResourceVerifier verifier) {
+    public ConfigAreaChecker(ResourceVerifier verifier) {
         this.verifier = verifier;
     }
 

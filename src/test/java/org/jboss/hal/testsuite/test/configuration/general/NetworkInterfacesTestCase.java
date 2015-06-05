@@ -12,7 +12,7 @@ import org.jboss.hal.testsuite.fragment.config.interfaces.NetworkInterfaceConten
 import org.jboss.hal.testsuite.fragment.config.interfaces.NetworkInterfaceWizard;
 import org.jboss.hal.testsuite.page.config.NetworkInterfacesPage;
 import org.jboss.hal.testsuite.test.category.Standalone;
-import org.jboss.hal.testsuite.test.util.ConfigAreaUtils;
+import org.jboss.hal.testsuite.test.util.ConfigAreaChecker;
 import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.ResourceVerifier;
 import org.junit.After;
@@ -56,7 +56,7 @@ public class NetworkInterfacesTestCase {
 
     private static CliClient client = CliClientFactory.getClient();
     private static ResourceVerifier verifier = new ResourceVerifier(DMR_INTERFACE,client);
-    private static ConfigAreaUtils utils = new ConfigAreaUtils(verifier);
+    private static ConfigAreaChecker checker = new ConfigAreaChecker(verifier);
 
     @Drone
     public WebDriver browser;
@@ -107,19 +107,19 @@ public class NetworkInterfacesTestCase {
     @Test
     @InSequence(1)
     public void changeNicAttribute() {
-        utils.editTextAndAssert(page, "nic", NEW_NIC).clear("inetAddress").rowName(INTERFACE_NAME).invoke();
+        checker.editTextAndAssert(page, "nic", NEW_NIC).clear("inetAddress").rowName(INTERFACE_NAME).invoke();
     }
 
     @Test
     @InSequence(2)
     public void changeNicMatchAttribute(){
-        utils.editTextAndAssert(page, "nicMatch", NEW_NIC_MATCH).clear("nic").rowName(INTERFACE_NAME).invoke();
+        checker.editTextAndAssert(page, "nicMatch", NEW_NIC_MATCH).clear("nic").rowName(INTERFACE_NAME).invoke();
     }
 
     @Test
     @InSequence(3)
     public void enableLoopBackAddress(){
-        utils.editTextAndAssert(page, "loopbackAddress", NEW_LOOPBACK_ADDRESS).clear("nicMatch").rowName(INTERFACE_NAME).invoke();
+        checker.editTextAndAssert(page, "loopbackAddress", NEW_LOOPBACK_ADDRESS).clear("nicMatch").rowName(INTERFACE_NAME).invoke();
     }
 
     @Test
