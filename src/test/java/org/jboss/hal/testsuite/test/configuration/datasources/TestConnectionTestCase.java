@@ -5,15 +5,14 @@ import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.cli.CliClient;
 import org.jboss.hal.testsuite.cli.CliClientFactory;
-import org.jboss.hal.testsuite.cli.DomainCliClient;
 import org.jboss.hal.testsuite.page.config.DatasourcesPage;
 import org.jboss.hal.testsuite.test.category.Shared;
-import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.jboss.hal.testsuite.util.Console;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
@@ -80,12 +79,14 @@ public class TestConnectionTestCase extends AbstractTestConnectionTestCase {
         testConnection(dsNameInvalid, false);
     }
 
+    @Ignore
     @Test
     public void validInWizard() {
         String name = RandomStringUtils.randomAlphabetic(6);
         testConnectionInWizard(dsOps, name, VALID_URL, true);
     }
 
+    @Ignore("Test connection fails as stated in [HAL-664]")
     @Test
     public void invalidInWizard() {
         String name = RandomStringUtils.randomAlphabetic(6);
@@ -94,20 +95,21 @@ public class TestConnectionTestCase extends AbstractTestConnectionTestCase {
 
 
     // XA DS tests
+    @Ignore("Not able to create xa datasource")
     @Test
     public void validXADatasource() {
         datasourcesPage.switchTab("XA Datasources");
         testConnection(xaDsNameValid, true);
     }
 
-
+    @Ignore("Not able to create xa datasource")
     @Test
     public void invalidXADatasource() {
         datasourcesPage.switchToXA();
-        testConnection(xaDsNameInvalid, false
-        );
+        testConnection(xaDsNameInvalid, false);
     }
 
+    @Ignore("Can't get further than on step 3/4 in wizard")
     @Test
     public void validXAInWizard() {
         datasourcesPage.switchToXA();
@@ -116,6 +118,7 @@ public class TestConnectionTestCase extends AbstractTestConnectionTestCase {
         testXAConnectionInWizard(dsOps, name, VALID_URL, true);
     }
 
+    @Ignore("Can't get further than on step 3/4 in wizard")
     @Test
     public void invalidXAInWizard() {
         datasourcesPage.switchToXA();

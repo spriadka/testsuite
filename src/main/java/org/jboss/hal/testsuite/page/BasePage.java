@@ -1,7 +1,5 @@
 package org.jboss.hal.testsuite.page;
 
-import java.util.List;
-
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.ByJQuery;
@@ -18,11 +16,12 @@ import org.jboss.hal.testsuite.fragment.shared.util.ResourceManager;
 import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.PropUtils;
 import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
+
+import java.util.List;
 
 /**
  * Created by jcechace on 15/02/14.
@@ -77,7 +76,6 @@ public abstract class BasePage {
      * Finds button in content area based on identifier
      *
      * @param identifier id or label
-     *
      * @return the button element
      */
     public WebElement getButton(String identifier) {
@@ -213,8 +211,8 @@ public abstract class BasePage {
 
     public RHAccessHeaderFragment getRedHatAccessArea() {
         List<WebElement> candidates = browser.findElements(By.className(RHAccessHeaderFragment.CLASS_ROOT));
-        for(WebElement candidate : candidates) {
-            if(candidate.getText().contains("Red Hat Access")) {
+        for (WebElement candidate : candidates) {
+            if (candidate.getText().contains("Red Hat Access")) {
                 return Graphene.createPageFragment(RHAccessHeaderFragment.class, candidate);
             }
         }
@@ -247,18 +245,10 @@ public abstract class BasePage {
 
     /**
      * Navigates to page url
-     *
      */
     public void navigate() {
         browser.navigate().refresh();
         Graphene.goTo(this.getClass());
         Console.withBrowser(browser).waitUntilLoaded();
-    }
-
-    /**
-     * Scrolls to the bottom portion of page by sendind a PAGE_DOWN key to content root.
-     */
-    public void pageDown() {
-        getContentRoot().sendKeys(Keys.PAGE_DOWN);
     }
 }

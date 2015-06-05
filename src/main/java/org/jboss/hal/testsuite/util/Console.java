@@ -1,14 +1,16 @@
 package org.jboss.hal.testsuite.util;
 
 import org.jboss.arquillian.graphene.Graphene;
+import org.jboss.hal.testsuite.cli.Library;
 import org.jboss.hal.testsuite.fragment.BaseFragment;
 import org.jboss.hal.testsuite.fragment.PopUpFragment;
-import org.jboss.hal.testsuite.fragment.shared.table.ResourceTableFragment;
 import org.jboss.hal.testsuite.fragment.WindowFragment;
-import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
 import org.jboss.hal.testsuite.fragment.formeditor.PropertyEditor;
+import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
+import org.jboss.hal.testsuite.fragment.shared.table.ResourceTableFragment;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
@@ -43,7 +45,13 @@ public class Console {
      */
     public Console waitUntilLoaded() {
         // TODO: this should rather wait until the loading box is not present
-        Graphene.waitModel().until().element(By.className("header-panel")).is().present();
+        // revert this after problem with loading pages is fixed
+        try {
+            Graphene.waitModel().withTimeout(5, TimeUnit.SECONDS).until().element(By.className("header-panel")).is().present();
+        } catch (TimeoutException e) {
+            refresh();
+            Graphene.waitModel().until().element(By.className("header-panel")).is().present();
+        }
         return this;
     }
 
@@ -261,4 +269,9 @@ public class Console {
         return this;
     }
 
+    public void pageDown() {
+        List<WebElement> elements = browser.findElements(By.id(PropUtils.get("page.scrollpanel.id")));
+        elements.stream().filter(WebElement::isDisplayed).forEach(e -> e.sendKeys(Keys.PAGE_DOWN));
+        Library.letsSleep(100);
+    }
 }

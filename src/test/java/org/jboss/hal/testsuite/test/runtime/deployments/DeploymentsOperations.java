@@ -11,6 +11,7 @@ public class DeploymentsOperations {
     private static final String COMMAND_READ_RESOURCE = CliConstants.DEPLOYMENT_ADDRESS + "=%s:read-resource";
     private static final String COMMAND_UNDEPLOY = "undeploy %s";
     private static final String COMMAND_READ_CHILDREN_DEPLOYMENT = CliConstants.DEPLOYMENT_ADDRESS + "=%s:read-children-resources(child-type=deployment)";
+    private static final String COMMAND_SERVER_GROUP_READ_RESOURCE = CliConstants.SERVER_GROUP_ADDRESS + "=%s" + CliConstants.DEPLOYMENT_ADDRESS + "=%s:read-resource";
 
     private CliClient client;
 
@@ -34,12 +35,12 @@ public class DeploymentsOperations {
     }
 
     public boolean isEnabledInServerGroup(String serverGroup, String deploymentName) {
-        String command = String.format(COMMAND_READ_CHILDREN_DEPLOYMENT, serverGroup);
-        return client.executeForResponse(command).get("result").get(deploymentName).get("enabled").asBoolean();
+        String command = String.format(COMMAND_SERVER_GROUP_READ_RESOURCE, serverGroup, deploymentName);
+        return client.executeForResponse(command).get("result").get("enabled").asBoolean();
     }
 
     public boolean isAssignedToServerGroup(String serverGroup, String deploymentName) {
-        String command = String.format(COMMAND_READ_CHILDREN_DEPLOYMENT, serverGroup);
-        return client.executeForResponse(command).get("result").has(deploymentName);
+        String command = String.format(COMMAND_SERVER_GROUP_READ_RESOURCE, serverGroup, deploymentName);
+        return client.executeForSuccess(command);
     }
 }

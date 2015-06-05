@@ -24,7 +24,7 @@ public abstract class AbstractTestConnectionTestCase {
     protected DatasourcesPage datasourcesPage;
 
     protected void testConnection(String name, boolean expected) {
-        datasourcesPage.getResourceManager().getResourceTable().getRowByText(0, name).click();
+        datasourcesPage.getResourceManager().selectByName(name);
 
         DatasourceConfigArea config = datasourcesPage.getConfig();
         ConnectionConfig connection = config.connectionConfig();
@@ -37,12 +37,15 @@ public abstract class AbstractTestConnectionTestCase {
         DatasourceWizard wizard = datasourcesPage.addResource();
         Editor editor = wizard.getEditor();
 
+        wizard.next();
+
         editor.text("name", name);
         editor.text("jndiName", "java:/" + name);
-
         wizard.next();
 
+        wizard.switchToDetectedDriver();
         wizard.next();
+
         editor.text("connectionUrl", url);
 
         assertConnectionTest(wizard.testConnection(), expected);
@@ -54,12 +57,15 @@ public abstract class AbstractTestConnectionTestCase {
         DatasourceWizard wizard = datasourcesPage.addResource();
         Editor editor = wizard.getEditor();
 
+        wizard.next();
+
         editor.text("name", name);
         editor.text("jndiName", "java:/" + name);
-
         wizard.next();
 
+        wizard.switchToDetectedDriver();
         wizard.next();
+
         PropertyEditor properties = editor.properties();
         properties.add("URL", url);
 

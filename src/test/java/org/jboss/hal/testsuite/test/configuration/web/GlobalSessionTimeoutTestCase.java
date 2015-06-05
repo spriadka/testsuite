@@ -14,6 +14,7 @@ import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.ResourceVerifier;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
@@ -30,6 +31,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author mkrajcov <mkrajcov@redhat.com>
  */
+@Ignore("This was moved to a different page")
 @RunWith(Arquillian.class)
 @Category(Shared.class)
 public class GlobalSessionTimeoutTestCase {
@@ -43,7 +45,6 @@ public class GlobalSessionTimeoutTestCase {
 
     private CliClient client = CliClientFactory.getClient();
     private ResourceVerifier verifier = new ResourceVerifier(WEB_SUBSYSTEM_ADDRESS, client);
-
 
     @Drone
     private WebDriver browser;

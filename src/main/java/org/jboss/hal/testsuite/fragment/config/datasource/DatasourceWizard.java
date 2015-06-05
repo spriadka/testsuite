@@ -3,11 +3,15 @@ package org.jboss.hal.testsuite.fragment.config.datasource;
 import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
 import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.PropUtils;
+import org.openqa.selenium.By;
 
 /**
  * @author jcechace
  */
 public class DatasourceWizard extends WizardWindow {
+
+    private static final By DETECTED_DRIVER_BUTTON = By.xpath(".//div[text()='Detected Driver']");
+
     public TestConnectionWindow testConnection() {
         String label = PropUtils.get("config.datasources.configarea.connection.test.label");
         clickButton(label);
@@ -18,6 +22,10 @@ public class DatasourceWizard extends WizardWindow {
                 .openedWindow(windowTitle, TestConnectionWindow.class);
 
         return window;
+    }
+
+    public void switchToDetectedDriver(){
+        root.findElement(DETECTED_DRIVER_BUTTON).click();
     }
 
 }

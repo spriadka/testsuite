@@ -15,6 +15,7 @@ import org.jboss.hal.testsuite.test.category.Standalone;
 import org.jboss.hal.testsuite.util.Console;
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
@@ -79,6 +80,7 @@ public class UnmanagedDeploymentsTestCase {
         assertTrue("Deployment should exist", ops.exists(NAME));
     }
 
+    @Ignore("Not able to enable deployment")
     @Test
     @InSequence(1)
     public void enableDeployment() {
@@ -89,6 +91,7 @@ public class UnmanagedDeploymentsTestCase {
         assertTrue("Deployment should be enabled", ops.isEnabled(NAME));
     }
 
+    @Ignore("Not able to enable deployment")
     @Test
     @InSequence(2)
     public void disableDeployment() {

@@ -5,7 +5,6 @@ import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.hal.testsuite.fragment.BaseFragment;
 import org.jboss.hal.testsuite.util.Console;
 import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
@@ -39,6 +38,9 @@ public class Editor extends BaseFragment {
      */
     public void text(String identifier, String value) {
         WebElement input = getText(identifier);
+        if (!input.isDisplayed()) {
+            Console.withBrowser(browser).pageDown();
+        }
         input.clear();
         log.debug("setting value '{}' to the text element '{}'", value, identifier);
         Graphene.waitGui().until().element(input).value().equalTo("");
@@ -62,7 +64,8 @@ public class Editor extends BaseFragment {
     private WebElement findSelect(String identifier) {
         By selector = ByJQuery.selector(
                 "select[id$='" + identifier + "']:visible," +
-                        "select[name='" + identifier + "']:visible, "
+                        "select[name='" + identifier + "']:visible, " +
+                        "tr[data-dmr-attr='" + identifier + "'] select:visible, "
         );
 
         return findElement(selector, root);
@@ -70,6 +73,7 @@ public class Editor extends BaseFragment {
 
     /**
      * Sets the value of given select
+     *
      * @param identifier
      * @param value
      */
@@ -118,7 +122,6 @@ public class Editor extends BaseFragment {
     }
 
     /**
-     *
      * @param fileToUpload
      * @param identifier
      */
@@ -132,6 +135,7 @@ public class Editor extends BaseFragment {
 
     /**
      * Returns a checkbox with given identifier.
+     *
      * @param identifier
      * @return a checkbox element
      */
@@ -167,7 +171,7 @@ public class Editor extends BaseFragment {
      * @param identifier
      * @return value of checkbox
      */
-    public boolean  checkbox(String identifier) {
+    public boolean checkbox(String identifier) {
         WebElement input = getCheckbox(identifier);
 
         boolean res = input.isSelected();
@@ -178,7 +182,7 @@ public class Editor extends BaseFragment {
 
 
     /**
-     *  Returns a property editor object found within editor's root.
+     * Returns a property editor object found within editor's root.
      *
      * @return a property editor
      */
@@ -195,9 +199,10 @@ public class Editor extends BaseFragment {
         } catch (NoSuchElementException ignore) {
             log.debug("not found - looking for textarea '{}'", identifier);
 
-            String byIdSelector = "textarea[id$='" + identifier + "']:visible, ";
-            String byNameSelector = "textarea[name='" + identifier + "']:visible, ";
-            By selector = ByJQuery.selector(byIdSelector + ", " + byNameSelector);
+            String byIdSelector = "textarea[id$='" + identifier + "']:visible";
+            String byNameSelector = "textarea[name='" + identifier + "']:visible";
+            String byDmrAttrSelector = "tr[data-dmr-attr='" + identifier + "'] textarea:visible";
+            By selector = ByJQuery.selector(byIdSelector + ", " + byNameSelector + ", " + byDmrAttrSelector);
 
             text = findElement(selector, root);
         }
@@ -215,14 +220,15 @@ public class Editor extends BaseFragment {
     private WebElement findInputElement(String type, String identifier) {
         log.debug("looking for the '{}' input element identified by '{}'", type, identifier);
 
-        String byIdSelector = "input[type='" + type + "'][id$='" + identifier + "']:visible, ";
-        String byNameSelector = "input[type='" + type + "'][name='" + identifier + "']:visible, ";
-        By selector = ByJQuery.selector(byIdSelector + ", " + byNameSelector);
+        String byIdSelector = "input[type='" + type + "'][id$='" + identifier + "']:visible";
+        String byNameSelector = "input[type='" + type + "'][name='" + identifier + "']:visible";
+        String byDmrAttrSelector = "tr[data-dmr-attr='" + identifier + "'] input:visible";
+        By selector = ByJQuery.selector(byIdSelector + ", " + byNameSelector + ", " + byDmrAttrSelector);
 
         WebElement input = findElement(selector, root);
         if (!input.isDisplayed()) {
             // maybe just too long form
-            root.sendKeys(Keys.PAGE_DOWN);
+            Console.withBrowser(browser).pageDown();
         }
         return input;
     }
@@ -243,7 +249,8 @@ public class Editor extends BaseFragment {
 
     /**
      * Select the index-th radio button of given name
-     * @param name name of the radio button input elements
+     *
+     * @param name  name of the radio button input elements
      * @param index index of the radio button to select
      */
     public void radioButton(String name, int index) {
@@ -255,7 +262,8 @@ public class Editor extends BaseFragment {
 
     /**
      * Select the radio button of given name and value
-     * @param name name of the radio button input elements
+     *
+     * @param name  name of the radio button input elements
      * @param value value of the radio button to select
      */
     public void radioButton(String name, String value) {

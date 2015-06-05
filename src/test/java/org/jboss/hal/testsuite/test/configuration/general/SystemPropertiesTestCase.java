@@ -57,7 +57,7 @@ public class SystemPropertiesTestCase {
         browser.navigate().refresh();
         Graphene.goTo(SystemPropertiesPage.class);
         Console.withBrowser(browser).waitUntilLoaded();
-        browser.manage().window().maximize();
+        Console.withBrowser(browser).maximizeWindow();
     }
 
     @AfterClass

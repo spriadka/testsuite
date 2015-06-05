@@ -60,7 +60,7 @@ public class MailTestCase {
         browser.navigate().refresh();
         Graphene.goTo(MailSessionsPage.class);
         Console.withBrowser(browser).waitUntilLoaded();
-        browser.manage().window().maximize();
+        Console.withBrowser(browser).maximizeWindow();
     }
 
     @AfterClass

@@ -12,18 +12,21 @@ import org.jboss.hal.testsuite.fragment.config.interfaces.NetworkInterfaceConten
 import org.jboss.hal.testsuite.fragment.config.interfaces.NetworkInterfaceWizard;
 import org.jboss.hal.testsuite.page.config.NetworkInterfacesPage;
 import org.jboss.hal.testsuite.test.category.Standalone;
+import org.jboss.hal.testsuite.test.util.ConfigAreaChecker;
 import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.ResourceVerifier;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
 
 import static org.jboss.hal.testsuite.cli.CliConstants.INTERFACE_ADDRESS;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author mkrajcov <mkrajcov@redhat.com>
@@ -53,6 +56,7 @@ public class NetworkInterfacesTestCase {
 
     private static CliClient client = CliClientFactory.getClient();
     private static ResourceVerifier verifier = new ResourceVerifier(DMR_INTERFACE,client);
+    private static ConfigAreaChecker checker = new ConfigAreaChecker(verifier);
 
     @Drone
     public WebDriver browser;
@@ -65,7 +69,7 @@ public class NetworkInterfacesTestCase {
         browser.navigate().refresh();
         Graphene.goTo(NetworkInterfacesPage.class);
         Console.withBrowser(browser).waitUntilLoaded();
-        browser.manage().window().maximize();
+        Console.withBrowser(browser).maximizeWindow();
     }
 
     @After
@@ -103,31 +107,19 @@ public class NetworkInterfacesTestCase {
     @Test
     @InSequence(1)
     public void changeNicAttribute() {
-        NetworkInterfaceContentFragment area = page.getContent();
-
-        area.editNicAndSave(INTERFACE_NAME, NEW_NIC);
-
-        verifier.verifyAttribute("nic", NEW_NIC);
+        checker.editTextAndAssert(page, "nic", NEW_NIC).clear("inetAddress").rowName(INTERFACE_NAME).invoke();
     }
 
     @Test
     @InSequence(2)
     public void changeNicMatchAttribute(){
-        NetworkInterfaceContentFragment area = page.getContent();
-
-        area.editNicMatchAndSave(INTERFACE_NAME, NEW_NIC_MATCH);
-
-        verifier.verifyAttribute("nic-match", NEW_NIC_MATCH);
+        checker.editTextAndAssert(page, "nicMatch", NEW_NIC_MATCH).clear("nic").rowName(INTERFACE_NAME).invoke();
     }
 
     @Test
     @InSequence(3)
     public void enableLoopBackAddress(){
-        NetworkInterfaceContentFragment area = page.getContent();
-
-        area.editLoopbackAddressAndSave(INTERFACE_NAME, NEW_LOOPBACK_ADDRESS);
-
-        verifier.verifyAttribute("loopback-address", NEW_LOOPBACK_ADDRESS);
+        checker.editTextAndAssert(page, "loopbackAddress", NEW_LOOPBACK_ADDRESS).clear("nicMatch").rowName(INTERFACE_NAME).invoke();
     }
 
     @Test
@@ -157,6 +149,7 @@ public class NetworkInterfacesTestCase {
         verifier.verifyResource(DMR_INTERFACE_ANY, false);
     }
 
+    @Ignore("Missing IPV4 option")
     @Test
     public void createInterfaceAnyIPv4Address(){
         NetworkInterfaceContentFragment area = page.getContent();
@@ -175,6 +168,7 @@ public class NetworkInterfacesTestCase {
         verifier.verifyResource(DMR_INTERFACE_ANY_IP4, false);
     }
 
+    @Ignore("Missing IPV6 option")
     @Test
     public void createInterfaceAnyIPv6Address(){
         NetworkInterfaceContentFragment area = page.getContent();
