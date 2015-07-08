@@ -81,7 +81,8 @@ public abstract class BasePage {
     public WebElement getButton(String identifier) {
         By selector = ByJQuery.selector("" +
                         "button#" + identifier + ":visible," +
-                        "button:contains('" + identifier + "'):visible"
+                        "button:contains('" + identifier + "'):visible," +
+                        "div.btn:contains('" + identifier + "'):visible"
         );
         WebElement button = getContentRoot().findElement(selector);
 
@@ -103,6 +104,16 @@ public abstract class BasePage {
         WebElement tab = getTab(identifier);
         tab.click();
         waitUntilTabActive(identifier);
+    }
+
+    public void switchSubTab(String identifier) {
+        WebElement subTab = getSubTab(identifier);
+        subTab.click();
+    }
+
+    private WebElement getSubTab(String identifier) {
+        By selector = ByJQuery.selector("div.inline-link:contains('" + identifier + "'):visible");
+        return browser.findElement(selector);
     }
 
     // TODO: tab management refactoring is needed
