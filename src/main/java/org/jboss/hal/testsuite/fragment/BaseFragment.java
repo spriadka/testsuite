@@ -30,7 +30,11 @@ public class BaseFragment {
     }
 
     public WebElement getButton(String label) {
-        By selector = ByJQuery.selector("button:contains('" + label + "'):visible");
+        By selector = ByJQuery.selector("" +
+                        "button#" + label + ":visible," +
+                        "button:contains('" + label + "'):visible," +
+                        "div.btn:contains('" + label + "'):visible"
+        );
         WebElement button = root.findElement(selector);
         return button;
     }
