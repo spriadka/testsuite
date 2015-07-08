@@ -53,4 +53,5 @@ public class CliConstants {
     public static final String MOD_CLUSTER_CONFIG_ADDRESS = "/subsystem=modcluster/mod-cluster-config=configuration";
     public static final String DOMAIN_HTTP_INTERFACE_ADDRESS = "/host=master/core-service=management/management-interface=http-interface";
     public static final String STANDALONE_HTTP_INTERFACE_ADDRESS = "/core-service=management/management-interface=http-interface";
+    public static final String CACHE_CONTAINER_ADDRESS = "/subsystem=infinispan/cache-container";
 }
