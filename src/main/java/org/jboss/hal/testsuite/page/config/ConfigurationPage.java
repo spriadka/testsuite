@@ -2,7 +2,6 @@ package org.jboss.hal.testsuite.page.config;
 
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.ByJQuery;
-import org.jboss.arquillian.graphene.page.Location;
 import org.jboss.hal.testsuite.cli.Library;
 import org.jboss.hal.testsuite.fragment.ConfigAreaFragment;
 import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
@@ -17,7 +16,6 @@ import org.openqa.selenium.WebElement;
 /**
  * @author mkrajcov <mkrajcov@redhat.com>
  */
-@Location("#profile")
 public class ConfigurationPage extends ConfigPage {
 
     public ConfigurationPage select(String label) {
@@ -65,9 +63,5 @@ public class ConfigurationPage extends ConfigPage {
         By selector = ByJQuery.selector("." + layoutClass + ":visible:has(table." + viewPanelClass + ")");
         WebElement root = browser.findElement(selector);
         return Graphene.createPageFragment(ConfigAreaFragment.class, root);
-    }
-
-    public ConfigurationPage subsystems() {
-        return select("Subsystems");
     }
 }
