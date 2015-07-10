@@ -11,6 +11,7 @@ import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.cli.CliUtils;
 import org.jboss.hal.testsuite.fragment.config.infinispan.CacheContainerWizard;
 import org.jboss.hal.testsuite.page.config.ConfigurationPage;
+import org.jboss.hal.testsuite.page.config.StandaloneConfigurationPage;
 import org.jboss.hal.testsuite.page.home.HomePage;
 import org.jboss.hal.testsuite.test.category.Standalone;
 import org.jboss.hal.testsuite.test.util.ConfigAreaChecker;
@@ -55,7 +56,7 @@ public class CacheContainersTestCase {
     public WebDriver browser;
 
     @Page
-    public ConfigurationPage page;
+    public StandaloneConfigurationPage page;
 
     @Before
     public void before() {
@@ -63,7 +64,7 @@ public class CacheContainersTestCase {
         browser.navigate().refresh();
         Graphene.goTo(HomePage.class);
         Console.withBrowser(browser).waitUntilLoaded();
-        Graphene.goTo(ConfigurationPage.class);
+        Graphene.goTo(StandaloneConfigurationPage.class);
         Console.withBrowser(browser).waitUntilLoaded().maximizeWindow();
     }
 

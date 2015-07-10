@@ -190,10 +190,10 @@ public class Console {
     public boolean isWindowOpen(By selector, long time, TimeUnit unit) {
         browser.manage().timeouts().implicitlyWait(time, unit);
         try {
-            Graphene.waitModel().withTimeout(time, unit).until().element(selector).is().not().present();
-            return true;
-        } catch (TimeoutException e) {
+            Graphene.waitModel().withTimeout(time, unit).until().element(selector).is().not().visible();
             return false;
+        } catch (TimeoutException e) {
+            return true;
         }
     }
 
