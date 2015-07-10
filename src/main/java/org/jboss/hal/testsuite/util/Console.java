@@ -48,7 +48,7 @@ public class Console {
      */
     public Console waitUntilLoaded() {
         // TODO: this should rather wait until the loading box is not present
-        Graphene.waitModel().until().element(By.className("hal-ProgressElement")).is().not().visible();
+        Graphene.waitModel().withTimeout(30, TimeUnit.SECONDS).until().element(By.className("hal-ProgressElement")).is().not().visible();
         return this;
     }
 

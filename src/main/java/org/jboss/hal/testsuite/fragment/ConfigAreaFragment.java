@@ -20,7 +20,7 @@ public class ConfigAreaFragment extends  BaseFragment {
         List<WebElement> items = root.findElements(selector);
 
         for(WebElement item : items) {
-            if (item.isDisplayed()) {
+            if (item.isDisplayed() && item.getText().equals(label)) {
                 return item;
             }
         }
