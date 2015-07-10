@@ -8,6 +8,8 @@ import org.jboss.hal.testsuite.fragment.WindowFragment;
 import org.jboss.hal.testsuite.fragment.formeditor.PropertyEditor;
 import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
 import org.jboss.hal.testsuite.fragment.shared.table.ResourceTableFragment;
+import org.jboss.hal.testsuite.page.BasePage;
+import org.jboss.hal.testsuite.page.home.HomePage;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
 import org.openqa.selenium.Keys;
@@ -38,20 +40,15 @@ public class Console {
     }
 
     // Prevent constructor instantiation
-    private Console() {}
+    private Console() {
+    }
 
     /**
      * Wait until the application is loaded.
      */
     public Console waitUntilLoaded() {
         // TODO: this should rather wait until the loading box is not present
-        // revert this after problem with loading pages is fixed
-        try {
-            Graphene.waitModel().withTimeout(5, TimeUnit.SECONDS).until().element(By.className("header-panel")).is().present();
-        } catch (TimeoutException e) {
-            refresh();
-            Graphene.waitModel().until().element(By.className("header-panel")).is().present();
-        }
+        Graphene.waitModel().until().element(By.className("hal-ProgressElement")).is().not().visible();
         return this;
     }
 
@@ -69,7 +66,7 @@ public class Console {
     }
 
     /**
-     *  Waits until operation is finished (progress bar is hidden)
+     * Waits until operation is finished (progress bar is hidden)
      */
     public void waitUntilFinished() {
         By selector = By.className("hal-ProgressElement");
@@ -77,27 +74,27 @@ public class Console {
     }
 
     /**
-     *  Retrieves currently opened popup menu
+     * Retrieves currently opened popup menu
      *
      * @param clazz
      * @param selector
      * @param <T>
      * @return currently opened menu
      */
-    public  <T extends PopUpFragment> T openedPopup(Class<T> clazz, By selector) {
+    public <T extends PopUpFragment> T openedPopup(Class<T> clazz, By selector) {
         Graphene.waitGui().until().element(PopUpFragment.ROOT_SELECTOR).is().present();
 
-        WebElement popupRoot =  browser.findElement(selector);
+        WebElement popupRoot = browser.findElement(selector);
         T popup = Graphene.createPageFragment(clazz, popupRoot);
 
         return popup;
     }
 
-    public  <T extends PopUpFragment> T openedPopup(Class<T> clazz) {
+    public <T extends PopUpFragment> T openedPopup(Class<T> clazz) {
         return openedPopup(clazz, PopUpFragment.ROOT_SELECTOR);
     }
 
-    public  PopUpFragment openedPopup() {
+    public PopUpFragment openedPopup() {
         return openedPopup(PopUpFragment.class, PopUpFragment.ROOT_SELECTOR);
     }
 
@@ -147,13 +144,13 @@ public class Console {
         T window = null;
 
         for (WebElement el : windowEelements) {
-            window  = Graphene.createPageFragment(clazz, el);
+            window = Graphene.createPageFragment(clazz, el);
             if (window.getHeadTitle().equals(headTitle)) {
                 return window;
             }
         }
         // Window with given title not found
-        throw new NoSuchElementException("Unable to find window with title '"+ headTitle
+        throw new NoSuchElementException("Unable to find window with title '" + headTitle
                 + "' using " + selector);
     }
 
@@ -164,6 +161,7 @@ public class Console {
 
     /**
      * Finds out the number of opened windows
+     *
      * @param selector the selector used to find the root of each window
      * @return number of windows currently opened
      */
@@ -174,6 +172,7 @@ public class Console {
 
     /**
      * Finds out the number of default popup windows
+     *
      * @return number of windows currently opened
      */
     public int getWindowCount() {
@@ -182,9 +181,10 @@ public class Console {
 
     /**
      * Convenience method to determine whether there is a window currently opened.
+     *
      * @param selector the selector used to find the root of each window
-     * @param time time to wait
-     * @param unit time unit
+     * @param time     time to wait
+     * @param unit     time unit
      * @return <code>true</code> if there is a window after waiting timeout, false otehrwise
      */
     public boolean isWindowOpen(By selector, long time, TimeUnit unit) {
@@ -199,6 +199,7 @@ public class Console {
 
     /**
      * Convenience method to determine whether there is a window currently opened.
+     *
      * @return <code>true</code> if there is a window after 5 seconds, false otehrwise
      */
     public boolean isWindowOpen() {
@@ -220,7 +221,7 @@ public class Console {
 
         String tableSelector = "table[contains(@class, '" + cssClass + "')]";
         String headerSelector = "//th/descendant-or-self::*[contains(text(), '" + label + "')]";
-        By selector = By.xpath(".//" +tableSelector + headerSelector +
+        By selector = By.xpath(".//" + tableSelector + headerSelector +
                 "/ancestor::" + tableSelector);
 
         WebElement tableRoot = findElement(selector, root);
@@ -261,7 +262,7 @@ public class Console {
     /**
      * Workaround for org.openqa.selenium.WebDriver.Window.maximize() not working properly in some environments.
      */
-    public Console maximizeWindow(){
+    public Console maximizeWindow() {
         int maxWidth = Integer.parseInt(ConfigUtils.get("window.max.width", "1920"));
         int maxHeight = Integer.parseInt(ConfigUtils.get("window.max.height", "1080"));
         Dimension maxDimension = new Dimension(maxWidth, maxHeight);
@@ -273,5 +274,14 @@ public class Console {
         List<WebElement> elements = browser.findElements(By.id(PropUtils.get("page.scrollpanel.id")));
         elements.stream().filter(WebElement::isDisplayed).forEach(e -> e.sendKeys(Keys.PAGE_DOWN));
         Library.letsSleep(100);
+    }
+
+    public <T extends BasePage> Console refreshAndNavigate(Class<T> clazz) {
+        browser.navigate().refresh();
+        Graphene.goTo(HomePage.class);
+        waitUntilLoaded();
+        Graphene.goTo(clazz);
+        waitUntilLoaded().maximizeWindow();
+        return this;
     }
 }
