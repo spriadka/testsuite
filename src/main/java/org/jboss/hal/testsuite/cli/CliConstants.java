@@ -54,4 +54,15 @@ public class CliConstants {
     public static final String DOMAIN_HTTP_INTERFACE_ADDRESS = "/host=master/core-service=management/management-interface=http-interface";
     public static final String STANDALONE_HTTP_INTERFACE_ADDRESS = "/core-service=management/management-interface=http-interface";
     public static final String CACHE_CONTAINER_ADDRESS = "/subsystem=infinispan/cache-container";
+    public static final String DOMAIN_CACHE_CONTAINER_ADDRESS = "/host=master/server=server-one/subsystem=infinispan/cache-container";
+    public static final String DEPLOYMENT_SCANNER_ADDRESS = "/subsystem=deployment-scanner/scanner";
+    public static final String EE_SUBSYSTEM_ADDRESS = "/subsystem=ee";
+    public static final String DOMAIN_SERVER_ONE_PREFIX = "/host=master/server=server-one";
+    public static final String TRANSACTIONS_SUBSYSTEM_ADDRESS = "/subsystem=transactions";
+    public static final String JPA_SUBSYSTEM_ADDRESS = "/subsystem=jpa";
+    public static final String EJB3_THREAD_POOL_ADDRESS = "/subsystem=ejb3/thread-pool";
+    public static final String EJB3_TIMER_SERVICE_ADDRESS = "/subsystem=ejb3/service=timer-service";
+    public static final String EJB3_ASYNC_SERVICE_ADDRESS = "/subsystem=ejb3/service=async";
+    public static final String EJB3_REMOTE_SERVICE_ADDRESS = "/subsystem=ejb3/service=remote";
+    public static final String EJB3_BEAN_POOL_ADDRESS = "/subsystem=ejb3/strict-max-bean-instance-pool";
 }
