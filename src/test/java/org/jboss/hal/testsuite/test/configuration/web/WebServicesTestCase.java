@@ -1,7 +1,6 @@
 package org.jboss.hal.testsuite.test.configuration.web;
 
 import org.jboss.arquillian.drone.api.annotation.Drone;
-import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.cli.CliClient;
@@ -49,10 +48,7 @@ public class WebServicesTestCase {
 
     @Before
     public void before() {
-        browser.navigate().refresh();
-        Graphene.goTo(WebServicesPage.class);
-        Console.withBrowser(browser).waitUntilLoaded();
-        Console.withBrowser(browser).maximizeWindow();
+        Console.withBrowser(browser).refreshAndNavigate(WebServicesPage.class);
     }
 
     @Test
