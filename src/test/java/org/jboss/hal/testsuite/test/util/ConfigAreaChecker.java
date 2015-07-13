@@ -1,11 +1,14 @@
 package org.jboss.hal.testsuite.test.util;
 
 import org.jboss.arquillian.graphene.Graphene;
+import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.hal.testsuite.fragment.ConfigAreaFragment;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.jboss.hal.testsuite.page.ConfigPage;
 import org.jboss.hal.testsuite.util.ResourceVerifier;
+import org.junit.Assert;
+import org.openqa.selenium.By;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -53,13 +56,13 @@ public class ConfigAreaChecker {
         private EditorType type;
 
         List<String> inputsToClear = new ArrayList<>();
-        private boolean defineFirst = false;
         private boolean expectedChange = true;
 
-        private String defineIdentifier;
         private String rowName;
         private String tab;
         private String dmrAttribute;
+        private ResourceVerifier insideVerifier;
+        private String disclosureLabel;
 
         private Builder(ConfigPage page, EditorType type, String identifier, String value) {
             this.page = page;
@@ -82,6 +85,11 @@ public class ConfigAreaChecker {
             this.lineValues = value;
         }
 
+        public Builder withVerifier(ResourceVerifier verifier) {
+            this.insideVerifier = verifier;
+            return this;
+        }
+
         public Builder rowName(String rowName) {
             this.rowName = rowName;
             return this;
@@ -97,19 +105,18 @@ public class ConfigAreaChecker {
             return this;
         }
 
-        public Builder defineFirst(String defineIdentifier) {
-            this.defineFirst = true;
-            this.defineIdentifier = defineIdentifier;
-            return this;
-        }
-
         public Builder expectError() {
             this.expectedChange = false;
             return this;
         }
 
-        public Builder clear(String input){
+        public Builder clear(String input) {
             inputsToClear.add(input);
+            return this;
+        }
+
+        public Builder disclose(String label) {
+            this.disclosureLabel = label;
             return this;
         }
 
@@ -123,10 +130,11 @@ public class ConfigAreaChecker {
             }
             fragment = Graphene.createPageFragment(ConfigFragment.class, area.getRoot());
             Editor edit = fragment.edit();
-            if (defineFirst) {
-                edit.checkbox(defineIdentifier, true);
+            if (disclosureLabel != null) {
+                By disclosure = ByJQuery.selector("a.header:has(td:contains('" + disclosureLabel + "'):visible)");
+                fragment.getRoot().findElement(disclosure).click();
             }
-            for(String i : inputsToClear){
+            for (String i : inputsToClear) {
                 edit.text(i, "");
             }
             switch (type) {
@@ -143,18 +151,26 @@ public class ConfigAreaChecker {
                     edit.select(identifier, stringValue);
                     break;
             }
-            fragment.saveAndAssert(expectedChange);
+            boolean finished = fragment.save();
             if (expectedChange) {
+                Assert.assertTrue("Config was supposed to be saved successfully, read view should be active.", finished);
+            } else {
+                Assert.assertFalse("Config wasn't supposed to be saved, read-write view should be active.", finished);
+            }
+            if (expectedChange) {
+                if (this.insideVerifier == null) {
+                    this.insideVerifier = verifier;
+                }
                 switch (type) {
                     case TEXTAREA:
-                        verifier.verifyAttribute(dmrAttribute, lineValues);
+                        insideVerifier.verifyAttribute(dmrAttribute, lineValues);
                         break;
                     case SELECT:
                     case TEXT:
-                        verifier.verifyAttribute(dmrAttribute, stringValue);
+                        insideVerifier.verifyAttribute(dmrAttribute, stringValue);
                         break;
                     case CHECKBOX:
-                        verifier.verifyAttribute(dmrAttribute, String.valueOf(booleanValue));
+                        insideVerifier.verifyAttribute(dmrAttribute, String.valueOf(booleanValue));
                         break;
                 }
             } else {

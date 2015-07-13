@@ -77,6 +77,7 @@ public class ConfigFragment extends BaseFragment {
      *
      * @param expected <code>true</code>if wizard is expected to finish, <code>false</code> otherwise
      */
+    @Deprecated
     public void saveAndAssert(boolean expected) {
         boolean finished = this.save();
 
