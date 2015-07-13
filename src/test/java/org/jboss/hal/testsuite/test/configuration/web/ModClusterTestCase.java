@@ -2,7 +2,6 @@ package org.jboss.hal.testsuite.test.configuration.web;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
-import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.cli.CliClient;
@@ -12,6 +11,7 @@ import org.jboss.hal.testsuite.test.category.Standalone;
 import org.jboss.hal.testsuite.test.util.ConfigAreaChecker;
 import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.ResourceVerifier;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -84,10 +84,12 @@ public class ModClusterTestCase {
 
     @Before
     public void before() {
-        browser.navigate().refresh();
-        Graphene.goTo(ModClusterPage.class);
-        Console.withBrowser(browser).waitUntilLoaded();
-        Console.withBrowser(browser).maximizeWindow();
+        Console.withBrowser(browser).refreshAndNavigate(ModClusterPage.class);
+    }
+
+    @After
+    public void after(){
+        client.reload(false);
     }
 
     /*
