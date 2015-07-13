@@ -7,10 +7,6 @@ import org.jboss.hal.testsuite.fragment.ConfigFragment;
  */
 public class NetworkInterfaceContentFragment extends ConfigFragment {
 
-    public static final String NIC = "nic";
-    private static final String NIC_MATCH = "nicMatch";
-    private static final String LOOPBACK_ADDRESS = "loopbackAddress";
-
     public NetworkInterfaceWizard addInterface(){
         return getResourceManager().addResource(NetworkInterfaceWizard.class);
     }

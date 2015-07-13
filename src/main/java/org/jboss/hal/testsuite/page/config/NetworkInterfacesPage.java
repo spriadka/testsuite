@@ -10,10 +10,10 @@ import org.openqa.selenium.By;
 /**
  * @author mkrajcov <mkrajcov@redhat.com>
  */
-@Location("#interfaces")
+@Location("#profile/interfaces")
 public class NetworkInterfacesPage extends ConfigPage {
 
-    private static final By CONTENT = By.id(PropUtils.get("page.content.id"));
+    private static final By CONTENT = By.id(PropUtils.get("page.content.area.id"));
 
     public NetworkInterfaceContentFragment getContent(){
         return Graphene.createPageFragment(NetworkInterfaceContentFragment.class, getContentRoot().findElement(CONTENT));
