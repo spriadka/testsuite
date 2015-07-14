@@ -7,13 +7,13 @@ import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.fragment.homepage.HomepageTaskFragment;
 import org.jboss.hal.testsuite.page.BasePage;
 import org.jboss.hal.testsuite.page.admin.RoleAssignmentPage;
-import org.jboss.hal.testsuite.page.config.DatasourcesPage;
-import org.jboss.hal.testsuite.page.domain.ServerGroupsPage;
+import org.jboss.hal.testsuite.page.config.DomainConfigurationPage;
+import org.jboss.hal.testsuite.page.config.StandaloneConfigurationPage;
 import org.jboss.hal.testsuite.page.home.HomePage;
 import org.jboss.hal.testsuite.page.runtime.DeploymentPage;
 import org.jboss.hal.testsuite.page.runtime.DomainDeploymentPage;
+import org.jboss.hal.testsuite.page.runtime.HostsPage;
 import org.jboss.hal.testsuite.page.runtime.PatchManagementPage;
-import org.jboss.hal.testsuite.page.runtime.TopologyPage;
 import org.jboss.hal.testsuite.test.category.Domain;
 import org.jboss.hal.testsuite.test.category.Shared;
 import org.jboss.hal.testsuite.util.ConfigUtils;
@@ -41,7 +41,7 @@ public class TaskBoxTestCase {
     @Before
     public void setup() {
         Graphene.goTo(HomePage.class);
-        Console.withBrowser(browser).waitUntilLoaded();
+        Console.withBrowser(browser).waitUntilLoaded().maximizeWindow();
     }
 
     //
@@ -53,7 +53,7 @@ public class TaskBoxTestCase {
         String id = PropUtils.get("homepage.task.datasource.id");
 
         assertTaskIsPresent(id);
-        assertLinkInTask(id, "datasource", DatasourcesPage.class);
+        assertLinkInTask(id, "datasource", ConfigUtils.isDomain() ? DomainConfigurationPage.class : StandaloneConfigurationPage.class);
     }
 
     @Test @Category(Shared.class)
@@ -92,7 +92,7 @@ public class TaskBoxTestCase {
         String id = PropUtils.get("homepage.task.topology.id");
 
         assertTaskIsPresent(id);
-        assertLinkInTask(id, "topology", TopologyPage.class);
+        assertLinkInTask(id, "topology", HostsPage.class);
     }
 
     @Test @Category(Domain.class)
@@ -100,7 +100,7 @@ public class TaskBoxTestCase {
         String id = PropUtils.get("homepage.task.server-group.id");
 
         assertTaskIsPresent(id);
-        assertLinkInTask(id, "server-group", ServerGroupsPage.class);
+        assertLinkInTask(id, "server-group", HostsPage.class);
     }
 
     //

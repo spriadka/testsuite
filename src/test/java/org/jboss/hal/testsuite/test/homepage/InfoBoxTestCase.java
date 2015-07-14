@@ -6,14 +6,14 @@ import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.fragment.homepage.HomepageInfoFragment;
 import org.jboss.hal.testsuite.page.BasePage;
-import org.jboss.hal.testsuite.page.admin.AdminEntryPoint;
+import org.jboss.hal.testsuite.page.admin.RoleAssignmentPage;
 import org.jboss.hal.testsuite.page.config.DomainConfigEntryPoint;
 import org.jboss.hal.testsuite.page.config.StandaloneConfigEntryPoint;
-import org.jboss.hal.testsuite.page.domain.DomainEntryPoint;
 import org.jboss.hal.testsuite.page.home.HomePage;
+import org.jboss.hal.testsuite.page.runtime.DeploymentPage;
+import org.jboss.hal.testsuite.page.runtime.DomainDeploymentPage;
 import org.jboss.hal.testsuite.page.runtime.DomainRuntimeEntryPoint;
 import org.jboss.hal.testsuite.page.runtime.StandaloneRuntimeEntryPoint;
-import org.jboss.hal.testsuite.test.category.Domain;
 import org.jboss.hal.testsuite.test.category.Shared;
 import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.jboss.hal.testsuite.util.Console;
@@ -30,6 +30,7 @@ import org.openqa.selenium.WebDriver;
  * @author jcechace
  */
 @RunWith(Arquillian.class)
+@Category(Shared.class)
 public class InfoBoxTestCase {
     @Drone
     private WebDriver browser;
@@ -47,14 +48,14 @@ public class InfoBoxTestCase {
     // Shared tests
     //
 
-    @Test @Category(Shared.class)
-    public void adminInfo() {
-        String id = PropUtils.get("homepage.info.admin.id");
+    @Test
+    public void accessControl() {
+        String id = PropUtils.get("homepage.info.access.control.id");
         assertInfoIsPresent(id);
-        assertLinkInInfo(id, "admin", AdminEntryPoint.class);
+        assertLinkInInfo(id, "access.control", RoleAssignmentPage.class);
     }
 
-    @Test @Category(Shared.class)
+    @Test
     public void configInfo() {
         Class<? extends BasePage> page = ConfigUtils.isDomain() ? DomainConfigEntryPoint.class
                                                                 : StandaloneConfigEntryPoint.class;
@@ -66,7 +67,7 @@ public class InfoBoxTestCase {
         assertLinkInInfo(id, "config", page);
     }
 
-    @Test @Category(Shared.class)
+    @Test
     public void runtimeInfo() {
         Class<? extends BasePage> page = ConfigUtils.isDomain() ? DomainRuntimeEntryPoint.class
                                                                 : StandaloneRuntimeEntryPoint.class;
@@ -78,15 +79,16 @@ public class InfoBoxTestCase {
         assertLinkInInfo(id, "runtime", page);
     }
 
-    //
-    // Domain only test
-    //
-    @Test @Category(Domain.class)
-    public void domainInfo() {
-        String id = PropUtils.get("homepage.info.domain.id");
+    @Test
+    public void deploymentsInfo(){
+        Class <? extends BasePage> page = ConfigUtils.isDomain() ? DomainDeploymentPage.class
+                                                                 : DeploymentPage.class;
+
+        String id = ConfigUtils.isDomain() ? PropUtils.get("homepage.info.domain.deployments.id")
+                                           : PropUtils.get("homepage.info.deployments.id");
 
         assertInfoIsPresent(id);
-        assertLinkInInfo(id, "domain", DomainEntryPoint.class);
+        assertLinkInInfo(id, "deployments", page);
     }
 
     //
