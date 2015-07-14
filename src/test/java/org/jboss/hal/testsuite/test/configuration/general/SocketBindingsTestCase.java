@@ -2,7 +2,6 @@ package org.jboss.hal.testsuite.test.configuration.general;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
-import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.junit.InSequence;
@@ -15,6 +14,7 @@ import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
 import org.jboss.hal.testsuite.page.config.StandardSocketBindingsPage;
 import org.jboss.hal.testsuite.test.category.Standalone;
+import org.jboss.hal.testsuite.test.util.ConfigAreaChecker;
 import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.ResourceVerifier;
 import org.junit.After;
@@ -25,8 +25,10 @@ import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
 
-import static org.jboss.hal.testsuite.cli.CliConstants.*;
-import static org.junit.Assert.*;
+import static org.jboss.hal.testsuite.cli.CliConstants.DEFAULT_SOCKET_BINDING_INBOUND_ADDRESS;
+import static org.jboss.hal.testsuite.cli.CliConstants.DEFAULT_SOCKET_BINDING_OUTBOUND_LOCAL_ADDRESS;
+import static org.jboss.hal.testsuite.cli.CliConstants.DEFAULT_SOCKET_BINDING_OUTBOUND_REMOTE_ADDRESS;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author mkrajcov <mkrajcov@redhat.com>
@@ -46,12 +48,12 @@ public class SocketBindingsTestCase {
     private static final String MULTICAST_ADDRESS = "${jboss.default.multicast.address:230.0.0.4}";
 
     private static final String DMR_INBOUND = DEFAULT_SOCKET_BINDING_INBOUND_ADDRESS + "=" + INBOUND_NAME;
-    private static final String DMR_OUTBOUND_LOCAL= DEFAULT_SOCKET_BINDING_OUTBOUND_LOCAL_ADDRESS+ "=" + OUTBOUND_LOCAL_NAME;
-    private static final String DMR_OUTBOUND_REMOTE = DEFAULT_SOCKET_BINDING_OUTBOUND_REMOTE_ADDRESS+ "=" + OUTBOUND_REMOTE_NAME;
+    private static final String DMR_OUTBOUND_LOCAL = DEFAULT_SOCKET_BINDING_OUTBOUND_LOCAL_ADDRESS + "=" + OUTBOUND_LOCAL_NAME;
+    private static final String DMR_OUTBOUND_REMOTE = DEFAULT_SOCKET_BINDING_OUTBOUND_REMOTE_ADDRESS + "=" + OUTBOUND_REMOTE_NAME;
 
     private static CliClient client = CliClientFactory.getClient();
     private static ResourceVerifier verifier = new ResourceVerifier(DMR_INBOUND, client);
-
+    private static ConfigAreaChecker checker = new ConfigAreaChecker(verifier);
 
     @Drone
     public WebDriver browser;
@@ -60,20 +62,17 @@ public class SocketBindingsTestCase {
     public StandardSocketBindingsPage page;
 
     @Before
-    public void before(){
-        browser.navigate().refresh();
-        Graphene.goTo(StandardSocketBindingsPage.class);
-        Console.withBrowser(browser).waitUntilLoaded();
-        Console.withBrowser(browser).maximizeWindow();
+    public void before() {
+        Console.withBrowser(browser).refreshAndNavigate(StandardSocketBindingsPage.class);
     }
 
     @After
-    public void after(){
+    public void after() {
         client.reload(false);
     }
 
     @AfterClass
-    public static void cleanUp(){
+    public static void cleanUp() {
         client.removeResource(DMR_INBOUND);
         client.removeResource(DMR_OUTBOUND_REMOTE);
         client.removeResource(DMR_OUTBOUND_LOCAL);
@@ -81,44 +80,41 @@ public class SocketBindingsTestCase {
 
     @Test
     @InSequence(0)
-    public void createInboundSocketBinding(){
+    public void createInboundSocketBinding() {
         InboundSocketBindingFragment fragment = page.switchToInbound();
         InboundSocketBindingWizard wizard = fragment.addSocketBinding();
 
         boolean result =
                 wizard.name(INBOUND_NAME)
-                .port(PORT)
-                .group(BINDING_GROUP)
-                .finish();
+                        .port(PORT)
+                        .group(BINDING_GROUP)
+                        .finish();
 
         assertTrue("Window should be closed", result);
         assertTrue("Socket Binding should be present in table", fragment.resourceIsPresent(INBOUND_NAME));
         verifier.verifyResource(true);
     }
+
     @Test
     @InSequence(1)
-    public void changeInboundPort(){
-        InboundSocketBindingFragment fragment = page.switchToInbound();
-
-        fragment.editPortAndSave(INBOUND_NAME, NEW_PORT);
-
-        verifier.verifyAttribute("port", NEW_PORT);
+    public void changeInboundPort() {
+        page.switchToInbound();
+        checker.editTextAndAssert(page, "port", NEW_PORT).rowName(INBOUND_NAME).invoke();
     }
 
     @Test
     @InSequence(2)
-    public void changeInboundMulticastPort(){
-        InboundSocketBindingFragment fragment = page.switchToInbound();
-
-        fragment.editMulticastAndSave(INBOUND_NAME, MULTICAST_PORT, MULTICAST_ADDRESS);
-
-        verifier.verifyAttribute("multicast-port", MULTICAST_PORT);
-        verifier.verifyAttribute("multicast-address", MULTICAST_ADDRESS);
+    public void changeInboundMulticastPort() {
+        page.switchToInbound();
+        checker.editTextAndAssert(page, "multiCastPort", MULTICAST_PORT)
+                .rowName(INBOUND_NAME).disclose("Multicast").dmrAttribute("multicast-port").invoke();
+        checker.editTextAndAssert(page, "multiCastAddress", MULTICAST_ADDRESS)
+                .rowName(INBOUND_NAME).dmrAttribute("multicast-address").invoke();
     }
 
     @Test
     @InSequence(3)
-    public void removeInboundSocketBinding(){
+    public void removeInboundSocketBinding() {
         InboundSocketBindingFragment fragment = page.switchToInbound();
         fragment.getResourceManager().removeResourceAndConfirm(INBOUND_NAME);
 
@@ -127,13 +123,13 @@ public class SocketBindingsTestCase {
     }
 
     @Test
-    public void createOutboundLocalSocketBinding(){
+    public void createOutboundLocalSocketBinding() {
         ConfigFragment fragment = page.switchToOutboundLocal();
         WizardWindow wizard = fragment.getResourceManager().addResource();
 
         Editor editor = wizard.getEditor();
         editor.text("name", OUTBOUND_LOCAL_NAME);
-        editor.text("socketBinding", PORT);
+        editor.text("socketBinding", "ajp");
         boolean result = wizard.finish();
 
         assertTrue("Window should be closed", result);
@@ -145,7 +141,7 @@ public class SocketBindingsTestCase {
     }
 
     @Test
-    public void createOutboundRemoteSocketBinding(){
+    public void createOutboundRemoteSocketBinding() {
         ConfigFragment fragment = page.switchToOutboundRemote();
         WizardWindow wizard = fragment.getResourceManager().addResource();
 

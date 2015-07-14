@@ -2,7 +2,6 @@ package org.jboss.hal.testsuite.test.configuration.general;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
-import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.junit.InSequence;
@@ -54,10 +53,7 @@ public class SystemPropertiesTestCase {
 
     @Before
     public void before(){
-        browser.navigate().refresh();
-        Graphene.goTo(SystemPropertiesPage.class);
-        Console.withBrowser(browser).waitUntilLoaded();
-        Console.withBrowser(browser).maximizeWindow();
+        Console.withBrowser(browser).refreshAndNavigate(SystemPropertiesPage.class);
     }
 
     @AfterClass

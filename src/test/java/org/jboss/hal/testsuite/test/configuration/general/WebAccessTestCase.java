@@ -30,30 +30,32 @@ public class WebAccessTestCase {
     public WebDriver browser;
 
     @AfterClass
-    public static void afterClass(){
+    public static void afterClass() {
         toggleWebConsole(true);
     }
 
-    @Test(expected=TimeoutException.class)
+    @Test(expected = TimeoutException.class)
     @InSequence(0)
-    public void disabledAccess(){
+    public void disabledAccess() {
         toggleWebConsole(false);
         Graphene.goTo(HomePage.class);
+        browser.navigate().refresh();
         Console.withBrowser(browser).waitUntilLoaded();
     }
 
     @Test
     @InSequence(1)
-    public void enabledAccess(){
+    public void enabledAccess() {
         toggleWebConsole(true);
         Graphene.goTo(HomePage.class);
+        browser.navigate().refresh();
         Console.withBrowser(browser).waitUntilLoaded();
     }
 
-    private static void toggleWebConsole(boolean enabled){
-        if(client instanceof DomainCliClient){
+    private static void toggleWebConsole(boolean enabled) {
+        if (client instanceof DomainCliClient) {
             client.writeAttribute(CliConstants.DOMAIN_HTTP_INTERFACE_ADDRESS, "console-enabled", Boolean.toString(enabled));
-        }else{
+        } else {
             client.writeAttribute(CliConstants.STANDALONE_HTTP_INTERFACE_ADDRESS, "console-enabled", Boolean.toString(enabled));
         }
         client.reload();

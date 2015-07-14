@@ -11,7 +11,7 @@ import org.openqa.selenium.WebElement;
 /**
  * @author jcechace
  */
-@Location("#deployments")
+@Location("#standalone-deployments")
 public class DeploymentPage extends BasePage {
 
     private static final By CONTENT = By.className(PropUtils.get("page.content.rhs.class"));

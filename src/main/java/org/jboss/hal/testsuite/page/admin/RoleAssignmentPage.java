@@ -6,6 +6,6 @@ import org.jboss.hal.testsuite.page.BasePage;
 /**
  * @author jcechace
  */
-@Location("role-assignment")
+@Location("rbac")
 public class RoleAssignmentPage extends BasePage {
 }
