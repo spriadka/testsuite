@@ -2,18 +2,15 @@ package org.jboss.hal.testsuite.test.configuration.connector;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
-import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.junit.InSequence;
 import org.jboss.hal.testsuite.cli.CliClient;
 import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.fragment.config.resourceadapters.AdminObjectWizard;
-import org.jboss.hal.testsuite.fragment.config.resourceadapters.AdminObjectsFragment;
 import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConfigPropertiesFragment;
 import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConfigPropertyWizard;
 import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConnectionDefinitionWizard;
-import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConnectionDefinitionsFragment;
 import org.jboss.hal.testsuite.fragment.config.resourceadapters.ResourceAdapterWizard;
 import org.jboss.hal.testsuite.fragment.config.resourceadapters.ResourceAdaptersConfigArea;
 import org.jboss.hal.testsuite.fragment.config.resourceadapters.ResourceAdaptersFragment;
@@ -73,10 +70,7 @@ public class ResourceAdaptersTestCase {
 
     @Before
     public void before(){
-        browser.navigate().refresh();
-        Graphene.goTo(ResourceAdaptersPage.class);
-        Console.withBrowser(browser).waitUntilLoaded();
-        Console.withBrowser(browser).maximizeWindow();
+        Console.withBrowser(browser).refreshAndNavigate(ResourceAdaptersPage.class);
     }
 
     @After
@@ -110,6 +104,16 @@ public class ResourceAdaptersTestCase {
     }
 
     @Test
+    @InSequence(4)
+    public void removeResourceAdapter(){
+        ResourceAdaptersFragment fragment = page.getContent();
+
+        fragment.removeResourceAdapter(NAME_NO_TRANSACTION);
+
+        verifier.verifyResource(DMR_ADAPTER_NO, false);
+    }
+
+    @Test
     @InSequence(1)
     public void createProperties() {
         ResourceAdaptersConfigArea area = page.getConfigArea();
@@ -135,9 +139,9 @@ public class ResourceAdaptersTestCase {
     @Test
     @InSequence(2)
     public void addManagedConnectionDefinition(){
-        ResourceAdaptersFragment fragment = page.getContent();
-        ConnectionDefinitionsFragment cdFragment = fragment.viewConnectionDefinitions(NAME_NO_TRANSACTION);
-        ConnectionDefinitionWizard wizard = cdFragment.addConnectionDefinition();
+        page.getResourceManager().viewByName(NAME_NO_TRANSACTION);
+        page.switchSubTab("Connection Definitions");
+        ConnectionDefinitionWizard wizard = page.getResourceManager().addResource(ConnectionDefinitionWizard.class);
 
         boolean result =
                 wizard.name(CONNECTION_DEFINITION_NAME)
@@ -146,10 +150,9 @@ public class ResourceAdaptersTestCase {
                 .finish();
 
         assertTrue("Window should be closed", result);
-        assertTrue("Admin object should be present in table", cdFragment.resourceIsPresent(CONNECTION_DEFINITION_NAME));
         verifier.verifyResource(DMR_CON_DEF, true);
 
-        cdFragment.removeConnectionDefinition(CONNECTION_DEFINITION_NAME);
+        page.getResourceManager().removeResourceAndConfirm(CONNECTION_DEFINITION_NAME);
 
         verifier.verifyResource(DMR_CON_DEF, false);
     }
@@ -157,9 +160,9 @@ public class ResourceAdaptersTestCase {
     @Test
     @InSequence(3)
     public void addAdminObject(){
-        ResourceAdaptersFragment fragment = page.getContent();
-        AdminObjectsFragment aoFragment = fragment.viewAdminObjects(NAME_NO_TRANSACTION);
-        AdminObjectWizard wizard = aoFragment.addAdminObject();
+        page.getResourceManager().viewByName(NAME_NO_TRANSACTION);
+        page.switchSubTab("Admin Objects");
+        AdminObjectWizard wizard = page.getResourceManager().addResource(AdminObjectWizard.class);
 
         boolean result =
                 wizard.name(ADMIN_OBJECT_NAME)
@@ -168,23 +171,12 @@ public class ResourceAdaptersTestCase {
                 .finish();
 
         assertTrue("Window should be closed", result);
-        assertTrue("Admin object should be present in table", aoFragment.resourceIsPresent(ADMIN_OBJECT_NAME));
         verifier.verifyResource(DMR_ADMIN_OBJ, true);
 
-        aoFragment.removeAdminObject(ADMIN_OBJECT_NAME);
-
+        page.getResourceManager().removeResourceAndConfirm(ADMIN_OBJECT_NAME);
         verifier.verifyResource(DMR_ADMIN_OBJ, false);
     }
 
-    @Test
-    @InSequence(4)
-    public void removeResourceAdapter(){
-        ResourceAdaptersFragment fragment = page.getContent();
-
-        fragment.removeResourceAdapter(NAME_NO_TRANSACTION);
-
-        verifier.verifyResource(DMR_ADAPTER_NO, false);
-    }
 
 
     @Test
