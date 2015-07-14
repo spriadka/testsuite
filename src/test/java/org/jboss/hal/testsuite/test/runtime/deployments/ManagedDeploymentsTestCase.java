@@ -10,6 +10,8 @@ import org.jboss.hal.testsuite.cli.CliClient;
 import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.fragment.runtime.DeploymentWizard;
 import org.jboss.hal.testsuite.fragment.runtime.StandaloneDeploymentsArea;
+import org.jboss.hal.testsuite.page.config.ConfigurationPage;
+import org.jboss.hal.testsuite.page.home.HomePage;
 import org.jboss.hal.testsuite.page.runtime.DeploymentPage;
 import org.jboss.hal.testsuite.test.category.Standalone;
 import org.jboss.hal.testsuite.util.Console;
@@ -51,7 +53,9 @@ public class ManagedDeploymentsTestCase {
 
     @Before
     public void before() {
-        browser.navigate().refresh();
+        //browser.navigate().refresh();
+        Graphene.goTo(HomePage.class);
+        Console.withBrowser(browser).waitUntilLoaded();
         Graphene.goTo(DeploymentPage.class);
         Console.withBrowser(browser).waitUntilLoaded();
         Console.withBrowser(browser).maximizeWindow();
@@ -74,7 +78,8 @@ public class ManagedDeploymentsTestCase {
 
         DeploymentWizard wizard = content.add();
 
-        boolean result = wizard.uploadDeployment(deployment)
+        boolean result = wizard.nextFluent()
+                .uploadDeployment(deployment)
                 .nextFluent()
                 .name(NAME)
                 .runtimeName(RUNTIME_NAME)
@@ -109,8 +114,9 @@ public class ManagedDeploymentsTestCase {
     @Test
     @InSequence(3)
     public void removeDeployment() {
+
         StandaloneDeploymentsArea content = page.getDeploymentContent();
-        content.removeAndConfirm(NAME);
+        page.select(NAME).remove();
 
         assertFalse("Deployment should not exist", ops.exists(NAME));
     }

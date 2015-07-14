@@ -10,6 +10,7 @@ import org.jboss.hal.testsuite.cli.CliClient;
 import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.fragment.runtime.DeploymentWizard;
 import org.jboss.hal.testsuite.fragment.runtime.StandaloneDeploymentsArea;
+import org.jboss.hal.testsuite.page.home.HomePage;
 import org.jboss.hal.testsuite.page.runtime.DeploymentPage;
 import org.jboss.hal.testsuite.test.category.Standalone;
 import org.jboss.hal.testsuite.util.Console;
@@ -50,6 +51,8 @@ public class UnmanagedDeploymentsTestCase {
     @Before
     public void before() {
         browser.navigate().refresh();
+        Graphene.goTo(HomePage.class);
+        Console.withBrowser(browser).waitUntilLoaded();
         Graphene.goTo(DeploymentPage.class);
         Console.withBrowser(browser).waitUntilLoaded();
     }
@@ -66,13 +69,15 @@ public class UnmanagedDeploymentsTestCase {
         File deployment = new File(FILE_PATH + FILE_NAME);
 
         DeploymentWizard wizard = content.add();
+
         wizard.switchToUnmanaged()
+                .nextFluent()
                 .path(deployment.getAbsolutePath())
                 .isArchive(true)
                 .name(NAME)
                 .runtimeName(RUNTIME_NAME)
                 .enable(false)
-                .next();
+                .finish();
 
         boolean result = wizard.isClosed();
 
@@ -105,8 +110,9 @@ public class UnmanagedDeploymentsTestCase {
     @Test
     @InSequence(3)
     public void removeDeployment() {
+
         StandaloneDeploymentsArea content = page.getDeploymentContent();
-        content.removeAndConfirm(NAME);
+        page.select(NAME).remove();
 
         assertFalse("Deployment should not exist", ops.exists(NAME));
     }

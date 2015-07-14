@@ -20,11 +20,11 @@ public class DeploymentWizard extends WizardWindow {
     private static final String IS_ARCHIVE = "archive";
     private static final String PATH = "path";
     private static final String UPLOAD_FORM_ELEMENT = "uploadFormElement";
-    private static final String MANAGED = "Managed";
-    private static final String UNMANAGED = "Unmanaged";
+    private static final String MANAGED = "Upload a new deployment";
+    private static final String UNMANAGED = "Create an unmanaged deployment";
 
-    private static final By MANAGED_BUTTON = By.xpath(".//div[text()='"+MANAGED+"']");
-    private static final By UNMANAGED_BUTTON = By.xpath(".//div[text()='"+UNMANAGED+"']");
+    private static final By MANAGED_BUTTON = By.xpath(".//label[text()='"+MANAGED+"']");
+    private static final By UNMANAGED_BUTTON = By.xpath(".//label[text()='"+UNMANAGED+"']");
 
 
     public DeploymentWizard switchToManaged() {
