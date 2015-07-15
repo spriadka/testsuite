@@ -107,6 +107,7 @@ public class DomainManagedDeploymentsTestCase {
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
         Library.letsSleep(10000);
 
+
         assertTrue("Deployment should be enabled", ops.isEnabledInServerGroup(MAIN_SERVER_GROUP, NAME));
     }
 
@@ -118,6 +119,7 @@ public class DomainManagedDeploymentsTestCase {
 
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
         Library.letsSleep(10000);
+
 
         assertFalse("Deployment should be disabled", ops.isEnabledInServerGroup(MAIN_SERVER_GROUP, NAME));
     }

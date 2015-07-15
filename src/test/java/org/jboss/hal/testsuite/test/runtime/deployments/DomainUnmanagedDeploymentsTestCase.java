@@ -95,6 +95,7 @@ public class DomainUnmanagedDeploymentsTestCase {
                 .nextFluent()
                 .finish();
 
+
         assertTrue("Deployment wizard should close", result);
         assertTrue("Deployment should be assigned to server group.", ops.isAssignedToServerGroup(MAIN_SERVER_GROUP, NAME));
     }
