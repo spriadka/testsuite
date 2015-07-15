@@ -3,14 +3,14 @@ package org.jboss.hal.testsuite.page.config;
 import org.jboss.arquillian.graphene.page.Location;
 import org.jboss.hal.testsuite.fragment.config.datasource.DatasourceConfigArea;
 import org.jboss.hal.testsuite.fragment.config.datasource.DatasourceWizard;
-import org.jboss.hal.testsuite.page.ConfigPage;
+import org.jboss.hal.testsuite.util.Console;
 
 /**
  * Created by jcechace on 22/02/14.
  */
 
-@Location("#datasources")
-public class DatasourcesPage extends ConfigPage {
+@Location("#profiles/ds-finder")
+public class DatasourcesPage extends ConfigurationPage {
     @Override
     public DatasourceConfigArea getConfig() {
         return getConfig(DatasourceConfigArea.class);
@@ -21,7 +21,8 @@ public class DatasourcesPage extends ConfigPage {
     }
 
     public void switchToXA() {
-        switchTab("XA Datasources");
+        select("XA");
+        Console.withBrowser(browser).waitUntilLoaded();
     }
 
 }
