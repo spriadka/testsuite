@@ -29,7 +29,7 @@ import java.io.IOException;
 public class DomainTestConnectionTestCase extends AbstractTestConnectionTestCase {
 
     @Page
-    DomainConfigurationPage domainConfigurationPage;
+    private DomainConfigurationPage domainConfigurationPage;
 
     private static String dsNameValid;
     private static String dsSameNameValid;
@@ -66,7 +66,7 @@ public class DomainTestConnectionTestCase extends AbstractTestConnectionTestCase
         Console.withBrowser(browser).waitUntilLoaded();
         Graphene.goTo(DomainConfigurationPage.class);
         Console.withBrowser(browser).waitUntilLoaded();
-        domainConfigurationPage.selectProfile(ConfigUtils.getDefaultProfile()).view("Datasources");
+        domainConfigurationPage.selectProfile(ConfigUtils.getDefaultProfile()).select("Datasources").select("Non-XA");
         Console.withBrowser(browser).waitUntilLoaded();
     }
 
@@ -91,7 +91,7 @@ public class DomainTestConnectionTestCase extends AbstractTestConnectionTestCase
     public void testValidWithSameNameInOtherGroup() throws IOException {
         Graphene.goTo(DomainConfigurationPage.class);
         Console.withBrowser(browser).waitUntilLoaded();
-        domainConfigurationPage.selectProfile("full-ha").view("Datasources");
+        domainConfigurationPage.selectProfile("full-ha").select("Datasources").select("Non-XA");
         Console.withBrowser(browser).waitUntilFinished();
         manager.startAllServers(10L);
         testConnection(dsSameNameValid, true);

@@ -63,6 +63,8 @@ public class TestConnectionTestCase extends AbstractTestConnectionTestCase {
         Console.withBrowser(browser).waitUntilLoaded();
         Graphene.goTo(DatasourcesPage.class);
         Console.withBrowser(browser).waitUntilLoaded();
+        datasourcesPage.select("Non-XA");
+        Console.withBrowser(browser).waitUntilLoaded();
     }
 
     @After
@@ -73,7 +75,6 @@ public class TestConnectionTestCase extends AbstractTestConnectionTestCase {
     // Regular DS tests
     @Test
     public void validDatasource() {
-
         testConnection(dsNameValid, true);
     }
 
@@ -98,13 +99,15 @@ public class TestConnectionTestCase extends AbstractTestConnectionTestCase {
     // XA DS tests
     @Test
     public void validXADatasource() {
-        datasourcesPage.switchTab("XA Datasources");
+        datasourcesPage.switchToXA();
+
         testConnection(xaDsNameValid, true);
     }
 
     @Test
     public void invalidXADatasource() {
         datasourcesPage.switchToXA();
+
         testConnection(xaDsNameInvalid, false);
     }
 

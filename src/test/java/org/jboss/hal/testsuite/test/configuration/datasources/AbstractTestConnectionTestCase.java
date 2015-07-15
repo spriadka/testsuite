@@ -9,6 +9,7 @@ import org.jboss.hal.testsuite.fragment.config.datasource.TestConnectionWindow;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.jboss.hal.testsuite.fragment.formeditor.PropertyEditor;
 import org.jboss.hal.testsuite.page.config.DatasourcesPage;
+import org.jboss.hal.testsuite.util.Console;
 import org.junit.Assert;
 import org.openqa.selenium.WebDriver;
 
@@ -24,7 +25,8 @@ public abstract class AbstractTestConnectionTestCase {
     protected DatasourcesPage datasourcesPage;
 
     protected void testConnection(String name, boolean expected) {
-        datasourcesPage.getResourceManager().selectByName(name);
+        datasourcesPage.view(name);
+        Console.withBrowser(browser).waitUntilLoaded();
 
         DatasourceConfigArea config = datasourcesPage.getConfig();
         ConnectionConfig connection = config.connectionConfig();
