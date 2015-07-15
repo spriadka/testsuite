@@ -2,6 +2,8 @@ package org.jboss.hal.testsuite.page.config;
 
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.ByJQuery;
+import org.jboss.arquillian.graphene.wait.AttributeBuilder;
+import org.jboss.arquillian.graphene.wait.ElementBuilder;
 import org.jboss.hal.testsuite.cli.Library;
 import org.jboss.hal.testsuite.fragment.ConfigAreaFragment;
 import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
@@ -21,7 +23,7 @@ public class ConfigurationPage extends ConfigPage {
     public ConfigurationPage select(String label) {
         String cellClass = PropUtils.get("table.cell.class");
         String cellSelectedClass = PropUtils.get("table.cell.selected.class");
-        By selector = ByJQuery.selector("." + cellClass + ":contains('" + label + "')");
+        By selector = By.ByXPath.xpath("//td[contains(@class,'" + cellClass + "') and descendant::div[@class='navigation-column-item' and text()='" + label + "']]");
         getContentRoot().findElement(selector).click();
         Graphene.waitModel().until().element(selector).attribute("class").contains(cellSelectedClass);
         Library.letsSleep(1000);
