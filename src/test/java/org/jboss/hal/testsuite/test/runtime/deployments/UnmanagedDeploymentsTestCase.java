@@ -10,6 +10,7 @@ import org.jboss.hal.testsuite.cli.CliClient;
 import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.fragment.runtime.DeploymentWizard;
 import org.jboss.hal.testsuite.fragment.runtime.StandaloneDeploymentsArea;
+import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
 import org.jboss.hal.testsuite.page.home.HomePage;
 import org.jboss.hal.testsuite.page.runtime.DeploymentPage;
 import org.jboss.hal.testsuite.test.category.Standalone;
@@ -20,6 +21,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 
 import java.io.File;
@@ -85,24 +87,28 @@ public class UnmanagedDeploymentsTestCase {
         assertTrue("Deployment should exist", ops.exists(NAME));
     }
 
-    @Ignore("Not able to enable deployment")
     @Test
     @InSequence(1)
     public void enableDeployment() {
-        StandaloneDeploymentsArea content = page.getDeploymentContent();
 
-        content.changeState(NAME);
+        page.select(NAME).clickButton("Enable");
+        try {
+            Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
+        } catch (TimeoutException ignored) {
+        }
 
         assertTrue("Deployment should be enabled", ops.isEnabled(NAME));
     }
 
-    @Ignore("Not able to enable deployment")
     @Test
     @InSequence(2)
     public void disableDeployment() {
-        StandaloneDeploymentsArea content = page.getDeploymentContent();
 
-        content.changeState(NAME);
+        page.select(NAME).clickButton("Disable");
+        try {
+            Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
+        } catch (TimeoutException ignored) {
+        }
 
         assertFalse("Deployment should be disabled", ops.isEnabled(NAME));
     }
