@@ -1,12 +1,13 @@
 package org.jboss.hal.testsuite.test.configuration.datasources;
 
 import org.jboss.arquillian.graphene.Graphene;
+import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.cli.CliClient;
 import org.jboss.hal.testsuite.cli.CliClientFactory;
-import org.jboss.hal.testsuite.cli.DomainCliClient;
 import org.jboss.hal.testsuite.cli.DomainManager;
-import org.jboss.hal.testsuite.page.config.DatasourcesPage;
+import org.jboss.hal.testsuite.page.config.DomainConfigurationPage;
+import org.jboss.hal.testsuite.page.home.HomePage;
 import org.jboss.hal.testsuite.test.category.Domain;
 import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.jboss.hal.testsuite.util.Console;
@@ -26,6 +27,9 @@ import java.io.IOException;
 @Category(Domain.class)
 @RunWith(Arquillian.class)
 public class DomainTestConnectionTestCase extends AbstractTestConnectionTestCase {
+
+    @Page
+    private DomainConfigurationPage domainConfigurationPage;
 
     private static String dsNameValid;
     private static String dsSameNameValid;
@@ -58,9 +62,12 @@ public class DomainTestConnectionTestCase extends AbstractTestConnectionTestCase
 
     @Before
     public void before() {
-        Graphene.goTo(DatasourcesPage.class);
+        Graphene.goTo(HomePage.class);
         Console.withBrowser(browser).waitUntilLoaded();
-        datasourcesPage.pickProfile(ConfigUtils.getDefaultProfile());
+        Graphene.goTo(DomainConfigurationPage.class);
+        Console.withBrowser(browser).waitUntilLoaded();
+        domainConfigurationPage.selectProfile(ConfigUtils.getDefaultProfile()).select("Datasources").select("Non-XA");
+        Console.withBrowser(browser).waitUntilLoaded();
     }
 
     @After
@@ -82,9 +89,11 @@ public class DomainTestConnectionTestCase extends AbstractTestConnectionTestCase
 
     @Test
     public void testValidWithSameNameInOtherGroup() throws IOException {
+        Graphene.goTo(DomainConfigurationPage.class);
+        Console.withBrowser(browser).waitUntilLoaded();
+        domainConfigurationPage.selectProfile("full-ha").select("Datasources").select("Non-XA");
+        Console.withBrowser(browser).waitUntilFinished();
         manager.startAllServers(10L);
-        datasourcesPage.pickProfile("full-ha");
-
         testConnection(dsSameNameValid, true);
     }
 }

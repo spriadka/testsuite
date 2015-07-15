@@ -21,7 +21,7 @@ public class ConfigurationPage extends ConfigPage {
     public ConfigurationPage select(String label) {
         String cellClass = PropUtils.get("table.cell.class");
         String cellSelectedClass = PropUtils.get("table.cell.selected.class");
-        By selector = ByJQuery.selector("." + cellClass + ":contains('" + label + "')");
+        By selector = By.ByXPath.xpath("//td[contains(@class,'" + cellClass + "') and descendant::div[@class='navigation-column-item' and text()='" + label + "']]");
         getContentRoot().findElement(selector).click();
         Graphene.waitModel().until().element(selector).attribute("class").contains(cellSelectedClass);
         Library.letsSleep(1000);
