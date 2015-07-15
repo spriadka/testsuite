@@ -3,7 +3,6 @@ package org.jboss.hal.testsuite.test.configuration.datasources;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.hal.testsuite.cli.CliClient;
 import org.jboss.hal.testsuite.cli.CliConstants;
-import org.jboss.hal.testsuite.cli.CliUtils;
 import org.jboss.hal.testsuite.util.ConfigUtils;
 
 /**
@@ -58,10 +57,9 @@ public class DataSourcesOperations {
                 " --name=" + name +
                 " --jndi-name=java:/xa-datasources/" + name +
                 " --driver-name=h2" +
-                " --enabled=true";
-        String command2 = CliUtils.buildCommand(getXADsAddress(name) + "/xa-datasource-properties=URL", ":add(value=\"" + url + "\")");
+                " --enabled=true" +
+                " --xa-datasource-properties=URL=\"" + url + "\"";
         client.executeCommand(command);
-        client.executeCommand(command2);
         return name;
     }
 
