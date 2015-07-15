@@ -2,8 +2,6 @@ package org.jboss.hal.testsuite.page.config;
 
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.ByJQuery;
-import org.jboss.arquillian.graphene.wait.AttributeBuilder;
-import org.jboss.arquillian.graphene.wait.ElementBuilder;
 import org.jboss.hal.testsuite.cli.Library;
 import org.jboss.hal.testsuite.fragment.ConfigAreaFragment;
 import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
