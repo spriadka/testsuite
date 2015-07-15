@@ -12,14 +12,18 @@ import org.jboss.hal.testsuite.cli.DomainCliClient;
 import org.jboss.hal.testsuite.fragment.runtime.DeploymentContentRepositoryArea;
 import org.jboss.hal.testsuite.fragment.runtime.DeploymentServerGroupArea;
 import org.jboss.hal.testsuite.fragment.runtime.DeploymentWizard;
+import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
+import org.jboss.hal.testsuite.page.home.HomePage;
 import org.jboss.hal.testsuite.page.runtime.DomainDeploymentPage;
 import org.jboss.hal.testsuite.test.category.Domain;
 import org.jboss.hal.testsuite.util.Console;
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 
 import java.io.File;
@@ -53,7 +57,8 @@ public class DomainUnmanagedDeploymentsTestCase {
 
     @Before
     public void before() {
-        browser.navigate().refresh();
+        Graphene.goTo(HomePage.class);
+        Console.withBrowser(browser).waitUntilLoaded();
         Graphene.goTo(DomainDeploymentPage.class);
         Console.withBrowser(browser).waitUntilLoaded();
         Console.withBrowser(browser).maximizeWindow();
@@ -67,17 +72,18 @@ public class DomainUnmanagedDeploymentsTestCase {
     @Test
     @InSequence(0)
     public void createDeployment() throws InterruptedException {
-        DeploymentContentRepositoryArea content = page.switchToContentRepository();
+        DeploymentContentRepositoryArea content = page.getDeploymentContent();
         File deployment = new File(FILE_PATH + FILE_NAME);
-
+        page.select("Server Group").select(MAIN_SERVER_GROUP);
         DeploymentWizard wizard = content.add();
 
         wizard.switchToUnmanaged()
+                .nextFluent()
                 .path(deployment.getAbsolutePath())
                 .isArchive(true)
                 .name(NAME)
                 .runtimeName(RUNTIME_NAME)
-                .next();
+                .finish();
 
         boolean result = wizard.isClosed();
 
@@ -85,6 +91,7 @@ public class DomainUnmanagedDeploymentsTestCase {
         assertTrue("Deployment should exist", ops.exists(NAME));
     }
 
+    @Ignore("Not able to assign to server group. Assigned while creating deployment")
     @Test
     @InSequence(1)
     public void assignDeploymentToServerGroup() {
@@ -96,27 +103,42 @@ public class DomainUnmanagedDeploymentsTestCase {
 
     @Test
     @InSequence(2)
+    public void enableDeployment() {
+
+        page.select("Server Groups").select(MAIN_SERVER_GROUP).select(NAME).clickButton("(En/Dis)able");
+        try {
+            Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
+        } catch (TimeoutException ignored) {
+        }
+
+        assertTrue("Deployment should be enabled", ops.isEnabledInServerGroup(MAIN_SERVER_GROUP, NAME));
+    }
+
+
+    @Test
+    @InSequence(3)
     public void disableDeployment() {
-        DeploymentServerGroupArea area = page.switchToServerGroup(MAIN_SERVER_GROUP);
-        area.changeState(NAME);
+
+        page.select("Server Groups").select(MAIN_SERVER_GROUP).select(NAME).clickButton("(En/Dis)able");
+        try {
+            Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
+        } catch (TimeoutException ignored) {
+        }
 
         assertFalse("Deployment should be enabled", ops.isEnabledInServerGroup(MAIN_SERVER_GROUP, NAME));
     }
 
     @Test
-    @InSequence(3)
-    public void enableDeployment() {
-        DeploymentServerGroupArea area = page.switchToServerGroup(MAIN_SERVER_GROUP);
-        area.changeState(NAME);
-
-        assertTrue("Deployment should be enabled", ops.isEnabledInServerGroup(MAIN_SERVER_GROUP, NAME));
-    }
-
-    @Test
     @InSequence(4)
     public void removeDeployment() {
-        DeploymentContentRepositoryArea content = page.switchToContentRepository();
-        content.removeAndConfirm(NAME);
+
+        page.select("Server Groups").select(MAIN_SERVER_GROUP).select(NAME).remove();
+
+        page.select("Unassigned Content").select(NAME).clickButton("Remove");
+        try {
+            Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
+        } catch (TimeoutException ignored) {
+        }
 
         assertFalse("Deployment should not exist", ops.exists(NAME));
     }

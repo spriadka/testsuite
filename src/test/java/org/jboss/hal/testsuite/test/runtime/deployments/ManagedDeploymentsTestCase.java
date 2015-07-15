@@ -76,6 +76,7 @@ public class ManagedDeploymentsTestCase {
         StandaloneDeploymentsArea content = page.getDeploymentContent();
         File deployment = new File(FILE_PATH + FILE_NAME);
 
+
         DeploymentWizard wizard = content.add();
 
         boolean result = wizard.nextFluent()
