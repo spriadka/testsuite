@@ -78,7 +78,9 @@ public class DomainManagedDeploymentsTestCase {
         page.select("Content Repository");
         DeploymentWizard wizard = content.add();
 
-        boolean result = wizard.uploadDeployment(deployment)
+        boolean result = wizard.switchToManaged()
+                .nextFluent()
+                .uploadDeployment(deployment)
                 .nextFluent()
                 .name(NAME)
                 .runtimeName(RUNTIME_NAME)
@@ -109,7 +111,7 @@ public class DomainManagedDeploymentsTestCase {
     @InSequence(2)
     public void enableDeployment() {
 
-        page.select("Server Groups").select(MAIN_SERVER_GROUP).select(NAME).clickButton("(En/Dis)able");
+        page.select("Server Groups").select(MAIN_SERVER_GROUP).select(NAME).clickButton("Enable");
         try {
             Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
         } catch (TimeoutException ignored) {
@@ -122,26 +124,22 @@ public class DomainManagedDeploymentsTestCase {
     @InSequence(3)
     public void disableDeployment() {
 
-        page.select("Server Groups").select(MAIN_SERVER_GROUP).select(NAME).clickButton("(En/Dis)able");
+        page.select("Server Groups").select(MAIN_SERVER_GROUP).select(NAME).clickButton("Disable");
         try {
             Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
         } catch (TimeoutException ignored) {
         }
 
-        assertFalse("Deployment should be enabled", ops.isEnabledInServerGroup(MAIN_SERVER_GROUP, NAME));
+        assertFalse("Deployment should be disabled", ops.isEnabledInServerGroup(MAIN_SERVER_GROUP, NAME));
     }
 
     @Test
     @InSequence(4)
     public void removeDeployment() {
 
-        page.select("Server Groups").select(MAIN_SERVER_GROUP).select(NAME).remove();
+        page.select("Server Groups").select(MAIN_SERVER_GROUP).select(NAME).unassign();
 
-        page.select("Unassigned Content").select(NAME).clickButton("Remove");
-        try {
-            Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
-        } catch (TimeoutException ignored) {
-        }
+        page.select("Unassigned Content").select(NAME).remove();
 
         assertFalse("Deployment should not exist", ops.exists(NAME));
     }

@@ -74,7 +74,7 @@ public class DomainUnmanagedDeploymentsTestCase {
     public void createDeployment() throws InterruptedException {
         DeploymentContentRepositoryArea content = page.getDeploymentContent();
         File deployment = new File(FILE_PATH + FILE_NAME);
-        page.select("Server Group").select(MAIN_SERVER_GROUP);
+        page.select("Content Repository");
         DeploymentWizard wizard = content.add();
 
         wizard.switchToUnmanaged()
@@ -91,13 +91,19 @@ public class DomainUnmanagedDeploymentsTestCase {
         assertTrue("Deployment should exist", ops.exists(NAME));
     }
 
-    @Ignore("Not able to assign to server group. Assigned while creating deployment")
     @Test
     @InSequence(1)
     public void assignDeploymentToServerGroup() {
-        DeploymentContentRepositoryArea content = page.switchToContentRepository();
-        content.assignDeployment(NAME, MAIN_SERVER_GROUP);
+        DeploymentContentRepositoryArea content = page.getDeploymentContent();
+        page.select("Server Groups").select("main-server-group");
 
+        DeploymentWizard wizard = content.add();
+
+        boolean result = wizard.switchToRepository()
+                .nextFluent()
+                .finish();
+
+        assertTrue("Deployment wizard should close", result);
         assertTrue("Deployment should be assigned to server group.", ops.isAssignedToServerGroup(MAIN_SERVER_GROUP, NAME));
     }
 
@@ -132,13 +138,9 @@ public class DomainUnmanagedDeploymentsTestCase {
     @InSequence(4)
     public void removeDeployment() {
 
-        page.select("Server Groups").select(MAIN_SERVER_GROUP).select(NAME).remove();
+        page.select("Server Groups").select(MAIN_SERVER_GROUP).select(NAME).unassign();
 
-        page.select("Unassigned Content").select(NAME).clickButton("Remove");
-        try {
-            Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
-        } catch (TimeoutException ignored) {
-        }
+        page.select("Unassigned Content").select(NAME).remove();
 
         assertFalse("Deployment should not exist", ops.exists(NAME));
     }

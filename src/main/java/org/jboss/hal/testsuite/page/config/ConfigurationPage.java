@@ -41,6 +41,14 @@ public class ConfigurationPage extends ConfigPage {
         }
     }
 
+    public void unassign() {
+        option("Unassign");
+        try {
+            Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
+        } catch (TimeoutException ignored) {
+        }
+    }
+
     public void option(String optionLabel) {
         String menuClass = PropUtils.get("options.dropdown.class");
         String menuItemClass = PropUtils.get("options.menu.item.class");
