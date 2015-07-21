@@ -6,10 +6,13 @@ import org.jboss.arquillian.graphene.page.Location;
 import org.jboss.hal.testsuite.fragment.BaseFragment;
 import org.jboss.hal.testsuite.fragment.runtime.DeploymentContentRepositoryArea;
 import org.jboss.hal.testsuite.fragment.runtime.DeploymentServerGroupArea;
+import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
 import org.jboss.hal.testsuite.page.BasePage;
 import org.jboss.hal.testsuite.page.config.ConfigurationPage;
+import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.PropUtils;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 
 /**
@@ -45,5 +48,13 @@ public class DomainDeploymentPage extends ConfigurationPage {
     public DeploymentContentRepositoryArea  getDeploymentContent() {
         WebElement content = getContentRoot().findElement(CONTENT);
         return Graphene.createPageFragment(DeploymentContentRepositoryArea.class, content);
+    }
+
+    public void unassign() {
+        option("Unassign");
+        try {
+            Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
+        } catch (TimeoutException ignored) {
+        }
     }
 }

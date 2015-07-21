@@ -9,6 +9,7 @@ import org.jboss.arquillian.junit.InSequence;
 import org.jboss.hal.testsuite.cli.CliClient;
 import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.cli.DomainCliClient;
+import org.jboss.hal.testsuite.cli.Library;
 import org.jboss.hal.testsuite.fragment.runtime.DeploymentContentRepositoryArea;
 import org.jboss.hal.testsuite.fragment.runtime.DeploymentServerGroupArea;
 import org.jboss.hal.testsuite.fragment.runtime.DeploymentWizard;
@@ -57,11 +58,7 @@ public class DomainUnmanagedDeploymentsTestCase {
 
     @Before
     public void before() {
-        Graphene.goTo(HomePage.class);
-        Console.withBrowser(browser).waitUntilLoaded();
-        Graphene.goTo(DomainDeploymentPage.class);
-        Console.withBrowser(browser).waitUntilLoaded();
-        Console.withBrowser(browser).maximizeWindow();
+        Console.withBrowser(browser).refreshAndNavigate(DomainDeploymentPage.class);
     }
 
     @AfterClass
@@ -112,11 +109,9 @@ public class DomainUnmanagedDeploymentsTestCase {
     public void enableDeployment() {
 
         page.select("Server Groups").select(MAIN_SERVER_GROUP).select(NAME).clickButton("(En/Dis)able");
-        try {
-            Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
-        } catch (TimeoutException ignored) {
-        }
 
+        Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
+        Library.letsSleep(1000);
         assertTrue("Deployment should be enabled", ops.isEnabledInServerGroup(MAIN_SERVER_GROUP, NAME));
     }
 
@@ -126,11 +121,9 @@ public class DomainUnmanagedDeploymentsTestCase {
     public void disableDeployment() {
 
         page.select("Server Groups").select(MAIN_SERVER_GROUP).select(NAME).clickButton("(En/Dis)able");
-        try {
-            Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
-        } catch (TimeoutException ignored) {
-        }
 
+        Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
+        Library.letsSleep(1000);
         assertFalse("Deployment should be enabled", ops.isEnabledInServerGroup(MAIN_SERVER_GROUP, NAME));
     }
 
@@ -138,8 +131,8 @@ public class DomainUnmanagedDeploymentsTestCase {
     @InSequence(4)
     public void removeDeployment() {
 
-        page.select("Server Groups").select(MAIN_SERVER_GROUP).select(NAME).unassign();
-
+        page.select("Server Groups").select(MAIN_SERVER_GROUP).select(NAME);
+        page.unassign();
         page.select("Unassigned Content").select(NAME).remove();
 
         assertFalse("Deployment should not exist", ops.exists(NAME));

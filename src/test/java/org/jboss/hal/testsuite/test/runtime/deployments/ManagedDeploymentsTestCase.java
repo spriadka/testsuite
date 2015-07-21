@@ -55,12 +55,7 @@ public class ManagedDeploymentsTestCase {
 
     @Before
     public void before() {
-        //browser.navigate().refresh();
-        Graphene.goTo(HomePage.class);
-        Console.withBrowser(browser).waitUntilLoaded();
-        Graphene.goTo(DeploymentPage.class);
-        Console.withBrowser(browser).waitUntilLoaded();
-        Console.withBrowser(browser).maximizeWindow();
+        Console.withBrowser(browser).refreshAndNavigate(DeploymentPage.class);
     }
 
     @BeforeClass
@@ -96,10 +91,8 @@ public class ManagedDeploymentsTestCase {
     @InSequence(1)
     public void disableDeployment() {
         page.select(NAME).clickButton("Disable");
-        try {
-            Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
-        } catch (TimeoutException ignored) {
-        }
+
+        Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
 
         assertFalse("Deployment should be disabled", ops.isEnabled(NAME));
     }
@@ -107,12 +100,9 @@ public class ManagedDeploymentsTestCase {
     @Test
     @InSequence(2)
     public void enableDeployment() {
-
         page.select(NAME).clickButton("Enable");
-        try {
-            Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
-        } catch (TimeoutException ignored) {
-        }
+
+        Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
 
         assertTrue("Deployment should be enabled", ops.isEnabled(NAME));
     }
@@ -123,8 +113,6 @@ public class ManagedDeploymentsTestCase {
     @Test
     @InSequence(3)
     public void removeDeployment() {
-
-        StandaloneDeploymentsArea content = page.getDeploymentContent();
         page.select(NAME).remove();
 
         assertFalse("Deployment should not exist", ops.exists(NAME));

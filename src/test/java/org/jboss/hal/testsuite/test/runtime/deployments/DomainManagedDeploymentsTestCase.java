@@ -62,11 +62,7 @@ public class DomainManagedDeploymentsTestCase {
 
     @Before
     public void before() {
-        Graphene.goTo(HomePage.class);
-        Console.withBrowser(browser).waitUntilLoaded();
-        Graphene.goTo(DomainDeploymentPage.class);
-        Console.withBrowser(browser).waitUntilLoaded();
-        Console.withBrowser(browser).maximizeWindow();
+        Console.withBrowser(browser).refreshAndNavigate(DomainDeploymentPage.class);
     }
 
     @Test
@@ -112,10 +108,9 @@ public class DomainManagedDeploymentsTestCase {
     public void enableDeployment() {
 
         page.select("Server Groups").select(MAIN_SERVER_GROUP).select(NAME).clickButton("Enable");
-        try {
-            Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
-        } catch (TimeoutException ignored) {
-        }
+
+        Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
+        Library.letsSleep(1000);
 
         assertTrue("Deployment should be enabled", ops.isEnabledInServerGroup(MAIN_SERVER_GROUP, NAME));
     }
@@ -125,10 +120,9 @@ public class DomainManagedDeploymentsTestCase {
     public void disableDeployment() {
 
         page.select("Server Groups").select(MAIN_SERVER_GROUP).select(NAME).clickButton("Disable");
-        try {
-            Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
-        } catch (TimeoutException ignored) {
-        }
+
+        Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
+        Library.letsSleep(1000);
 
         assertFalse("Deployment should be disabled", ops.isEnabledInServerGroup(MAIN_SERVER_GROUP, NAME));
     }
@@ -137,8 +131,8 @@ public class DomainManagedDeploymentsTestCase {
     @InSequence(4)
     public void removeDeployment() {
 
-        page.select("Server Groups").select(MAIN_SERVER_GROUP).select(NAME).unassign();
-
+        page.select("Server Groups").select(MAIN_SERVER_GROUP).select(NAME);
+        page.unassign();
         page.select("Unassigned Content").select(NAME).remove();
 
         assertFalse("Deployment should not exist", ops.exists(NAME));
