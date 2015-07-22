@@ -3,13 +3,9 @@ package org.jboss.hal.testsuite.page.runtime;
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.page.Location;
 import org.jboss.hal.testsuite.fragment.runtime.StandaloneDeploymentsArea;
-import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
-import org.jboss.hal.testsuite.page.BasePage;
 import org.jboss.hal.testsuite.page.config.ConfigurationPage;
-import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.PropUtils;
 import org.openqa.selenium.By;
-import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 
 /**

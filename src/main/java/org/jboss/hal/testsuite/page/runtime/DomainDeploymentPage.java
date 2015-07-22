@@ -1,13 +1,11 @@
 package org.jboss.hal.testsuite.page.runtime;
 
 import org.jboss.arquillian.graphene.Graphene;
-import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.arquillian.graphene.page.Location;
 import org.jboss.hal.testsuite.fragment.BaseFragment;
 import org.jboss.hal.testsuite.fragment.runtime.DeploymentContentRepositoryArea;
 import org.jboss.hal.testsuite.fragment.runtime.DeploymentServerGroupArea;
 import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
-import org.jboss.hal.testsuite.page.BasePage;
 import org.jboss.hal.testsuite.page.config.ConfigurationPage;
 import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.PropUtils;
@@ -22,7 +20,6 @@ import org.openqa.selenium.WebElement;
 public class DomainDeploymentPage extends ConfigurationPage {
 
     private static final By BACK_BUTTON = By.xpath(".//a[text()='Back']");
-    //private static final By CONTENT = ByJQuery.selector("." + PropUtils.get("page.content.rhs.class") + ":visible");
     private static final By CONTENT = By.className(PropUtils.get("page.content.gwt-layoutpanel"));
 
     public DeploymentContentRepositoryArea switchToContentRepository() {
