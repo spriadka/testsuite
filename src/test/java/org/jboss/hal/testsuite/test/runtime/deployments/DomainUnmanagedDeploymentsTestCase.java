@@ -2,16 +2,15 @@ package org.jboss.hal.testsuite.test.runtime.deployments;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
-import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.junit.InSequence;
 import org.jboss.hal.testsuite.cli.CliClient;
 import org.jboss.hal.testsuite.cli.CliClientFactory;
-import org.jboss.hal.testsuite.cli.DomainCliClient;
+import org.jboss.hal.testsuite.cli.Library;
 import org.jboss.hal.testsuite.fragment.runtime.DeploymentContentRepositoryArea;
-import org.jboss.hal.testsuite.fragment.runtime.DeploymentServerGroupArea;
 import org.jboss.hal.testsuite.fragment.runtime.DeploymentWizard;
+import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
 import org.jboss.hal.testsuite.page.runtime.DomainDeploymentPage;
 import org.jboss.hal.testsuite.test.category.Domain;
 import org.jboss.hal.testsuite.util.Console;
@@ -53,10 +52,7 @@ public class DomainUnmanagedDeploymentsTestCase {
 
     @Before
     public void before() {
-        browser.navigate().refresh();
-        Graphene.goTo(DomainDeploymentPage.class);
-        Console.withBrowser(browser).waitUntilLoaded();
-        Console.withBrowser(browser).maximizeWindow();
+        Console.withBrowser(browser).refreshAndNavigate(DomainDeploymentPage.class);
     }
 
     @AfterClass
@@ -67,17 +63,18 @@ public class DomainUnmanagedDeploymentsTestCase {
     @Test
     @InSequence(0)
     public void createDeployment() throws InterruptedException {
-        DeploymentContentRepositoryArea content = page.switchToContentRepository();
+        DeploymentContentRepositoryArea content = page.getDeploymentContent();
         File deployment = new File(FILE_PATH + FILE_NAME);
-
+        page.select("Content Repository");
         DeploymentWizard wizard = content.add();
 
         wizard.switchToUnmanaged()
+                .nextFluent()
                 .path(deployment.getAbsolutePath())
                 .isArchive(true)
                 .name(NAME)
                 .runtimeName(RUNTIME_NAME)
-                .next();
+                .finish();
 
         boolean result = wizard.isClosed();
 
@@ -88,35 +85,49 @@ public class DomainUnmanagedDeploymentsTestCase {
     @Test
     @InSequence(1)
     public void assignDeploymentToServerGroup() {
-        DeploymentContentRepositoryArea content = page.switchToContentRepository();
-        content.assignDeployment(NAME, MAIN_SERVER_GROUP);
+        DeploymentContentRepositoryArea content = page.getDeploymentContent();
+        page.select("Server Groups").select("main-server-group");
 
+        DeploymentWizard wizard = content.add();
+
+        boolean result = wizard.switchToRepository()
+                .nextFluent()
+                .finish();
+
+        assertTrue("Deployment wizard should close", result);
         assertTrue("Deployment should be assigned to server group.", ops.isAssignedToServerGroup(MAIN_SERVER_GROUP, NAME));
     }
 
     @Test
     @InSequence(2)
-    public void disableDeployment() {
-        DeploymentServerGroupArea area = page.switchToServerGroup(MAIN_SERVER_GROUP);
-        area.changeState(NAME);
+    public void enableDeployment() {
 
-        assertFalse("Deployment should be enabled", ops.isEnabledInServerGroup(MAIN_SERVER_GROUP, NAME));
+        page.select("Server Groups").select(MAIN_SERVER_GROUP).select(NAME).clickButton("(En/Dis)able");
+
+        Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
+        Library.letsSleep(1000);
+        assertTrue("Deployment should be enabled", ops.isEnabledInServerGroup(MAIN_SERVER_GROUP, NAME));
     }
+
 
     @Test
     @InSequence(3)
-    public void enableDeployment() {
-        DeploymentServerGroupArea area = page.switchToServerGroup(MAIN_SERVER_GROUP);
-        area.changeState(NAME);
+    public void disableDeployment() {
 
-        assertTrue("Deployment should be enabled", ops.isEnabledInServerGroup(MAIN_SERVER_GROUP, NAME));
+        page.select("Server Groups").select(MAIN_SERVER_GROUP).select(NAME).clickButton("(En/Dis)able");
+
+        Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
+        Library.letsSleep(1000);
+        assertFalse("Deployment should be enabled", ops.isEnabledInServerGroup(MAIN_SERVER_GROUP, NAME));
     }
 
     @Test
     @InSequence(4)
     public void removeDeployment() {
-        DeploymentContentRepositoryArea content = page.switchToContentRepository();
-        content.removeAndConfirm(NAME);
+
+        page.select("Server Groups").select(MAIN_SERVER_GROUP).select(NAME);
+        page.unassign();
+        page.select("Unassigned Content").select(NAME).remove();
 
         assertFalse("Deployment should not exist", ops.exists(NAME));
     }

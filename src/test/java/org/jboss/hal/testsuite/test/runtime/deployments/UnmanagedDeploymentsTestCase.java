@@ -2,7 +2,6 @@ package org.jboss.hal.testsuite.test.runtime.deployments;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
-import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.junit.InSequence;
@@ -10,12 +9,12 @@ import org.jboss.hal.testsuite.cli.CliClient;
 import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.fragment.runtime.DeploymentWizard;
 import org.jboss.hal.testsuite.fragment.runtime.StandaloneDeploymentsArea;
+import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
 import org.jboss.hal.testsuite.page.runtime.DeploymentPage;
 import org.jboss.hal.testsuite.test.category.Standalone;
 import org.jboss.hal.testsuite.util.Console;
 import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
@@ -49,9 +48,7 @@ public class UnmanagedDeploymentsTestCase {
 
     @Before
     public void before() {
-        browser.navigate().refresh();
-        Graphene.goTo(DeploymentPage.class);
-        Console.withBrowser(browser).waitUntilLoaded();
+        Console.withBrowser(browser).refreshAndNavigate(DeploymentPage.class);
     }
 
     @AfterClass
@@ -66,13 +63,15 @@ public class UnmanagedDeploymentsTestCase {
         File deployment = new File(FILE_PATH + FILE_NAME);
 
         DeploymentWizard wizard = content.add();
+
         wizard.switchToUnmanaged()
+                .nextFluent()
                 .path(deployment.getAbsolutePath())
                 .isArchive(true)
                 .name(NAME)
                 .runtimeName(RUNTIME_NAME)
                 .enable(false)
-                .next();
+                .finish();
 
         boolean result = wizard.isClosed();
 
@@ -80,24 +79,24 @@ public class UnmanagedDeploymentsTestCase {
         assertTrue("Deployment should exist", ops.exists(NAME));
     }
 
-    @Ignore("Not able to enable deployment")
     @Test
     @InSequence(1)
     public void enableDeployment() {
-        StandaloneDeploymentsArea content = page.getDeploymentContent();
 
-        content.changeState(NAME);
+        page.select(NAME).clickButton("Enable");
+
+        Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
 
         assertTrue("Deployment should be enabled", ops.isEnabled(NAME));
     }
 
-    @Ignore("Not able to enable deployment")
     @Test
     @InSequence(2)
     public void disableDeployment() {
-        StandaloneDeploymentsArea content = page.getDeploymentContent();
 
-        content.changeState(NAME);
+        page.select(NAME).clickButton("Disable");
+
+        Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
 
         assertFalse("Deployment should be disabled", ops.isEnabled(NAME));
     }
@@ -105,8 +104,7 @@ public class UnmanagedDeploymentsTestCase {
     @Test
     @InSequence(3)
     public void removeDeployment() {
-        StandaloneDeploymentsArea content = page.getDeploymentContent();
-        content.removeAndConfirm(NAME);
+        page.select(NAME).remove();
 
         assertFalse("Deployment should not exist", ops.exists(NAME));
     }

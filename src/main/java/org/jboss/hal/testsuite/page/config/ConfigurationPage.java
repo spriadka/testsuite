@@ -23,6 +23,7 @@ public class ConfigurationPage extends ConfigPage {
         String cellSelectedClass = PropUtils.get("table.cell.selected.class");
         By selector = By.ByXPath.xpath("//td[contains(@class,'" + cellClass + "') and descendant::div[@class='navigation-column-item' and text()='" + label + "']]");
         getContentRoot().findElement(selector).click();
+
         Graphene.waitModel().until().element(selector).attribute("class").contains(cellSelectedClass);
         Library.letsSleep(1000);
         return this;
@@ -40,11 +41,12 @@ public class ConfigurationPage extends ConfigPage {
         }
     }
 
+
     public void option(String optionLabel) {
         String menuClass = PropUtils.get("options.dropdown.class");
         String menuItemClass = PropUtils.get("options.menu.item.class");
         By menuSelector = ByJQuery.selector("button." + menuClass + ":visible");
-        By optionSelector = ByJQuery.selector("td." + menuItemClass + ":contains('" + optionLabel + "')");
+        By optionSelector = ByJQuery.selector("td." + menuItemClass + ":contains('" + optionLabel + "'):visible");
         getContentRoot().findElement(menuSelector).click();
         Graphene.waitModel().until().element(optionSelector).is().present();
         browser.findElement(optionSelector).click();
