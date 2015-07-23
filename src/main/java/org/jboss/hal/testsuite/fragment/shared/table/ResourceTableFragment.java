@@ -6,7 +6,6 @@ import org.jboss.hal.testsuite.fragment.BaseFragment;
 import org.jboss.hal.testsuite.fragment.PagerFragment;
 import org.jboss.hal.testsuite.util.PropUtils;
 import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -154,7 +153,9 @@ public class ResourceTableFragment extends BaseFragment {
             } while (this.getPager().goToNextPage());
         } else {
             List<WebElement> rowsWithText = root.findElements(selector);
-            row = Graphene.createPageFragment(ResourceTableRowFragment.class, rowsWithText.get(0));
+            if(!rowsWithText.isEmpty()) {
+                row = Graphene.createPageFragment(ResourceTableRowFragment.class, rowsWithText.get(0));
+            }
         }
 
         if (row != null) {
@@ -208,7 +209,7 @@ public class ResourceTableFragment extends BaseFragment {
         List<WebElement> rowElements = root.findElements(selector);
 
         if (rowElements.isEmpty()) {
-            throw new NoSuchElementException("Cannot locate element using: " + selector);
+            log.warn("Table is empty");
         }
 
         return rowElements;
