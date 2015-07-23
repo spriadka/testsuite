@@ -48,7 +48,7 @@ public class RHAccessOpenTicketFragment extends RHAccessFragment {
 
         selectElement.click();
         WebElement optionElement = selectElement.findElement(optionSelector);
-        actions.doubleClick(optionElement).perform();
+        actions.click(optionElement).perform();
     }
 
     protected WebElement getField(final String title) {
