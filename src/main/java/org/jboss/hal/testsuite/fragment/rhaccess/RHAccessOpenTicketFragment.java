@@ -5,7 +5,7 @@ import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.hal.testsuite.util.PropUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Actions;
+import org.openqa.selenium.support.ui.Select;
 
 /**
  * Created by mvelas on 4.11.14.
@@ -32,23 +32,20 @@ public class RHAccessOpenTicketFragment extends RHAccessFragment {
     }
 
     public void setProduct(final String productName) {
-        setDropDownField("Product:", productName);
+        setDropDownField(PropUtils.get("rhaccess.open.case.product.id"), productName);
     }
 
     public void setVersion(final String version) {
-        setDropDownField("Product Version:", version);
+        setDropDownField(PropUtils.get("rhaccess.open.case.product.version.id"), version);
     }
 
-    protected void setDropDownField(final String fieldName, final String value) {
-        Actions actions = new Actions(browser);
-        ByJQuery optionSelector = ByJQuery.selector("option:contains(" + value + ")");
-
-        WebElement selectElement = getField(fieldName).findElement(By.tagName("select"));
-        waitLongUntilElementIs(selectElement).visible();
-
+    protected void setDropDownField(final String selectorId, final String value) {
+        By statusSelector = ByJQuery.selector("select[id=" + selectorId + "]");
+        waitLongUntilElementIs(statusSelector, root).visible();
+        WebElement selectElement = root.findElement(statusSelector);
         selectElement.click();
-        WebElement optionElement = selectElement.findElement(optionSelector);
-        actions.click(optionElement).perform();
+        Select statusSelect = new Select(selectElement);
+        statusSelect.selectByVisibleText(value);
     }
 
     protected WebElement getField(final String title) {
