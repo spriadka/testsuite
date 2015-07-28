@@ -106,6 +106,7 @@ public class UnmanagedDeploymentsTestCase {
     @InSequence(3)
     public void removeDeployment() {
         Console.withBrowser(browser).waitUntilLoaded();
+        Library.letsSleep(10000);
         page.select(NAME).remove();
 
         assertFalse("Deployment should not exist", ops.exists(NAME));

@@ -125,6 +125,7 @@ public class DomainUnmanagedDeploymentsTestCase {
     @InSequence(4)
     public void removeDeployment() {
         Console.withBrowser(browser).waitUntilLoaded();
+        Library.letsSleep(10000);
         page.select("Server Groups").select(MAIN_SERVER_GROUP).select(NAME);
         page.unassign();
         page.select("Unassigned Content").select(NAME).remove();
