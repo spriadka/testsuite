@@ -88,6 +88,7 @@ public class ResourceAdaptersTestCase {
     @Test
     @InSequence(0)
     public void createNoTransaction() {
+        page.select("Subsystems").select("Resource Adapters");
         ResourceAdaptersFragment fragment = page.getContent();
         ResourceAdapterWizard wizard = fragment.addResourceAdapter();
 
@@ -98,30 +99,20 @@ public class ResourceAdaptersTestCase {
                 .finish();
 
         assertTrue("Window should be closed", result);
-        assertTrue("Resource adapter should be present in table", fragment.resourceIsPresent(NAME_NO_TRANSACTION));
         verifier.verifyResource(true);
 
     }
 
     @Test
-    @InSequence(4)
-    public void removeResourceAdapter(){
-        ResourceAdaptersFragment fragment = page.getContent();
-
-        fragment.removeResourceAdapter(NAME_NO_TRANSACTION);
-
-        verifier.verifyResource(DMR_ADAPTER_NO, false);
-    }
-
-    @Test
     @InSequence(1)
     public void createProperties() {
+        page.select("Subsystems").select("Resource Adapters").select(NAME_NO_TRANSACTION).view(NAME_NO_TRANSACTION);
         ResourceAdaptersConfigArea area = page.getConfigArea();
-        ResourceAdaptersFragment content = page.getContent();
+       // ResourceAdaptersFragment content = page.getContent();
         ConfigPropertiesFragment fragment = area.switchToProperty();
         ConfigPropertyWizard wizard = fragment.addProperty();
 
-        content.selectResourceAdapter(NAME_NO_TRANSACTION);
+       // content.selectResourceAdapter(NAME_NO_TRANSACTION);
         boolean result =
                 wizard.name(PROPERTY_KEY)
                 .value(PROPERTY_VALUE)
@@ -139,6 +130,7 @@ public class ResourceAdaptersTestCase {
     @Test
     @InSequence(2)
     public void addManagedConnectionDefinition(){
+        page.select("Subsystems").select("Resource Adapters");
         page.getResourceManager().viewByName(NAME_NO_TRANSACTION);
         page.switchSubTab("Connection Definitions");
         ConnectionDefinitionWizard wizard = page.getResourceManager().addResource(ConnectionDefinitionWizard.class);
@@ -160,6 +152,7 @@ public class ResourceAdaptersTestCase {
     @Test
     @InSequence(3)
     public void addAdminObject(){
+        page.select("Subsystems").select("Resource Adapters");
         page.getResourceManager().viewByName(NAME_NO_TRANSACTION);
         page.switchSubTab("Admin Objects");
         AdminObjectWizard wizard = page.getResourceManager().addResource(AdminObjectWizard.class);
@@ -178,9 +171,17 @@ public class ResourceAdaptersTestCase {
     }
 
 
+    @Test
+    @InSequence(4)
+    public void removeResourceAdapter(){
+        page.select("Subsystems").select("Resource Adapters").select(NAME_NO_TRANSACTION).remove();;
+
+        verifier.verifyResource(DMR_ADAPTER_NO, false);
+    }
 
     @Test
     public void createLocalTransaction(){
+        page.select("Subsystems").select("Resource Adapters");
         ResourceAdaptersFragment fragment = page.getContent();
         ResourceAdapterWizard wizard = fragment.addResourceAdapter();
 
@@ -191,15 +192,15 @@ public class ResourceAdaptersTestCase {
                         .finish();
 
         assertTrue("Window should be closed", result);
-        assertTrue("Resource adapter should be present in table", fragment.resourceIsPresent(NAME_LOCAL_TRANSACTION));
         verifier.verifyResource(DMR_ADAPTER_LOCAL, true);
 
-        fragment.removeResourceAdapter(NAME_LOCAL_TRANSACTION);
+        page.select("Subsystems").select("Resource Adapters").select(NAME_LOCAL_TRANSACTION).remove();
         verifier.verifyResource(DMR_ADAPTER_LOCAL, false);
     }
 
     @Test
     public void createXATransaction(){
+        page.select("Subsystems").select("Resource Adapters");
         ResourceAdaptersFragment fragment = page.getContent();
         ResourceAdapterWizard wizard = fragment.addResourceAdapter();
 
@@ -211,11 +212,9 @@ public class ResourceAdaptersTestCase {
 
 
         assertTrue("Window should be closed", result);
-        assertTrue("Admin object should be present in table", fragment.resourceIsPresent(NAME_XA_TRANSACTION));
         verifier.verifyResource(DMR_ADAPTER_XA, true);
 
-        fragment.removeResourceAdapter(NAME_XA_TRANSACTION);
-
+        page.select("Subsystems").select("Resource Adapters").select(NAME_XA_TRANSACTION).remove();
         verifier.verifyResource(DMR_ADAPTER_XA, false);
     }
 }

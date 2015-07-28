@@ -11,8 +11,8 @@ import org.openqa.selenium.By;
 /**
  * @author mkrajcov <mkrajcov@redhat.com>
  */
-@Location("#resource-adapters")
-public class ResourceAdaptersPage extends ConfigPage {
+@Location("#profile")
+public class ResourceAdaptersPage extends ConfigurationPage {
 
     private static final By CONTENT = By.id(PropUtils.get("page.content.id"));
 
