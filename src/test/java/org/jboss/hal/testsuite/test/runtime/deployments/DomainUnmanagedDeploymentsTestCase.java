@@ -85,6 +85,7 @@ public class DomainUnmanagedDeploymentsTestCase {
     @Test
     @InSequence(1)
     public void assignDeploymentToServerGroup() {
+        Console.withBrowser(browser).waitUntilLoaded();
         DeploymentContentRepositoryArea content = page.getDeploymentContent();
         page.select("Server Groups").select("main-server-group");
 
