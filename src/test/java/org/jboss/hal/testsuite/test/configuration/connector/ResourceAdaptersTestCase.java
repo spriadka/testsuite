@@ -5,6 +5,7 @@ import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.junit.InSequence;
+import org.jboss.hal.testsuite.category.Standalone;
 import org.jboss.hal.testsuite.cli.CliClient;
 import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.cli.Library;
@@ -16,7 +17,6 @@ import org.jboss.hal.testsuite.fragment.config.resourceadapters.ResourceAdapterW
 import org.jboss.hal.testsuite.fragment.config.resourceadapters.ResourceAdaptersConfigArea;
 import org.jboss.hal.testsuite.fragment.config.resourceadapters.ResourceAdaptersFragment;
 import org.jboss.hal.testsuite.page.config.ResourceAdaptersPage;
-import org.jboss.hal.testsuite.test.category.Standalone;
 import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.ResourceVerifier;
 import org.junit.After;

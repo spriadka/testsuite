@@ -20,11 +20,11 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.jboss.hal.testsuite.test.category;
+package org.jboss.hal.testsuite.category;
 
 /**
  * Created by pjelinek on Mar 31, 2015
  */
-public interface Standalone {
+public interface Shared {
 
 }
