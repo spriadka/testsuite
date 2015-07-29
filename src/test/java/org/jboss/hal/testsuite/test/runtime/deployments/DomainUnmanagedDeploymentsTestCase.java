@@ -85,6 +85,7 @@ public class DomainUnmanagedDeploymentsTestCase {
     @Test
     @InSequence(1)
     public void assignDeploymentToServerGroup() {
+        Console.withBrowser(browser).waitUntilLoaded();
         DeploymentContentRepositoryArea content = page.getDeploymentContent();
         page.select("Server Groups").select("main-server-group");
 
@@ -105,7 +106,7 @@ public class DomainUnmanagedDeploymentsTestCase {
         page.select("Server Groups").select(MAIN_SERVER_GROUP).select(NAME).clickButton("(En/Dis)able");
 
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
-        Library.letsSleep(1000);
+        Library.letsSleep(10000);
         assertTrue("Deployment should be enabled", ops.isEnabledInServerGroup(MAIN_SERVER_GROUP, NAME));
     }
 
@@ -117,14 +118,15 @@ public class DomainUnmanagedDeploymentsTestCase {
         page.select("Server Groups").select(MAIN_SERVER_GROUP).select(NAME).clickButton("(En/Dis)able");
 
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
-        Library.letsSleep(1000);
+        Library.letsSleep(10000);
         assertFalse("Deployment should be enabled", ops.isEnabledInServerGroup(MAIN_SERVER_GROUP, NAME));
     }
 
     @Test
     @InSequence(4)
     public void removeDeployment() {
-
+        Console.withBrowser(browser).waitUntilLoaded();
+        Library.letsSleep(10000);
         page.select("Server Groups").select(MAIN_SERVER_GROUP).select(NAME);
         page.unassign();
         page.select("Unassigned Content").select(NAME).remove();

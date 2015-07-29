@@ -105,7 +105,7 @@ public class DomainManagedDeploymentsTestCase {
         page.select("Server Groups").select(MAIN_SERVER_GROUP).select(NAME).clickButton("Enable");
 
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
-        Library.letsSleep(1000);
+        Library.letsSleep(10000);
 
         assertTrue("Deployment should be enabled", ops.isEnabledInServerGroup(MAIN_SERVER_GROUP, NAME));
     }
@@ -117,7 +117,7 @@ public class DomainManagedDeploymentsTestCase {
         page.select("Server Groups").select(MAIN_SERVER_GROUP).select(NAME).clickButton("Disable");
 
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
-        Library.letsSleep(1000);
+        Library.letsSleep(10000);
 
         assertFalse("Deployment should be disabled", ops.isEnabledInServerGroup(MAIN_SERVER_GROUP, NAME));
     }
@@ -125,7 +125,8 @@ public class DomainManagedDeploymentsTestCase {
     @Test
     @InSequence(4)
     public void removeDeployment() {
-
+        Console.withBrowser(browser).waitUntilLoaded();
+        Library.letsSleep(10000);
         page.select("Server Groups").select(MAIN_SERVER_GROUP).select(NAME);
         page.unassign();
         page.select("Unassigned Content").select(NAME).remove();

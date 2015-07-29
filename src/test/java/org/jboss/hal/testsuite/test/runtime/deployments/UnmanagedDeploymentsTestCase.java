@@ -7,6 +7,7 @@ import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.junit.InSequence;
 import org.jboss.hal.testsuite.cli.CliClient;
 import org.jboss.hal.testsuite.cli.CliClientFactory;
+import org.jboss.hal.testsuite.cli.Library;
 import org.jboss.hal.testsuite.fragment.runtime.DeploymentWizard;
 import org.jboss.hal.testsuite.fragment.runtime.StandaloneDeploymentsArea;
 import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
@@ -86,7 +87,7 @@ public class UnmanagedDeploymentsTestCase {
         page.select(NAME).clickButton("Enable");
 
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
-
+        Library.letsSleep(10000);
         assertTrue("Deployment should be enabled", ops.isEnabled(NAME));
     }
 
@@ -97,13 +98,15 @@ public class UnmanagedDeploymentsTestCase {
         page.select(NAME).clickButton("Disable");
 
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
-
+        Library.letsSleep(10000);
         assertFalse("Deployment should be disabled", ops.isEnabled(NAME));
     }
 
     @Test
     @InSequence(3)
     public void removeDeployment() {
+        Console.withBrowser(browser).waitUntilLoaded();
+        Library.letsSleep(10000);
         page.select(NAME).remove();
 
         assertFalse("Deployment should not exist", ops.exists(NAME));

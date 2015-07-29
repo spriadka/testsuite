@@ -199,8 +199,10 @@ public class Editor extends BaseFragment {
         } catch (NoSuchElementException ignore) {
             log.debug("not found - looking for textarea '{}'", identifier);
 
-            String byIdSelector = "textarea[id$='" + identifier + "']:visible";
-            String byNameSelector = "textarea[name='" + identifier + "']:visible";
+            //String byIdSelector = "textarea[id$='" + identifier + "']:visible";
+            //String byNameSelector = "textarea[name='" + identifier + "']:visible";
+            String byIdSelector = "input[id$='" + identifier + "']:visible";
+            String byNameSelector = "input[name='" + identifier + "']:visible";
             String byDmrAttrSelector = "tr[data-dmr-attr='" + identifier + "'] textarea:visible";
             By selector = ByJQuery.selector(byIdSelector + ", " + byNameSelector + ", " + byDmrAttrSelector);
 
