@@ -10,7 +10,8 @@ import org.openqa.selenium.By;
  */
 public class ResourceAdaptersFragment extends ConfigFragment{
 
-    private static final By CONTENT = ByJQuery.selector("." + PropUtils.get("page.content.rhs.class") + ":visible");
+    //private static final By CONTENT = ByJQuery.selector("." + PropUtils.get("page.content.rhs.class") + ":visible");
+    private static final By CONTENT = ByJQuery.selector("." + PropUtils.get("page.content.gwt-layoutpanel") + ":visible");
 
     public ResourceAdapterWizard addResourceAdapter(){
         return getResourceManager().addResource(ResourceAdapterWizard.class);
