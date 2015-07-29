@@ -23,7 +23,7 @@ public class XmlUtils {
             transformer.transform(new DOMSource(doc), new StreamResult(writer));
             String output = writer.getBuffer().toString().replaceAll("\n|\r", "");
             return output;
-        }catch(TransformerException exc){
+        } catch (TransformerException exc) {
             throw new RuntimeException("Unable to convert XML to String");
         }
     }

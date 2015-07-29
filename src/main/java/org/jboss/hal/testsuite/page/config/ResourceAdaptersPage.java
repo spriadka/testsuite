@@ -4,7 +4,6 @@ import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.page.Location;
 import org.jboss.hal.testsuite.fragment.config.resourceadapters.ResourceAdaptersConfigArea;
 import org.jboss.hal.testsuite.fragment.config.resourceadapters.ResourceAdaptersFragment;
-import org.jboss.hal.testsuite.page.ConfigPage;
 import org.jboss.hal.testsuite.util.PropUtils;
 import org.openqa.selenium.By;
 

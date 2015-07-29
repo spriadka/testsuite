@@ -84,7 +84,7 @@ public class UnmanagedDeploymentsTestCase {
     @InSequence(1)
     public void enableDeployment() {
 
-        page.select(NAME).clickButton("Enable");
+        page.selectMenu(NAME).clickButton("Enable");
 
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
         Library.letsSleep(10000);
@@ -95,7 +95,7 @@ public class UnmanagedDeploymentsTestCase {
     @InSequence(2)
     public void disableDeployment() {
 
-        page.select(NAME).clickButton("Disable");
+        page.selectMenu(NAME).clickButton("Disable");
 
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
         Library.letsSleep(10000);
@@ -107,7 +107,7 @@ public class UnmanagedDeploymentsTestCase {
     public void removeDeployment() {
         Console.withBrowser(browser).waitUntilLoaded();
         Library.letsSleep(10000);
-        page.select(NAME).remove();
+        page.selectMenu(NAME).remove();
 
         assertFalse("Deployment should not exist", ops.exists(NAME));
     }

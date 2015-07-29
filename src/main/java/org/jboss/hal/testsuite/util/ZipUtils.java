@@ -28,7 +28,7 @@ public class ZipUtils {
     public static void updateOneFileInZip(File zip, File file, String fileName) throws IOException {
         log.info("Updating file {} using {} in zip archive {}", new String[] {fileName, file.getAbsolutePath(), zip.getAbsolutePath()});
         Path filePath = file.toPath();
-        try(FileSystem fileSystem = FileSystems.newFileSystem(zip.toPath(), null)){
+        try (FileSystem fileSystem = FileSystems.newFileSystem(zip.toPath(), null)) {
             Path fileInsideZipPath = fileSystem.getPath(fileName);
             Files.copy(filePath, fileInsideZipPath, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
@@ -48,7 +48,7 @@ public class ZipUtils {
         try (FileSystem fileSystem = FileSystems.newFileSystem(zip.toPath(), null)){
             Path source = fileSystem.getPath(fileName);
             Files.copy(source, output.toPath(), StandardCopyOption.REPLACE_EXISTING);
-        }catch(IOException e){
+        } catch (IOException e) {
             throw new IOException("Unable to extract " + fileName +  " in " + zip.getAbsolutePath() + " into " + output.getAbsolutePath(), e);
         }
     }

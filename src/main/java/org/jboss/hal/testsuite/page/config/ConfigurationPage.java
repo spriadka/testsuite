@@ -18,15 +18,8 @@ import org.openqa.selenium.WebElement;
  */
 public class ConfigurationPage extends ConfigPage {
 
-    public ConfigurationPage select(String label) {
-        String cellClass = PropUtils.get("table.cell.class");
-        String cellSelectedClass = PropUtils.get("table.cell.selected.class");
-        By selector = By.ByXPath.xpath("//td[contains(@class,'" + cellClass + "') and descendant::div[@class='navigation-column-item' and text()='" + label + "']]");
-        getContentRoot().findElement(selector).click();
-
-        Graphene.waitModel().until().element(selector).attribute("class").contains(cellSelectedClass);
-        Library.letsSleep(1000);
-        return this;
+    public ConfigurationPage selectMenu(String label) {
+        return (ConfigurationPage) super.selectMenu(label);
     }
 
     public <T extends WizardWindow> T add(Class<T> clazz) {
@@ -53,7 +46,7 @@ public class ConfigurationPage extends ConfigPage {
     }
 
     public ConfigurationPage view(String label) {
-        select(label);
+        selectMenu(label);
         clickButton("View");
         return this;
     }

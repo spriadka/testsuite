@@ -76,7 +76,7 @@ public class CacheContainersTestCase {
     @Test
     @InSequence(0)
     public void createCacheContainer() {
-        CacheContainerWizard wizard = page.subsystems().select("Infinispan").add(CacheContainerWizard.class);
+        CacheContainerWizard wizard = page.subsystems().selectMenu("Infinispan").add(CacheContainerWizard.class);
         boolean result = wizard.name(CACHE_CONTAINER_NAME).finish();
 
         assertTrue("Window should be closed.", result);
@@ -145,7 +145,7 @@ public class CacheContainersTestCase {
     }
 
     private ConfigurationPage navigateToCache(String cache) {
-        return page.subsystems().select("Infinispan").select(cache);
+        return page.subsystems().selectMenu("Infinispan").selectMenu(cache);
     }
 
     private void addCacheContainer() {

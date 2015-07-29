@@ -63,7 +63,7 @@ public class TestConnectionTestCase extends AbstractTestConnectionTestCase {
         Console.withBrowser(browser).waitUntilLoaded();
         Graphene.goTo(DatasourcesPage.class);
         Console.withBrowser(browser).waitUntilLoaded();
-        datasourcesPage.select("Non-XA");
+        datasourcesPage.selectMenu("Non-XA");
         Console.withBrowser(browser).waitUntilLoaded();
     }
 

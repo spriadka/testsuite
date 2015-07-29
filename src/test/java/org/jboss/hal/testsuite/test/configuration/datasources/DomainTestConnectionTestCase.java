@@ -66,7 +66,7 @@ public class DomainTestConnectionTestCase extends AbstractTestConnectionTestCase
         Console.withBrowser(browser).waitUntilLoaded();
         Graphene.goTo(DomainConfigurationPage.class);
         Console.withBrowser(browser).waitUntilLoaded();
-        domainConfigurationPage.selectProfile(ConfigUtils.getDefaultProfile()).select("Datasources").select("Non-XA");
+        domainConfigurationPage.selectProfile(ConfigUtils.getDefaultProfile()).selectMenu("Datasources").selectMenu("Non-XA");
         Console.withBrowser(browser).waitUntilLoaded();
     }
 
@@ -91,7 +91,7 @@ public class DomainTestConnectionTestCase extends AbstractTestConnectionTestCase
     public void testValidWithSameNameInOtherGroup() throws IOException {
         Graphene.goTo(DomainConfigurationPage.class);
         Console.withBrowser(browser).waitUntilLoaded();
-        domainConfigurationPage.selectProfile("full-ha").select("Datasources").select("Non-XA");
+        domainConfigurationPage.selectProfile("full-ha").selectMenu("Datasources").selectMenu("Non-XA");
         Console.withBrowser(browser).waitUntilFinished();
         manager.startAllServers(10L);
         testConnection(dsSameNameValid, true);

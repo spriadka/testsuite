@@ -65,7 +65,7 @@ public class DomainUnmanagedDeploymentsTestCase {
     public void createDeployment() throws InterruptedException {
         DeploymentContentRepositoryArea content = page.getDeploymentContent();
         File deployment = new File(FILE_PATH + FILE_NAME);
-        page.select("Content Repository");
+        page.selectMenu("Content Repository");
         DeploymentWizard wizard = content.add();
 
         wizard.switchToUnmanaged()
@@ -87,7 +87,7 @@ public class DomainUnmanagedDeploymentsTestCase {
     public void assignDeploymentToServerGroup() {
         Console.withBrowser(browser).waitUntilLoaded();
         DeploymentContentRepositoryArea content = page.getDeploymentContent();
-        page.select("Server Groups").select("main-server-group");
+        page.selectMenu("Server Groups").selectMenu("main-server-group");
 
         DeploymentWizard wizard = content.add();
 
@@ -103,7 +103,7 @@ public class DomainUnmanagedDeploymentsTestCase {
     @InSequence(2)
     public void enableDeployment() {
 
-        page.select("Server Groups").select(MAIN_SERVER_GROUP).select(NAME).clickButton("(En/Dis)able");
+        page.selectMenu("Server Groups").selectMenu(MAIN_SERVER_GROUP).selectMenu(NAME).clickButton("(En/Dis)able");
 
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
         Library.letsSleep(10000);
@@ -115,7 +115,7 @@ public class DomainUnmanagedDeploymentsTestCase {
     @InSequence(3)
     public void disableDeployment() {
 
-        page.select("Server Groups").select(MAIN_SERVER_GROUP).select(NAME).clickButton("(En/Dis)able");
+        page.selectMenu("Server Groups").selectMenu(MAIN_SERVER_GROUP).selectMenu(NAME).clickButton("(En/Dis)able");
 
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
         Library.letsSleep(10000);
@@ -127,9 +127,9 @@ public class DomainUnmanagedDeploymentsTestCase {
     public void removeDeployment() {
         Console.withBrowser(browser).waitUntilLoaded();
         Library.letsSleep(10000);
-        page.select("Server Groups").select(MAIN_SERVER_GROUP).select(NAME);
+        page.selectMenu("Server Groups").selectMenu(MAIN_SERVER_GROUP).selectMenu(NAME);
         page.unassign();
-        page.select("Unassigned Content").select(NAME).remove();
+        page.selectMenu("Unassigned Content").selectMenu(NAME).remove();
 
         assertFalse("Deployment should not exist", ops.exists(NAME));
     }
