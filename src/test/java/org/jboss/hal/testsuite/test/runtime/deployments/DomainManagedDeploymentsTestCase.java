@@ -5,6 +5,7 @@ import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.junit.InSequence;
+import org.jboss.hal.testsuite.category.Domain;
 import org.jboss.hal.testsuite.cli.CliClient;
 import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.cli.Library;
@@ -12,7 +13,6 @@ import org.jboss.hal.testsuite.fragment.runtime.DeploymentContentRepositoryArea;
 import org.jboss.hal.testsuite.fragment.runtime.DeploymentWizard;
 import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
 import org.jboss.hal.testsuite.page.runtime.DomainDeploymentPage;
-import org.jboss.hal.testsuite.test.category.Domain;
 import org.jboss.hal.testsuite.util.Console;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -66,7 +66,7 @@ public class DomainManagedDeploymentsTestCase {
 
         DeploymentContentRepositoryArea content = page.getDeploymentContent();
         File deployment = new File(FILE_PATH + FILE_NAME);
-        page.select("Content Repository");
+        page.selectMenu("Content Repository");
         DeploymentWizard wizard = content.add();
 
         boolean result = wizard.switchToManaged()
@@ -86,7 +86,7 @@ public class DomainManagedDeploymentsTestCase {
     public void assignDeploymentToServerGroup() {
 
         DeploymentContentRepositoryArea content = page.getDeploymentContent();
-        page.select("Server Groups").select("main-server-group");
+        page.selectMenu("Server Groups").selectMenu("main-server-group");
 
         DeploymentWizard wizard = content.add();
 
@@ -102,7 +102,7 @@ public class DomainManagedDeploymentsTestCase {
     @InSequence(2)
     public void enableDeployment() {
 
-        page.select("Server Groups").select(MAIN_SERVER_GROUP).select(NAME).clickButton("Enable");
+        page.selectMenu("Server Groups").selectMenu(MAIN_SERVER_GROUP).selectMenu(NAME).clickButton("Enable");
 
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
         Library.letsSleep(10000);
@@ -114,7 +114,7 @@ public class DomainManagedDeploymentsTestCase {
     @InSequence(3)
     public void disableDeployment() {
 
-        page.select("Server Groups").select(MAIN_SERVER_GROUP).select(NAME).clickButton("Disable");
+        page.selectMenu("Server Groups").selectMenu(MAIN_SERVER_GROUP).selectMenu(NAME).clickButton("Disable");
 
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
         Library.letsSleep(10000);
@@ -127,9 +127,9 @@ public class DomainManagedDeploymentsTestCase {
     public void removeDeployment() {
         Console.withBrowser(browser).waitUntilLoaded();
         Library.letsSleep(10000);
-        page.select("Server Groups").select(MAIN_SERVER_GROUP).select(NAME);
+        page.selectMenu("Server Groups").selectMenu(MAIN_SERVER_GROUP).selectMenu(NAME);
         page.unassign();
-        page.select("Unassigned Content").select(NAME).remove();
+        page.selectMenu("Unassigned Content").selectMenu(NAME).remove();
 
         assertFalse("Deployment should not exist", ops.exists(NAME));
     }

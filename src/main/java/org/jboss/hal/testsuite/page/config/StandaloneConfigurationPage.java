@@ -31,7 +31,7 @@ import org.jboss.arquillian.graphene.page.Location;
 public class StandaloneConfigurationPage extends ConfigurationPage {
 
     public ConfigurationPage subsystems() {
-        return select("Subsystems");
+        return selectMenu("Subsystems");
     }
 
 }

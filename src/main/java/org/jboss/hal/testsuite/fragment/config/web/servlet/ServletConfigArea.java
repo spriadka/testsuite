@@ -11,6 +11,11 @@ public class ServletConfigArea extends ConfigAreaFragment {
         return switchTo(label);
     }
 
+    public ConnectorsConfigFragment connectors(){
+        String label = PropUtils.get("config.web.servlet.configarea.connectors.tab.label");
+        return switchTo(label, ConnectorsConfigFragment.class);
+    }
+
     public VirtualServersFragment virtualServers(){
         String label = PropUtils.get("config.web.servlet.configarea.virtualservers.tab.label");
         return switchTo(label, VirtualServersFragment.class);

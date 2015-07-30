@@ -129,8 +129,8 @@
         <suite.mode>standalone</suite.mode>
         <suite.server>wildfly</suite.server>
         <test.category>
-          org.jboss.hal.testsuite.test.category.Shared,
-          org.jboss.hal.testsuite.test.category.Standalone
+          org.jboss.hal.testsuite.category.Shared,
+          org.jboss.hal.testsuite.category.Standalone
         </test.category>
       </properties>
       <dependencies>
@@ -150,8 +150,8 @@
         <suite.server>wildfly</suite.server>
         <arq.managementPort>9999</arq.managementPort>
         <test.category>
-          org.jboss.hal.testsuite.test.category.Shared,
-          org.jboss.hal.testsuite.test.category.Domain
+          org.jboss.hal.testsuite.category.Shared,
+          org.jboss.hal.testsuite.category.Domain
         </test.category>
       </properties>
       <dependencies>

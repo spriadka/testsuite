@@ -21,7 +21,7 @@ public class DatasourcesPage extends ConfigurationPage {
     }
 
     public void switchToXA() {
-        select("XA");
+        selectMenu("XA");
         Console.withBrowser(browser).waitUntilLoaded();
     }
 

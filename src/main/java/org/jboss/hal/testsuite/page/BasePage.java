@@ -4,6 +4,7 @@ import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.arquillian.graphene.findby.FindByJQuery;
+import org.jboss.hal.testsuite.cli.Library;
 import org.jboss.hal.testsuite.fragment.MessageListEntry;
 import org.jboss.hal.testsuite.fragment.NavigationFragment;
 import org.jboss.hal.testsuite.fragment.NotificationCenterFragment;
@@ -262,5 +263,32 @@ public abstract class BasePage {
         browser.navigate().refresh();
         Graphene.goTo(this.getClass());
         Console.withBrowser(browser).waitUntilLoaded();
+    }
+
+    /**
+     * select item in left menu navigation
+     * @param label
+     * @return
+     */
+    public BasePage selectMenu(String label) {
+        String cellSelectedClass = PropUtils.get("table.cell.selected.class");
+        By selector = getMenuEqualsSelector(label);
+        getContentRoot().findElement(selector).click();
+        Graphene.waitModel().until().element(selector).attribute("class").contains(cellSelectedClass);
+        Library.letsSleep(1000);
+        return this;
+    }
+
+    protected By getMenuEqualsSelector(String label){
+        return getMenuSelector(" and text()='" + label + "']]");
+    }
+
+    protected By getMenuContainsSelector(String label){
+        return getMenuSelector(" and contains(.,'" + label + "')]]");
+    }
+
+    private By getMenuSelector(String xpathSuffix){
+        String cellClass = PropUtils.get("table.cell.class");
+        return By.ByXPath.xpath("//td[contains(@class,'" + cellClass + "') and descendant::div[@class='navigation-column-item'"+xpathSuffix);
     }
 }

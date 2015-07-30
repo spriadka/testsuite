@@ -3,11 +3,11 @@ package org.jboss.hal.testsuite.test.configuration.datasources;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.cli.CliClient;
 import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.page.config.*;
 import org.jboss.hal.testsuite.page.home.HomePage;
-import org.jboss.hal.testsuite.test.category.Shared;
 import org.jboss.hal.testsuite.util.Console;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -63,7 +63,7 @@ public class TestConnectionTestCase extends AbstractTestConnectionTestCase {
         Console.withBrowser(browser).waitUntilLoaded();
         Graphene.goTo(DatasourcesPage.class);
         Console.withBrowser(browser).waitUntilLoaded();
-        datasourcesPage.select("Non-XA");
+        datasourcesPage.selectMenu("Non-XA");
         Console.withBrowser(browser).waitUntilLoaded();
     }
 

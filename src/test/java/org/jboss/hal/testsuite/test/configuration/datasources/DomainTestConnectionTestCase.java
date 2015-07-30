@@ -3,12 +3,12 @@ package org.jboss.hal.testsuite.test.configuration.datasources;
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.hal.testsuite.category.Domain;
 import org.jboss.hal.testsuite.cli.CliClient;
 import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.cli.DomainManager;
 import org.jboss.hal.testsuite.page.config.DomainConfigurationPage;
 import org.jboss.hal.testsuite.page.home.HomePage;
-import org.jboss.hal.testsuite.test.category.Domain;
 import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.jboss.hal.testsuite.util.Console;
 import org.junit.After;
@@ -66,7 +66,7 @@ public class DomainTestConnectionTestCase extends AbstractTestConnectionTestCase
         Console.withBrowser(browser).waitUntilLoaded();
         Graphene.goTo(DomainConfigurationPage.class);
         Console.withBrowser(browser).waitUntilLoaded();
-        domainConfigurationPage.selectProfile(ConfigUtils.getDefaultProfile()).select("Datasources").select("Non-XA");
+        domainConfigurationPage.selectProfile(ConfigUtils.getDefaultProfile()).selectMenu("Datasources").selectMenu("Non-XA");
         Console.withBrowser(browser).waitUntilLoaded();
     }
 
@@ -91,7 +91,7 @@ public class DomainTestConnectionTestCase extends AbstractTestConnectionTestCase
     public void testValidWithSameNameInOtherGroup() throws IOException {
         Graphene.goTo(DomainConfigurationPage.class);
         Console.withBrowser(browser).waitUntilLoaded();
-        domainConfigurationPage.selectProfile("full-ha").select("Datasources").select("Non-XA");
+        domainConfigurationPage.selectProfile("full-ha").selectMenu("Datasources").selectMenu("Non-XA");
         Console.withBrowser(browser).waitUntilFinished();
         manager.startAllServers(10L);
         testConnection(dsSameNameValid, true);

@@ -6,6 +6,7 @@ import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.junit.InSequence;
+import org.jboss.hal.testsuite.category.Standalone;
 import org.jboss.hal.testsuite.cli.CliClient;
 import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.cli.CliUtils;
@@ -13,7 +14,6 @@ import org.jboss.hal.testsuite.fragment.config.infinispan.CacheContainerWizard;
 import org.jboss.hal.testsuite.page.config.ConfigurationPage;
 import org.jboss.hal.testsuite.page.config.StandaloneConfigurationPage;
 import org.jboss.hal.testsuite.page.home.HomePage;
-import org.jboss.hal.testsuite.test.category.Standalone;
 import org.jboss.hal.testsuite.test.util.ConfigAreaChecker;
 import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.ResourceVerifier;
@@ -76,7 +76,7 @@ public class CacheContainersTestCase {
     @Test
     @InSequence(0)
     public void createCacheContainer() {
-        CacheContainerWizard wizard = page.subsystems().select("Infinispan").add(CacheContainerWizard.class);
+        CacheContainerWizard wizard = page.subsystems().selectMenu("Infinispan").add(CacheContainerWizard.class);
         boolean result = wizard.name(CACHE_CONTAINER_NAME).finish();
 
         assertTrue("Window should be closed.", result);
@@ -145,7 +145,7 @@ public class CacheContainersTestCase {
     }
 
     private ConfigurationPage navigateToCache(String cache) {
-        return page.subsystems().select("Infinispan").select(cache);
+        return page.subsystems().selectMenu("Infinispan").selectMenu(cache);
     }
 
     private void addCacheContainer() {

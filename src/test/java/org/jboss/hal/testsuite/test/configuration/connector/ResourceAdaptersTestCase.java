@@ -5,6 +5,7 @@ import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.junit.InSequence;
+import org.jboss.hal.testsuite.category.Standalone;
 import org.jboss.hal.testsuite.cli.CliClient;
 import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.cli.Library;
@@ -16,7 +17,6 @@ import org.jboss.hal.testsuite.fragment.config.resourceadapters.ResourceAdapterW
 import org.jboss.hal.testsuite.fragment.config.resourceadapters.ResourceAdaptersConfigArea;
 import org.jboss.hal.testsuite.fragment.config.resourceadapters.ResourceAdaptersFragment;
 import org.jboss.hal.testsuite.page.config.ResourceAdaptersPage;
-import org.jboss.hal.testsuite.test.category.Standalone;
 import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.ResourceVerifier;
 import org.junit.After;
@@ -89,7 +89,7 @@ public class ResourceAdaptersTestCase {
     @Test
     @InSequence(0)
     public void createNoTransaction() {
-        page.select("Subsystems").select("Resource Adapters");
+        page.selectMenu("Subsystems").selectMenu("Resource Adapters");
         ResourceAdaptersFragment fragment = page.getContent();
         ResourceAdapterWizard wizard = fragment.addResourceAdapter();
 
@@ -108,7 +108,7 @@ public class ResourceAdaptersTestCase {
     @Test
     @InSequence(1)
     public void createProperties() {
-        page.select("Subsystems").select("Resource Adapters").view(NAME_NO_TRANSACTION);
+        page.selectMenu("Subsystems").selectMenu("Resource Adapters").view(NAME_NO_TRANSACTION);
         Console.withBrowser(browser).waitUntilLoaded();
 
         ResourceAdaptersConfigArea area = page.getConfigArea();
@@ -135,7 +135,7 @@ public class ResourceAdaptersTestCase {
     @Test
     @InSequence(2)
     public void addManagedConnectionDefinition(){
-        page.select("Subsystems").select("Resource Adapters").view(NAME_NO_TRANSACTION);
+        page.selectMenu("Subsystems").selectMenu("Resource Adapters").view(NAME_NO_TRANSACTION);
         Console.withBrowser(browser).waitUntilLoaded();
         Library.letsSleep(100);
 
@@ -160,7 +160,7 @@ public class ResourceAdaptersTestCase {
     @Test
     @InSequence(3)
     public void addAdminObject(){
-        page.select("Subsystems").select("Resource Adapters").view(NAME_NO_TRANSACTION);
+        page.selectMenu("Subsystems").selectMenu("Resource Adapters").view(NAME_NO_TRANSACTION);
         Console.withBrowser(browser).waitUntilLoaded();
         Library.letsSleep(100);
 
@@ -185,14 +185,14 @@ public class ResourceAdaptersTestCase {
     @Test
     @InSequence(4)
     public void removeResourceAdapter(){
-        page.select("Subsystems").select("Resource Adapters").select(NAME_NO_TRANSACTION).remove();;
+        page.selectMenu("Subsystems").selectMenu("Resource Adapters").selectMenu(NAME_NO_TRANSACTION).remove();;
         Library.letsSleep(1000);
         verifier.verifyResource(DMR_ADAPTER_NO, false);
     }
 
     @Test
     public void createLocalTransaction(){
-        page.select("Subsystems").select("Resource Adapters");
+        page.selectMenu("Subsystems").selectMenu("Resource Adapters");
         ResourceAdaptersFragment fragment = page.getContent();
         ResourceAdapterWizard wizard = fragment.addResourceAdapter();
 
@@ -206,13 +206,13 @@ public class ResourceAdaptersTestCase {
         assertTrue("Window should be closed", result);
         verifier.verifyResource(DMR_ADAPTER_LOCAL, true);
         Library.letsSleep(1000);
-        page.select("Subsystems").select("Resource Adapters").select(NAME_LOCAL_TRANSACTION).remove();
+        page.selectMenu("Subsystems").selectMenu("Resource Adapters").selectMenu(NAME_LOCAL_TRANSACTION).remove();
         verifier.verifyResource(DMR_ADAPTER_LOCAL, false);
     }
 
     @Test
     public void createXATransaction(){
-        page.select("Subsystems").select("Resource Adapters");
+        page.selectMenu("Subsystems").selectMenu("Resource Adapters");
         ResourceAdaptersFragment fragment = page.getContent();
         ResourceAdapterWizard wizard = fragment.addResourceAdapter();
 
@@ -226,7 +226,7 @@ public class ResourceAdaptersTestCase {
         assertTrue("Window should be closed", result);
         verifier.verifyResource(DMR_ADAPTER_XA, true);
         Library.letsSleep(1000);
-        page.select("Subsystems").select("Resource Adapters").select(NAME_XA_TRANSACTION).remove();
+        page.selectMenu("Subsystems").selectMenu("Resource Adapters").selectMenu(NAME_XA_TRANSACTION).remove();
         verifier.verifyResource(DMR_ADAPTER_XA, false);
     }
 }
