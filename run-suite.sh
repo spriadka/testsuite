@@ -7,6 +7,7 @@
 # - TMPDIR: the tmp directory to download and install into
 # - SERVER_MODE: which tests to execute (standalone || domain)
 # - DOWNLOAD_URL (optional): the location for required binaries
+# - HAL_VERSION: the HAL version to install
 #
 
 if [ "${WF_VERSION}x" == "x" ] ; then
@@ -27,6 +28,11 @@ fi
 
 if [ "${M2_HOME}x" == "x" ] ; then
    echo "M2_HOME has to be specified!"
+   exit 1
+fi
+
+if [ "${HAL_VERSION}x" == "x" ] ; then
+   echo "HAL_VERSION has to be specified!"
    exit 1
 fi
 
@@ -116,16 +122,12 @@ function runSuite {
 }
 
 function prepareCore {
-  pushd core
-  git log --no-merges -1 --pretty=format:"Core commit %h %an %s"
-  mvn clean install -Dmaven.repo.local=$WORKSPACE/maven_repo
-  popd
-  new_artifact=$(ls core/build/app/target/*-console-*-resources.jar | xargs)
-  cp $new_artifact .
+  sh $M2_HOME/bin/mvn dependency:copy -DoutputDirectory=$TMPDIR -Dartifact=org.jboss.as:jboss-as-console:$HAL_VERSION:jar:resources
+  new_artifact="$TMPDIR/jboss-as-console-$HAL_VERSION-resources.jar"
 
-  # amending eap bits
   original_artifact=$(ls $SERVER_DIR_PATH/modules/system/layers/base/org/jboss/as/console/**/*.jar)
-  cp $new_artifact $original_artifact
+  rm -f $original_artifact
+  cp -v $new_artifact $original_artifact
 }
 
 #
@@ -134,7 +136,7 @@ function prepareCore {
 
 prepareServer
 
-#prepareCore
+prepareCore
 
 killServer
 
