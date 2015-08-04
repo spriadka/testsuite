@@ -6,9 +6,12 @@ import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Standalone;
 import org.jboss.hal.testsuite.cli.CliClient;
 import org.jboss.hal.testsuite.cli.CliClientFactory;
+import org.jboss.hal.testsuite.finder.Application;
+import org.jboss.hal.testsuite.finder.FinderNames;
+import org.jboss.hal.testsuite.finder.FinderNavigation;
+import org.jboss.hal.testsuite.page.config.StandaloneConfigurationPage;
 import org.jboss.hal.testsuite.page.config.WebServicesPage;
 import org.jboss.hal.testsuite.test.util.ConfigAreaChecker;
-import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.ResourceVerifier;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,11 +29,10 @@ import static org.jboss.hal.testsuite.cli.CliConstants.WEB_SERVICES_SUBSYSTEM_AD
 @Category(Standalone.class)
 public class WebServicesTestCase {
 
-    private static final String MODIFY_SOAP_ADDRESS_ID = "modifyAddress";
-    private static final String MODIFY_SOAP_ADDRESS_DMR = "modify-wsdl-address";
-    private static final String WSDL_HOST_ID = "wsdlHost";
-    private static final String WSDL_PORT_ID = "wsdlPort";
-    private static final String WSDL_SECURE_PORT_ID = "wsdlSecurePort";
+    private static final String MODIFY_SOAP_ADDRESS = "modify-wsdl-address";
+    private static final String WSDL_HOST = "wsdl-host";
+    private static final String WSDL_PORT = "wsdl-port";
+    private static final String WSDL_SECURE_PORT = "wsdl-secure-port";
 
     private static final String PORT_VALUE = "50";
     private static final String PORT_VALUE_NEGATIVE = "-50";
@@ -48,38 +50,42 @@ public class WebServicesTestCase {
 
     @Before
     public void before() {
-        Console.withBrowser(browser).refreshAndNavigate(WebServicesPage.class);
+        new FinderNavigation(browser, StandaloneConfigurationPage.class)
+                .addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
+                .addAddress(FinderNames.SUBSYSTEM, "Web Services")
+                .selectRow()
+                .invoke(FinderNames.VIEW);
+        Application.waitUntilVisible();
     }
 
     @Test
     public void modifySoapAddress() {
-        checker.editCheckboxAndAssert(page, MODIFY_SOAP_ADDRESS_ID, false).dmrAttribute(MODIFY_SOAP_ADDRESS_DMR).invoke();
-        checker.editCheckboxAndAssert(page, MODIFY_SOAP_ADDRESS_ID, true).dmrAttribute(MODIFY_SOAP_ADDRESS_DMR).invoke();
+        checker.editCheckboxAndAssert(page, MODIFY_SOAP_ADDRESS, false).dmrAttribute(MODIFY_SOAP_ADDRESS).invoke();
+        checker.editCheckboxAndAssert(page, MODIFY_SOAP_ADDRESS, true).dmrAttribute(MODIFY_SOAP_ADDRESS).invoke();
     }
 
     @Test
     public void setWsdlPort() {
-        checker.editTextAndAssert(page, WSDL_PORT_ID, PORT_VALUE).invoke();
+        checker.editTextAndAssert(page, WSDL_PORT, PORT_VALUE).invoke();
     }
 
     @Test
     public void setWsdlPortNegative() {
-        checker.editTextAndAssert(page, WSDL_PORT_ID, PORT_VALUE_NEGATIVE).expectError().invoke();
+        checker.editTextAndAssert(page, WSDL_PORT, PORT_VALUE_NEGATIVE).expectError().invoke();
     }
 
     @Test
     public void setWsdlSecurePort() {
-        checker.editTextAndAssert(page, WSDL_SECURE_PORT_ID, PORT_VALUE).invoke();
+        checker.editTextAndAssert(page, WSDL_SECURE_PORT, PORT_VALUE).invoke();
     }
 
     @Test
     public void setWsdlSecurePortNegative() {
-        checker.editTextAndAssert(page, WSDL_SECURE_PORT_ID, PORT_VALUE_NEGATIVE).expectError().invoke();
+        checker.editTextAndAssert(page, WSDL_SECURE_PORT, PORT_VALUE_NEGATIVE).expectError().invoke();
     }
 
     @Test
     public void setWsdlHostSimpleIP() {
-        checker.editTextAndAssert(page, WSDL_HOST_ID, SIMPLE_IP).invoke();
+        checker.editTextAndAssert(page, WSDL_HOST, SIMPLE_IP).invoke();
     }
-
 }
