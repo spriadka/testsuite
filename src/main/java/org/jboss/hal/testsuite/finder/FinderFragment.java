@@ -37,7 +37,7 @@ public abstract class FinderFragment {
     @Drone protected WebDriver browser;
     @Root protected WebElement root;
 
-    public void invoke(String action) {
+    public FinderFragment invoke(String action) {
         try {
             root.findElement(primaryButtonSelector(action)).click();
 
@@ -56,6 +56,7 @@ public abstract class FinderFragment {
                         primaryButtonSelector(action) + ", " + secondaryButtonSelector(action), inner);
             }
         }
+        return this;
     }
 
     protected abstract By primaryButtonSelector(String name);

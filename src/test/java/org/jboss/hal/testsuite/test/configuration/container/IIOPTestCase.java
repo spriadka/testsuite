@@ -25,6 +25,7 @@ import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Standalone;
+import org.jboss.hal.testsuite.finder.Application;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
@@ -58,8 +59,8 @@ public class IIOPTestCase {
 
     @Test
     public void expectErrorForInvalidHighWaterMarkValue() {
-        navigation.selectRow().invoke("View");
-        Graphene.waitGui().until().element(By.className("rhs-content-panel")).is().visible();
+        navigation.selectRow().invoke(FinderNames.VIEW);
+        Application.waitUntilVisible();
 
         WebElement viewPanel = browser.findElement(By.className("form-view-panel"));
         WebElement editLink = viewPanel.findElement(By.className("form-edit-button"));

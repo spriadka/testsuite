@@ -22,9 +22,9 @@
 package org.jboss.hal.testsuite.test.configuration.container;
 
 import org.jboss.arquillian.drone.api.annotation.Drone;
-import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Standalone;
+import org.jboss.hal.testsuite.finder.Application;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.page.config.StandaloneConfigurationPage;
@@ -32,7 +32,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
 /**
@@ -55,7 +54,7 @@ public class MailTestCase {
 
     @Test
     public void openApplication() {
-        navigation.selectColumn().invoke("View");
-        Graphene.waitGui().until().element(By.className("rhs-content-panel")).is().visible();
+        navigation.selectColumn().invoke(FinderNames.VIEW);
+        Application.waitUntilVisible();
     }
 }

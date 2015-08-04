@@ -21,24 +21,17 @@
  */
 package org.jboss.hal.testsuite.finder;
 
+import org.jboss.arquillian.graphene.Graphene;
+import org.openqa.selenium.By;
+
 /**
  * @author Harald Pehl
  */
-public interface FinderNames {
+public class Application {
 
-    String BROWSE_BY = "Browse By";
-    String BROWSE_DOMAIN_BY = "Browse Domain By";
-    String CONFIGURATION = "Configuration";
-    String DEPLOYMENT = "Deployment";
-    String HOST = "Host";
-    String HOSTS = "Hosts";
-    String MONITOR = "Monitor";
-    String PROFILE = "Profile";
-    String PROFILES = "Profiles";
-    String SERVER = "Server";
-    String SERVER_GROUP = "Server Group";
-    String SERVER_GROUPS = "Server Groups";
-    String SUBSYSTEM = "Subsystem";
-    String SUBSYSTEMS = "Subsystems";
-    String VIEW = "View";
+    public static final By APPLICATION_PANEL = By.className("rhs-content-panel");
+
+    public static void waitUntilVisible() {
+        Graphene.waitGui().until().element(APPLICATION_PANEL).is().visible();
+    }
 }

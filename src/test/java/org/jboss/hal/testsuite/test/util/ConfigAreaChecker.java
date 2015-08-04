@@ -54,6 +54,7 @@ public class ConfigAreaChecker {
         private boolean booleanValue;
         private String[] lineValues;
         private EditorType type;
+        private int timeout = 0;
 
         List<String> inputsToClear = new ArrayList<>();
         private boolean expectedChange = true;
@@ -87,6 +88,11 @@ public class ConfigAreaChecker {
 
         public Builder withVerifier(ResourceVerifier verifier) {
             this.insideVerifier = verifier;
+            return this;
+        }
+
+        public Builder withTimeout(int timeout) {
+            this.timeout = timeout;
             return this;
         }
 
@@ -167,7 +173,7 @@ public class ConfigAreaChecker {
                         break;
                     case SELECT:
                     case TEXT:
-                        insideVerifier.verifyAttribute(dmrAttribute, stringValue);
+                        insideVerifier.verifyAttribute(dmrAttribute, stringValue, timeout);
                         break;
                     case CHECKBOX:
                         insideVerifier.verifyAttribute(dmrAttribute, String.valueOf(booleanValue));

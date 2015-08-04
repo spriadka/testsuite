@@ -52,7 +52,11 @@ public class ResourceVerifier {
      * @param expected <code>true</code> if resource is expected to exists, false otherwise
      */
     public void verifyResource(String dmrPath, boolean expected) {
-        boolean exists = cliClient.executeForSuccess(dmrPath + ":read-resource()");
+        verifyResource(dmrPath, expected, 0);
+    }
+
+    public void verifyResource(String dmrPath, boolean expected, int timeout) {
+        boolean exists = cliClient.executeForSuccess(dmrPath + ":read-resource()", timeout);
         if (expected) {
             Assert.assertTrue("Resource " + dmrPath + " should exist", exists);
         } else {
@@ -66,10 +70,14 @@ public class ResourceVerifier {
      * @param expected <code>true</code> if resource is expected to exists, false otherwise
      */
     public void verifyResource(boolean expected) {
+        verifyResource(expected, 0);
+    }
+
+    public void verifyResource(boolean expected, int timeout) {
         if (dmrPath == null) {
             throw new IllegalStateException("DMR path not set");
         }
-        verifyResource(dmrPath, expected);
+        verifyResource(dmrPath, expected, timeout);
     }
 
     /**
@@ -79,12 +87,16 @@ public class ResourceVerifier {
      * @param expectedValue expected value
      */
     public void verifyAttribute(String name, String expectedValue) {
+        verifyAttribute(name, expectedValue, 0);
+    }
+
+    public void verifyAttribute(String name, String expectedValue, int timeout) {
         if (dmrPath == null) {
             throw new IllegalStateException("DMR path not set");
         }
 
         String dmrName = camelToDash(name);
-        String actualValue = cliClient.readAttribute(dmrPath, dmrName);
+        String actualValue = cliClient.readAttribute(dmrPath, dmrName, timeout);
 
         Assert.assertEquals("Attribute value is different in model.", expectedValue, actualValue);
     }
@@ -131,5 +143,4 @@ public class ResourceVerifier {
     private static String camelToDash(String input) {
         return input.replaceAll("\\B([A-Z])", "-$1" ).toLowerCase();
     }
-
 }

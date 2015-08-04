@@ -94,8 +94,28 @@ public class CliClient {
      * @return Response <code>true</code>, if the command execution was successful, else <code>false</code>.
      */
     public boolean executeForSuccess(String command) {
-        CLI.Result result = executeCommand(command);
-        return result.isSuccess();
+        return executeForSuccess(command, 0);
+    }
+
+    /**
+     * Execute the command via CLI and returns its command execution status.
+     *
+     * @param command String based command to be executed via CLI.
+     * @param timeout A timeout for the command to return successfully
+     * @return Response <code>true</code>, if the command execution was successful, else <code>false</code>.
+     */
+    public boolean executeForSuccess(String command, int timeout) {
+        long start = System.currentTimeMillis();
+        boolean successful = executeCommand(command).isSuccess();
+        if (timeout > 0) {
+            while (!successful) {
+                if (System.currentTimeMillis() >= start + timeout) {
+                    throw new TimeoutException(command, timeout);
+                }
+                Library.letsSleep(200);
+            }
+        }
+        return successful;
     }
 
 
@@ -106,7 +126,20 @@ public class CliClient {
      * @return Result of given command.
      */
     public String executeForResult(String command) {
+        return executeForResult(command, 0);
+    }
+
+    public String executeForResult(String command, int timeout) {
+        long start = System.currentTimeMillis();
         CLI.Result result = executeCommand(command);
+        if (timeout > 0) {
+            while (!result.isSuccess()) {
+                if (System.currentTimeMillis() >= start + timeout) {
+                    throw new TimeoutException(command, timeout);
+                }
+                Library.letsSleep(200);
+            }
+        }
         return result.getResponse().get(RESULT).asString();
     }
 
@@ -131,7 +164,11 @@ public class CliClient {
      * @return Value of given attribute.
      */
     public String readAttribute(String address, String name) {
-        return readAttribute(address, name, true);
+        return readAttribute(address, name, true, 0);
+    }
+
+    public String readAttribute(String address, String name, int timeout) {
+        return readAttribute(address, name, true, timeout);
     }
 
     /**
@@ -143,8 +180,12 @@ public class CliClient {
      * @return Value of given attribute.
      */
     public String readAttribute(String address, String name, boolean includeDefaults) {
+        return readAttribute(address, name, includeDefaults, 0);
+    }
+
+    public String readAttribute(String address, String name, boolean includeDefaults, int timeout) {
         String command = CliUtils.buildCommand(address, ":read-attribute", new String[]{"name=" + name, "include-defaults=" + String.valueOf(includeDefaults)});
-        return executeForResult(command);
+        return executeForResult(command, timeout);
     }
 
     /**
@@ -317,7 +358,8 @@ public class CliClient {
     public List<String> getChildNames(String nodeAddress, String childNodeType) {
         List<String> list = new ArrayList<String>();
 
-        String cmd = CliUtils.buildCommand(nodeAddress, ":read-children-names", new String[]{"child-type=" + childNodeType});
+        String cmd = CliUtils.buildCommand(nodeAddress, ":read-children-names",
+                new String[]{"child-type=" + childNodeType});
 
         List<ModelNode> asList = executeForResponse(cmd).get(RESULT).asList();
 
