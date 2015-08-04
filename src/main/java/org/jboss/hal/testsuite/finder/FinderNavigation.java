@@ -111,7 +111,7 @@ public class FinderNavigation {
                         .contains("cellTableSelectedRowCell");
 
                 // wait for next column to be visible
-                if (i < address.size() - 2) {
+                if (i < address.size() - 1) {
                     AddressTuple nextTuple = address.get(i + 1);
                     Graphene.waitModel().until().element(columnSelector(nextTuple.column)).is().visible();
                 }
