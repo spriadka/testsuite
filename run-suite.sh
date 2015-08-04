@@ -24,16 +24,8 @@ if [ "${SERVER_MODE}x" == "x" ] ; then
 fi
 
 
-if [ "${MVN_HOME}x" == "x" ] ; then
-   MVN = $(which mvn)
-   export MVN_BIN=$MVN
-else
-   MVN = "$MVN_HOME/bin/mvn"
-   export MVN_BIN=$MVN
-fi
-
-if [ "${MVN_BIN}x" == "x" ] ; then
-   echo "MVN_HOME has to be specified!"
+if [ "${M2_HOME}x" == "x" ] ; then
+   echo "M2_HOME has to be specified!"
    exit 1
 fi
 
@@ -103,9 +95,9 @@ function runSuite {
   fi
 
   if [ "$SERVER_MODE" == "domain" ]; then
-    $MVN_BIN test -Pdomain -Djboss.dist=$SERVER_DIR_PATH $DTEST -Darq.extension.webdriver.firefox_binary="${FIREFOX_BINARY}"  || true
+    $M2_HOME/bin/mvn test -Pdomain -Djboss.dist=$SERVER_DIR_PATH $DTEST -Darq.extension.webdriver.firefox_binary="${FIREFOX_BINARY}"  || true
   else
-    $MVN_BIN test -Pstandalone -Djboss.dist=$SERVER_DIR_PATH $DTEST -Darq.extension.webdriver.firefox_binary="${FIREFOX_BINARY}" || true
+    $M2_HOME/bin/mvn test -Pstandalone -Djboss.dist=$SERVER_DIR_PATH $DTEST -Darq.extension.webdriver.firefox_binary="${FIREFOX_BINARY}" || true
   fi
 }
 
