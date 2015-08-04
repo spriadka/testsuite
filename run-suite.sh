@@ -56,8 +56,8 @@ function prepareServer {
   $SERVER_DIR_PATH/bin/add-user.sh -s admin asd1asd!
 
   # unsecure
-  sed -i '_orig' 's/http-interface security-realm=\"ManagementRealm\"/http-interface /' $SERVER_DIR_PATH/standalone/configuration/standalone-full-ha.xml
-  sed -i '_orig' 's/http-interface security-realm=\"ManagementRealm\"/http-interface /' $SERVER_DIR_PATH/domain/configuration/host.xml
+  sed 's/http-interface security-realm=\"ManagementRealm\"/http-interface /' -i $SERVER_DIR_PATH/standalone/configuration/standalone-full-ha.xml
+  sed 's/http-interface security-realm=\"ManagementRealm\"/http-interface /' -i $SERVER_DIR_PATH/domain/configuration/host.xml
 }
 
 
