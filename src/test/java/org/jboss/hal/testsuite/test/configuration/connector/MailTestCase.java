@@ -8,11 +8,12 @@ import org.jboss.arquillian.junit.InSequence;
 import org.jboss.hal.testsuite.category.Standalone;
 import org.jboss.hal.testsuite.cli.CliClient;
 import org.jboss.hal.testsuite.cli.CliClientFactory;
-import org.jboss.hal.testsuite.cli.Library;
+import org.jboss.hal.testsuite.finder.Application;
+import org.jboss.hal.testsuite.finder.FinderNames;
+import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.fragment.config.mail.MailServerFragment;
 import org.jboss.hal.testsuite.fragment.config.mail.MailServerWizard;
 import org.jboss.hal.testsuite.fragment.config.mail.MailSessionWizard;
-import org.jboss.hal.testsuite.fragment.config.mail.MailSessionsFragment;
 import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
 import org.jboss.hal.testsuite.page.config.MailSessionsPage;
 import org.jboss.hal.testsuite.util.Console;
@@ -35,8 +36,10 @@ import static org.junit.Assert.assertTrue;
 @Category(Standalone.class)
 public class MailTestCase {
 
-    private static final String MAIL_SESSION = "java:/mail_" + RandomStringUtils.randomAlphanumeric(5);
-    private static final String MAIL_SESSION_INVALID = "%%%" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String ATTRIBUTES = "Attributes";
+    private static final String MAIL_SESSION_LABEL = "Mail Session";
+    private static final String MAIL_SESSION_NAME = "java:/mail_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String MAIL_SESSION_NAME_INVALID = "%%%" + RandomStringUtils.randomAlphanumeric(5);
     private static final String MAIL_NAME = "n_" + RandomStringUtils.randomAlphanumeric(5);
     private static final String TYPE = "pop3";
     private static final String USERNAME = "un_" + RandomStringUtils.randomAlphanumeric(5);
@@ -45,7 +48,7 @@ public class MailTestCase {
     private static final String FROM = "from_" + RandomStringUtils.randomAlphanumeric(5);
 
     private static final String DMR_SESSION = MAIL_SESSION_SUBSYSTEM_ADDRESS + "=" + MAIL_NAME + "";
-    private static final String DMR_SESSION_INVALID = MAIL_SESSION_SUBSYSTEM_ADDRESS + "=" + MAIL_SESSION_INVALID + "";
+    private static final String DMR_SESSION_INVALID = MAIL_SESSION_SUBSYSTEM_ADDRESS + "=" + MAIL_SESSION_NAME_INVALID + "";
     private static final String DMR_SERVER = DMR_SESSION + "/server=" + TYPE;
 
     private static CliClient client = CliClientFactory.getClient();
@@ -57,9 +60,13 @@ public class MailTestCase {
     @Page
     public MailSessionsPage page;
 
+    private FinderNavigation navi;
+
     @Before
     public void before() {
-        Console.withBrowser(browser).refreshAndNavigate(MailSessionsPage.class);
+        navi = new FinderNavigation(browser, MailSessionsPage.class)
+            .addAddress(FinderNames.CONFIGURATION,FinderNames.SUBSYSTEMS)
+            .addAddress(FinderNames.SUBSYSTEM,"Mail");
     }
 
     @AfterClass
@@ -72,11 +79,11 @@ public class MailTestCase {
     @Test
     public void createInvalidMailSession() {
 
-        page.select("Subsystems").select("Mail");
-        MailSessionWizard wizard = page.getMailSessions().addMailSession();
+        invokeOperationAddMailSession();
+        MailSessionWizard wizard = Console.withBrowser(browser).openedWizard(MailSessionWizard.class);
 
         boolean result =
-                wizard.jndiName(MAIL_SESSION_INVALID)
+                wizard.jndiName(MAIL_SESSION_NAME_INVALID)
                         .name(MAIL_NAME)
                         .finish();
 
@@ -87,12 +94,11 @@ public class MailTestCase {
     @Test
     @InSequence(0)
     public void createMailSession() {
-        page.select("Subsystems").select("Mail");
-        MailSessionsFragment fragment = page.getMailSessions();
-        MailSessionWizard wizard = fragment.addMailSession();
+        invokeOperationAddMailSession();
+        MailSessionWizard wizard = Console.withBrowser(browser).openedWizard(MailSessionWizard.class);
 
         boolean result =
-                wizard.jndiName(MAIL_SESSION)
+                wizard.jndiName(MAIL_SESSION_NAME)
                         .name(MAIL_NAME)
                         .finish();
 
@@ -104,7 +110,7 @@ public class MailTestCase {
     @Test
     @InSequence(1)
     public void enableDebugOnMailSession() {
-        page.select("Subsystems").select("Mail").select(MAIL_SESSION).option("Attributes");
+        invokeOperationOnMailSession(ATTRIBUTES);
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).getEditor().checkbox("debug", true);
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).clickButton("Save");
 
@@ -114,7 +120,7 @@ public class MailTestCase {
     @Test
     @InSequence(2)
     public void disableDebugOnMailSession() {
-        page.select("Subsystems").select("Mail").select(MAIL_SESSION).option("Attributes");
+        invokeOperationOnMailSession(ATTRIBUTES);
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).getEditor().checkbox("debug", false);
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).clickButton("Save");
 
@@ -124,7 +130,7 @@ public class MailTestCase {
     @Test
     @InSequence(3)
     public void changeDefaultFromOnMailSession() {
-        page.select("Subsystems").select("Mail").select(MAIL_SESSION).option("Attributes");
+        invokeOperationOnMailSession(ATTRIBUTES);
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).getEditor().text("from",FROM);
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).clickButton("Save");
 
@@ -134,8 +140,8 @@ public class MailTestCase {
     @Test
     @InSequence(4)
     public void createMailServer() {
-        page.select("Subsystems").select("Mail").view(MAIL_SESSION);
-        Library.letsSleep(1000);
+        invokeOperationOnMailSession(FinderNames.VIEW);
+        Application.waitUntilVisible();
         MailServerFragment fragment = page.getSesionsServers();
         MailServerWizard wizard = fragment.addMailServer();
 
@@ -156,8 +162,8 @@ public class MailTestCase {
     @Test
     @InSequence(5)
     public void removeMailServer() {
-        page.select("Subsystems").select("Mail").view(MAIL_SESSION);
-        Library.letsSleep(1000);
+        invokeOperationOnMailSession(FinderNames.VIEW);
+        Application.waitUntilVisible();
         MailServerFragment fragment = page.getSesionsServers();
         fragment.removeAndConfirm(TYPE);
 
@@ -167,10 +173,17 @@ public class MailTestCase {
     @Test
     @InSequence(6)
     public void removeMailSession() {
-        page.select("Subsystems").select("Mail").select(MAIL_SESSION).option("Remove");
+        invokeOperationOnMailSession("Remove");
 
         verifier.verifyResource(DMR_SESSION, false);
     }
 
+    private void invokeOperationOnMailSession(String operationName){
+        navi.addAddress(MAIL_SESSION_LABEL, MAIL_SESSION_NAME).selectRow().invoke(operationName);
+    }
+
+    private void invokeOperationAddMailSession(){
+        navi.addAddress(MAIL_SESSION_LABEL).selectColumn().invoke(FinderNames.ADD);
+    }
 
 }

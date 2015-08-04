@@ -26,6 +26,7 @@ package org.jboss.hal.testsuite.finder;
  */
 public interface FinderNames {
 
+    String ADD = "Add";
     String BROWSE_BY = "Browse By";
     String BROWSE_DOMAIN_BY = "Browse Domain By";
     String CONFIGURATION = "Configuration";
