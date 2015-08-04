@@ -29,8 +29,6 @@ fi
 
 function prepareServer {
   if [ "${WF_VERSION}x" != "x" ]; then
-    FILE = "$TMPDIR/wildfly-${WF_VERSION}.zip"
-
     wget -nc -O $TMPDIR/wildfly-${WF_VERSION}.zip http://download.jboss.org/wildfly/${WF_VERSION}/wildfly-${WF_VERSION}.zip
     rm -rf $TMPDIR/wildfly-${WF_VERSION}
     unzip -q $TMPDIR/wildfly-${WF_VERSION}.zip -d $TMPDIR
@@ -115,6 +113,7 @@ prepareServer
 #prepareCore
 
 killServer
+
 runServer
 
 runSuite
