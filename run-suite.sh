@@ -23,6 +23,20 @@ if [ "${SERVER_MODE}x" == "x" ] ; then
    exit 1
 fi
 
+
+if [ "${MVN_HOME}x" == "x" ] ; then
+   MVN = $(which mvn)
+   export MVN_BIN=$MVN
+else
+   MVN = "$MVN_HOME/bin/mvn"
+   export MVN_BIN=$MVN
+fi
+
+if [ "${MVN_BIN}x" == "x" ] ; then
+   echo "MVN_HOME has to be specified!"
+   exit 1
+fi
+
 #
 # function definitions
 #
@@ -84,21 +98,18 @@ function killServer() {
 
 function runSuite {
 
-  MVN = $(which mvn)
   if [ -n "$DTEST" ]; then
     export DTEST="-Dtest=$DTEST"
   fi
 
-  cd $WORKSPACE/testsuite
   if [ "$SERVER_MODE" == "domain" ]; then
-    $MVN test -Pdomain -Djboss.dist=$SERVER_DIR_PATH $DTEST -Darq.extension.webdriver.firefox_binary="${FIREFOX_BINARY}"  || true
+    $MVN_BIN test -Pdomain -Djboss.dist=$SERVER_DIR_PATH $DTEST -Darq.extension.webdriver.firefox_binary="${FIREFOX_BINARY}"  || true
   else
-    $MVN test -Pstandalone -Djboss.dist=$SERVER_DIR_PATH $DTEST -Darq.extension.webdriver.firefox_binary="${FIREFOX_BINARY}" || true
+    $MVN_BIN test -Pstandalone -Djboss.dist=$SERVER_DIR_PATH $DTEST -Darq.extension.webdriver.firefox_binary="${FIREFOX_BINARY}" || true
   fi
 }
 
 function prepareCore {
-  cd $WORKSPACE
   pushd core
   git log --no-merges -1 --pretty=format:"Core commit %h %an %s"
   mvn clean install -Dmaven.repo.local=$WORKSPACE/maven_repo
