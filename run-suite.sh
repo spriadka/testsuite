@@ -6,6 +6,7 @@
 # - WF_VERSION: the wildfly version to install
 # - TMPDIR: the tmp directory to download and install into
 # - SERVER_MODE: which tests to execute (standalone || domain)
+# - DOWNLOAD_URL (optional): the location for required binaries
 #
 
 if [ "${WF_VERSION}x" == "x" ] ; then
@@ -34,8 +35,15 @@ fi
 #
 
 function prepareServer {
+
+  if [ "${DOWNLOAD_URL}x" == "x" ]; then
+    export URL="http://download.jboss.org/wildfly/${WF_VERSION}"
+  else
+    export URL=$DOWNLOAD_URL
+  fi
+
   if [ "${WF_VERSION}x" != "x" ]; then
-    wget -nc -O $TMPDIR/wildfly-${WF_VERSION}.zip http://download.jboss.org/wildfly/${WF_VERSION}/wildfly-${WF_VERSION}.zip
+    wget -nc -O $TMPDIR/wildfly-${WF_VERSION}.zip "$URL/wildfly-${WF_VERSION}.zip"
     rm -rf $TMPDIR/wildfly-${WF_VERSION}
     unzip -q $TMPDIR/wildfly-${WF_VERSION}.zip -d $TMPDIR
   fi
