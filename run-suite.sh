@@ -56,8 +56,14 @@ function prepareServer {
   $SERVER_DIR_PATH/bin/add-user.sh -s admin asd1asd!
 
   # unsecure
-  sed 's/http-interface security-realm=\"ManagementRealm\"/http-interface /' -i $SERVER_DIR_PATH/standalone/configuration/standalone-full-ha.xml
-  sed 's/http-interface security-realm=\"ManagementRealm\"/http-interface /' -i $SERVER_DIR_PATH/domain/configuration/host.xml
+  if [ "$(uname -s)" == "Darwin" ]; then
+    sed -i '.bak' 's/http-interface security-realm=\"ManagementRealm\"/http-interface /' $SERVER_DIR_PATH/standalone/configuration/standalone-full-ha.xml
+    sed -i '.bak' 's/http-interface security-realm=\"ManagementRealm\"/http-interface /' $SERVER_DIR_PATH/domain/configuration/host.xml
+  else
+    sed 's/http-interface security-realm=\"ManagementRealm\"/http-interface /' -i $SERVER_DIR_PATH/standalone/configuration/standalone-full-ha.xml
+    sed 's/http-interface security-realm=\"ManagementRealm\"/http-interface /' -i $SERVER_DIR_PATH/domain/configuration/host.xml
+  fi
+
 }
 
 
