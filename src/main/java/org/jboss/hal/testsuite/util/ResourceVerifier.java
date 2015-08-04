@@ -31,7 +31,9 @@ import java.util.Map;
 
 /**
  * Created by pjelinek on Apr 7, 2015
+ * @deprecated Should be replaced with {@link org.jboss.hal.testsuite.dmr.ResourceVerifier}
  */
+@Deprecated
 public class ResourceVerifier {
 
     private String dmrPath;

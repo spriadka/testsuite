@@ -2,6 +2,7 @@ package org.jboss.hal.testsuite.test.util;
 
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.ByJQuery;
+import org.jboss.hal.testsuite.dmr.ResourceAddress;
 import org.jboss.hal.testsuite.fragment.ConfigAreaFragment;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
@@ -18,10 +19,18 @@ import java.util.List;
  */
 public class ConfigAreaChecker {
 
-    private ResourceVerifier verifier;
+    private org.jboss.hal.testsuite.dmr.ResourceVerifier verifier;
+    private ResourceAddress address;
+    private ResourceVerifier oldVerifier;
 
+    @Deprecated
     public ConfigAreaChecker(ResourceVerifier verifier) {
+        this.oldVerifier = verifier;
+    }
+
+    public ConfigAreaChecker(org.jboss.hal.testsuite.dmr.ResourceVerifier verifier, ResourceAddress address) {
         this.verifier = verifier;
+        this.address = address;
     }
 
     public Builder editTextAndAssert(ConfigPage page, String identifier, String value) {
@@ -62,7 +71,8 @@ public class ConfigAreaChecker {
         private String rowName;
         private String tab;
         private String dmrAttribute;
-        private ResourceVerifier insideVerifier;
+        private ResourceVerifier oldInsideVerifier;
+        private org.jboss.hal.testsuite.dmr.ResourceVerifier insideVerifier;
         private String disclosureLabel;
 
         private Builder(ConfigPage page, EditorType type, String identifier, String value) {
@@ -86,7 +96,13 @@ public class ConfigAreaChecker {
             this.lineValues = value;
         }
 
+        @Deprecated
         public Builder withVerifier(ResourceVerifier verifier) {
+            this.oldInsideVerifier = verifier;
+            return this;
+        }
+
+        public Builder withVerifier(org.jboss.hal.testsuite.dmr.ResourceVerifier verifier) {
             this.insideVerifier = verifier;
             return this;
         }
@@ -164,20 +180,38 @@ public class ConfigAreaChecker {
                 Assert.assertFalse("Config wasn't supposed to be saved, read-write view should be active.", finished);
             }
             if (expectedChange) {
+                if (this.oldInsideVerifier == null) {
+                    this.oldInsideVerifier = oldVerifier;
+                }
                 if (this.insideVerifier == null) {
                     this.insideVerifier = verifier;
                 }
-                switch (type) {
-                    case TEXTAREA:
-                        insideVerifier.verifyAttribute(dmrAttribute, lineValues);
-                        break;
-                    case SELECT:
-                    case TEXT:
-                        insideVerifier.verifyAttribute(dmrAttribute, stringValue, timeout);
-                        break;
-                    case CHECKBOX:
-                        insideVerifier.verifyAttribute(dmrAttribute, String.valueOf(booleanValue));
-                        break;
+                if (insideVerifier != null) {
+                    switch (type) {
+                        case TEXTAREA:
+                            insideVerifier.verifyAttribute(address, dmrAttribute, lineValues);
+                            break;
+                        case SELECT:
+                        case TEXT:
+                            insideVerifier.verifyAttribute(address, dmrAttribute, stringValue, timeout);
+                            break;
+                        case CHECKBOX:
+                            insideVerifier.verifyAttribute(address, dmrAttribute, booleanValue);
+                            break;
+                    }
+                } else if (oldInsideVerifier != null) {
+                    switch (type) {
+                        case TEXTAREA:
+                            oldInsideVerifier.verifyAttribute(dmrAttribute, lineValues);
+                            break;
+                        case SELECT:
+                        case TEXT:
+                            oldInsideVerifier.verifyAttribute(dmrAttribute, stringValue, timeout);
+                            break;
+                        case CHECKBOX:
+                            oldInsideVerifier.verifyAttribute(dmrAttribute, String.valueOf(booleanValue));
+                            break;
+                    }
                 }
             } else {
                 fragment.cancel();
