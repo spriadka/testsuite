@@ -22,8 +22,6 @@
 
 package org.jboss.hal.testsuite.test.configuration.profiles;
 
-import static org.junit.Assert.assertTrue;
-
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.Graphene;
@@ -44,6 +42,8 @@ import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
 
+import static org.junit.Assert.assertTrue;
+
 /**
  * Created by pjelinek on Jul 9, 2015
  */
@@ -58,11 +58,12 @@ public class ProfileCloningTestCase {
     public ProfilesConfigurationPage page;
 
     private CliClient client = CliClientFactory.getClient();
-    
-    private static final String DEFAULT = "default"; 
-    private static final String NEW_PROFILE_NAME = "qwerty"+RandomStringUtils.randomAlphabetic(5);
-    private static final String NEW_PROFILE_NAME_WITH_WHITESPACE = "qw rty"+RandomStringUtils.randomAlphabetic(5);
-    private static final String DMR_NEW_PROFILE_NAME_WITH_WHITESPACE = NEW_PROFILE_NAME_WITH_WHITESPACE.replaceAll(" ", "\\\\ ");
+
+    private static final String DEFAULT = "default";
+    private static final String NEW_PROFILE_NAME = "qwerty" + RandomStringUtils.randomAlphabetic(5);
+    private static final String NEW_PROFILE_NAME_WITH_WHITESPACE = "qw rty" + RandomStringUtils.randomAlphabetic(5);
+    private static final String DMR_NEW_PROFILE_NAME_WITH_WHITESPACE = NEW_PROFILE_NAME_WITH_WHITESPACE
+            .replaceAll(" ", "\\\\ ");
     private static final String DMR_PROFILE_PREFIX = "/profile=";
 
     @Before
@@ -75,30 +76,23 @@ public class ProfileCloningTestCase {
     }
 
     @Test
-    public void cloneDefaultProfile(){
+    public void cloneDefaultProfile() {
         page.tryToCloneProfile(DEFAULT, NEW_PROFILE_NAME);
-        assertTrue("Clone profile dialog should be successfully closed!",page.isCreateNewProfileWindowOpened());
+        assertTrue("Clone profile dialog should be successfully closed!", page.isCreateNewProfileWindowOpened());
         new ResourceVerifier(DMR_PROFILE_PREFIX + NEW_PROFILE_NAME, client).verifyResource(true);
         page.tryToCloneProfile(DEFAULT, NEW_PROFILE_NAME_WITH_WHITESPACE);
-        assertTrue("Whitespace is allowed in profile name. Clone profile dialog should be successfully closed!",page.isCreateNewProfileWindowOpened());
-        new ResourceVerifier(DMR_PROFILE_PREFIX + NEW_PROFILE_NAME_WITH_WHITESPACE, client).verifyResource(true);
+        assertTrue("Whitespace is allowed in profile name. Clone profile dialog should be successfully closed!",
+                page.isCreateNewProfileWindowOpened());
+        new ResourceVerifier(DMR_PROFILE_PREFIX + DMR_NEW_PROFILE_NAME_WITH_WHITESPACE, client).verifyResource(true);
     }
 
     @After
-    public void cleanUp(){
+    public void cleanUp() {
         removeProfile(NEW_PROFILE_NAME);
         removeProfile(DMR_NEW_PROFILE_NAME_WITH_WHITESPACE);
     }
 
-    private void removeProfile(String profileName){
-        String dmrSubsystemQuery = DMR_PROFILE_PREFIX+profileName+":read-children-names(child-type=subsystem)";
-        String result = client.executeForResult(dmrSubsystemQuery);
-        String[] subsystems = result.replaceAll("\\[", "").replaceAll("\\]","").replaceAll("\"", "").split(",");
-        for (String subsystem : subsystems) {
-            if(!subsystem.trim().equals("")){
-                client.removeResource(DMR_PROFILE_PREFIX+profileName+"/subsystem="+subsystem);
-            }
-        };
-        client.removeResource(DMR_PROFILE_PREFIX+profileName);
+    private void removeProfile(String profileName) {
+        client.removeResource(DMR_PROFILE_PREFIX + profileName);
     }
 }
