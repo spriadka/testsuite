@@ -42,8 +42,8 @@ function prepareServer {
   $SERVER_DIR_PATH/bin/add-user.sh -s admin asd1asd!
 
   # unsecure
-  sed -i '.original' 's/http-interface security-realm=\"ManagementRealm\"/http-interface /' $SERVER_DIR_PATH/standalone/configuration/standalone-full-ha.xml
-  sed -i '.original' 's/http-interface security-realm=\"ManagementRealm\"/http-interface /' $SERVER_DIR_PATH/domain/configuration/host.xml
+  sed -i '' 's/http-interface security-realm=\"ManagementRealm\"/http-interface /' $SERVER_DIR_PATH/standalone/configuration/standalone-full-ha.xml
+  sed -i '' 's/http-interface security-realm=\"ManagementRealm\"/http-interface /' $SERVER_DIR_PATH/domain/configuration/host.xml
 }
 
 
@@ -73,20 +73,27 @@ function prepareSuite {
 }
 
 function killServer() {
-  kill -9 $(cat $TMPDIR/HAL_TS_WF.pid)
+  PID="$TMPDIR/HAL_TS_WF.pid"
+  if [ -f $PID ]; then
+    kill -9 $(cat $PID)
+  else
+    echo "The File '$PID' Does Not Exist"
+  fi
+
 }
 
 function runSuite {
 
+  MVN = $(which mvn)
   if [ -n "$DTEST" ]; then
     export DTEST="-Dtest=$DTEST"
   fi
 
   cd $WORKSPACE/testsuite
   if [ "$SERVER_MODE" == "domain" ]; then
-    mvn test -Pdomain -Djboss.dist=$SERVER_DIR_PATH $DTEST -Darq.extension.webdriver.firefox_binary="${FIREFOX_BINARY}"  || true
+    $MVN test -Pdomain -Djboss.dist=$SERVER_DIR_PATH $DTEST -Darq.extension.webdriver.firefox_binary="${FIREFOX_BINARY}"  || true
   else
-    mvn test -Pstandalone -Djboss.dist=$SERVER_DIR_PATH $DTEST -Darq.extension.webdriver.firefox_binary="${FIREFOX_BINARY}" || true
+    $MVN test -Pstandalone -Djboss.dist=$SERVER_DIR_PATH $DTEST -Darq.extension.webdriver.firefox_binary="${FIREFOX_BINARY}" || true
   fi
 }
 
