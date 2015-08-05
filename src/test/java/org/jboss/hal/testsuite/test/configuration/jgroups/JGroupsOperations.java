@@ -78,15 +78,15 @@ public class JGroupsOperations {
 
     /*protocol properties*/
 
-    public boolean addProtocolProperty(String protocol, String name, String value) {//TODO: verify
+    public boolean addProtocolProperty(String protocol, String name, String value) {
         return addProperty(getProtocolDrmPath(protocol), name, value);
     }
 
-    public boolean verifyProtocolProperty(String protocol, String name, String value) {//todo verify
+    public boolean verifyProtocolProperty(String protocol, String name, String value) {
         return verifyProperty(getProtocolDrmPath(protocol), name, value);
     }
 
-    public void removeProtocolProperty(String protocol, String name) {//todo verify
+    public void removeProtocolProperty(String protocol, String name) {
         removeProperty(getProtocolDrmPath(protocol), name);
     }
 }
