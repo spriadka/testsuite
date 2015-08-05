@@ -21,17 +21,23 @@
  */
 package org.jboss.hal.testsuite.dmr;
 
-import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
 import org.jboss.dmr.ModelNode;
 import org.jboss.dmr.Property;
 
 import java.util.Collection;
 
+import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.*;
+
 /**
+ * Abstraction over a model node to execute operations.
+ *
  * @author Harald Pehl
  */
 public class Operation extends ModelNode {
 
+    /**
+     * A builder for creating operations. Name and address are required, operation parameters are optional.
+     */
     public static class Builder {
 
         private final String name;
@@ -97,12 +103,12 @@ public class Operation extends ModelNode {
     }
 
 
-    private int timeout;
+    private final int timeout;
 
     protected Operation(final String name, final ResourceAddress address, final ModelNode parameter, final String role,
             int timeout) {
-        get(ModelDescriptionConstants.OP).set(name);
-        get(ModelDescriptionConstants.ADDRESS).set(address);
+        get(OP).set(name);
+        get(ADDRESS).set(address);
         if (parameter.isDefined()) {
             for (Property property : parameter.asPropertyList()) {
                 get(property.getName()).set(property.getValue());
@@ -110,7 +116,7 @@ public class Operation extends ModelNode {
         }
         if (role != null && !name.equals("whoami")) {
             // otherwise we get the replacement role
-            get(ModelDescriptionConstants.OPERATION_HEADERS).get(ModelDescriptionConstants.ROLES).set(role);
+            get(OPERATION_HEADERS).get(ROLES).set(role);
         }
 
         this.timeout = timeout;
@@ -118,9 +124,5 @@ public class Operation extends ModelNode {
 
     public int getTimeout() {
         return timeout;
-    }
-
-    public void setTimeout(final int timeout) {
-        this.timeout = timeout;
     }
 }

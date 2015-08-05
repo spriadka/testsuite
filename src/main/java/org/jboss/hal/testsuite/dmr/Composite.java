@@ -28,13 +28,17 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.COMPOSITE;
+
 /**
+ * Represents a composite operation using a list of given operations. The composite won't use a timeout.
+ *
  * @author Harald Pehl
  */
 public class Composite extends Operation {
 
     public Composite(Operation first, Operation... rest) {
-        super(ModelDescriptionConstants.COMPOSITE, ResourceAddress.ROOT, new ModelNode(), null, 0);
+        super(COMPOSITE, ResourceAddress.ROOT, new ModelNode(), null, 0);
         List<Operation> operations = new ArrayList<>();
         operations.add(first);
         if (rest != null) {
@@ -44,7 +48,7 @@ public class Composite extends Operation {
     }
 
     public Composite(List<Operation> operations) {
-        super(ModelDescriptionConstants.COMPOSITE, ResourceAddress.ROOT, new ModelNode(), null, 0);
+        super(COMPOSITE, ResourceAddress.ROOT, new ModelNode(), null, 0);
         addSteps(operations);
     }
 

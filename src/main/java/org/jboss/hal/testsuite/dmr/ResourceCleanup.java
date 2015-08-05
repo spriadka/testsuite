@@ -21,9 +21,12 @@
  */
 package org.jboss.hal.testsuite.dmr;
 
-import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
+import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.READ_RESOURCE_OPERATION;
+import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.REMOVE;
 
 /**
+ * Helper class to cleanup resources created in test cases.
+ *
  * @author Harald Pehl
  */
 public class ResourceCleanup {
@@ -35,8 +38,8 @@ public class ResourceCleanup {
     }
 
     public void removeIfPresent(ResourceAddress address) {
-        if (dispatcher.execute(new Operation.Builder(ModelDescriptionConstants.READ_RESOURCE_OPERATION, address).build()).isSuccessful()) {
-            dispatcher.execute(new Operation.Builder(ModelDescriptionConstants.REMOVE, address).build());
+        if (dispatcher.execute(new Operation.Builder(READ_RESOURCE_OPERATION, address).build()).isSuccessful()) {
+            dispatcher.execute(new Operation.Builder(REMOVE, address).build());
         }
     }
 }

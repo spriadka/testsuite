@@ -21,29 +21,32 @@
  */
 package org.jboss.hal.testsuite.dmr;
 
-import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
 import org.jboss.dmr.ModelNode;
 
+import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.*;
+
 /**
+ * Represents the response of {@link Dispatcher#execute(Operation)}.
+ *
  * @author Harald Pehl
  */
 public class DmrResponse {
 
     private final ModelNode response;
 
-    public DmrResponse() {
-        this(new ModelNode());
-    }
-
     public DmrResponse(ModelNode response) {
         this.response = response;
     }
 
     public boolean isSuccessful() {
-        return response.get(ModelDescriptionConstants.OUTCOME).asString().equals(ModelDescriptionConstants.SUCCESS);
+        return response.get(OUTCOME).asString().equals(SUCCESS);
     }
 
+    /**
+     * @return the payload which is extracted from the nested {@link org.jboss.as.controller.descriptions.ModelDescriptionConstants#RESULT}
+     * node.
+     */
     public ModelNode payload() {
-        return response.get(ModelDescriptionConstants.RESULT);
+        return response.get(RESULT);
     }
 }

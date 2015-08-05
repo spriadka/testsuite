@@ -26,6 +26,14 @@ import org.jboss.hal.testsuite.util.ConfigUtils;
 import java.util.LinkedList;
 
 /**
+ * The default context implementation for the testsuite.
+ * <p>
+ * This implementation will handle the following patterns:
+ * <ul>
+ * <li>{@code {default.profile}} &rarr; {@code /profile=full} if running in domain mode, otherwise this pattern will
+ * simply be skipped.</li>
+ * </ul>
+ *
  * @author Harald Pehl
  */
 public class DefaultContext implements StatementContext {

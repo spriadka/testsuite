@@ -70,6 +70,9 @@ public class AddressTemplate {
 
     // ------------------------------------------------------ factory
 
+    /**
+     * Creates a new instance for the given template.
+     */
     public static AddressTemplate of(String template) {
         return new AddressTemplate(template);
     }
@@ -77,17 +80,14 @@ public class AddressTemplate {
 
     // ------------------------------------------------------ template methods
 
-    private static final String OPT = "opt:/";
     private final String template;
     private final LinkedList<Token> tokens;
-    private final boolean optional;
 
     private AddressTemplate(String template) {
         assert template != null : "template must not be null";
 
         this.tokens = parse(template);
-        this.optional = template.startsWith(OPT);
-        this.template = join(optional, tokens);
+        this.template = join(tokens);
     }
 
     private LinkedList<Token> parse(String template) {
@@ -97,8 +97,7 @@ public class AddressTemplate {
             return tokens;
         }
 
-        String normalized = template.startsWith(OPT) ? template.substring(5) : template;
-        StringTokenizer tok = new StringTokenizer(normalized, "/");
+        StringTokenizer tok = new StringTokenizer(template, "/");
         while (tok.hasMoreTokens()) {
             String nextToken = tok.nextToken();
             if (nextToken.contains("=")) {
@@ -112,13 +111,8 @@ public class AddressTemplate {
         return tokens;
     }
 
-    private String join(boolean optional, LinkedList<Token> tokens) {
-        StringBuilder builder = new StringBuilder();
-        if (optional) {
-            builder.append(OPT);
-        }
-        Joiner.on('/').appendTo(builder, tokens);
-        return builder.toString();
+    private String join(LinkedList<Token> tokens) {
+        return Joiner.on('/').join(tokens);
     }
 
     @Override
@@ -127,15 +121,13 @@ public class AddressTemplate {
         if (!(o instanceof AddressTemplate)) return false;
 
         AddressTemplate that = (AddressTemplate) o;
-        return optional == that.optional && template.equals(that.template);
+        return template.equals(that.template);
 
     }
 
     @Override
     public int hashCode() {
-        int result = template.hashCode();
-        result = 31 * result + (optional ? 1 : 0);
-        return result;
+        return template.hashCode();
     }
 
     @Override
@@ -168,7 +160,7 @@ public class AddressTemplate {
     public AddressTemplate subTemplate(int fromIndex, int toIndex) {
         LinkedList<Token> subTokens = new LinkedList<>();
         subTokens.addAll(this.tokens.subList(fromIndex, toIndex));
-        return AddressTemplate.of(join(this.optional, subTokens));
+        return AddressTemplate.of(join(subTokens));
     }
 
     /**
@@ -197,7 +189,7 @@ public class AddressTemplate {
                 replacedTokens.add(new Token(token.key, token.value));
             }
         }
-        return AddressTemplate.of(join(this.optional, replacedTokens));
+        return AddressTemplate.of(join(replacedTokens));
     }
 
     /**
@@ -216,9 +208,6 @@ public class AddressTemplate {
         return template;
     }
 
-    public boolean isOptional() {
-        return optional;
-    }
 
     // ------------------------------------------------------ resolve
 

@@ -24,11 +24,14 @@ package org.jboss.hal.testsuite.dmr;
 import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
 import org.jboss.dmr.ModelNode;
 
+import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.READ_ATTRIBUTE_OPERATION;
+import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.READ_RESOURCE_OPERATION;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
+ * Helper class to verify resource (attributes).
  * @author Harald Pehl
  */
 public class ResourceVerifier {
@@ -39,37 +42,67 @@ public class ResourceVerifier {
         this.dispatcher = dispatcher;
     }
 
+
+    // ------------------------------------------------------ resources
+
+    /**
+     * Verifies that the given resource exists.
+     */
     public void verifyResource(ResourceAddress address) {
         verifyResource(address, true);
     }
 
+    /**
+     * Verifies that the given resource exists using the specified timeout.
+     */
     public void verifyResource(ResourceAddress address, int timeout) {
         verifyResource(address, true, timeout);
     }
 
+    /**
+     * Verifies the given resource against the {@code expected} parameter.
+     */
     public void verifyResource(ResourceAddress address, boolean expected) {
         verifyResource(address, expected, 0);
     }
 
+    /**
+     * Verifies the given resource against the {@code expected} parameter using the specified timeout.
+     */
     public void verifyResource(ResourceAddress address, boolean expected, int timeout) {
-        Operation operation = new Operation.Builder(ModelDescriptionConstants.READ_RESOURCE_OPERATION, address).withTimeout(timeout).build();
+        Operation operation = new Operation.Builder(READ_RESOURCE_OPERATION, address).withTimeout(timeout).build();
         assertEquals(expected, dispatcher.execute(operation).isSuccessful());
     }
 
+
+    // ------------------------------------------------------ attributes
+
+    /**
+     * Verifies the attribute against the {@code expected} parameter.
+     */
     public void verifyAttribute(ResourceAddress address, String attribute, boolean expected) {
         verifyAttribute(address, attribute, expected, 0);
     }
 
+    /**
+     * Verifies the attribute against the {@code expected} parameter using the specified timeout.
+     */
     public void verifyAttribute(ResourceAddress address, String attribute, boolean expected, int timeout) {
         DmrResponse response = dispatcher.execute(readAttributeOperation(address, attribute, timeout));
         assertTrue(response.isSuccessful());
         assertEquals(expected, response.payload().asBoolean());
     }
 
+    /**
+     * Verifies the attribute against the {@code expected} parameter.
+     */
     public void verifyAttribute(ResourceAddress address, String attribute, String[] expected) {
         verifyAttribute(address, attribute, expected, 0);
     }
 
+    /**
+     * Verifies the attribute against the {@code expected} parameter using the specified timeout.
+     */
     public void verifyAttribute(ResourceAddress address, String attribute, String[] expected, int timeout) {
         DmrResponse response = dispatcher.execute(readAttributeOperation(address, attribute, timeout));
         assertTrue(response.isSuccessful());
@@ -77,10 +110,16 @@ public class ResourceVerifier {
         assertArrayEquals(expected, values);
     }
 
+    /**
+     * Verifies the attribute against the {@code expected} parameter.
+     */
     public void verifyAttribute(ResourceAddress address, String attribute, String expected) {
         verifyAttribute(address, attribute, expected, 0);
     }
 
+    /**
+     * Verifies the attribute against the {@code expected} parameter using the specified timeout.
+     */
     public void verifyAttribute(ResourceAddress address, String attribute, String expected, int timeout) {
         DmrResponse response = dispatcher.execute(readAttributeOperation(address, attribute, timeout));
         assertTrue(response.isSuccessful());
@@ -88,7 +127,7 @@ public class ResourceVerifier {
     }
 
     private Operation readAttributeOperation(ResourceAddress address, String attribute, int timeout) {
-        return new Operation.Builder(ModelDescriptionConstants.READ_ATTRIBUTE_OPERATION, address)
+        return new Operation.Builder(READ_ATTRIBUTE_OPERATION, address)
                 .param(ModelDescriptionConstants.NAME, attribute)
                 .withTimeout(timeout).build();
     }

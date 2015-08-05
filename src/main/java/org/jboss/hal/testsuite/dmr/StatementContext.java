@@ -2,6 +2,10 @@ package org.jboss.hal.testsuite.dmr;
 
 import java.util.LinkedList;
 
+/**
+ * A context able to {@linkplain AddressTemplate#resolve(StatementContext, String...) resolve} patterns in an {@link
+ * AddressTemplate}.
+ */
 public interface StatementContext {
 
     /**

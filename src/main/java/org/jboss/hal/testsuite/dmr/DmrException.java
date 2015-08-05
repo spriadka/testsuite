@@ -29,7 +29,7 @@ import java.io.IOException;
 public class DmrException extends RuntimeException {
 
     public DmrException(final IOException exception) {
-        super("Error in model controller client: " + exception.getMessage(), exception);
+        super("Error using model controller client: " + exception.getMessage(), exception);
     }
 
     public DmrException(final Operation operation, final IOException exception) {

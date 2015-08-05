@@ -39,11 +39,14 @@ import java.io.IOException;
 import java.net.UnknownHostException;
 
 /**
+ * Central class to execute {@link Operation}s.
+ *
  * @author Harald Pehl
  */
 public class Dispatcher {
 
-    static class AuthCallback implements CallbackHandler{
+    private static class AuthCallback implements CallbackHandler {
+
         String[] args;
 
         public AuthCallback(String[] args) {
@@ -68,24 +71,38 @@ public class Dispatcher {
         }
     }
 
+
     private static final Logger log = LoggerFactory.getLogger(Dispatcher.class);
 
     private static final String MANAGEMENT_HOST = ConfigUtils.get("as.managementAddress");
     private static final int MANAGEMENT_PORT = Integer.valueOf(ConfigUtils.get("as.managementPort"));
+    private static final String USERNAME = "authentication";
+    private static final String PASSWORD = "must be disabled";
+    private static final int WAIT = 200;
 
     private ModelControllerClient client;
 
+    /**
+     * Creates a new instance and opens a connection to the management interface which needs to be closed in {@link
+     * #close()}.
+     */
     public Dispatcher() {
         try {
             client = ModelControllerClient.Factory.create(MANAGEMENT_HOST, MANAGEMENT_PORT,
-                    new AuthCallback(new String[] {"foo", "bar"}));
+                    new AuthCallback(new String[]{USERNAME, PASSWORD}));
         } catch (UnknownHostException e) {
-            throw new RuntimeException("Unable to create model controller client", e);
+            throw new DmrException(e);
         }
     }
 
     // ------------------------------------------------------ execute
 
+    /**
+     * Execute the given operation. If a {@linkplain Operation#getTimeout()} timeout} is given the operation is
+     * executed repeatedly until it was successfully executed.
+     *
+     * @throws TimeoutException if the operation could not be executed successfully within the given timeout.
+     */
     public DmrResponse execute(Operation operation) {
         log.debug("Executing operation {}", operation);
 
@@ -97,7 +114,7 @@ public class Dispatcher {
                     if (System.currentTimeMillis() >= start + operation.getTimeout()) {
                         throw new TimeoutException(operation.toString(), operation.getTimeout());
                     }
-                    Library.letsSleep(200);
+                    Library.letsSleep(WAIT);
                     response = executeSingle(operation);
                 }
             }
