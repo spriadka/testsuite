@@ -4,7 +4,7 @@ import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.arquillian.graphene.page.Location;
 import org.jboss.hal.testsuite.fragment.config.jgroups.ExecutorTabFragment;
-import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConfigPropertiesFragment;
+import org.jboss.hal.testsuite.fragment.config.jgroups.JGroupsConfigArea;
 import org.jboss.hal.testsuite.util.Console;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -25,7 +25,7 @@ public class JGroupsPage extends ConfigurationPage {
         ExecutorTabFragment executorTabFragment = Graphene.createPageFragment(ExecutorTabFragment.class, root);
         executorTabFragment.openExecutors();
     }
-    
+
     public void switchToTransport() {
         switchTo("Transport");
     }
@@ -34,13 +34,18 @@ public class JGroupsPage extends ConfigurationPage {
         switchTo("Protocols");
     }
 
+    public void switchToProtocol(String protocol) {
+        switchToProtocols();
+        getResourceManager().getResourceTable().getRowByText(0, protocol).click();
+    }
+
     public void switchTo(String name) {
         switchView(name);
         Console.withBrowser(browser).waitUntilLoaded();
     }
 
-    public ConfigPropertiesFragment getConfigProperties() {
-        return Graphene.createPageFragment(ConfigPropertiesFragment.class, getContentRoot());
+    public JGroupsConfigArea getConfig() {
+        return getConfig(JGroupsConfigArea.class);
     }
 
 }

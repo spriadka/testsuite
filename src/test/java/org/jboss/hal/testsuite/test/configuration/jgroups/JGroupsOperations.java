@@ -10,32 +10,11 @@ import org.jboss.hal.testsuite.util.ConfigUtils;
 public class JGroupsOperations {
 
     private CliClient client;
-    private String profile = "";
-    private String stackName = "";
     private String transport = "";
-    private String protocol = "";
-
-    public JGroupsOperations(CliClient client, String stackName, String transport, String protocol) {
-        this(client);
-        this.stackName = stackName;
-        this.transport = transport;
-        this.protocol = protocol;
-    }
+    private String baseDrmPath = "";
 
     public JGroupsOperations(CliClient client) {
         this.client = client;
-        if (ConfigUtils.isDomain()) {
-            profile = "/profile=full-ha";
-        }
-        protocol = "";//TODO: default protocol name
-    }
-
-    public String getStackName() {
-        return stackName;
-    }
-
-    public void setStackName(String stackName) {
-        this.stackName = stackName;
     }
 
     public String getTransport() {
@@ -47,17 +26,19 @@ public class JGroupsOperations {
     }
 
     private String getBaseDmrPath() {
-        return  profile +
-                "/subsystem=jgroups/" +
-                "stack=" + stackName + "/";
+        return baseDrmPath;
+    }
+
+    public void setBaseDrmPath(String baseDrmPath) {
+        this.baseDrmPath = baseDrmPath;
     }
 
     private String getTransportDrmPath() {
         return getBaseDmrPath() + "transport=" + transport + "/";
     }
 
-    private String getProtocolDrmPath() {//TODO: verify
-        return getBaseDmrPath() + "protocol=" + protocol + "/";
+    private String getProtocolDrmPath(String name) {//TODO: verify
+        return getBaseDmrPath() + "protocol=" + name + "/";
     }
 
     /**/
@@ -97,15 +78,15 @@ public class JGroupsOperations {
 
     /*protocol properties*/
 
-    public boolean addProtocolProperty(String name, String value) {//TODO: verify
-        return addProperty(getProtocolDrmPath(), name, value);
+    public boolean addProtocolProperty(String protocol, String name, String value) {//TODO: verify
+        return addProperty(getProtocolDrmPath(protocol), name, value);
     }
 
-    public boolean verifyProtocolProperty(String name, String value) {//todo verify
-        return verifyProperty(getProtocolDrmPath(), name, value);
+    public boolean verifyProtocolProperty(String protocol, String name, String value) {//todo verify
+        return verifyProperty(getProtocolDrmPath(protocol), name, value);
     }
 
-    public void removeProtocolProperty(String name) {//todo verify
-        removeProperty(getProtocolDrmPath(), name);
+    public void removeProtocolProperty(String protocol, String name) {//todo verify
+        removeProperty(getProtocolDrmPath(protocol), name);
     }
 }

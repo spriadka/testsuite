@@ -16,10 +16,7 @@ import org.jboss.hal.testsuite.test.util.ConfigAreaChecker;
 import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.ResourceVerifier;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import org.openqa.selenium.WebDriver;
 
 import static org.junit.Assert.assertFalse;
@@ -36,6 +33,7 @@ public class JGroupAbstractTestCase {
     protected static final String PROPERTY_VALUE = "url";
     protected static final String PROPERTY_NAME_P = "URL1";
     protected static final String PROPERTY_VALUE_P = "url1";
+    protected static final String DEFAULT_PROTOCOL = "UNICAST3";
 
     private static CliClient client = CliClientFactory.getClient();
     protected static ResourceVerifier verifier = new ResourceVerifier("", client);
@@ -56,20 +54,23 @@ public class JGroupAbstractTestCase {
     public void navigateInDomain() {
         Graphene.goTo(DomainConfigurationPage.class);
         Console.withBrowser(browser).waitUntilLoaded();
-        page.select("Profiles").select("full-ha").view("JGroups");
+        page.selectMenu("Profiles").selectMenu("full-ha").view("JGroups");
         Console.withBrowser(browser).waitUntilLoaded();
     }
 
     private void navigateInStandalone() {
         Graphene.goTo(StandaloneConfigurationPage.class);
         Console.withBrowser(browser).waitUntilLoaded();
-        page.select("Subsystems").view("JGroups");
+        page.selectMenu("Subsystems").view("JGroups");
         Console.withBrowser(browser).waitUntilLoaded();
     }
 
     @Before
     public void before() {
-        if (!initialized) { onlyOnce(); initialized = true;}
+        if (!initialized) {
+            onlyOnce();
+            initialized = true;
+        }
         Graphene.goTo(HomePage.class);
         Console.withBrowser(browser).waitUntilLoaded();
         if (ConfigUtils.isDomain()) {
@@ -77,19 +78,21 @@ public class JGroupAbstractTestCase {
         } else {
             navigateInStandalone();
         }
+        Console.withBrowser(browser).waitUntilLoaded();
     }
 
     @After
     public void after() {
         Console.withBrowser(browser).refresh();
+        Console.withBrowser(browser).waitUntilLoaded();
     }
 
     @AfterClass
     public static void tearDown() {
         jGroupsOperations.removeTransportProperty(PROPERTY_NAME, PROPERTY_VALUE);
         jGroupsOperations.removeTransportProperty(PROPERTY_NAME_P, PROPERTY_VALUE_P);
-        jGroupsOperations.removeProtocolProperty(PROPERTY_NAME);
-        jGroupsOperations.removeProtocolProperty(PROPERTY_NAME_P);
+        jGroupsOperations.removeProtocolProperty(DEFAULT_PROTOCOL, PROPERTY_NAME);
+        jGroupsOperations.removeProtocolProperty(DEFAULT_PROTOCOL, PROPERTY_NAME_P);
     }
 
     @Test
@@ -128,6 +131,7 @@ public class JGroupAbstractTestCase {
         checker.editTextAndAssert(page, "rack", name).invoke();
     }
 
+    @Ignore("Executor tab removed in DR7")
     @Test
     public void threadFactoryEdit() {
         String name = RandomStringUtils.randomAlphabetic(6);
@@ -135,6 +139,7 @@ public class JGroupAbstractTestCase {
         checker.editTextAndAssert(page, "threadFactory", name).dmrAttribute("thread-factory").invoke();
     }
 
+    @Ignore("Executor tab removed in DR7")
     @Test
     public void defaultExecutorEdit() {
         String name = RandomStringUtils.randomAlphabetic(6);
@@ -142,6 +147,7 @@ public class JGroupAbstractTestCase {
         checker.editTextAndAssert(page, "defaultExecutor", name).dmrAttribute("default-executor").invoke();
     }
 
+    @Ignore("Executor tab removed in DR7")
     @Test
     public void oobExecutorEdit() {
         String name = RandomStringUtils.randomAlphabetic(6);
@@ -149,6 +155,7 @@ public class JGroupAbstractTestCase {
         checker.editTextAndAssert(page, "oobExecutor", name).dmrAttribute("oob-executor").invoke();
     }
 
+    @Ignore("Executor tab removed in DR7")
     @Test
     public void timerExecutorEdit() {
         String name = RandomStringUtils.randomAlphabetic(6);
@@ -158,7 +165,7 @@ public class JGroupAbstractTestCase {
 
     @Test
     public void createTransportProperty() {
-        ConfigPropertiesFragment properties = page.getConfigProperties();
+        ConfigPropertiesFragment properties = page.getConfig().propertiesConfig();
         ConfigPropertyWizard wizard = properties.addProperty();
         wizard.name(PROPERTY_NAME).value(PROPERTY_VALUE).finish();
         assertTrue(jGroupsOperations.verifyTransportProperty(PROPERTY_NAME, PROPERTY_VALUE));
@@ -166,25 +173,26 @@ public class JGroupAbstractTestCase {
 
     @Test
     public void removeTransportProperty() {
-        ConfigPropertiesFragment properties = page.getConfigProperties();
+        ConfigPropertiesFragment properties = page.getConfig().propertiesConfig();
         properties.removeProperty(PROPERTY_NAME_P);
         assertFalse(jGroupsOperations.verifyTransportProperty(PROPERTY_NAME_P, PROPERTY_VALUE_P));
     }
 
+
     @Test
-    public void createProtocolProperty() {//TODO
-        page.switchToProtocols();
-        ConfigPropertiesFragment properties = page.getConfigProperties();
+    public void createProtocolProperty() {
+        page.switchToProtocol(DEFAULT_PROTOCOL);
+        ConfigPropertiesFragment properties = page.getConfig().propertiesConfig();
         ConfigPropertyWizard wizard = properties.addProperty();
         wizard.name(PROPERTY_NAME).value(PROPERTY_VALUE).finish();
-        assertTrue(jGroupsOperations.verifyProtocolProperty(PROPERTY_NAME, PROPERTY_VALUE));
+        assertTrue(jGroupsOperations.verifyProtocolProperty(DEFAULT_PROTOCOL, PROPERTY_NAME, PROPERTY_VALUE));
     }
 
     @Test
-    public void removeProtocolProperty() {//TODO
-        page.switchToProtocols();
-        ConfigPropertiesFragment properties = page.getConfigProperties();
+    public void removeProtocolProperty() {
+        page.switchToProtocol(DEFAULT_PROTOCOL);
+        ConfigPropertiesFragment properties = page.getConfig().propertiesConfig();
         properties.removeProperty(PROPERTY_NAME_P);
-        assertFalse(jGroupsOperations.verifyProtocolProperty(PROPERTY_NAME_P, PROPERTY_VALUE_P));
+        assertFalse(jGroupsOperations.verifyProtocolProperty(DEFAULT_PROTOCOL, PROPERTY_NAME_P, PROPERTY_VALUE_P));
     }
 }
