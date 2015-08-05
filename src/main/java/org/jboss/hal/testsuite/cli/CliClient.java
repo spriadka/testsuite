@@ -35,9 +35,11 @@ import java.util.List;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.*;
 
 /**
+ * @deprecated Should be replaced with {@link org.jboss.hal.testsuite.dmr.Dispatcher}
  * Use {@link CliClientFactory} to obtain instance.
  * @author rhatlapa (rhatlapa@redhat.com)
  */
+@Deprecated
 public class CliClient {
 
     private static final Logger log = LoggerFactory.getLogger(CliClient.class);
