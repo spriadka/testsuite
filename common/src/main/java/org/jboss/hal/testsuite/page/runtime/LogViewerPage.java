@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.arquillian.graphene.page.Location;
 import org.jboss.hal.testsuite.fragment.shared.modal.LogConfirmDownloadWindow;
 import org.jboss.hal.testsuite.page.RuntimePage;
@@ -24,6 +25,7 @@ public class LogViewerPage extends RuntimePage {
 
     public static final String MAIN_TAB = PropUtils.get("logviewer.tab.main.label");
     public static final String CLOSE_TAB = PropUtils.get("content.tab.close.class");
+    public static final String REMOVE = PropUtils.get("remove.icon.class");
     public static final String VIEW_BUTTON = PropUtils.get("logviewer.btn.view.id");
 
 
@@ -92,7 +94,9 @@ public class LogViewerPage extends RuntimePage {
 
         WebElement tab = map.get(name);
 
-        WebElement close = tab.findElement(By.className(CLOSE_TAB));
+
+        By selector = ByJQuery.selector("." + REMOVE + "." +CLOSE_TAB + ":visible");
+        WebElement close = tab.findElement(selector);
         close.click();
 
         try {
