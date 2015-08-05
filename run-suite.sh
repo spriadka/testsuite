@@ -80,13 +80,14 @@ function shutdownServer {
 function runServer {
   shutdownServer
   if [ "$SERVER_MODE" == "domain" ]; then
-    $SERVER_DIR_PATH/bin/domain.sh &
+    eval "($SERVER_DIR_PATH/bin/domain.sh) &"
+    echo $!>$TMPDIR/HAL_TS_WF.pid
   else
-    $SERVER_DIR_PATH/bin/standalone.sh -c standalone-full-ha.xml &
+    eval "($SERVER_DIR_PATH/bin/standalone.sh -c standalone-full-ha.xml) &"
+    echo $!>$TMPDIR/HAL_TS_WF.pid
   fi
 
-  echo $$>$TMPDIR/HAL_TS_WF.pid
-
+  echo "WF PID: $(cat $TMPDIR/HAL_TS_WF.pid)"
   sleep 20
 }
 
@@ -99,13 +100,7 @@ function prepareSuite {
 }
 
 function killServer() {
-  PID="$TMPDIR/HAL_TS_WF.pid"
-  if [ -f "$PID" ]; then
-    kill -9 $(cat $PID)
-  else
-    echo "The File '$PID' Does Not Exist"
-  fi
-
+  sh kill.sh
 }
 
 function runSuite {
