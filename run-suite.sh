@@ -100,7 +100,7 @@ function prepareSuite {
 
 function killServer() {
   PID="$TMPDIR/HAL_TS_WF.pid"
-  if [ -f $PID ]; then
+  if [ -f "$PID" ]; then
     kill -9 $(cat $PID)
   else
     echo "The File '$PID' Does Not Exist"
