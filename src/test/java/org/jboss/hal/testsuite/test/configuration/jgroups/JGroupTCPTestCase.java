@@ -21,6 +21,7 @@ public class JGroupTCPTestCase extends JGroupAbstractTestCase {
         jGroupsOperations.setStackName("tcp");
         jGroupsOperations.setTransport("TCP");
         jGroupsOperations.addTransportProperty(PROPERTY_NAME_P, PROPERTY_VALUE_P);
+        jGroupsOperations.addProtocolProperty(PROPERTY_NAME_P, PROPERTY_VALUE_P);
     }
 
     @Before

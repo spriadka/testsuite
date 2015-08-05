@@ -13,11 +13,13 @@ public class JGroupsOperations {
     private String profile = "";
     private String stackName = "";
     private String transport = "";
+    private String protocol = "";
 
-    public JGroupsOperations(CliClient client, String stackName, String transport) {
+    public JGroupsOperations(CliClient client, String stackName, String transport, String protocol) {
         this(client);
         this.stackName = stackName;
         this.transport = transport;
+        this.protocol = protocol;
     }
 
     public JGroupsOperations(CliClient client) {
@@ -25,6 +27,7 @@ public class JGroupsOperations {
         if (ConfigUtils.isDomain()) {
             profile = "/profile=full-ha";
         }
+        protocol = "";//TODO: default protocol name
     }
 
     public String getStackName() {
@@ -50,45 +53,59 @@ public class JGroupsOperations {
     }
 
     private String getTransportDrmPath() {
-        return  getBaseDmrPath() + "transport=" + transport + "/";
+        return getBaseDmrPath() + "transport=" + transport + "/";
     }
 
-    /*transport properties*/
-
-    public boolean addTransportProperty(String name, String value) {
-        String command = getTransportDrmPath() + "property=" + name + ":add(value=" + value + ")";
-        CLI.Result result = client.executeCommand(command);
-        return result.isSuccess();
+    private String getProtocolDrmPath() {//TODO: verify
+        return getBaseDmrPath() + "protocol=" + protocol + "/";
     }
 
-    public void removeTransportProperty(String name, String value) {
-        String command = getTransportDrmPath() + "property=" + name + ":remove";
+    /**/
+
+    private boolean addProperty(String path, String name, String value) {
+        String command = path + "property=" + name + ":add(value=" + value + ")";
+        return client.executeForSuccess(command);
+    }
+
+    private void removeProperty(String path, String name) {
+        String command = path + "property=" + name + ":remove";
         client.executeCommand(command);
     }
 
-    public boolean verifyTransportProperty(String name, String value) {
-        String command = getTransportDrmPath() + ":read-resource";
-        CLI.Result result = client.executeCommand(command);
-        return result.getResponse()
+    public boolean verifyProperty(String path, String name, String value) {
+        String command = path + ":read-resource";
+        return client.executeForResponse(command)
                 .get("result")
                 .get("properties")
                 .toJSONString(false)
                 .contains("\"" + name + "\" : \"" + value + "\"");
     }
 
+    /*transport properties*/
+
+    public boolean addTransportProperty(String name, String value) {
+        return addProperty(getTransportDrmPath(), name, value);
+    }
+
+    public void removeTransportProperty(String name, String value) {
+        removeProperty(getTransportDrmPath(), name);
+    }
+
+    public boolean verifyTransportProperty(String name, String value) {
+        return verifyProperty(getTransportDrmPath(), name, value);
+    }
+
     /*protocol properties*/
 
-    public boolean addProtocolProperty(String name, String value) {
-        //TODO
-        return false;
+    public boolean addProtocolProperty(String name, String value) {//TODO: verify
+        return addProperty(getProtocolDrmPath(), name, value);
     }
 
-    public boolean verifyProtocolProperty(String name, String value) {
-        //TODO
-        return false;
+    public boolean verifyProtocolProperty(String name, String value) {//todo verify
+        return verifyProperty(getProtocolDrmPath(), name, value);
     }
 
-    public void removeProtocolProperty() {
-        //TODO
+    public void removeProtocolProperty(String name) {//todo verify
+        removeProperty(getProtocolDrmPath(), name);
     }
 }

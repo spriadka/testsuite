@@ -88,6 +88,8 @@ public class JGroupAbstractTestCase {
     public static void tearDown() {
         jGroupsOperations.removeTransportProperty(PROPERTY_NAME, PROPERTY_VALUE);
         jGroupsOperations.removeTransportProperty(PROPERTY_NAME_P, PROPERTY_VALUE_P);
+        jGroupsOperations.removeProtocolProperty(PROPERTY_NAME);
+        jGroupsOperations.removeProtocolProperty(PROPERTY_NAME_P);
     }
 
     @Test
@@ -175,7 +177,7 @@ public class JGroupAbstractTestCase {
         ConfigPropertiesFragment properties = page.getConfigProperties();
         ConfigPropertyWizard wizard = properties.addProperty();
         wizard.name(PROPERTY_NAME).value(PROPERTY_VALUE).finish();
-        assertTrue(jGroupsOperations.verifyTransportProperty(PROPERTY_NAME, PROPERTY_VALUE));
+        assertTrue(jGroupsOperations.verifyProtocolProperty(PROPERTY_NAME, PROPERTY_VALUE));
     }
 
     @Test
@@ -183,6 +185,6 @@ public class JGroupAbstractTestCase {
         page.switchToProtocols();
         ConfigPropertiesFragment properties = page.getConfigProperties();
         properties.removeProperty(PROPERTY_NAME_P);
-        assertFalse(jGroupsOperations.verifyTransportProperty(PROPERTY_NAME_P, PROPERTY_VALUE_P));
+        assertFalse(jGroupsOperations.verifyProtocolProperty(PROPERTY_NAME_P, PROPERTY_VALUE_P));
     }
 }
