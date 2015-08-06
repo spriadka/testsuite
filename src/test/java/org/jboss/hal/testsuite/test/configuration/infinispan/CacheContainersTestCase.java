@@ -2,7 +2,6 @@ package org.jboss.hal.testsuite.test.configuration.infinispan;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
-import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.junit.InSequence;
@@ -13,7 +12,6 @@ import org.jboss.hal.testsuite.cli.CliUtils;
 import org.jboss.hal.testsuite.fragment.config.infinispan.CacheContainerWizard;
 import org.jboss.hal.testsuite.page.config.ConfigurationPage;
 import org.jboss.hal.testsuite.page.config.StandaloneConfigurationPage;
-import org.jboss.hal.testsuite.page.home.HomePage;
 import org.jboss.hal.testsuite.test.util.ConfigAreaChecker;
 import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.ResourceVerifier;
@@ -61,11 +59,7 @@ public class CacheContainersTestCase {
     @Before
     public void before() {
         addCacheContainer();
-        browser.navigate().refresh();
-        Graphene.goTo(HomePage.class);
-        Console.withBrowser(browser).waitUntilLoaded();
-        Graphene.goTo(StandaloneConfigurationPage.class);
-        Console.withBrowser(browser).waitUntilLoaded().maximizeWindow();
+        Console.withBrowser(browser).refreshAndNavigate(StandaloneConfigurationPage.class);
     }
 
     @After
