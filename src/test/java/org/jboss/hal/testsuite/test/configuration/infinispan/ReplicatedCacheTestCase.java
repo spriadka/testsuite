@@ -2,7 +2,7 @@ package org.jboss.hal.testsuite.test.configuration.infinispan;
 
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.cli.CliUtils;
-import org.jboss.hal.testsuite.test.category.Standalone;
+import org.jboss.hal.testsuite.category.Standalone;
 import org.junit.Before;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;

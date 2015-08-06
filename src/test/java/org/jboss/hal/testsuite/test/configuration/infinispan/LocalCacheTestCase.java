@@ -4,7 +4,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.cli.CliUtils;
 import org.jboss.hal.testsuite.fragment.config.infinispan.CacheWizard;
-import org.jboss.hal.testsuite.test.category.Standalone;
+import org.jboss.hal.testsuite.category.Standalone;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
