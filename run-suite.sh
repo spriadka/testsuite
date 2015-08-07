@@ -141,8 +141,8 @@ prepareCore
 
 killServer
 
-#runServer
+runServer
 
-#runSuite
+runSuite
 
-#shutdownServer
+shutdownServer
