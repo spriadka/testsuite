@@ -21,13 +21,13 @@ E.g. for standalone Wildfly 9 using CLI:
 
 ## How to run tests
 
-`mvn test -P{profile} -Djboss.dist=${path_to_server_home} -Darq.extension.webdriver.firefox_binary=${path_to_firefox_binary}`
+`mvn test -P{module},{server.mode} -Djboss.dist=${path_to_server_home} -Darq.extension.webdriver.firefox_binary=${path_to_firefox_binary}`
 
-### Required profile parameter
+### Required profile (-P) parameters
 
 Can be one of those:
-* `-Pstandalone` ... run testsuite against standalone mode
-* `-Pdomain`` ... run testsuite against domain mode
+* `-Pbasic,standalone` ... run basic tests against standalone mode
+* `-Pbasic,domain`` ... run basic tests against domain mode
 
 ### Required jboss.dist parameter
 

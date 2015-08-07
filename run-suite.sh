@@ -110,9 +110,9 @@ function runSuite {
   fi
 
   if [ "$SERVER_MODE" == "domain" ]; then
-    sh $M2_HOME/bin/mvn test -Pdomain -Djboss.dist=$SERVER_DIR_PATH $DTEST -Darq.extension.webdriver.firefox_binary="${FIREFOX_BINARY}"  || true
+    sh $M2_HOME/bin/mvn test -Pbasic,domain -Djboss.dist=$SERVER_DIR_PATH $DTEST -Darq.extension.webdriver.firefox_binary="${FIREFOX_BINARY}"  || true
   else
-    sh $M2_HOME/bin/mvn test -Pstandalone -Djboss.dist=$SERVER_DIR_PATH $DTEST -Darq.extension.webdriver.firefox_binary="${FIREFOX_BINARY}" || true
+    sh $M2_HOME/bin/mvn test -Pbasic,standalone -Djboss.dist=$SERVER_DIR_PATH $DTEST -Darq.extension.webdriver.firefox_binary="${FIREFOX_BINARY}" || true
   fi
 }
 

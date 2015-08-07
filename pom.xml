@@ -9,7 +9,12 @@
 
   <groupId>org.jboss.as</groupId>
   <artifactId>hal-testsuite</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>0.0.2-SNAPSHOT</version>
+  <packaging>pom</packaging>
+
+  <modules>
+    <module>common</module>
+  </modules>
 
   <scm>
     <connection>scm:git:git@github.com:hal/testsuite.git</connection>
@@ -69,6 +74,11 @@
       	<version>2.42.2</version>
       </dependency>
 
+      <dependency>
+        <groupId>org.jboss.as</groupId>
+        <artifactId>hal-testsuite-common</artifactId>
+        <version>${project.version}</version>
+      </dependency>
 
     </dependencies>
 
@@ -129,6 +139,21 @@
   </dependencies>
 
   <profiles>
+
+    <profile>
+      <id>basic</id>
+      <modules>
+        <module>basic</module>
+      </modules>
+    </profile>
+
+    <profile>
+      <id>rbac</id>
+      <modules>
+        <module>rbac</module>
+      </modules>
+    </profile>
+
     <profile>
       <id>standalone</id>
       <properties>
