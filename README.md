@@ -21,13 +21,13 @@ E.g. for standalone Wildfly 9 using CLI:
 
 ## How to run tests
 
-`mvn test -P{profile} -Djboss.dist=${path_to_server_home} -Darq.extension.webdriver.firefox_binary=${path_to_firefox_binary}`
+`mvn test -P{module},{server.mode} -Djboss.dist=${path_to_server_home} -Darq.extension.webdriver.firefox_binary=${path_to_firefox_binary}`
 
-### Required profile parameter
+### Required profile (-P) parameters
 
 Can be one of those:
-* `-Pstandalone` ... run testsuite against standalone mode
-* `-Pdomain`` ... run testsuite against domain mode
+* `-Pbasic,standalone` ... run basic tests against standalone mode
+* `-Pbasic,domain`` ... run basic tests against domain mode
 
 ### Required jboss.dist parameter
 
@@ -39,6 +39,21 @@ E.g. `-Djboss.dist=/home/user/workspace/wildfly/build/target/wildfly-9.0.0.Alpha
 
 Path to Firefox binary file. If not provided system default firefox will be used.
 E.g. `-Darq.extension.webdriver.firefox_binary=/home/user/apps/firefox-31.2.0esr/firefox`
+
+## Modules
+
+### common
+
+Should contain all common abstraction like UI navigation, test categories, DMR abstraction etc.
+It's intentioned to be able to used as a dependency of external testsuites as well.
+
+### basic
+
+Should contain majority of tests which don't require special configuration.
+
+### rbac
+
+Should contain RBAC related tests.
 
 ## Tips
 
