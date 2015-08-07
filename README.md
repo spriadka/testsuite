@@ -40,6 +40,21 @@ E.g. `-Djboss.dist=/home/user/workspace/wildfly/build/target/wildfly-9.0.0.Alpha
 Path to Firefox binary file. If not provided system default firefox will be used.
 E.g. `-Darq.extension.webdriver.firefox_binary=/home/user/apps/firefox-31.2.0esr/firefox`
 
+## Modules
+
+### common
+
+Should contain all common abstraction like UI navigation, test categories, DMR abstraction etc.
+It's intentioned to be able to used as a dependency of external testsuites as well.
+
+### basic
+
+Should contain majority of tests which don't require special configuration.
+
+### rbac
+
+Should contain RBAC related tests.
+
 ## Tips
 
 * If you want tests to be run on background use vncserver. E.g. 
