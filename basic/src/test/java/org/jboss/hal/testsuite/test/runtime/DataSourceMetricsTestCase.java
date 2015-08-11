@@ -64,13 +64,13 @@ public class DataSourceMetricsTestCase {
                     .addAddress(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
                     .addAddress(FinderNames.SUBSYSTEM,"Datasources");
         }
+
+        navigation.selectRow().invoke("View");
+        Application.waitUntilVisible();
     }
 
     @Test
     public void connectionPoolMetrics(){
-        navigation.selectRow().invoke("View");
-        Application.waitUntilVisible();
-
         MetricsAreaFragment metricsArea = dsPage.getConnectionPoolMetricsArea();
         double expectedActivePercentage = metricsArea.getPercentage(ACTIVE, AVAILABLE_CONNECTIONS);
         double expectedMaxUsedPercentage = metricsArea.getPercentage(MAX_USED, AVAILABLE_CONNECTIONS);
@@ -84,9 +84,6 @@ public class DataSourceMetricsTestCase {
 
     @Test
     public void preparedStatementCacheMetrics(){
-        navigation.selectRow().invoke("View");
-        Application.waitUntilVisible();
-
         MetricsAreaFragment metricsArea = dsPage.getPreparedStatementCacheMetricsArea();
         double expectedHitCountPercentage = metricsArea.getPercentage(HIT_COUNT, ACCESS_COUNT);
         double expectedMissCountPercentage = metricsArea.getPercentage(MISS_COUNT, ACCESS_COUNT);

@@ -61,13 +61,13 @@ public class JvmMetricsTestCase {
                     .addAddress(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
                     .addAddress(FinderNames.MONITOR, "JVM");
         }
+
+        navigation.selectRow().invoke("View");
+        Application.waitUntilVisible();
     }
 
     @Test
     public void heapUsageMetrics(){
-        navigation.selectRow().invoke("View");
-        Application.waitUntilVisible();
-
         MetricsAreaFragment metricsArea = jvmPage.getHeapUsageMetricsArea();
         double expectedUsedPercentage = metricsArea.getPercentage(USED, MAX);
         double expectedCommittedPercentage = metricsArea.getPercentage(COMMITTED, MAX);
@@ -80,9 +80,6 @@ public class JvmMetricsTestCase {
 
     @Test
     public void threadUsageMetrics(){
-        navigation.selectRow().invoke("View");
-        Application.waitUntilVisible();
-
         MetricsAreaFragment metricsArea = jvmPage.getThreadUsageMetricsArea();
         double expectedUsagePercentage = metricsArea.getPercentage(DAEMON, LIVE);
         MetricsFragment threadUsageMetrics = metricsArea.getMetricsFragment(DAEMON);

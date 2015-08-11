@@ -51,26 +51,26 @@ public class TransactionsMetricsTestCase {
     @Before
     public void before(){
         if (ConfigUtils.isDomain()) {
-        navigation = new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
+            navigation = new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
                 .addAddress(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
                 .addAddress(FinderNames.HOST, "master")
                 .addAddress(FinderNames.SERVER,"server-one")
                 .addAddress(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
                 .addAddress(FinderNames.SUBSYSTEM, "Transactions");
-    }
-    else{
-        navigation = new FinderNavigation(browser, StandaloneRuntimeEntryPoint.class)
+        }
+        else{
+            navigation = new FinderNavigation(browser, StandaloneRuntimeEntryPoint.class)
                 .addAddress(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
                 .addAddress(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
                 .addAddress(FinderNames.SUBSYSTEM,"Transactions");
-    }
+        }
+        navigation.selectRow().invoke("View");
+        Application.waitUntilVisible();
+
     }
 
     @Test
     public void successRationMetrics() {
-        navigation.selectRow().invoke("View");
-        Application.waitUntilVisible();
-
         MetricsAreaFragment metricsArea = tmPage.getSuccessRationMetricsArea();
         double expectedCommittedPercentage = metricsArea.getPercentage(COMMITTED, NUMBER_OF_TRANSACTIONS);
         double expectedAbortedPercentage = metricsArea.getPercentage(ABORTED, NUMBER_OF_TRANSACTIONS);
@@ -86,10 +86,7 @@ public class TransactionsMetricsTestCase {
     }
 
     @Test
-    public void failureOriginMetrics() {
-        navigation.selectRow().invoke("View");
-        Application.waitUntilVisible();
-
+    public void failureOriginMetrics(){
         MetricsAreaFragment metricsArea = tmPage.getFailureOriginMetricsArea();
         MetricsFragment appFailuresMetrics = metricsArea.getMetricsFragment(APPLICATION_FAILURES);
         MetricsFragment resFailuresMetrics = metricsArea.getMetricsFragment(RESOURCE_FAILURES);
