@@ -8,6 +8,7 @@
 # - SERVER_MODE: which tests to execute (standalone || domain)
 # - DOWNLOAD_URL (optional): the location for required binaries
 # - HAL_VERSION: the HAL version to install
+# - HAL_FS_LOCATION: HAL artifact location on the filesystem (otherwise mvn repo will be used)
 #
 
 if [ "${WF_VERSION}x" == "x" ] ; then
@@ -117,8 +118,13 @@ function runSuite {
 }
 
 function prepareCore {
-  sh $M2_HOME/bin/mvn dependency:copy -DoutputDirectory=$TMPDIR -Dartifact=org.jboss.as:jboss-as-console:$HAL_VERSION:jar:resources
-  new_artifact="$TMPDIR/jboss-as-console-$HAL_VERSION-resources.jar"
+
+  if [ -n "$HAL_FS_LOCATION" ]; then
+    new_artifact="$HAL_FS_LOCATION/jboss-as-console-$HAL_VERSION-resources.jar"
+  else
+    sh $M2_HOME/bin/mvn dependency:copy -DoutputDirectory=$TMPDIR -Dmaven.repository=https://repository.jboss.org/nexus/content/groups/public/ -Dartifact=org.jboss.as:jboss-as-console:$HAL_VERSION:jar:resources
+    new_artifact="$TMPDIR/jboss-as-console-$HAL_VERSION-resources.jar"
+  fi
 
   original_artifact=$(ls $SERVER_DIR_PATH/modules/system/layers/base/org/jboss/as/console/**/*.jar)
   rm -f $original_artifact
