@@ -4,10 +4,15 @@ import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Shared;
+import org.jboss.hal.testsuite.finder.Application;
+import org.jboss.hal.testsuite.finder.FinderNames;
+import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.fragment.MetricsAreaFragment;
 import org.jboss.hal.testsuite.fragment.MetricsFragment;
 import org.jboss.hal.testsuite.page.runtime.DataSourcesMetricsPage;
-import org.jboss.hal.testsuite.util.Console;
+import org.jboss.hal.testsuite.page.runtime.DomainRuntimeEntryPoint;
+import org.jboss.hal.testsuite.page.runtime.StandaloneRuntimeEntryPoint;
+import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -30,15 +35,38 @@ public class DataSourceMetricsTestCase {
     public static final String ACCESS_COUNT = "Access Count";
     public static final String MISS_COUNT = "Miss Count";
     public static final int DELTA = 3;
+
+    private FinderNavigation navigation;
+
     @Drone
     private WebDriver browser;
 
     @Page
     private DataSourcesMetricsPage dsPage;
+    @Page
+    private StandaloneRuntimeEntryPoint standalonePage;
+    @Page
+    private DomainRuntimeEntryPoint domainPage;
 
     @Before
     public void before(){
-        Console.withBrowser(browser).refreshAndNavigate(DataSourcesMetricsPage.class);
+        if (ConfigUtils.isDomain()) {
+            navigation = new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
+                    .addAddress(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
+                    .addAddress(FinderNames.HOST, "master")
+                    .addAddress(FinderNames.SERVER,"server-one")
+                    .addAddress(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
+                    .addAddress(FinderNames.SUBSYSTEM, "Datasources");
+        }
+        else{
+            navigation = new FinderNavigation(browser, StandaloneRuntimeEntryPoint.class)
+                    .addAddress(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
+                    .addAddress(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
+                    .addAddress(FinderNames.SUBSYSTEM,"Datasources");
+        }
+
+        navigation.selectRow().invoke("View");
+        Application.waitUntilVisible();
     }
 
     @Test
