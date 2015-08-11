@@ -124,7 +124,7 @@ public class FinderNavigation {
         return By.cssSelector("[data-column=\"" + name + "\"]");
     }
 
-    private By rowSelector(String label) {
+    By rowSelector(String label) {
         String cellClass = PropUtils.get("table.cell.class");
         return By.ByXPath.xpath("//td[contains(@class,'" + cellClass + "') and " +
                 "descendant::div[@class='navigation-column-item'" + " and contains(.,'" + label + "')]]");

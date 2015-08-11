@@ -21,8 +21,12 @@
  */
 package org.jboss.hal.testsuite.finder;
 
+import java.util.concurrent.TimeUnit;
+
+import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 
 /**
  * A fragment representing a column in a finder.
@@ -44,5 +48,23 @@ public class Column extends FinderFragment {
     @Override
     protected By dropDownArrowSelector() {
         return By.cssSelector(".btn.dropdown-toggle.primary");
+    }
+
+    /**
+     * Wait for up to {@code timeout} to row containing text {@code label} to appear.<br />
+     * Intended to be used in e.g. large domain tests.
+     * @param label
+     * @param timeout
+     * @param navi
+     * @return
+     */
+    public boolean rowIsVisible(String label, Long timeout, FinderNavigation navi){
+        By rowSelector = navi.rowSelector(label);
+        try {
+            Graphene.waitModel().withTimeout(timeout, TimeUnit.SECONDS).until().element(root, rowSelector).is().visible();
+            return true;
+        } catch (TimeoutException e) {
+            return false;
+        }
     }
 }
