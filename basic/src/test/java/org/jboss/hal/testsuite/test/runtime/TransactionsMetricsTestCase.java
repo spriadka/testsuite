@@ -4,10 +4,15 @@ import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Shared;
+import org.jboss.hal.testsuite.finder.Application;
+import org.jboss.hal.testsuite.finder.FinderNames;
+import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.fragment.MetricsAreaFragment;
 import org.jboss.hal.testsuite.fragment.MetricsFragment;
+import org.jboss.hal.testsuite.page.runtime.DomainRuntimeEntryPoint;
+import org.jboss.hal.testsuite.page.runtime.StandaloneRuntimeEntryPoint;
 import org.jboss.hal.testsuite.page.runtime.TransactionsMetricsPage;
-import org.jboss.hal.testsuite.util.Console;
+import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -30,19 +35,42 @@ public class TransactionsMetricsTestCase {
     public static final String APPLICATION_FAILURES = "Application Failures";
     public static final String RESOURCE_FAILURES = "Resource Failures";
     public static final int DELTA = 3;
+
+    private FinderNavigation navigation;
+
     @Drone
     private WebDriver browser;
 
     @Page
     private TransactionsMetricsPage tmPage;
+    @Page
+    private StandaloneRuntimeEntryPoint standalonePage;
+    @Page
+    private DomainRuntimeEntryPoint domainPage;
 
     @Before
-    public void before() {
-        Console.withBrowser(browser).refreshAndNavigate(TransactionsMetricsPage.class);
+    public void before(){
+        if (ConfigUtils.isDomain()) {
+        navigation = new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
+                .addAddress(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
+                .addAddress(FinderNames.HOST, "master")
+                .addAddress(FinderNames.SERVER,"server-one")
+                .addAddress(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
+                .addAddress(FinderNames.SUBSYSTEM, "Transactions");
+    }
+    else{
+        navigation = new FinderNavigation(browser, StandaloneRuntimeEntryPoint.class)
+                .addAddress(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
+                .addAddress(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
+                .addAddress(FinderNames.SUBSYSTEM,"Transactions");
+    }
     }
 
     @Test
     public void successRationMetrics() {
+        navigation.selectRow().invoke("View");
+        Application.waitUntilVisible();
+
         MetricsAreaFragment metricsArea = tmPage.getSuccessRationMetricsArea();
         double expectedCommittedPercentage = metricsArea.getPercentage(COMMITTED, NUMBER_OF_TRANSACTIONS);
         double expectedAbortedPercentage = metricsArea.getPercentage(ABORTED, NUMBER_OF_TRANSACTIONS);
@@ -59,6 +87,9 @@ public class TransactionsMetricsTestCase {
 
     @Test
     public void failureOriginMetrics() {
+        navigation.selectRow().invoke("View");
+        Application.waitUntilVisible();
+
         MetricsAreaFragment metricsArea = tmPage.getFailureOriginMetricsArea();
         MetricsFragment appFailuresMetrics = metricsArea.getMetricsFragment(APPLICATION_FAILURES);
         MetricsFragment resFailuresMetrics = metricsArea.getMetricsFragment(RESOURCE_FAILURES);
