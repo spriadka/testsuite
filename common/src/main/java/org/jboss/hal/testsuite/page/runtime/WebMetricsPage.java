@@ -1,6 +1,5 @@
 package org.jboss.hal.testsuite.page.runtime;
 
-import org.jboss.arquillian.graphene.page.Location;
 import org.jboss.hal.testsuite.fragment.MetricsAreaFragment;
 import org.jboss.hal.testsuite.page.MetricsPage;
 
