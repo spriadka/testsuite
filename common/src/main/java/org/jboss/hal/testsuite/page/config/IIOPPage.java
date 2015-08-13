@@ -27,6 +27,11 @@ public class IIOPPage extends ConfigurationPage {
         Graphene.waitGui().until().element(By.className("form-edit-panel")).is().visible();
     }
 
+    public void waitUntilPropertiesAreVisible(){
+        // wait until we switched to properties
+        Graphene.waitGui().until().element(By.className("default-cell-table")).is().visible();
+    }
+
     public ConfigFragment getConfigFragment(){
         WebElement editPanel = browser.findElement(By.className("default-tabpanel"));
         return  Graphene.createPageFragment(ConfigFragment.class, editPanel);
@@ -35,5 +40,4 @@ public class IIOPPage extends ConfigurationPage {
     public IIOPConfigArea getConfig() {
         return getConfig(IIOPConfigArea.class);
     }
-    
 }
