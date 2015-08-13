@@ -249,7 +249,6 @@ public class IIOPTestCase {
 
         assertTrue("Config should be saved and closed.", finished);
         verifier.verifyAttribute(transactionAddress, "jts", true);
-        cliClient.restart();
     }
 
     @Test
@@ -274,7 +273,6 @@ public class IIOPTestCase {
 
         assertTrue("Config should be saved and closed.", finished);
         verifier.verifyAttribute(transactionAddress, "jts", false);
-        cliClient.restart();
     }
 
     @Test
