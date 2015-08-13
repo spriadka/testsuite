@@ -33,13 +33,15 @@ public class WizardWindow extends WindowFragment {
      * @return true if window is not present after the button was clicked
      */
     public boolean finish() {
-        String label = PropUtils.get("modals.wizard.finish.label");
         try {
-            clickButton(label);
+            clickFinishButton();
         } catch (WebDriverException e) {
-            log.debug("Button with label \"" + label + "\" not found");
-            label = PropUtils.get("modals.window.save.label");
-            clickButton(label);
+            try {
+                clickDoneButton();
+            }
+            catch (WebDriverException ex) {
+                clickSaveButton();
+            }
         }
 
         try {
@@ -52,6 +54,30 @@ public class WizardWindow extends WindowFragment {
             return false;
         }
 
+    }
+
+    private void clickDoneButton() {
+        String label = PropUtils.get("modals.wizard.done.label");
+        clickButtonAndLogIfFails(label);
+    }
+
+    private void clickFinishButton() {
+        String label = PropUtils.get("modals.wizard.finish.label");
+        clickButtonAndLogIfFails(label);
+    }
+
+    private void clickSaveButton() {
+        String label = PropUtils.get("modals.window.save.label");
+        clickButtonAndLogIfFails(label);
+    }
+
+    private void clickButtonAndLogIfFails(String label) {
+        try {
+            clickButton(label);
+        } catch (WebDriverException e) {
+            log.debug("Button with label \"" + label + "\" not found");
+            throw e;
+        }
     }
 
     /**
