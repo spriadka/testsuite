@@ -1,0 +1,18 @@
+connect
+batch
+/core-service=management/access=authorization/role-mapping=Administrator:add()
+/core-service=management/access=authorization/role-mapping=Maintainer:add()
+/core-service=management/access=authorization/role-mapping=Operator:add()
+/core-service=management/access=authorization/role-mapping=Monitor:add()
+/core-service=management/access=authorization/role-mapping=Auditor:add()
+/core-service=management/access=authorization/role-mapping=Deployer:add()
+
+/core-service=management/access=authorization/role-mapping=SuperUser/include=superuser:add(name=superuser, type=user, realm=ManagementRealm)
+/core-service=management/access=authorization/role-mapping=Administrator/include=aministrator:add(name=administrator, type=user, realm=ManagementRealm)
+/core-service=management/access=authorization/role-mapping=Maintainer/include=maintainer:add(name=maintainer, type=user, realm=ManagementRealm)
+/core-service=management/access=authorization/role-mapping=Operator/include=operator:add(name=operator, type=user, realm=ManagementRealm)
+/core-service=management/access=authorization/role-mapping=Monitor/include=monitor:add(name=monitor, type=user, realm=ManagementRealm)
+/core-service=management/access=authorization/role-mapping=Auditor/include=auditor:add(name=auditor, type=user, realm=ManagementRealm)
+/core-service=management/access=authorization/role-mapping=Deployer/include=deployer:add(name=deployer, type=user, realm=ManagementRealm)
+
+run-batch

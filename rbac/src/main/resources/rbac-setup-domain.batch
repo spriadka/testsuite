@@ -1,0 +1,148 @@
+connect
+batch
+
+#######################
+#   DOMAIN TOPOLOGY   #
+#######################
+/server-group=mainmaster-server-group:add(profile=ha, socket-binding-group=ha-sockets)
+/host=master/server-config=server-four:add(group=mainmaster-server-group, auto-start=true, socket-binding-port-offset=350)
+
+####################
+#   GLOBAL ROLES   #
+####################
+
+/core-service=management/access=authorization/role-mapping=Administrator:add()
+/core-service=management/access=authorization/role-mapping=Maintainer:add()
+/core-service=management/access=authorization/role-mapping=Operator:add()
+/core-service=management/access=authorization/role-mapping=Monitor:add()
+/core-service=management/access=authorization/role-mapping=Auditor:add()
+/core-service=management/access=authorization/role-mapping=Deployer:add()
+
+/core-service=management/access=authorization/role-mapping=SuperUser/include=superuser:add(name=superuser, type=user, realm=ManagementRealm)
+/core-service=management/access=authorization/role-mapping=Administrator/include=aministrator:add(name=administrator, type=user, realm=ManagementRealm)
+/core-service=management/access=authorization/role-mapping=Maintainer/include=Maintainer:add(name=maintainer, type=user, realm=ManagementRealm)
+/core-service=management/access=authorization/role-mapping=Operator/include=operator:add(name=operator, type=user, realm=ManagementRealm)
+/core-service=management/access=authorization/role-mapping=Monitor/include=monitor:add(name=monitor, type=user, realm=ManagementRealm)
+/core-service=management/access=authorization/role-mapping=Auditor/include=auditor:add(name=auditor, type=user, realm=ManagementRealm)
+/core-service=management/access=authorization/role-mapping=Deployer/include=deployer:add(name=deployer, type=user, realm=ManagementRealm)
+
+
+##########################
+#   GROUP SCOPED ROLES   #
+##########################
+
+#
+# main-server-group
+#
+/core-service=management/access=authorization/server-group-scoped-role=main-Administrator:add(base-role=Administrator, server-groups=[main-server-group])
+/core-service=management/access=authorization/server-group-scoped-role=main-Maintainer:add(base-role=Maintainer, server-groups=[main-server-group])
+/core-service=management/access=authorization/server-group-scoped-role=main-Operator:add(base-role=Operator, server-groups=[main-server-group])
+/core-service=management/access=authorization/server-group-scoped-role=main-Monitor:add(base-role=Monitor, server-groups=[main-server-group])
+/core-service=management/access=authorization/server-group-scoped-role=main-Auditor:add(base-role=Auditor, server-groups=[main-server-group])
+/core-service=management/access=authorization/server-group-scoped-role=main-Deployer:add(base-role=Deployer, server-groups=[main-server-group])
+
+# main-server-group mappings
+/core-service=management/access=authorization/role-mapping=main-Administrator:add()
+/core-service=management/access=authorization/role-mapping=main-Maintainer:add()
+/core-service=management/access=authorization/role-mapping=main-Operator:add()
+/core-service=management/access=authorization/role-mapping=main-Monitor:add()
+/core-service=management/access=authorization/role-mapping=main-Auditor:add()
+/core-service=management/access=authorization/role-mapping=main-Deployer:add()
+
+/core-service=management/access=authorization/role-mapping=main-Administrator/include=main-aministrator:add(name=main-administrator, type=user, realm=ManagementRealm)
+/core-service=management/access=authorization/role-mapping=main-Maintainer/include=main-maintainer:add(name=main-maintainer, type=user, realm=ManagementRealm)
+/core-service=management/access=authorization/role-mapping=main-Operator/include=main-operator:add(name=main-operator, type=user, realm=ManagementRealm)
+/core-service=management/access=authorization/role-mapping=main-Monitor/include=main-monitor:add(name=main-monitor, type=user, realm=ManagementRealm)
+/core-service=management/access=authorization/role-mapping=main-Auditor/include=main-auditor:add(name=main-auditor, type=user, realm=ManagementRealm)
+/core-service=management/access=authorization/role-mapping=main-Deployer/include=main-deployer:add(name=main-deployer, type=user, realm=ManagementRealm)
+
+#
+# other-server-group
+#
+/core-service=management/access=authorization/server-group-scoped-role=other-Administrator:add(base-role=Administrator, server-groups=[other-server-group])
+/core-service=management/access=authorization/server-group-scoped-role=other-Maintainer:add(base-role=Maintainer, server-groups=[other-server-group])
+/core-service=management/access=authorization/server-group-scoped-role=other-Operator:add(base-role=Operator, server-groups=[other-server-group])
+/core-service=management/access=authorization/server-group-scoped-role=other-Monitor:add(base-role=Monitor, server-groups=[other-server-group])
+/core-service=management/access=authorization/server-group-scoped-role=other-Auditor:add(base-role=Auditor, server-groups=[other-server-group])
+/core-service=management/access=authorization/server-group-scoped-role=other-Deployer:add(base-role=Deployer, server-groups=[other-server-group])
+
+
+# other-server-group mappings
+/core-service=management/access=authorization/role-mapping=other-Administrator:add()
+/core-service=management/access=authorization/role-mapping=other-Maintainer:add()
+/core-service=management/access=authorization/role-mapping=other-Operator:add()
+/core-service=management/access=authorization/role-mapping=other-Monitor:add()
+/core-service=management/access=authorization/role-mapping=other-Auditor:add()
+/core-service=management/access=authorization/role-mapping=other-Deployer:add()
+
+/core-service=management/access=authorization/role-mapping=other-Administrator/include=other-aministrator:add(name=other-administrator, type=user, realm=ManagementRealm)
+/core-service=management/access=authorization/role-mapping=other-Maintainer/include=other-Maintainer:add(name=other-Maintainer, type=user, realm=ManagementRealm)
+/core-service=management/access=authorization/role-mapping=other-Operator/include=other-operator:add(name=other-operator, type=user, realm=ManagementRealm)
+/core-service=management/access=authorization/role-mapping=other-Monitor/include=other-monitor:add(name=other-monitor, type=user, realm=ManagementRealm)
+/core-service=management/access=authorization/role-mapping=other-Auditor/include=other-auditor:add(name=other-auditor, type=user, realm=ManagementRealm)
+/core-service=management/access=authorization/role-mapping=other-Deployer/include=other-deployer:add(name=other-deployer, type=user, realm=ManagementRealm)
+
+#
+# mainmaster-server-group
+#
+/core-service=management/access=authorization/server-group-scoped-role=mainmaster-Administrator:add(base-role=Administrator, server-groups=[mainmaster-server-group])
+
+# other-server-group mappings
+/core-service=management/access=authorization/role-mapping=mainmaster-Administrator:add()
+
+/core-service=management/access=authorization/role-mapping=mainmaster-Administrator/include=mainmaster-aministrator:add(name=mainmaster-administrator, type=user, realm=ManagementRealm)
+
+#########################
+#   HOST SCOPED ROLES   #
+#########################
+
+# master
+/core-service=management/access=authorization/host-scoped-role=host-master-Administrator:add(base-role=Administrator, hosts=[master])
+/core-service=management/access=authorization/host-scoped-role=host-master-Maintainer:add(base-role=Maintainer, hosts=[master])
+/core-service=management/access=authorization/host-scoped-role=host-master-Operator:add(base-role=Operator, hosts=[master])
+/core-service=management/access=authorization/host-scoped-role=host-master-Monitor:add(base-role=Monitor, hosts=[master])
+/core-service=management/access=authorization/host-scoped-role=host-master-Auditor:add(base-role=Auditor, hosts=[master])
+/core-service=management/access=authorization/host-scoped-role=host-master-Deployer:add(base-role=Deployer, hosts=[master])
+
+# master mappings
+/core-service=management/access=authorization/role-mapping=host-master-Administrator:add()
+/core-service=management/access=authorization/role-mapping=host-master-Maintainer:add()
+/core-service=management/access=authorization/role-mapping=host-master-Operator:add()
+/core-service=management/access=authorization/role-mapping=host-master-Monitor:add()
+/core-service=management/access=authorization/role-mapping=host-master-Auditor:add()
+/core-service=management/access=authorization/role-mapping=host-master-Deployer:add()
+
+/core-service=management/access=authorization/role-mapping=host-master-Administrator/include=host-master-aministrator:add(name=host-master-administrator, type=user, realm=ManagementRealm)
+/core-service=management/access=authorization/role-mapping=host-master-Maintainer/include=host-master-Maintainer:add(name=host-master-Maintainer, type=user, realm=ManagementRealm)
+/core-service=management/access=authorization/role-mapping=host-master-Operator/include=host-master-operator:add(name=host-master-operator, type=user, realm=ManagementRealm)
+/core-service=management/access=authorization/role-mapping=host-master-Monitor/include=host-master-monitor:add(name=host-master-monitor, type=user, realm=ManagementRealm)
+/core-service=management/access=authorization/role-mapping=host-master-Auditor/include=host-master-auditor:add(name=host-master-auditor, type=user, realm=ManagementRealm)
+/core-service=management/access=authorization/role-mapping=host-master-Deployer/include=host-master-deployer:add(name=host-master-deployer, type=user, realm=ManagementRealm)
+
+# slave
+/core-service=management/access=authorization/host-scoped-role=host-slave-Administrator:add(base-role=Administrator, hosts=[slave])
+/core-service=management/access=authorization/host-scoped-role=host-slave-Maintainer:add(base-role=Maintainer, hosts=[slave])
+/core-service=management/access=authorization/host-scoped-role=host-slave-Operator:add(base-role=Operator, hosts=[slave])
+/core-service=management/access=authorization/host-scoped-role=host-slave-Monitor:add(base-role=Monitor, hosts=[slave])
+/core-service=management/access=authorization/host-scoped-role=host-slave-Auditor:add(base-role=Auditor, hosts=[slave])
+/core-service=management/access=authorization/host-scoped-role=host-slave-Deployer:add(base-role=Deployer, hosts=[slave])
+
+# slave mappings
+/core-service=management/access=authorization/role-mapping=host-slave-Administrator:add()
+/core-service=management/access=authorization/role-mapping=host-slave-Maintainer:add()
+/core-service=management/access=authorization/role-mapping=host-slave-Operator:add()
+/core-service=management/access=authorization/role-mapping=host-slave-Monitor:add()
+/core-service=management/access=authorization/role-mapping=host-slave-Auditor:add()
+/core-service=management/access=authorization/role-mapping=host-slave-Deployer:add()
+
+/core-service=management/access=authorization/role-mapping=host-slave-Administrator/include=host-slave-aministrator:add(name=host-slave-administrator, type=user, realm=ManagementRealm)
+/core-service=management/access=authorization/role-mapping=host-slave-Maintainer/include=host-slave-Maintainer:add(name=host-slave-Maintainer, type=user, realm=ManagementRealm)
+/core-service=management/access=authorization/role-mapping=host-slave-Operator/include=host-slave-operator:add(name=host-slave-operator, type=user, realm=ManagementRealm)
+/core-service=management/access=authorization/role-mapping=host-slave-Monitor/include=host-slave-monitor:add(name=host-slave-monitor, type=user, realm=ManagementRealm)
+/core-service=management/access=authorization/role-mapping=host-slave-Auditor/include=host-slave-auditor:add(name=host-slave-auditor, type=user, realm=ManagementRealm)
+/core-service=management/access=authorization/role-mapping=host-slave-Deployer/include=host-slave-deployer:add(name=host-slave-deployer, type=user, realm=ManagementRealm)
+
+run-batch
+
+# Following needs to be outside batch due to BZ1015098
+
