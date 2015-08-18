@@ -1,9 +1,11 @@
 package org.jboss.hal.testsuite.util;
 
 import org.jboss.arquillian.graphene.Graphene;
+import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.hal.testsuite.cli.Library;
 import org.jboss.hal.testsuite.fragment.BaseFragment;
 import org.jboss.hal.testsuite.fragment.PopUpFragment;
+import org.jboss.hal.testsuite.fragment.UserFragment;
 import org.jboss.hal.testsuite.fragment.WindowFragment;
 import org.jboss.hal.testsuite.fragment.formeditor.PropertyEditor;
 import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
@@ -283,5 +285,14 @@ public class Console {
         Graphene.goTo(clazz);
         waitUntilLoaded().maximizeWindow();
         return this;
+    }
+
+    public UserFragment getUserFragment(){
+        ByJQuery selector = ByJQuery.selector("." + PropUtils.get("header.textlink.class") + ":has(i." + PropUtils.get("icon.user.class") + ")");
+        return Graphene.createPageFragment(UserFragment.class, browser.findElement(selector));
+    }
+
+    public void logout(){
+        getUserFragment().openMenu().logout();
     }
 }
