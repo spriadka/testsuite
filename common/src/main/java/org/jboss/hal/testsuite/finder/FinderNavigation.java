@@ -87,6 +87,17 @@ public class FinderNavigation {
         return Graphene.createPageFragment(Column.class, column);
     }
 
+    /**
+     * @param exactRowText decides whether the row will be selected by its exact label (equals) or by part of its label (contains)
+     */
+    public Column selectColumn(Boolean exactRowText) {
+        WebElement column = navigate(exactRowText)[0];
+        if (column == null) {
+            throw new IllegalStateException("No address for selecting a column given");
+        }
+        return Graphene.createPageFragment(Column.class, column);
+    }
+
     public Row selectRow() {
         WebElement row = navigate()[1];
         if (row == null) {
@@ -95,7 +106,22 @@ public class FinderNavigation {
         return Graphene.createPageFragment(Row.class, row);
     }
 
+    /**
+     * @param exactRowText decides whether the row will be selected by its exact label (equals) or by part of its label (contains)
+     */
+    public Row selectRow(Boolean exactRowText) {
+        WebElement row = navigate(exactRowText)[1];
+        if (row == null) {
+            throw new IllegalStateException("No address for selecting a row given.");
+        }
+        return Graphene.createPageFragment(Row.class, row);
+    }
+
     private WebElement[] navigate() {
+        return navigate(false);
+    }
+    
+    private WebElement[] navigate(Boolean exactRowText) {
         WebElement[] columnRow = new WebElement[2];
         Console.withBrowser(browser).refreshAndNavigate(page);
 
@@ -104,10 +130,10 @@ public class FinderNavigation {
 
             columnRow[0] = browser.findElement(columnSelector(tuple.column));
             if (!WILDCARD.equals(tuple.row)) {
-                By rowSelector = rowSelector(tuple.row);
+                By rowSelector = exactRowText ? rowSelectorEquals(tuple.row) : rowSelector(tuple.row);
                 columnRow[1] = columnRow[0].findElement(rowSelector);
                 columnRow[1].click();
-                Graphene.waitModel().until().element(rowSelector).attribute("class")
+                Graphene.waitModel().until().element(columnRow[0],rowSelector).attribute("class")
                         .contains("cellTableSelectedRowCell");
 
                 // wait for next column to be visible
@@ -124,9 +150,16 @@ public class FinderNavigation {
         return By.cssSelector("[data-column=\"" + name + "\"]");
     }
 
-    By rowSelector(String label) {
+    By rowSelectorEquals(String label){
+        return getRowSelector(" and text()='" + label + "']]");
+    }
+
+    By rowSelector(String label){
+        return getRowSelector(" and contains(.,'" + label + "')]]");
+    }
+
+    private By getRowSelector(String xpathSuffix){
         String cellClass = PropUtils.get("table.cell.class");
-        return By.ByXPath.xpath("//td[contains(@class,'" + cellClass + "') and " +
-                "descendant::div[@class='navigation-column-item'" + " and contains(.,'" + label + "')]]");
+        return By.ByXPath.xpath(".//td[contains(@class,'" + cellClass + "') and descendant::div[@class='navigation-column-item'" + xpathSuffix);
     }
 }
