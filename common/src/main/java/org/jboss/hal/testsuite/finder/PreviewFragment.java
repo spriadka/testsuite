@@ -1,6 +1,6 @@
 /*
  * JBoss, Home of Professional Open Source.
- * Copyright 2010, Red Hat, Inc., and individual contributors
+ * Copyright 2015, Red Hat, Inc., and individual contributors
  * as indicated by the @author tags. See the copyright.txt file in the
  * distribution for a full listing of individual contributors.
  *
@@ -19,36 +19,26 @@
  * Software Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
+
 package org.jboss.hal.testsuite.finder;
 
+import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.ByJQuery;
+import org.jboss.hal.testsuite.fragment.BaseFragment;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
 /**
- * A fragment representing a row in a finder.
- *
- * @author Harald Pehl
+ * Created by pjelinek on Aug 17, 2015
  */
-public class Row extends FinderFragment {
+public class PreviewFragment extends BaseFragment {
 
-    @Override
-    protected By primaryButtonSelector(String name) {
-        return ByJQuery.selector("button#" + name + ":visible," +
-                "button:contains('" + name + "'):visible," +
-                "div.btn:contains('" + name + "'):visible");
+    public String getIncludedFromProfile(){
+        By selector = ByJQuery.selector("h3:contains('Included from profile:')");
+        Graphene.waitAjax().until().element(root,selector).is().visible();
+        WebElement element = root.findElement(selector);
+        // remove the 'Included from profile:' prefix
+        return element.getText().substring(22).trim();
     }
 
-    @Override
-    protected By secondaryButtonSelector(final String name) {
-        return ByJQuery.selector(".popupContent td.gwt-MenuItem:contains('" + name + "')");
-    }
-
-    @Override
-    protected By dropDownArrowSelector() {
-        return By.cssSelector(".btn.dropdown-toggle");
-    }
-
-    public String getText(){
-        return root.getText();
-    }
 }

@@ -50,7 +50,7 @@ public class FinderNavigation {
         }
     }
 
-    public interface Hook{
+    public interface Hook {
         void performAfterRowClick();
     }
 
@@ -134,10 +134,17 @@ public class FinderNavigation {
         return Graphene.createPageFragment(Row.class, row);
     }
 
+    public PreviewFragment getPreview(){
+        By previewSelector = By.className("preview-content");
+        Graphene.waitGui().until().element(previewSelector).is().visible();
+        WebElement preview = browser.findElement(previewSelector);
+        return Graphene.createPageFragment(PreviewFragment.class, preview);
+    }
+
     private WebElement[] navigate() {
         return navigate(false);
     }
-    
+
     private WebElement[] navigate(Boolean exactRowText) {
         WebElement[] columnRow = new WebElement[2];
         Console.withBrowser(browser).refreshAndNavigate(page);
