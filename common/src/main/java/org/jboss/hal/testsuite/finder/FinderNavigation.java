@@ -50,17 +50,34 @@ public class FinderNavigation {
         }
     }
 
+    public interface Hook{
+        void performAfterRowClick();
+    }
 
     private static final String WILDCARD = "*";
 
     private final WebDriver browser;
     private final Class<? extends BasePage> page;
     private final List<AddressTuple> address;
+    private final Hook hook;
 
-    public FinderNavigation(final WebDriver browser, final Class<? extends BasePage> page) {
+    /**
+     * This constructor should not be used regularly! <br />
+     * It's for special cases when you need to perform some action after every row click.<br />
+     * E.g. sleeps to workaround HAL-803
+     * @param browser
+     * @param page
+     * @param hook action after every row click
+     */
+    public FinderNavigation(final WebDriver browser, final Class<? extends BasePage> page, Hook hook) {
         this.browser = browser;
         this.page = page;
+        this.hook = hook;
         this.address = new ArrayList<>();
+    }
+
+    public FinderNavigation(final WebDriver browser, final Class<? extends BasePage> page){
+        this(browser, page, ()->{});
     }
 
     /**
@@ -133,6 +150,7 @@ public class FinderNavigation {
                 By rowSelector = exactRowText ? rowSelectorEquals(tuple.row) : rowSelector(tuple.row);
                 columnRow[1] = columnRow[0].findElement(rowSelector);
                 columnRow[1].click();
+                hook.performAfterRowClick();
                 Graphene.waitModel().until().element(columnRow[0],rowSelector).attribute("class")
                         .contains("cellTableSelectedRowCell");
 
