@@ -3,6 +3,7 @@ package org.jboss.hal.testsuite.page.config;
 import org.jboss.arquillian.graphene.page.Location;
 import org.jboss.hal.testsuite.fragment.config.datasource.DatasourceConfigArea;
 import org.jboss.hal.testsuite.fragment.config.datasource.DatasourceWizard;
+import org.jboss.hal.testsuite.fragment.config.datasource.PoolConfig;
 import org.jboss.hal.testsuite.util.Console;
 
 /**
@@ -23,6 +24,14 @@ public class DatasourcesPage extends ConfigurationPage {
     public void switchToXA() {
         selectMenu("XA");
         Console.withBrowser(browser).waitUntilLoaded();
+    }
+
+    public DatasourceWizard getDatasourceWizard() {
+        return Console.withBrowser(browser).openedWizard(DatasourceWizard.class);
+    }
+
+    public PoolConfig getPoolConfig() {
+        return getConfig().switchTo("Pool", PoolConfig.class);
     }
 
 }
