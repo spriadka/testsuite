@@ -58,10 +58,10 @@ public class Column extends FinderFragment {
      * @param navi
      * @return
      */
-    public boolean rowIsVisible(String label, Long timeout, FinderNavigation navi){
+    public boolean rowIsPresent(String label, Long timeout, FinderNavigation navi){
         By rowSelector = navi.rowSelector(label);
         try {
-            Graphene.waitModel().withTimeout(timeout, TimeUnit.SECONDS).until().element(root, rowSelector).is().visible();
+            Graphene.waitModel().withTimeout(timeout, TimeUnit.SECONDS).until().element(root, rowSelector).is().present();
             return true;
         } catch (TimeoutException e) {
             return false;
