@@ -280,12 +280,12 @@ public abstract class BasePage {
         return this;
     }
 
-    public ConfigFragment getConfigFragment(){
+    public ConfigFragment getConfigFragment() {
         WebElement editPanel = browser.findElement(By.className("default-tabpanel"));
         return  Graphene.createPageFragment(ConfigFragment.class, editPanel);
     }
 
-    protected By getMenuEqualsSelector(String label){
+    protected By getMenuEqualsSelector(String label) {
         return getMenuSelector(" and text()='" + label + "']]");
     }
 
