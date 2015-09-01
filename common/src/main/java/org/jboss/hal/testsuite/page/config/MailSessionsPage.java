@@ -23,7 +23,7 @@ public class MailSessionsPage extends ConfigurationPage {
     private static final By CONTENT = ByJQuery.selector("." + PropUtils.get("page.content.gwt-layoutpanel") + ":visible");
     private static final By SESSIONCONTENT = ByJQuery.selector("." + PropUtils.get("page.content.rhs.class") + ":visible");
 
-    public MailSessionsFragment getMailSessions(){
+    public MailSessionsFragment getMailSessions() {
         backIfAvailable();
         WebElement root = getContentRoot().findElement(CONTENT);
         return Graphene.createPageFragment(MailSessionsFragment.class, root);
@@ -41,13 +41,13 @@ public class MailSessionsPage extends ConfigurationPage {
         return Graphene.createPageFragment(MailServerFragment.class, fragmentRoot);
     }
 
-    private void backIfAvailable(){
-        try{
+    private void backIfAvailable() {
+        try {
         WebElement back = getContentRoot().findElement(BACK_ANCHOR);
-        if(back.isDisplayed()){
+        if (back.isDisplayed()) {
             back.click();
         }
-        }catch(NoSuchElementException e){
+        } catch (NoSuchElementException e) {
             log.debug("No back anchor found");
         }
     }

@@ -95,7 +95,7 @@ public class LogViewerPage extends RuntimePage {
         WebElement tab = map.get(name);
 
 
-        By selector = ByJQuery.selector("." + REMOVE + "." +CLOSE_TAB + ":visible");
+        By selector = ByJQuery.selector("." + REMOVE + "." + CLOSE_TAB + ":visible");
         WebElement close = tab.findElement(selector);
         close.click();
 

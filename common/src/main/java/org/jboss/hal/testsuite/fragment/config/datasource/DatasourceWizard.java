@@ -24,7 +24,7 @@ public class DatasourceWizard extends WizardWindow {
         return window;
     }
 
-    public void switchToDetectedDriver(){
+    public void switchToDetectedDriver() {
         root.findElement(DETECTED_DRIVER_BUTTON).click();
     }
 

@@ -45,7 +45,7 @@ public class ZipUtils {
      */
     public static void extractOneFileFromZip(File zip, String fileName, File output) throws IOException {
         log.info("Extracting {} from {} to {}", new String[]{fileName, zip.getAbsolutePath(), output.getAbsolutePath()});
-        try (FileSystem fileSystem = FileSystems.newFileSystem(zip.toPath(), null)){
+        try (FileSystem fileSystem = FileSystems.newFileSystem(zip.toPath(), null)) {
             Path source = fileSystem.getPath(fileName);
             Files.copy(source, output.toPath(), StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {

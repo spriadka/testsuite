@@ -43,7 +43,7 @@ public class TransactionsTestCase {
     }
 
     @After
-    public void after(){
+    public void after() {
         client.reload(false);
     }
 

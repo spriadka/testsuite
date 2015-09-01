@@ -50,13 +50,13 @@ public class VirtualServersTestCase {
     public ServletPage page;
 
     @AfterClass
-    public static void cleanUp(){
+    public static void cleanUp() {
         client.removeResource(DMR_PATH);
         client.reload(false);
     }
 
     @Before
-    public void before(){
+    public void before() {
         browser.navigate().refresh();
         Graphene.goTo(ServletPage.class);
         Console.withBrowser(browser).waitUntilLoaded();
@@ -65,7 +65,7 @@ public class VirtualServersTestCase {
 
     @Test
     @InSequence(0)
-    public void createVirtualServer(){
+    public void createVirtualServer() {
         VirtualServersFragment fragment = page.getConfig().virtualServers();
         VirtualServersWizard wizard = fragment.addVirtualServer();
 
@@ -81,7 +81,7 @@ public class VirtualServersTestCase {
 
     @Test
     @InSequence(1)
-    public void removeVirtualServer(){
+    public void removeVirtualServer() {
         VirtualServersFragment fragment = page.getConfig().virtualServers();
         fragment.removeVirtualServer(NAME);
         verifier.verifyResource(false);

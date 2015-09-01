@@ -39,7 +39,7 @@ public class ResourceVerifier {
     private String dmrPath;
     private CliClient cliClient;
 
-    public ResourceVerifier(String dmrPath, CliClient cliClient){
+    public ResourceVerifier(String dmrPath, CliClient cliClient) {
         if (cliClient == null) {
             throw new IllegalArgumentException("Management client not set.");
         }
@@ -108,7 +108,7 @@ public class ResourceVerifier {
      * @param name name of the attribute. If the name is camelCase it will be converted to camel-case.
      * @param expectedValues expected values
      */
-    public void verifyAttribute(String name, String[] expectedValues){
+    public void verifyAttribute(String name, String[] expectedValues) {
         if (dmrPath == null) {
             throw new IllegalStateException("DMR path not set");
         }

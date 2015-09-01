@@ -153,7 +153,7 @@ public class ResourceTableFragment extends BaseFragment {
             } while (this.getPager().goToNextPage());
         } else {
             List<WebElement> rowsWithText = root.findElements(selector);
-            if(!rowsWithText.isEmpty()) {
+            if (!rowsWithText.isEmpty()) {
                 row = Graphene.createPageFragment(ResourceTableRowFragment.class, rowsWithText.get(0));
             }
         }

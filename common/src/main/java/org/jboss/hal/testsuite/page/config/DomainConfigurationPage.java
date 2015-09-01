@@ -30,7 +30,7 @@ import org.jboss.arquillian.graphene.page.Location;
 @Location("#profiles")
 public class DomainConfigurationPage extends ConfigurationPage {
 
-    public DomainConfigurationPage selectProfile(String label){
+    public DomainConfigurationPage selectProfile(String label) {
         return (DomainConfigurationPage) selectMenu("Profiles").selectMenu(label);
     }
 

@@ -9,7 +9,7 @@ import org.jboss.hal.testsuite.page.MetricsPage;
  */
 @Location("#webservice-runtime")
 public class WebServiceEndpointsPage extends MetricsPage {
-    public MetricsAreaFragment getWebServiceRequestMetricsArea(){
+    public MetricsAreaFragment getWebServiceRequestMetricsArea() {
         return getMetricsArea("Web Service Requests");
     }
 }

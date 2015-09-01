@@ -287,12 +287,12 @@ public class Console {
         return this;
     }
 
-    public UserFragment getUserFragment(){
+    public UserFragment getUserFragment() {
         ByJQuery selector = ByJQuery.selector("." + PropUtils.get("header.textlink.class") + ":has(i." + PropUtils.get("icon.user.class") + ")");
         return Graphene.createPageFragment(UserFragment.class, browser.findElement(selector));
     }
 
-    public void logout(){
+    public void logout() {
         getUserFragment().openMenu().logout();
     }
 }

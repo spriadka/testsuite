@@ -58,7 +58,7 @@ public class ProfileHierarchyTestCase {
     private FinderNavigation navi;
 
     @Before
-    public void before(){
+    public void before() {
         ops.addProfileWithSubsystem(profileIOName, "io");
         ops.addProfileWithSubsystem(profileMailName, "mail");
         ops.addComposedProfile(profileComposedName, profileIOName, profileMailName);
@@ -68,14 +68,14 @@ public class ProfileHierarchyTestCase {
     }
 
     @After
-    public void after(){
+    public void after() {
         ops.removeProfile(profileComposedName);
         ops.removeProfile(profileIOName);
         ops.removeProfile(profileMailName);
     }
 
     @AfterClass
-    public static void closeDispatcher(){
+    public static void closeDispatcher() {
         dispatcher.close();
     }
 
@@ -155,8 +155,8 @@ public class ProfileHierarchyTestCase {
     }
 
     // HAL-803 workaround
-    private FinderNavigation newNavi(){
-        return new FinderNavigation(browser, DomainConfigEntryPoint.class, ()->{
+    private FinderNavigation newNavi() {
+        return new FinderNavigation(browser, DomainConfigEntryPoint.class, ()-> {
             try {
                 Thread.sleep(200);
             } catch (InterruptedException e) {

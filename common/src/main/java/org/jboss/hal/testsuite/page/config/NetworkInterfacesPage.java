@@ -15,7 +15,7 @@ public class NetworkInterfacesPage extends ConfigPage {
 
     private static final By CONTENT = By.id(PropUtils.get("page.content.area.id"));
 
-    public NetworkInterfaceContentFragment getContent(){
+    public NetworkInterfaceContentFragment getContent() {
         return Graphene.createPageFragment(NetworkInterfaceContentFragment.class, getContentRoot().findElement(CONTENT));
     }
 }

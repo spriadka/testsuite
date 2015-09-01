@@ -40,6 +40,6 @@ public class MessageListEntry {
 
     @Override
     public String toString() {
-        return "MessageListEntry{" + "isSuccess=" + isSuccess + ", text=" + text + ", isUnread=" + isUnread + '}';
+        return "MessageListEntry {" + "isSuccess=" + isSuccess + ", text=" + text + ", isUnread=" + isUnread + '}';
     }
 }

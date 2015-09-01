@@ -62,7 +62,7 @@ public class GlobalSessionTimeoutTestCase {
 
     @After
     public void cleanUp() throws IOException, TimeoutException, InterruptedException {
-        if(origValue != null) {
+        if (origValue != null) {
             client.writeAttribute(CliConstants.WEB_SUBSYSTEM_ADDRESS, DEFAULT_SESSION_TIMEOUT_CONSOLE_ID, origValue);
             client.reload(false);
         }

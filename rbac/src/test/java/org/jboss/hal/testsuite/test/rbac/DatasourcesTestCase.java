@@ -44,7 +44,7 @@ public class DatasourcesTestCase {
     }
 
     @After
-    public void after(){
+    public void after() {
     }
 
     @Test

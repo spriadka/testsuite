@@ -34,14 +34,14 @@ public class ProfilesConfigurationPage extends DomainConfigurationPage {
 
     private static final String BUTTON_CREATE_NEW_PROFILE_SELECTOR = "button:contains('Create new profile'):visible";
 
-    public ProfilesConfigurationPage tryToCloneProfile(String originalProfileName, String newProfileName){
+    public ProfilesConfigurationPage tryToCloneProfile(String originalProfileName, String newProfileName) {
         selectProfile(originalProfileName).clickButton("Clone");
         getConfig().getEditor().text("name", newProfileName);
         browser.findElement(ByJQuery.selector(BUTTON_CREATE_NEW_PROFILE_SELECTOR)).click();
         return this;
     }
 
-    public boolean isCreateNewProfileWindowOpened(){
+    public boolean isCreateNewProfileWindowOpened() {
         return Console.withBrowser(browser).isWindowOpen(ByJQuery.selector(BUTTON_CREATE_NEW_PROFILE_SELECTOR),3,TimeUnit.SECONDS);
     }
 }

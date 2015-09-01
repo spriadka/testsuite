@@ -7,11 +7,11 @@ import org.jboss.hal.testsuite.fragment.ConfigFragment;
  */
 public class NetworkInterfaceContentFragment extends ConfigFragment {
 
-    public NetworkInterfaceWizard addInterface(){
+    public NetworkInterfaceWizard addInterface() {
         return getResourceManager().addResource(NetworkInterfaceWizard.class);
     }
 
-    public void removeInterface(String interfaceName){
+    public void removeInterface(String interfaceName) {
         getResourceManager().removeResourceAndConfirm(interfaceName);
     }
 

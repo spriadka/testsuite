@@ -15,15 +15,15 @@ public class MailSessionsFragment extends ConfigFragment {
     private static final String DEBUG = "debug";
     private static final String FROM = "from";
 
-    public MailSessionWizard addMailSession(){
+    public MailSessionWizard addMailSession() {
         return getResourceManager().addResource(MailSessionWizard.class);
     }
 
-    public void removeAndConfirm(String jndiName){
+    public void removeAndConfirm(String jndiName) {
         getResourceManager().removeResourceAndConfirm(jndiName);
     }
 
-    public void editDebugAndSave(String jndiName, boolean value){
+    public void editDebugAndSave(String jndiName, boolean value) {
         getResourceManager().selectByName(jndiName);
         Editor editor = edit();
         editor.checkbox(DEBUG, value);

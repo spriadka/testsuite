@@ -49,7 +49,7 @@ public class DataSourceMetricsTestCase {
     private DomainRuntimeEntryPoint domainPage;
 
     @Before
-    public void before(){
+    public void before() {
         if (ConfigUtils.isDomain()) {
             navigation = new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
                     .addAddress(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
@@ -58,7 +58,7 @@ public class DataSourceMetricsTestCase {
                     .addAddress(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
                     .addAddress(FinderNames.SUBSYSTEM, "Datasources");
         }
-        else{
+        else {
             navigation = new FinderNavigation(browser, StandaloneRuntimeEntryPoint.class)
                     .addAddress(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
                     .addAddress(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
@@ -70,7 +70,7 @@ public class DataSourceMetricsTestCase {
     }
 
     @Test
-    public void connectionPoolMetrics(){
+    public void connectionPoolMetrics() {
         MetricsAreaFragment metricsArea = dsPage.getConnectionPoolMetricsArea();
         double expectedActivePercentage = metricsArea.getPercentage(ACTIVE, AVAILABLE_CONNECTIONS);
         double expectedMaxUsedPercentage = metricsArea.getPercentage(MAX_USED, AVAILABLE_CONNECTIONS);
@@ -83,7 +83,7 @@ public class DataSourceMetricsTestCase {
     }
 
     @Test
-    public void preparedStatementCacheMetrics(){
+    public void preparedStatementCacheMetrics() {
         MetricsAreaFragment metricsArea = dsPage.getPreparedStatementCacheMetricsArea();
         double expectedHitCountPercentage = metricsArea.getPercentage(HIT_COUNT, ACCESS_COUNT);
         double expectedMissCountPercentage = metricsArea.getPercentage(MISS_COUNT, ACCESS_COUNT);

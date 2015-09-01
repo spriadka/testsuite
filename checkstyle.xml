@@ -64,6 +64,9 @@
         <module name="EqualsHashCode"/>
         <module name="IllegalInstantiation"/>
 
+        <!-- Checks that a token is surrounded by whitespace. -->
+        <module name="WhitespaceAround"/>
+
         <!-- Miscellaneous other checks.                   -->
         <module name="UpperEll"/>
         <module name="PackageAnnotation"/>

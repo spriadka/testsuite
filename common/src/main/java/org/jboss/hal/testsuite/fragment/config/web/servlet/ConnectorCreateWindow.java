@@ -17,34 +17,34 @@ public class ConnectorCreateWindow extends WizardWindow {
     private static final String SCHEME = "scheme";
     private static final String ENABLED = "enabled";
 
-    public void save(){
+    public void save() {
         clickButton(PropUtils.get("modals.window.save.label"));
-        if(isClosed()) {
+        if (isClosed()) {
             waitGui().until().element(By.className(PropUtils.get("resourcetable.cell.class"))).is().visible();
         }
     }
 
-    public ConnectorCreateWindow name(String value){
+    public ConnectorCreateWindow name(String value) {
         getEditor().text(NAME, value);
         return this;
     }
 
-    public ConnectorCreateWindow socketBinding(String value){
+    public ConnectorCreateWindow socketBinding(String value) {
         getEditor().text(SOCKET_BINDING, value);
         return this;
     }
 
-    public ConnectorCreateWindow protocol(String value){
+    public ConnectorCreateWindow protocol(String value) {
         getEditor().select(PROTOCOL, value);
         return this;
     }
 
-    public ConnectorCreateWindow scheme(String value){
+    public ConnectorCreateWindow scheme(String value) {
         getEditor().select(SCHEME, value);
         return this;
     }
 
-    public ConnectorCreateWindow enabled(boolean value){
+    public ConnectorCreateWindow enabled(boolean value) {
         getEditor().checkbox(ENABLED, value);
         return this;
     }

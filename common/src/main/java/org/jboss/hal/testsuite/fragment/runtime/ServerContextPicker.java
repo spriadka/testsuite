@@ -30,7 +30,7 @@ public class ServerContextPicker extends PopUpFragment {
     private List<String> getCurrentContext() {
         ByJQuery serverSelector = ByJQuery.selector("div.cellListSelectedItem");
         List<String> context = new ArrayList<String>();
-        for(WebElement elem : root.findElements(serverSelector)) {
+        for (WebElement elem : root.findElements(serverSelector)) {
             context.add(elem.getText().trim());
         }
         return context;

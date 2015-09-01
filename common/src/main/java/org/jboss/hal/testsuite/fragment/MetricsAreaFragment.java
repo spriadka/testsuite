@@ -17,17 +17,17 @@ public class MetricsAreaFragment extends BaseFragment {
         this.metricGrid = metricGrid;
     }
 
-    public MetricsFragment getMetricsFragment(String text){
+    public MetricsFragment getMetricsFragment(String text) {
         return getMetricsFragment(text, MetricsFragment.class);
     }
 
-    public double getPercentage(String dividendLabel, String divisorLabel){
+    public double getPercentage(String dividendLabel, String divisorLabel) {
         double divisor = getMetricNumber(divisorLabel);
-        if(divisor == 0) return 0;
+        if (divisor == 0) return 0;
         return getMetricNumber(dividendLabel) * 100 / divisor;
     }
 
-    public <T extends MetricsFragment> T getMetricsFragment(String text, Class<T> clazz){
+    public <T extends MetricsFragment> T getMetricsFragment(String text, Class<T> clazz) {
         By elementSelector = By.xpath(".//*[name()='svg']//*[name()='g']/*[name()='text'][contains(text(),'" + text + "')]/../..");
         WebElement element = root.findElement(elementSelector);
         T content = Graphene.createPageFragment(clazz, element);
@@ -46,11 +46,11 @@ public class MetricsAreaFragment extends BaseFragment {
         return content;
     }
 
-    public String getMetric(String key){
+    public String getMetric(String key) {
         return metricGrid.get(key);
     }
 
-    public double getMetricNumber(String key){
+    public double getMetricNumber(String key) {
         return Double.parseDouble(metricGrid.get(key));
     }
 }

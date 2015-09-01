@@ -1,8 +1,6 @@
 package org.jboss.hal.testsuite.test.configuration.jgroups;
 
-import org.jboss.as.cli.scriptsupport.CLI;
 import org.jboss.hal.testsuite.cli.CliClient;
-import org.jboss.hal.testsuite.util.ConfigUtils;
 
 /**
  * Created by jkasik on 23.7.15.
@@ -37,7 +35,7 @@ public class JGroupsOperations {
         return getBaseDmrPath() + "transport=" + transport + "/";
     }
 
-    private String getProtocolDrmPath(String name) {//TODO: verify
+    private String getProtocolDrmPath(String name) { //TODO: verify
         return getBaseDmrPath() + "protocol=" + name + "/";
     }
 

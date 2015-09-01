@@ -62,7 +62,7 @@ public class HomePage extends BasePage {
 
         T fragment = boxes.get(identifier.toLowerCase());
 
-        if (fragment == null){
+        if (fragment == null) {
             throw new NoSuchElementException("Unable to found " + box + " with identifier: "
                 + identifier);
         }
@@ -82,7 +82,7 @@ public class HomePage extends BasePage {
 
             String id = header.getAttribute("id");
             String[] classAttr = id.split("_"); // only prefix up to first "_"
-            String key = classAttr[box == BoxType.TASK ? 0 : classAttr.length -1].toLowerCase();
+            String key = classAttr[box == BoxType.TASK ? 0 : classAttr.length - 1].toLowerCase();
             T task = Graphene.createPageFragment(clazz, element);
 
             tasks.put(key, task);

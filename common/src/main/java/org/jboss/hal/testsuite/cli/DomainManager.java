@@ -123,7 +123,7 @@ public class DomainManager extends ServerManager {
     public  List<String> listRunningServers(final String host) {
         List<String> list = new ArrayList<String>();
         List<ModelNode> serverList = listRunningServerNodes(host);
-        for(ModelNode server : serverList) {
+        for (ModelNode server : serverList) {
             list.add(server.asString());
         }
         return list;
@@ -151,7 +151,7 @@ public class DomainManager extends ServerManager {
         List<String> remaining = new ArrayList<String>(servers);
         try {
             List<ModelNode> serverList = listRunningServerNodes(host);
-            for(ModelNode server : serverList) {
+            for (ModelNode server : serverList) {
                 String state = server.get("server-state").asString();
                 if (!state.equalsIgnoreCase("running")) {
                     return false;
@@ -414,7 +414,7 @@ public class DomainManager extends ServerManager {
                 .executeForResponse("/host=" + host + ":read-children-names(child-type=server)");
 
         // workaround for BZ1093030
-        if(response.has("failure-description") && response.get("failure-description")
+        if (response.has("failure-description") && response.get("failure-description")
                 .asString().contains("JBAS014793")) {
             return Collections.emptyList();
         }

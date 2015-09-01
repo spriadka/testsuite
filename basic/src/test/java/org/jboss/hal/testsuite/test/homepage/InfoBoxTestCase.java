@@ -80,7 +80,7 @@ public class InfoBoxTestCase {
     }
 
     @Test
-    public void deploymentsInfo(){
+    public void deploymentsInfo() {
         Class <? extends BasePage> page = ConfigUtils.isDomain() ? DomainDeploymentPage.class
                                                                  : DeploymentPage.class;
 

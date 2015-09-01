@@ -45,7 +45,7 @@ public class WebServiceEndpointsTestCase {
     private DomainRuntimeEntryPoint domainPage;
 
     @Before
-    public void before(){
+    public void before() {
         if (ConfigUtils.isDomain()) {
             navigation = new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
                     .addAddress(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
@@ -54,7 +54,7 @@ public class WebServiceEndpointsTestCase {
                     .addAddress(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
                     .addAddress(FinderNames.SUBSYSTEM, "Webservices");
         }
-        else{
+        else {
             navigation = new FinderNavigation(browser, StandaloneRuntimeEntryPoint.class)
                     .addAddress(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
                     .addAddress(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
@@ -65,7 +65,7 @@ public class WebServiceEndpointsTestCase {
     }
 
     @Test
-    public void webServiceRequestsMetrics(){
+    public void webServiceRequestsMetrics() {
         MetricsAreaFragment wsrMetricsArea = wsePage.getWebServiceRequestMetricsArea();
         double expectedResponsesPercentage = wsrMetricsArea.getPercentage(RESPONSES, NUMBER_OF_REQUEST);
         double expectedFaultsPercentage = wsrMetricsArea.getPercentage(FAULTS, NUMBER_OF_REQUEST);

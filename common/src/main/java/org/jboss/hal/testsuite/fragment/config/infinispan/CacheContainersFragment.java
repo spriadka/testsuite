@@ -6,7 +6,7 @@ import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
 /**
  * @author mkrajcov <mkrajcov@redhat.com>
  */
-public class CacheContainersFragment extends ConfigFragment{
+public class CacheContainersFragment extends ConfigFragment {
 
     public void addCacheContainer(String name) {
         WizardWindow window = getResourceManager().addResource();

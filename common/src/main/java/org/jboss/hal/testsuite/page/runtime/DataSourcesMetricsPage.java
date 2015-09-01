@@ -10,11 +10,11 @@ import org.jboss.hal.testsuite.page.MetricsPage;
 @Location("#ds-metrics")
 public class DataSourcesMetricsPage extends MetricsPage {
 
-    public MetricsAreaFragment getConnectionPoolMetricsArea(){
+    public MetricsAreaFragment getConnectionPoolMetricsArea() {
         return getMetricsArea("Connection Pool");
     }
 
-    public MetricsAreaFragment getPreparedStatementCacheMetricsArea(){
+    public MetricsAreaFragment getPreparedStatementCacheMetricsArea() {
         return getMetricsArea("Prepared Statement Cache");
     }
 }

@@ -15,11 +15,11 @@ public class ResourceAdaptersPage extends ConfigurationPage {
 
     private static final By CONTENT = By.id(PropUtils.get("page.content.id"));
 
-    public ResourceAdaptersFragment getContent(){
+    public ResourceAdaptersFragment getContent() {
         return Graphene.createPageFragment(ResourceAdaptersFragment.class, getContentRoot().findElement(CONTENT));
     }
 
-    public ResourceAdaptersConfigArea getConfigArea(){
+    public ResourceAdaptersConfigArea getConfigArea() {
         return getConfig(ResourceAdaptersConfigArea.class);
     }
 }

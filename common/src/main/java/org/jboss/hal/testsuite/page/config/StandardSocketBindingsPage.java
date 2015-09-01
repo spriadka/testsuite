@@ -18,22 +18,22 @@ public class StandardSocketBindingsPage extends ConfigPage {
 
     private static final By CONTENT_ROOT = ByJQuery.selector("." + PropUtils.get("page.content.rhs.class") + ":visible");
 
-    public InboundSocketBindingFragment switchToInbound(){
+    public InboundSocketBindingFragment switchToInbound() {
         return switchTo(InboundSocketBindingFragment.class,"Inbound");
     }
 
-    public ConfigFragment switchToOutboundRemote(){
+    public ConfigFragment switchToOutboundRemote() {
         return switchTo("Outbound Remote");
     }
 
-    public ConfigFragment switchToOutboundLocal(){
+    public ConfigFragment switchToOutboundLocal() {
         return switchTo("Outbound Local");
     }
 
-    private ConfigFragment switchTo(String label){
+    private ConfigFragment switchTo(String label) {
         return switchTo(ConfigFragment.class, label);
     }
-    private <T extends ConfigFragment> T switchTo(Class<T> clazz,String label){
+    private <T extends ConfigFragment> T switchTo(Class<T> clazz,String label) {
         switchSubTab(label);
         WebElement root = getContentRoot().findElement(CONTENT_ROOT);
         return Graphene.createPageFragment(clazz, root);

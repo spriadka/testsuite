@@ -64,17 +64,17 @@ public class NetworkInterfacesTestCase {
     public NetworkInterfacesPage page;
 
     @Before
-    public void before(){
+    public void before() {
         Console.withBrowser(browser).refreshAndNavigate(NetworkInterfacesPage.class);
     }
 
     @After
-    public void after(){
+    public void after() {
         client.reload(false);
     }
 
     @AfterClass
-    public static void cleanUp(){
+    public static void cleanUp() {
         client.removeResource(DMR_INTERFACE);
         client.removeResource(DMR_INTERFACE_ANY);
         client.removeResource(DMR_INTERFACE_NO_ADDRESS);
@@ -84,7 +84,7 @@ public class NetworkInterfacesTestCase {
 
     @Test
     @InSequence(0)
-    public void createInterfaceSpecificInetAddress(){
+    public void createInterfaceSpecificInetAddress() {
         NetworkInterfaceContentFragment area = page.getContent();
         NetworkInterfaceWizard wizard = area.addInterface();
 
@@ -108,19 +108,19 @@ public class NetworkInterfacesTestCase {
 
     @Test
     @InSequence(2)
-    public void changeNicMatchAttribute(){
+    public void changeNicMatchAttribute() {
         checker.editTextAndAssert(page, "nicMatch", NEW_NIC_MATCH).clear("nic").rowName(INTERFACE_NAME).invoke();
     }
 
     @Test
     @InSequence(3)
-    public void enableLoopBackAddress(){
+    public void enableLoopBackAddress() {
         checker.editTextAndAssert(page, "loopbackAddress", NEW_LOOPBACK_ADDRESS).clear("nicMatch").rowName(INTERFACE_NAME).invoke();
     }
 
     @Test
     @InSequence(4)
-    public void removeInterface(){
+    public void removeInterface() {
         NetworkInterfaceContentFragment area = page.getContent();
 
         area.removeInterface(INTERFACE_NAME);
@@ -128,7 +128,7 @@ public class NetworkInterfacesTestCase {
     }
 
     @Test
-    public void createInterfaceAnyInetAddress(){
+    public void createInterfaceAnyInetAddress() {
         NetworkInterfaceContentFragment area = page.getContent();
         NetworkInterfaceWizard wizard = area.addInterface();
 
@@ -147,7 +147,7 @@ public class NetworkInterfacesTestCase {
 
     @Ignore("Missing IPV4 option")
     @Test
-    public void createInterfaceAnyIPv4Address(){
+    public void createInterfaceAnyIPv4Address() {
         NetworkInterfaceContentFragment area = page.getContent();
         NetworkInterfaceWizard wizard = area.addInterface();
 
@@ -166,7 +166,7 @@ public class NetworkInterfacesTestCase {
 
     @Ignore("Missing IPV6 option")
     @Test
-    public void createInterfaceAnyIPv6Address(){
+    public void createInterfaceAnyIPv6Address() {
         NetworkInterfaceContentFragment area = page.getContent();
         NetworkInterfaceWizard wizard = area.addInterface();
 

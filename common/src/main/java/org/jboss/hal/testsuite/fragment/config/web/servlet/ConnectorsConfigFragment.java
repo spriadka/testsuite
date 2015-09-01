@@ -5,17 +5,17 @@ import org.jboss.hal.testsuite.fragment.ConfigFragment;
 /**
  * Created by mkrajcov on 3/26/15.
  */
-public class ConnectorsConfigFragment extends ConfigFragment{
+public class ConnectorsConfigFragment extends ConfigFragment {
 
-    public ConnectorCreateWindow addConnector(){
+    public ConnectorCreateWindow addConnector() {
         return getResourceManager().addResource(ConnectorCreateWindow.class);
     }
 
-    public void removeConnector(String name){
+    public void removeConnector(String name) {
         getResourceManager().removeResourceAndConfirm(name);
     }
 
-    public boolean isPresent(String connectorName){
+    public boolean isPresent(String connectorName) {
         return getResourceManager().selectByName(connectorName) != null;
     }
 }

@@ -16,7 +16,7 @@ public class WebServicesPage extends ConfigPage {
     private static final By CONFIG_CONTENT = By.className(PropUtils.get("page.content.rhs.class"));
 
     @Override
-    public ConfigAreaFragment getConfig(){
+    public ConfigAreaFragment getConfig() {
         return Graphene.createPageFragment(ConfigAreaFragment.class, getContentRoot().findElement(CONFIG_CONTENT));
     }
 }

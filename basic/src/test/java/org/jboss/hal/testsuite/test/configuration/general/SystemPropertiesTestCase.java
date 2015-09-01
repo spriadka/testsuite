@@ -52,12 +52,12 @@ public class SystemPropertiesTestCase {
     public SystemPropertiesPage page;
 
     @Before
-    public void before(){
+    public void before() {
         Console.withBrowser(browser).refreshAndNavigate(SystemPropertiesPage.class);
     }
 
     @AfterClass
-    public static void cleanUp(){
+    public static void cleanUp() {
         client.removeSystemProperty(PROPERTY_INVALID_KEY);
         client.removeSystemProperty(PROPERTY_KEY);
         client.removeSystemProperty(PROPERTY_KEY2);
@@ -81,14 +81,14 @@ public class SystemPropertiesTestCase {
 
     @Test
     @InSequence(1)
-    public void removeProperty(){
+    public void removeProperty() {
         page.getResourceManager().removeResourceAndConfirm(PROPERTY_KEY);
 
         verifier.verifyResource(false);
     }
 
     @Test
-    public void createPropertyWithInvalidKey(){
+    public void createPropertyWithInvalidKey() {
         WizardWindow wizard = page.getResourceManager().addResource();
 
         Editor editor = wizard.getEditor();
@@ -102,7 +102,7 @@ public class SystemPropertiesTestCase {
     }
 
     @Test
-    public void createPropertyWithInvalidValue(){
+    public void createPropertyWithInvalidValue() {
         WizardWindow wizard = page.getResourceManager().addResource();
 
         Editor editor = wizard.getEditor();

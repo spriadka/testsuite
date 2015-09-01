@@ -45,51 +45,51 @@ public class ProfileOperations {
     private final Dispatcher dispatcher;
     private final StatementContext ctx = new DefaultContext();
 
-    public ProfileOperations(Dispatcher dispatcher){
+    public ProfileOperations(Dispatcher dispatcher) {
         this.dispatcher = dispatcher;
     }
 
-    public void addProfileWithSubsystem(String profileName, String subsystemName){
+    public void addProfileWithSubsystem(String profileName, String subsystemName) {
         dispatcher.execute(new Operation.Builder(
-            ADD, 
+            ADD,
             profileTemplate.resolve(ctx, profileName))
             .build()
         );
         addSubsystem(profileName, subsystemName);
     }
 
-    public void addSubsystem(String profileName, String subsystemName){
+    public void addSubsystem(String profileName, String subsystemName) {
         dispatcher.execute(new Operation.Builder(
-                ADD, 
+                ADD,
                 subsystemTemplate.resolve(ctx, profileName, subsystemName))
                 .build()
             );
     }
 
-    public void addComposedProfile(String profileName, String momName, String dadName){
+    public void addComposedProfile(String profileName, String momName, String dadName) {
         List<ModelNode> parentNodes = Arrays.asList(new ModelNode[]{
             new ModelNode(dadName),
             new ModelNode(momName)
         });
         dispatcher.execute(new Operation.Builder(
-            ADD, 
+            ADD,
             profileTemplate.resolve(ctx, profileName))
             .param(INCLUDES, parentNodes)
             .build()
         );
     }
 
-    public void removeProfile(String profileName){
+    public void removeProfile(String profileName) {
         dispatcher.execute(new Operation.Builder(
-            REMOVE, 
+            REMOVE,
             profileTemplate.resolve(ctx, profileName))
             .build()
         );
     }
 
-    public void removeProfileFromIncludes(String parentProfileName, String childProfileName){
+    public void removeProfileFromIncludes(String parentProfileName, String childProfileName) {
         dispatcher.execute(new Operation.Builder(
-            "list-remove", 
+            "list-remove",
             profileTemplate.resolve(ctx, childProfileName))
             .param(NAME, INCLUDES)
             .param(VALUE, parentProfileName)

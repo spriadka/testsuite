@@ -51,7 +51,7 @@ public class ConfigFragment extends BaseFragment {
      */
     public boolean save() {
         WebElement button = getButton(PropUtils.get("configarea.save.button.label"));
-        if(!button.isDisplayed()){
+        if (!button.isDisplayed()) {
             Console.withBrowser(browser).pageDown();
             Library.letsSleep(100);
         }
@@ -91,7 +91,7 @@ public class ConfigFragment extends BaseFragment {
     public boolean resourceIsPresent(String name) {
         long start = System.currentTimeMillis();
         while (getResourceManager().getResourceTable().getRowByText(0, name) == null) {
-            if(System.currentTimeMillis() >= start + 2000) return false;
+            if (System.currentTimeMillis() >= start + 2000) return false;
             Library.letsSleep(200);
         }
         return true;

@@ -34,7 +34,7 @@ public class RHAccessMenuFragment extends PopUpFragment {
 
         try {
             // TODO - this wait must be implemented in more fancy way
-            Thread.sleep(RH_ACCESS_TIMEOUT*1000);
+            Thread.sleep(RH_ACCESS_TIMEOUT * 1000);
         } catch (Exception ignored) { }
 
         WebElement iFrame = browser.findElement(ByJQuery.selector("iframe.gwt-Frame"));

@@ -15,26 +15,26 @@ public class HibernateCachePage extends ConfigPage {
 
     private static final By CONTENT = By.id(PropUtils.get("page.content.id"));
 
-    public CacheFragment content(){
+    public CacheFragment content() {
         return Graphene.createPageFragment(CacheFragment.class, getContentRoot().findElement(CONTENT));
     }
 
-    public CacheFragment local(){
+    public CacheFragment local() {
         switchTab("Local Caches");
         return content();
     }
 
-    public CacheFragment replicated(){
+    public CacheFragment replicated() {
         switchTab("Replicated Caches");
         return content();
     }
 
-    public CacheFragment distributed(){
+    public CacheFragment distributed() {
         switchTab("Distributed Caches");
         return content();
     }
 
-    public CacheFragment invalidation(){
+    public CacheFragment invalidation() {
         switchTab("Invalidation Caches");
         return content();
     }

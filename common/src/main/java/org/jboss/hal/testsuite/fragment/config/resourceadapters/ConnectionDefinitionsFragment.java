@@ -5,8 +5,8 @@ import org.jboss.hal.testsuite.fragment.ConfigFragment;
 /**
  * @author mkrajcov <mkrajcov@redhat.com>
  */
-public class ConnectionDefinitionsFragment extends ConfigFragment{
-    public ConnectionDefinitionWizard addConnectionDefinition(){
+public class ConnectionDefinitionsFragment extends ConfigFragment {
+    public ConnectionDefinitionWizard addConnectionDefinition() {
         return getResourceManager().addResource(ConnectionDefinitionWizard.class);
     }
 

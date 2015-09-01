@@ -39,8 +39,8 @@ public class RadioButtonGroup {
      * @return radio input of given value
      */
     public WebElement getInputElement(String value) throws ElementNotFoundException {
-        for(WebElement input : choices) {
-            if(input.getAttribute("value").equals(value)) {
+        for (WebElement input : choices) {
+            if (input.getAttribute("value").equals(value)) {
                 return input;
             }
         }
@@ -68,8 +68,8 @@ public class RadioButtonGroup {
      */
     public int getSelectedIndex() {
         int i = 0;
-        for(WebElement choice : choices) {
-            if(choice.isSelected()) {
+        for (WebElement choice : choices) {
+            if (choice.isSelected()) {
                 return i;
             }
             i++;

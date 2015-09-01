@@ -7,6 +7,6 @@ import org.jboss.hal.testsuite.page.BasePage;
  * @author mkrajcov <mkrajcov@redhat.com>
  */
 @Location("#socket-bindings")
-public class SocketBindingsPage extends BasePage{
+public class SocketBindingsPage extends BasePage {
 
 }

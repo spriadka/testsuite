@@ -76,8 +76,8 @@ public class FinderNavigation {
         this.address = new ArrayList<>();
     }
 
-    public FinderNavigation(final WebDriver browser, final Class<? extends BasePage> page){
-        this(browser, page, ()->{});
+    public FinderNavigation(final WebDriver browser, final Class<? extends BasePage> page) {
+        this(browser, page, ()-> { } );
     }
 
     /**
@@ -134,7 +134,7 @@ public class FinderNavigation {
         return Graphene.createPageFragment(Row.class, row);
     }
 
-    public PreviewFragment getPreview(){
+    public PreviewFragment getPreview() {
         By previewSelector = By.className("preview-content");
         Graphene.waitGui().until().element(previewSelector).is().visible();
         WebElement preview = browser.findElement(previewSelector);
@@ -175,15 +175,15 @@ public class FinderNavigation {
         return By.cssSelector("[data-column=\"" + name + "\"]");
     }
 
-    By rowSelectorEquals(String label){
+    By rowSelectorEquals(String label) {
         return getRowSelector(" and text()='" + label + "']]");
     }
 
-    By rowSelector(String label){
+    By rowSelector(String label) {
         return getRowSelector(" and contains(.,'" + label + "')]]");
     }
 
-    private By getRowSelector(String xpathSuffix){
+    private By getRowSelector(String xpathSuffix) {
         String cellClass = PropUtils.get("table.cell.class");
         return By.ByXPath.xpath(".//td[contains(@class,'" + cellClass + "') and descendant::div[@class='navigation-column-item'" + xpathSuffix);
     }

@@ -13,15 +13,15 @@ import java.util.stream.Collectors;
 /**
  * @author mkrajcov <mkrajcov@redhat.com>
  */
-public abstract class MetricsPage extends BasePage{
+public abstract class MetricsPage extends BasePage {
 
-    public MetricsAreaFragment getMetricsArea(String title){
+    public MetricsAreaFragment getMetricsArea(String title) {
         //////add property
         By selector = By.xpath(".//table[contains(@class, '" + PropUtils.get("metrics.container.class") + "')][.//h3[text()='" + title + "']]");
         WebElement element = null;
         try {
             element = getContentRoot().findElement(selector);
-        }catch(NoSuchElementException exc){
+        } catch (NoSuchElementException exc) {
             return null;
         }
         MetricsAreaFragment area = Graphene.createPageFragment(MetricsAreaFragment.class, element);

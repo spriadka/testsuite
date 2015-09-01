@@ -11,11 +11,11 @@ import org.openqa.selenium.By;
  * @author mkrajcov <mkrajcov@redhat.com>
  */
 @Location("#infinispan")
-public class CacheContainersPage extends ConfigPage{
+public class CacheContainersPage extends ConfigPage {
 
     private static final By CONTENT = By.id(PropUtils.get("page.content.id"));
 
-    public CacheContainersFragment content(){
+    public CacheContainersFragment content() {
         return Graphene.createPageFragment(CacheContainersFragment.class, getContentRoot().findElement(CONTENT));
     }
 }

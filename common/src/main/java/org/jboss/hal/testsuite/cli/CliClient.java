@@ -64,7 +64,7 @@ public class CliClient {
     public CLI.Result executeCommand(String command) {
         CLI cli = CLI.newInstance();
 
-        log.trace("Connecting to native interface ("+cliConfig.getHost()+":"+cliConfig.getPort() + ") via CLI");
+        log.trace("Connecting to native interface (" + cliConfig.getHost() + ":" + cliConfig.getPort() + ") via CLI");
         cli.connect(cliConfig.getHost(), cliConfig.getPort(), cliConfig.getUser(), cliConfig.getPassword());
 
         log.debug("Running cli command: " + command);
@@ -152,7 +152,7 @@ public class CliClient {
     public CLI getCLI() {
         CLI cli = CLI.newInstance();
 
-        log.debug("Connecting to native interface ("+cliConfig.getHost()+":"+cliConfig.getPort() + ") via CLI");
+        log.debug("Connecting to native interface (" + cliConfig.getHost() + ":" + cliConfig.getPort() + ") via CLI");
         cli.connect(cliConfig.getHost(), cliConfig.getPort(), cliConfig.getUser(), cliConfig.getPassword());
         return cli;
     }
@@ -221,7 +221,7 @@ public class CliClient {
         if (!CliConstants.UNDEFINED.equals(value) && ModelType.STRING.equals(readAttributeType(address, name))) {
             valueInImprovedFormat = "\"" + value.replaceAll("\\\\","\\\\\\\\") + "\"";
         }
-        String[] attributes = {"name=" + name, "value="+valueInImprovedFormat};
+        String[] attributes = {"name=" + name, "value=" + valueInImprovedFormat};
         String command = CliUtils.buildCommand(address, ":write-attribute", attributes);
         return executeForSuccess(command);
     }
@@ -258,7 +258,7 @@ public class CliClient {
         return executeForSuccess(command);
     }
 
-    public boolean removeResource(String dmrPath){
+    public boolean removeResource(String dmrPath) {
         String command = CliUtils.buildCommand(dmrPath, ":remove");
         return executeForSuccess(command);
     }

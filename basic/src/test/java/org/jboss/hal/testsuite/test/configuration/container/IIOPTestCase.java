@@ -42,7 +42,10 @@ import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConfigPropertyWi
 import org.jboss.hal.testsuite.fragment.shared.table.ResourceTableRowFragment;
 import org.jboss.hal.testsuite.page.config.IIOPPage;
 import org.jboss.hal.testsuite.page.config.StandaloneConfigurationPage;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
@@ -95,7 +98,7 @@ public class IIOPTestCase {
     }
 
     @After
-    public void after(){
+    public void after() {
         cliClient.reload();
     }
 
@@ -201,7 +204,7 @@ public class IIOPTestCase {
     @Ignore("After removing property, empty properties tag left in xml configuration and server cannot run more. https://issues.jboss.org/browse/HAL-791")
     @Test
     @InSequence(5)
-    public void addProperty(){
+    public void addProperty() {
         ConfigPropertiesFragment properties = page.getConfig().propertiesConfig();
         page.waitUntilPropertiesAreVisible();
         ConfigPropertyWizard wizard = properties.addProperty();
@@ -218,7 +221,7 @@ public class IIOPTestCase {
     @Ignore("After removing property, empty properties tag left in xml configuration and server cannot run more. https://issues.jboss.org/browse/HAL-791")
     @Test
     @InSequence(6)
-    public void removeProperty(){
+    public void removeProperty() {
         ConfigPropertiesFragment properties = page.getConfig().propertiesConfig();
         page.waitUntilPropertiesAreVisible();
         properties.removeProperty(KEY_VALUE);
@@ -253,8 +256,7 @@ public class IIOPTestCase {
 
     @Test
     @InSequence(10)
-    public void setTransactionsToSpecWithDisablingJTS()
-    {
+    public void setTransactionsToSpecWithDisablingJTS() {
         page.switchToEditMode();
         ConfigFragment editPanelFragment = page.getConfigFragment();
         editPanelFragment.getEditor().select("transactions", "spec");

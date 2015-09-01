@@ -7,7 +7,11 @@ import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
 import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.cli.CliClient;
 import org.jboss.hal.testsuite.cli.CliClientFactory;
-import org.jboss.hal.testsuite.dmr.*;
+import org.jboss.hal.testsuite.dmr.AddressTemplate;
+import org.jboss.hal.testsuite.dmr.DefaultContext;
+import org.jboss.hal.testsuite.dmr.Dispatcher;
+import org.jboss.hal.testsuite.dmr.Operation;
+import org.jboss.hal.testsuite.dmr.ResourceAddress;
 import org.jboss.hal.testsuite.finder.Application;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
@@ -76,7 +80,7 @@ public class WebMetricsTestCase {
                     .addAddress(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
                     .addAddress(FinderNames.SUBSYSTEM, "Undertow");
         }
-        else{
+        else {
             navigation = new FinderNavigation(browser, StandaloneRuntimeEntryPoint.class)
                     .addAddress(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
                     .addAddress(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
@@ -97,7 +101,7 @@ public class WebMetricsTestCase {
     }
 
     @Test
-    public void requestPerConnectorMetrics(){
+    public void requestPerConnectorMetrics() {
         ResourceAddress address = ADDRESS_TEMPLATE.resolve(statementContext);
         long expectedRequests = dispatcher.execute(new Operation.Builder(ModelDescriptionConstants.READ_ATTRIBUTE_OPERATION, address).param("name", "request-count").build()).payload().asLong();
         long expectedErrors = dispatcher.execute(new Operation.Builder(ModelDescriptionConstants.READ_ATTRIBUTE_OPERATION, address).param("name", "error-count").build()).payload().asLong();

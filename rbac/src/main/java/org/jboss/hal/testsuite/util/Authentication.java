@@ -24,9 +24,9 @@ public class Authentication {
 
     private Authentication(WebDriver browser) {
         this.browser = browser;
-        if(loginMap.containsKey(browser)){
+        if (loginMap.containsKey(browser)) {
             authenticated = loginMap.get(browser);
-        }else{
+        } else {
             loginMap.put(browser, authenticated);
         }
     }
