@@ -42,7 +42,10 @@ import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConfigPropertyWi
 import org.jboss.hal.testsuite.fragment.shared.table.ResourceTableRowFragment;
 import org.jboss.hal.testsuite.page.config.IIOPPage;
 import org.jboss.hal.testsuite.page.config.StandaloneConfigurationPage;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
@@ -253,8 +256,7 @@ public class IIOPTestCase {
 
     @Test
     @InSequence(10)
-    public void setTransactionsToSpecWithDisablingJTS()
-    {
+    public void setTransactionsToSpecWithDisablingJTS() {
         page.switchToEditMode();
         ConfigFragment editPanelFragment = page.getConfigFragment();
         editPanelFragment.getEditor().select("transactions", "spec");

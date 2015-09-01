@@ -6,7 +6,7 @@ import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.cli.CliClient;
 import org.jboss.hal.testsuite.cli.CliClientFactory;
-import org.jboss.hal.testsuite.page.config.*;
+import org.jboss.hal.testsuite.page.config.DatasourcesPage;
 import org.jboss.hal.testsuite.page.home.HomePage;
 import org.jboss.hal.testsuite.util.Console;
 import org.junit.After;

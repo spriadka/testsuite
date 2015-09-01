@@ -51,7 +51,7 @@ public class ProfileOperations {
 
     public void addProfileWithSubsystem(String profileName, String subsystemName){
         dispatcher.execute(new Operation.Builder(
-            ADD, 
+            ADD,
             profileTemplate.resolve(ctx, profileName))
             .build()
         );
@@ -60,7 +60,7 @@ public class ProfileOperations {
 
     public void addSubsystem(String profileName, String subsystemName){
         dispatcher.execute(new Operation.Builder(
-                ADD, 
+                ADD,
                 subsystemTemplate.resolve(ctx, profileName, subsystemName))
                 .build()
             );
@@ -72,7 +72,7 @@ public class ProfileOperations {
             new ModelNode(momName)
         });
         dispatcher.execute(new Operation.Builder(
-            ADD, 
+            ADD,
             profileTemplate.resolve(ctx, profileName))
             .param(INCLUDES, parentNodes)
             .build()
@@ -81,7 +81,7 @@ public class ProfileOperations {
 
     public void removeProfile(String profileName){
         dispatcher.execute(new Operation.Builder(
-            REMOVE, 
+            REMOVE,
             profileTemplate.resolve(ctx, profileName))
             .build()
         );
@@ -89,7 +89,7 @@ public class ProfileOperations {
 
     public void removeProfileFromIncludes(String parentProfileName, String childProfileName){
         dispatcher.execute(new Operation.Builder(
-            "list-remove", 
+            "list-remove",
             profileTemplate.resolve(ctx, childProfileName))
             .param(NAME, INCLUDES)
             .param(VALUE, parentProfileName)

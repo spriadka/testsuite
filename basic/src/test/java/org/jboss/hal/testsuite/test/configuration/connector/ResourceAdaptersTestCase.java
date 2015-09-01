@@ -185,7 +185,7 @@ public class ResourceAdaptersTestCase {
     @Test
     @InSequence(4)
     public void removeResourceAdapter(){
-        page.selectMenu("Subsystems").selectMenu("Resource Adapters").selectMenu(NAME_NO_TRANSACTION).remove();;
+        page.selectMenu("Subsystems").selectMenu("Resource Adapters").selectMenu(NAME_NO_TRANSACTION).remove();
         Library.letsSleep(1000);
         verifier.verifyResource(DMR_ADAPTER_NO, false);
     }
