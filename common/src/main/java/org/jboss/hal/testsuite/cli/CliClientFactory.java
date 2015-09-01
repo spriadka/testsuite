@@ -37,7 +37,7 @@ public class CliClientFactory {
     /**
      * @return either {@link CliClient} or {@link DomainCliClient} depending on actual mode
      */
-    public static CliClient getClient(){
+    public static CliClient getClient() {
         if (ConfigUtils.isDomain()) {
             return new DomainCliClient(CLI_CONFIGURATION, FULL);
         } else {
@@ -49,7 +49,7 @@ public class CliClientFactory {
      * @param profile
      * @return {@link DomainCliClient} with given profile
      */
-    public static DomainCliClient getDomainClient(String profile){
+    public static DomainCliClient getDomainClient(String profile) {
         return new DomainCliClient(CLI_CONFIGURATION, profile);
     }
 

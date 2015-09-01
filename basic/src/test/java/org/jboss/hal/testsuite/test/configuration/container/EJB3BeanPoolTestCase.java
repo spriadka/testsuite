@@ -61,14 +61,14 @@ public class EJB3BeanPoolTestCase {
 
     @Test
     @InSequence(1)
-    public void editMaxPoolSize(){
+    public void editMaxPoolSize() {
         checker.editTextAndAssert(page, "max-pool-size", "56").rowName(BEAN_POOL_NAME).invoke();
         checker.editTextAndAssert(page, "max-pool-size", "56F").rowName(BEAN_POOL_NAME).expectError().invoke();
     }
 
     @Test
     @InSequence(2)
-    public void editTimeout(){
+    public void editTimeout() {
         checker.editTextAndAssert(page, "timeout", "56").rowName(BEAN_POOL_NAME).invoke();
         checker.editTextAndAssert(page, "timeout", "56F").rowName(BEAN_POOL_NAME).expectError().invoke();
     }

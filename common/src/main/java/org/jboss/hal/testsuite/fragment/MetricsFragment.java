@@ -10,12 +10,12 @@ public class MetricsFragment extends BaseFragment {
     private double maxWidth;
     private double currentWidth;
 
-    public double getPercentage(){
-        return (currentWidth *100 / maxWidth);
+    public double getPercentage() {
+        return (currentWidth * 100 / maxWidth);
     }
 
-    public double getCurrentValue(){
-        return (currentWidth/maxWidth)*maxValue;
+    public double getCurrentValue() {
+        return (currentWidth / maxWidth) * maxValue;
     }
 
     public double getMaxWidth() {

@@ -48,7 +48,7 @@ public class JvmMetricsTestCase {
     private DomainRuntimeEntryPoint domainPage;
 
     @Before
-    public void before(){
+    public void before() {
         if (ConfigUtils.isDomain()) {
             navigation = new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
                     .addAddress(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
@@ -56,7 +56,7 @@ public class JvmMetricsTestCase {
                     .addAddress(FinderNames.SERVER,"server-one")
                     .addAddress(FinderNames.MONITOR, "JVM");
         }
-        else{
+        else {
             navigation = new FinderNavigation(browser, StandaloneRuntimeEntryPoint.class)
                     .addAddress(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
                     .addAddress(FinderNames.MONITOR, "JVM");
@@ -67,7 +67,7 @@ public class JvmMetricsTestCase {
     }
 
     @Test
-    public void heapUsageMetrics(){
+    public void heapUsageMetrics() {
         MetricsAreaFragment metricsArea = jvmPage.getHeapUsageMetricsArea();
         double expectedUsedPercentage = metricsArea.getPercentage(USED, MAX);
         double expectedCommittedPercentage = metricsArea.getPercentage(COMMITTED, MAX);
@@ -79,7 +79,7 @@ public class JvmMetricsTestCase {
     }
 
     @Test
-    public void threadUsageMetrics(){
+    public void threadUsageMetrics() {
         MetricsAreaFragment metricsArea = jvmPage.getThreadUsageMetricsArea();
         double expectedUsagePercentage = metricsArea.getPercentage(DAEMON, LIVE);
         MetricsFragment threadUsageMetrics = metricsArea.getMetricsFragment(DAEMON);

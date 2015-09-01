@@ -66,7 +66,7 @@ public class RHAccessFragment extends BaseFragment {
     }
 
     protected IsNotElementBuilder<Void> waitLongUntilElementIs(final By selector, final SearchContext context) {
-        if(context != null) {
+        if (context != null) {
             return Graphene.waitGui().withTimeout(LONG_SEARCH_TIMEOUT, TimeUnit.SECONDS).until().
                     element(context, selector).is();
         } else {

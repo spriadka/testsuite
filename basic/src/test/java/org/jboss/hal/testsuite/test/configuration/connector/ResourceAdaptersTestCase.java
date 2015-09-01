@@ -44,20 +44,20 @@ public class ResourceAdaptersTestCase {
     private static final String NO_TRANSACTION = "NoTransaction";
     private static final String LOCAL_TRANSACTION = "LocalTransaction";
     private static final String XA_TRANSACTION = "XATransaction";
-    private static final String PROPERTY_VALUE = "prop_"+ RandomStringUtils.randomAlphanumeric(5);
-    private static final String PROPERTY_KEY = "val_"+ RandomStringUtils.randomAlphanumeric(5);
-    private static final String CONNECTION_DEFINITION_NAME = "cdn_"+ RandomStringUtils.randomAlphanumeric(5);
-    private static final String CONNECTION_DEFINITION_JNDI_NAME = "java:/cdjn_"+ RandomStringUtils.randomAlphanumeric(5);
-    private static final String CONNECTION_DEFINITION_CLASS = "cdc_"+ RandomStringUtils.randomAlphanumeric(5);
+    private static final String PROPERTY_VALUE = "prop_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String PROPERTY_KEY = "val_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String CONNECTION_DEFINITION_NAME = "cdn_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String CONNECTION_DEFINITION_JNDI_NAME = "java:/cdjn_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String CONNECTION_DEFINITION_CLASS = "cdc_" + RandomStringUtils.randomAlphanumeric(5);
     private static final String ADMIN_OBJECT_NAME = "aon_" + RandomStringUtils.randomAlphanumeric(5);
-    private static final String ADMIN_OBJECT_JNDI_NAME = "java:/aojn_"+ RandomStringUtils.randomAlphanumeric(5);
-    private static final String ADMIN_OBJECT_CLASS = "aoc_"+ RandomStringUtils.randomAlphanumeric(5);
+    private static final String ADMIN_OBJECT_JNDI_NAME = "java:/aojn_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String ADMIN_OBJECT_CLASS = "aoc_" + RandomStringUtils.randomAlphanumeric(5);
 
     private static final String DMR_ADAPTER_NO = RESOURCE_ADAPTER_ADDRESS + "=" + NAME_NO_TRANSACTION;
     private static final String DMR_ADAPTER_LOCAL = RESOURCE_ADAPTER_ADDRESS + "=" + NAME_LOCAL_TRANSACTION;
     private static final String DMR_ADAPTER_XA = RESOURCE_ADAPTER_ADDRESS + "=" + NAME_XA_TRANSACTION;
     private static final String DMR_PROPERTY = DMR_ADAPTER_NO + "/config-properties=" + PROPERTY_KEY;
-    private static final String DMR_ADMIN_OBJ= DMR_ADAPTER_NO + "/admin-objects=" + ADMIN_OBJECT_NAME;
+    private static final String DMR_ADMIN_OBJ = DMR_ADAPTER_NO + "/admin-objects=" + ADMIN_OBJECT_NAME;
     private static final String DMR_CON_DEF = DMR_ADAPTER_NO + "/connection-definitions=" + CONNECTION_DEFINITION_NAME;
 
     private static CliClient client = CliClientFactory.getClient();
@@ -70,17 +70,17 @@ public class ResourceAdaptersTestCase {
     public ResourceAdaptersPage page;
 
     @Before
-    public void before(){
+    public void before() {
         Console.withBrowser(browser).refreshAndNavigate(ResourceAdaptersPage.class);
     }
 
     @After
-    public void after(){
+    public void after() {
         client.reload(false);
     }
 
     @AfterClass
-    public static void cleanUp(){
+    public static void cleanUp() {
         client.removeResource(DMR_ADAPTER_NO);
         client.removeResource(DMR_ADAPTER_XA);
         client.removeResource(DMR_ADAPTER_LOCAL);
@@ -134,7 +134,7 @@ public class ResourceAdaptersTestCase {
 
     @Test
     @InSequence(2)
-    public void addManagedConnectionDefinition(){
+    public void addManagedConnectionDefinition() {
         page.selectMenu("Subsystems").selectMenu("Resource Adapters").view(NAME_NO_TRANSACTION);
         Console.withBrowser(browser).waitUntilLoaded();
         Library.letsSleep(100);
@@ -159,7 +159,7 @@ public class ResourceAdaptersTestCase {
 
     @Test
     @InSequence(3)
-    public void addAdminObject(){
+    public void addAdminObject() {
         page.selectMenu("Subsystems").selectMenu("Resource Adapters").view(NAME_NO_TRANSACTION);
         Console.withBrowser(browser).waitUntilLoaded();
         Library.letsSleep(100);
@@ -184,14 +184,14 @@ public class ResourceAdaptersTestCase {
 
     @Test
     @InSequence(4)
-    public void removeResourceAdapter(){
+    public void removeResourceAdapter() {
         page.selectMenu("Subsystems").selectMenu("Resource Adapters").selectMenu(NAME_NO_TRANSACTION).remove();
         Library.letsSleep(1000);
         verifier.verifyResource(DMR_ADAPTER_NO, false);
     }
 
     @Test
-    public void createLocalTransaction(){
+    public void createLocalTransaction() {
         page.selectMenu("Subsystems").selectMenu("Resource Adapters");
         ResourceAdaptersFragment fragment = page.getContent();
         ResourceAdapterWizard wizard = fragment.addResourceAdapter();
@@ -211,7 +211,7 @@ public class ResourceAdaptersTestCase {
     }
 
     @Test
-    public void createXATransaction(){
+    public void createXATransaction() {
         page.selectMenu("Subsystems").selectMenu("Resource Adapters");
         ResourceAdaptersFragment fragment = page.getContent();
         ResourceAdapterWizard wizard = fragment.addResourceAdapter();

@@ -33,7 +33,7 @@ import org.openqa.selenium.WebElement;
  */
 public class PreviewFragment extends BaseFragment {
 
-    public String getIncludedFromProfile(){
+    public String getIncludedFromProfile() {
         By selector = ByJQuery.selector("h3:contains('Included from profile:')");
         Graphene.waitAjax().until().element(root,selector).is().visible();
         WebElement element = root.findElement(selector);

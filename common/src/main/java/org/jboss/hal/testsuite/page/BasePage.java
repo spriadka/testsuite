@@ -279,16 +279,16 @@ public abstract class BasePage {
         return this;
     }
 
-    protected By getMenuEqualsSelector(String label){
+    protected By getMenuEqualsSelector(String label) {
         return getMenuSelector(" and text()='" + label + "']]");
     }
 
-    protected By getMenuContainsSelector(String label){
+    protected By getMenuContainsSelector(String label) {
         return getMenuSelector(" and contains(.,'" + label + "')]]");
     }
 
-    private By getMenuSelector(String xpathSuffix){
+    private By getMenuSelector(String xpathSuffix) {
         String cellClass = PropUtils.get("table.cell.class");
-        return By.ByXPath.xpath("//td[contains(@class,'" + cellClass + "') and descendant::div[@class='navigation-column-item'"+xpathSuffix);
+        return By.ByXPath.xpath("//td[contains(@class,'" + cellClass + "') and descendant::div[@class='navigation-column-item'" + xpathSuffix);
     }
 }

@@ -88,7 +88,7 @@ public class WizardWindow extends WindowFragment {
     public void assertFinish(boolean expected) {
         boolean finished = finish();
 
-        if(expected) {
+        if (expected) {
             Assert.assertTrue("Wizard was supposed to finish, the window should be closed.", finished);
         } else {
             Assert.assertFalse("Wizard was supposed to fail, the window should be open.", finished);

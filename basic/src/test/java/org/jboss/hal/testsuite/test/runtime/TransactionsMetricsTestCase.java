@@ -49,7 +49,7 @@ public class TransactionsMetricsTestCase {
     private DomainRuntimeEntryPoint domainPage;
 
     @Before
-    public void before(){
+    public void before() {
         if (ConfigUtils.isDomain()) {
             navigation = new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
                 .addAddress(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
@@ -58,7 +58,7 @@ public class TransactionsMetricsTestCase {
                 .addAddress(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
                 .addAddress(FinderNames.SUBSYSTEM, "Transactions");
         }
-        else{
+        else {
             navigation = new FinderNavigation(browser, StandaloneRuntimeEntryPoint.class)
                 .addAddress(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
                 .addAddress(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
@@ -86,7 +86,7 @@ public class TransactionsMetricsTestCase {
     }
 
     @Test
-    public void failureOriginMetrics(){
+    public void failureOriginMetrics() {
         MetricsAreaFragment metricsArea = tmPage.getFailureOriginMetricsArea();
         MetricsFragment appFailuresMetrics = metricsArea.getMetricsFragment(APPLICATION_FAILURES);
         MetricsFragment resFailuresMetrics = metricsArea.getMetricsFragment(RESOURCE_FAILURES);

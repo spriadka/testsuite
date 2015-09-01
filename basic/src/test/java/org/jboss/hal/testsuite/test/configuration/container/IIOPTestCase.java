@@ -98,7 +98,7 @@ public class IIOPTestCase {
     }
 
     @After
-    public void after(){
+    public void after() {
         cliClient.reload();
     }
 
@@ -204,7 +204,7 @@ public class IIOPTestCase {
     @Ignore("After removing property, empty properties tag left in xml configuration and server cannot run more. https://issues.jboss.org/browse/HAL-791")
     @Test
     @InSequence(5)
-    public void addProperty(){
+    public void addProperty() {
         ConfigPropertiesFragment properties = page.getConfig().propertiesConfig();
         page.waitUntilPropertiesAreVisible();
         ConfigPropertyWizard wizard = properties.addProperty();
@@ -221,7 +221,7 @@ public class IIOPTestCase {
     @Ignore("After removing property, empty properties tag left in xml configuration and server cannot run more. https://issues.jboss.org/browse/HAL-791")
     @Test
     @InSequence(6)
-    public void removeProperty(){
+    public void removeProperty() {
         ConfigPropertiesFragment properties = page.getConfig().propertiesConfig();
         page.waitUntilPropertiesAreVisible();
         properties.removeProperty(KEY_VALUE);

@@ -35,12 +35,12 @@ public class EETestCase {
     public EEPage page;
 
     @Before
-    public void before(){
+    public void before() {
         Console.withBrowser(browser).refreshAndNavigate(EEPage.class);
     }
 
     @Test
-    public void toggleIsolatedDeployments(){
+    public void toggleIsolatedDeployments() {
         checker.editCheckboxAndAssert(page, "ear-subdeployments-isolated", true).invoke();
         checker.editCheckboxAndAssert(page, "ear-subdeployments-isolated", false).invoke();
     }

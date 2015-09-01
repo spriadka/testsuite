@@ -48,7 +48,7 @@ public class Row extends FinderFragment {
         return By.cssSelector(".btn.dropdown-toggle");
     }
 
-    public String getText(){
+    public String getText() {
         return root.getText();
     }
 }

@@ -7,7 +7,7 @@ import org.jboss.hal.testsuite.page.MetricsPage;
  * Created by mkrajcov on 4/10/15.
  */
 public class WebMetricsPage extends MetricsPage {
-    public MetricsAreaFragment getRequestPerConnectorMetricsArea(){
+    public MetricsAreaFragment getRequestPerConnectorMetricsArea() {
         return getMetricsArea("HTTP Requests");
     }
 }

@@ -178,11 +178,11 @@ public class MailTestCase {
         verifier.verifyResource(DMR_SESSION, false);
     }
 
-    private void invokeOperationOnMailSession(String operationName){
+    private void invokeOperationOnMailSession(String operationName) {
         navi.addAddress(MAIL_SESSION_LABEL, MAIL_SESSION_NAME).selectRow().invoke(operationName);
     }
 
-    private void invokeOperationAddMailSession(){
+    private void invokeOperationAddMailSession() {
         navi.addAddress(MAIL_SESSION_LABEL).selectColumn().invoke(FinderNames.ADD);
     }
 

@@ -58,7 +58,7 @@ public class Column extends FinderFragment {
      * @param navi
      * @return
      */
-    public boolean rowIsPresent(String label, Long timeout, FinderNavigation navi){
+    public boolean rowIsPresent(String label, Long timeout, FinderNavigation navi) {
         By rowSelector = navi.rowSelector(label);
         try {
             Graphene.waitModel().withTimeout(timeout, TimeUnit.SECONDS).until().element(root, rowSelector).is().present();

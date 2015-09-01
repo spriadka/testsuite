@@ -24,9 +24,9 @@ public class DeploymentWizard extends WizardWindow {
     private static final String UNMANAGED = "Create an unmanaged deployment";
     private static final String FROMREPOSITORY = "Choose a deployment from the content repository";
 
-    private static final By MANAGED_BUTTON = By.xpath(".//label[text()='"+MANAGED+"']");
-    private static final By UNMANAGED_BUTTON = By.xpath(".//label[text()='"+UNMANAGED+"']");
-    private static final By FROMREPOSITORY_BUTTON = By.xpath(".//label[text()='"+FROMREPOSITORY+"']");
+    private static final By MANAGED_BUTTON = By.xpath(".//label[text()='" + MANAGED + "']");
+    private static final By UNMANAGED_BUTTON = By.xpath(".//label[text()='" + UNMANAGED + "']");
+    private static final By FROMREPOSITORY_BUTTON = By.xpath(".//label[text()='" + FROMREPOSITORY + "']");
 
     public DeploymentWizard switchToRepository() {
         root.findElement(FROMREPOSITORY_BUTTON).click();

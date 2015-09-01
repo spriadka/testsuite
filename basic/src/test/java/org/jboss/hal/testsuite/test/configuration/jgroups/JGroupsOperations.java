@@ -35,7 +35,7 @@ public class JGroupsOperations {
         return getBaseDmrPath() + "transport=" + transport + "/";
     }
 
-    private String getProtocolDrmPath(String name) {//TODO: verify
+    private String getProtocolDrmPath(String name) { //TODO: verify
         return getBaseDmrPath() + "protocol=" + name + "/";
     }
 

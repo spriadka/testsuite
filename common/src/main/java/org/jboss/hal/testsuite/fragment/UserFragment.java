@@ -7,7 +7,7 @@ import org.jboss.hal.testsuite.util.Console;
  */
 public class UserFragment extends BaseFragment {
 
-    public UserMenuFragment openMenu(){
+    public UserMenuFragment openMenu() {
         root.click();
         UserMenuFragment popup = Console.withBrowser(browser).openedPopup(UserMenuFragment.class);
         return popup;

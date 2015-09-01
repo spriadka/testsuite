@@ -7,5 +7,5 @@ import org.jboss.hal.testsuite.page.ConfigPage;
  * @author mkrajcov <mkrajcov@redhat.com>
  */
 @Location("#ee")
-public class EEPage extends ConfigPage{
+public class EEPage extends ConfigPage {
 }

@@ -12,7 +12,7 @@ import org.openqa.selenium.support.ui.Select;
  */
 public class RHAccessModifyTicketFragment extends RHAccessFragment {
 
-    public List<WebElement> searchFor(final String query) {
+    public List<WebElement> searchFor (final String query) {
         By queryInputSelector = ByJQuery.selector("div.input-group input");
         waitLongUntilElementIs(queryInputSelector, root).enabled();
         root.findElement(queryInputSelector).sendKeys(query);

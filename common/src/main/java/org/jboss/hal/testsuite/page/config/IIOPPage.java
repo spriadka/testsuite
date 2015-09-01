@@ -15,24 +15,24 @@ public class IIOPPage extends ConfigurationPage {
     @Drone
     WebDriver browser;
 
-    public void switchToEditMode(){
+    public void switchToEditMode() {
         WebElement viewPanel = browser.findElement(By.className("form-view-panel"));
         WebElement editLink = viewPanel.findElement(By.className("form-edit-button"));
         editLink.click();
         waitUntilPanelIsVisible();
     }
 
-    public void waitUntilPanelIsVisible(){
+    public void waitUntilPanelIsVisible() {
         // wait until we switched to edit mode
         Graphene.waitGui().until().element(By.className("form-edit-panel")).is().visible();
     }
 
-    public void waitUntilPropertiesAreVisible(){
+    public void waitUntilPropertiesAreVisible() {
         // wait until we switched to properties
         Graphene.waitGui().until().element(By.className("default-cell-table")).is().visible();
     }
 
-    public ConfigFragment getConfigFragment(){
+    public ConfigFragment getConfigFragment() {
         WebElement editPanel = browser.findElement(By.className("default-tabpanel"));
         return  Graphene.createPageFragment(ConfigFragment.class, editPanel);
     }

@@ -10,15 +10,15 @@ import org.jboss.hal.testsuite.page.MetricsPage;
 @Location("#standalone-runtime/host-vm")
 public class JVMPage extends MetricsPage {
 
-    public MetricsAreaFragment getHeapUsageMetricsArea(){
+    public MetricsAreaFragment getHeapUsageMetricsArea() {
         return getMetricsArea("Heap Usage");
     }
 
-    public MetricsAreaFragment getNonHeapUsageMetricsArea(){
+    public MetricsAreaFragment getNonHeapUsageMetricsArea() {
         return getMetricsArea("Non Heap Usage");
     }
 
-    public MetricsAreaFragment getThreadUsageMetricsArea(){
+    public MetricsAreaFragment getThreadUsageMetricsArea() {
         return getMetricsArea("Thread Usage");
     }
 }

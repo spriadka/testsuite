@@ -7,5 +7,5 @@ import org.jboss.hal.testsuite.page.BasePage;
  * @author jcechace
  */
 @Location("#server-groups")
-public class ServerGroupsPage extends BasePage{
+public class ServerGroupsPage extends BasePage {
 }

@@ -7,5 +7,5 @@ import org.jboss.hal.testsuite.page.ConfigPage;
  * @author mkrajcov <mkrajcov@redhat.com>
  */
 @Location("#properties")
-public class SystemPropertiesPage extends ConfigPage{
+public class SystemPropertiesPage extends ConfigPage {
 }

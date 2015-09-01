@@ -33,14 +33,14 @@ public interface FinderNames {
     String DEPLOYMENT = "Deployment";
     String HOST = "Host";
     String HOSTS = "Hosts";
-    String LOG_FILES="Log Files";
+    String LOG_FILES = "Log Files";
     String MONITOR = "Monitor";
     String PROFILE = "Profile";
     String PROFILES = "Profiles";
     String SERVER = "Server";
     String SERVER_GROUP = "Server Group";
     String SERVER_GROUPS = "Server Groups";
-    String STANDALONE_SERVER="Standalone Server";
+    String STANDALONE_SERVER = "Standalone Server";
     String SUBSYSTEM = "Subsystem";
     String SUBSYSTEMS = "Subsystems";
     String VIEW = "View";

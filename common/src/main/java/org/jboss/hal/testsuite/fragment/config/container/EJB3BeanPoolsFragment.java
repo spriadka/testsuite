@@ -7,11 +7,11 @@ import org.jboss.hal.testsuite.fragment.ConfigFragment;
  */
 public class EJB3BeanPoolsFragment extends ConfigFragment {
 
-    public EJB3BeanPoolWizard addBeanPool(){
+    public EJB3BeanPoolWizard addBeanPool() {
         return getResourceManager().addResource(EJB3BeanPoolWizard.class);
     }
 
-    public void removeBeanPool(String name){
+    public void removeBeanPool(String name) {
         getResourceManager().removeResourceAndConfirm(name);
     }
 }

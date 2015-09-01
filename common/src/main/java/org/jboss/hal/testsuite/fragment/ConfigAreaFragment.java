@@ -19,7 +19,7 @@ public class ConfigAreaFragment extends  BaseFragment {
         By selector = ByJQuery.selector("." + tabClass + ":contains('" + label + "')");
         List<WebElement> items = root.findElements(selector);
 
-        for(WebElement item : items) {
+        for (WebElement item : items) {
             if (item.isDisplayed() && item.getText().equals(label)) {
                 return item;
             }

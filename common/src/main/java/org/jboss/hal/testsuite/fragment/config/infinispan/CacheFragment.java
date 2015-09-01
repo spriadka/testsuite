@@ -5,9 +5,9 @@ import org.jboss.hal.testsuite.fragment.ConfigFragment;
 /**
  * @author mkrajcov <mkrajcov@redhat.com>
  */
-public class CacheFragment extends ConfigFragment{
+public class CacheFragment extends ConfigFragment {
 
-    public CacheWizard addCache(){
+    public CacheWizard addCache() {
         return getResourceManager().addResource(CacheWizard.class);
     }
 }
