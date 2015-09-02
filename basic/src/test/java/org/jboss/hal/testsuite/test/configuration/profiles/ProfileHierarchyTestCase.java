@@ -156,13 +156,7 @@ public class ProfileHierarchyTestCase {
 
     // HAL-803 workaround
     private FinderNavigation newNavi() {
-        return new FinderNavigation(browser, DomainConfigEntryPoint.class, ()-> {
-            try {
-                Thread.sleep(200);
-            } catch (InterruptedException e) {
-                throw new IllegalStateException(e);
-            }
-        });
+        return new FinderNavigation(browser, DomainConfigEntryPoint.class, 200);
     }
 
 }

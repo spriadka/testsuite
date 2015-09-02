@@ -65,8 +65,6 @@ public class FinderNavigation {
      * This constructor should not be used regularly! <br />
      * It's for special cases when you need to perform some action after every row click.<br />
      * E.g. sleeps to workaround HAL-803
-     * @param browser
-     * @param page
      * @param hook action after every row click
      */
     public FinderNavigation(final WebDriver browser, final Class<? extends BasePage> page, Hook hook) {
@@ -74,6 +72,22 @@ public class FinderNavigation {
         this.page = page;
         this.hook = hook;
         this.address = new ArrayList<>();
+    }
+
+    /**
+     * This constructor should not be used regularly! <br />
+     * It's for special cases when you need to delay after every row click.<br />
+     * This is workaround for HAL-803 snd should be used mainly when you are interested about preview content.
+     * @param clickDelay milis to wait after every row click
+     */
+    public FinderNavigation(final WebDriver browser, final Class<? extends BasePage> page, final long clickDelay) {
+        this(browser, page, ()-> {
+            try {
+                Thread.sleep(clickDelay);
+            } catch (InterruptedException e) {
+                throw new IllegalStateException(e);
+            }
+        });
     }
 
     public FinderNavigation(final WebDriver browser, final Class<? extends BasePage> page) {
