@@ -16,12 +16,12 @@ import org.openqa.selenium.support.ui.Select;
 
 public class LoggingPage extends ConfigPage {
 
-    public ConfigFragment getConfigFragment(){
+    public ConfigFragment getConfigFragment() {
         WebElement editPanel = browser.findElement(By.className("default-tabpanel"));
         return  Graphene.createPageFragment(ConfigFragment.class, editPanel);
     }
 
-    public ConfigFragment getWindowFragment(){
+    public ConfigFragment getWindowFragment() {
         WebElement editPanel = browser.findElement(By.className("default-window-content"));
         return  Graphene.createPageFragment(ConfigFragment.class, editPanel);
     }
@@ -34,7 +34,7 @@ public class LoggingPage extends ConfigPage {
         }
     }
 
-    public void addLogger(String name,String category,String level){
+    public void addLogger(String name,String category,String level) {
         clickButton("Add");
         getWindowFragment().getEditor().text("name", name);
         getWindowFragment().getEditor().text("category",category);
@@ -43,37 +43,45 @@ public class LoggingPage extends ConfigPage {
         getWindowFragment().clickButton("Save");
     }
 
-    public void addFormatter(String name,String pattern){
+    public void addFormatter(String name,String pattern) {
         clickButton("Add");
         getWindowFragment().getEditor().text("name", name);
         getWindowFragment().getEditor().text("pattern", pattern);
         getWindowFragment().clickButton("Save");
     }
 
-    public void addAsyncHandler(String name,String queueLen){
+    public void addAsyncHandler(String name,String queueLen) {
         clickButton("Add");
         getWindowFragment().getEditor().text("name", name);
         getWindowFragment().getEditor().text("queue-length", queueLen);
         getWindowFragment().clickButton("Save");
     }
 
-    public void addFileHandler(String name){
+    public void addFileHandler(String name) {
         clickButton("Add");
         getWindowFragment().getEditor().text("name", name);
         getWindowFragment().clickButton("Save");
     }
 
-    public void addConsoleHandler(String name,String namedFormatter){
+    public void addConsoleHandler(String name,String namedFormatter) {
         clickButton("Add");
         getWindowFragment().getEditor().text("name", name);
         getWindowFragment().getEditor().text("named-formatter", namedFormatter);
         getWindowFragment().clickButton("Save");
     }
 
-    public void addPeriodicHandler(String name,String suffix){
+    public void addPeriodicHandler(String name,String suffix) {
         clickButton("Add");
         getWindowFragment().getEditor().text("name", name);
         getWindowFragment().getEditor().text("suffix", suffix);
+        getWindowFragment().clickButton("Save");
+    }
+
+    public void addCustomFormatter(String name, String clazz, String module) {
+        clickButton("Add");
+        getWindowFragment().getEditor().text("name", name);
+        getWindowFragment().getEditor().text("class",clazz);
+        getWindowFragment().getEditor().text("module",module);
         getWindowFragment().clickButton("Save");
     }
 
@@ -100,6 +108,10 @@ public class LoggingPage extends ConfigPage {
 
     public void switchToSyslog() {
         switchView("Syslog");
+    }
+
+    public void switchToCustom() {
+        switchView("Custom");
     }
 
     public void switchToPeriodicSize() {

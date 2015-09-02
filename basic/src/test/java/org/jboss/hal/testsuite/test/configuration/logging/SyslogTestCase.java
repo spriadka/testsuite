@@ -34,7 +34,7 @@ public class SyslogTestCase {
 
     private FinderNavigation navigation;
 
-    private ModelNode path = new ModelNode("/subsystem=logging/syslog-handler="+ SYSLOGHANDLER);
+    private ModelNode path = new ModelNode("/subsystem=logging/syslog-handler=" + SYSLOGHANDLER);
     private ResourceAddress address = new ResourceAddress(path);
     Dispatcher dispatcher = new Dispatcher();
     ResourceVerifier verifier = new ResourceVerifier(dispatcher);
@@ -59,7 +59,7 @@ public class SyslogTestCase {
 
     @Test
     @InSequence(0)
-    public void addSyslogHandler(){
+    public void addSyslogHandler() {
         page.addFileHandler(SYSLOGHANDLER);
 
         verifier.verifyResource(address, true);
@@ -67,7 +67,7 @@ public class SyslogTestCase {
 
     @Test //https://issues.jboss.org/browse/HAL-813
     @InSequence(1)
-    public void updateSyslogHandlerPortWrongValue(){
+    public void updateSyslogHandlerPortWrongValue() {
         page.edit();
         ConfigFragment editPanelFragment = page.getConfigFragment();
 
@@ -93,7 +93,7 @@ public class SyslogTestCase {
 
     @Test
     @InSequence(3)
-    public void updateSyslogHandlerFacolity(){
+    public void updateSyslogHandlerFacolity() {
         page.edit();
         ConfigFragment editPanelFragment = page.getConfigFragment();
 
@@ -107,7 +107,7 @@ public class SyslogTestCase {
 
     @Test
     @InSequence(4)
-    public void updateSyslogHandlerFormat(){
+    public void updateSyslogHandlerFormat() {
         page.edit();
         ConfigFragment editPanelFragment = page.getConfigFragment();
 
@@ -120,7 +120,7 @@ public class SyslogTestCase {
 
     @Test
     @InSequence(5)
-    public void removeSyslogHandler(){
+    public void removeSyslogHandler() {
         page.remove();
 
         verifier.verifyResource(address, false);

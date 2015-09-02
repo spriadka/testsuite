@@ -6,8 +6,6 @@ import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.junit.InSequence;
 import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Standalone;
-import org.jboss.hal.testsuite.cli.CliClient;
-import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.dmr.Dispatcher;
 import org.jboss.hal.testsuite.dmr.ResourceAddress;
 import org.jboss.hal.testsuite.dmr.ResourceVerifier;
@@ -45,7 +43,7 @@ public class LogCategoriesTestCase {
     private LoggingPage page;
 
     @Before
-    public void before(){
+    public void before() {
         navigation = new FinderNavigation(browser,StandaloneConfigEntryPoint.class)
                 .addAddress(FinderNames.CONFIGURATION,FinderNames.SUBSYSTEMS)
                 .addAddress(FinderNames.SUBSYSTEM,"Logging");
@@ -58,7 +56,7 @@ public class LogCategoriesTestCase {
 
     @Test
     @InSequence(0)
-    public void addLoggerHandler(){
+    public void addLoggerHandler() {
         page.addLogger(LOGGER, LOGGER, "DEBUG");
 
         verifier.verifyResource(address, true);
@@ -66,8 +64,8 @@ public class LogCategoriesTestCase {
 
     @Test
     @InSequence(1)
-    public void updateLoggerLevel(){
-        page.getResourceManager().getResourceTable().selectRowByText(0,LOGGER);
+    public void updateLoggerLevel() {
+        page.getResourceManager().getResourceTable().selectRowByText(0, LOGGER);
         page.edit();
         ConfigFragment editPanelFragment = page.getConfigFragment();
 
@@ -80,7 +78,7 @@ public class LogCategoriesTestCase {
 
     @Test
     @InSequence(2)
-    public void updateLoggerUsingParentHandler(){
+    public void updateLoggerUsingParentHandler() {
         page.getResourceManager().getResourceTable().selectRowByText(0, LOGGER);
         page.edit();
         ConfigFragment editPanelFragment = page.getConfigFragment();
@@ -94,7 +92,7 @@ public class LogCategoriesTestCase {
 
     @Test
     @InSequence(3)
-    public void updateLoggerHandlesr(){
+    public void updateLoggerHandlesr() {
         page.getResourceManager().getResourceTable().selectRowByText(0, LOGGER);
         page.edit();
         ConfigFragment editPanelFragment = page.getConfigFragment();
@@ -108,8 +106,8 @@ public class LogCategoriesTestCase {
 
     @Test
     @InSequence(4)
-    public void removeLoggerHandler(){
-        page.getResourceManager().getResourceTable().selectRowByText(0,LOGGER);
+    public void removeLoggerHandler() {
+        page.getResourceManager().getResourceTable().selectRowByText(0, LOGGER);
         page.remove();
 
         verifier.verifyResource(address, false);

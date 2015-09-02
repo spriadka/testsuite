@@ -69,7 +69,7 @@ public class ConsoleHandlerTestCase {
 
     @Test
     @InSequence(0)
-    public void addConsoleHandler(){
+    public void addConsoleHandler() {
         page.addConsoleHandler(CONSOLEHANDLER, "PATTERN");
 
         verifier.verifyResource(address, true);
@@ -77,8 +77,8 @@ public class ConsoleHandlerTestCase {
 
     @Test
     @InSequence(1)
-    public void updateConsoleHandlerLevel(){
-        page.getResourceManager().getResourceTable().selectRowByText(0,CONSOLEHANDLER);
+    public void updateConsoleHandlerLevel() {
+        page.getResourceManager().getResourceTable().selectRowByText(0, CONSOLEHANDLER);
         page.edit();
         ConfigFragment editPanelFragment = page.getConfigFragment();
 
@@ -91,8 +91,8 @@ public class ConsoleHandlerTestCase {
 
     @Test
     @InSequence(2)
-    public void updateConsoleHandlerNamedFormatter(){
-        page.getResourceManager().getResourceTable().selectRowByText(0,CONSOLEHANDLER);
+    public void updateConsoleHandlerNamedFormatter() {
+        page.getResourceManager().getResourceTable().selectRowByText(0, CONSOLEHANDLER);
         page.edit();
         ConfigFragment editPanelFragment = page.getConfigFragment();
 
@@ -105,8 +105,8 @@ public class ConsoleHandlerTestCase {
 
     @Test
     @InSequence(3)
-    public void updateConsoleHandlerTarget(){
-        page.getResourceManager().getResourceTable().selectRowByText(0,CONSOLEHANDLER);
+    public void updateConsoleHandlerTarget() {
+        page.getResourceManager().getResourceTable().selectRowByText(0, CONSOLEHANDLER);
         page.edit();
         ConfigFragment editPanelFragment = page.getConfigFragment();
 
@@ -119,8 +119,8 @@ public class ConsoleHandlerTestCase {
 
     @Test
     @InSequence(4)
-    public void updateConsoleHandlerAutoflush(){
-        page.getResourceManager().getResourceTable().selectRowByText(0,CONSOLEHANDLER);
+    public void updateConsoleHandlerAutoflush() {
+        page.getResourceManager().getResourceTable().selectRowByText(0, CONSOLEHANDLER);
         page.edit();
         ConfigFragment editPanelFragment = page.getConfigFragment();
 
@@ -133,8 +133,8 @@ public class ConsoleHandlerTestCase {
 
     @Test
     @InSequence(5)
-    public void updateConsoleHandlerFormatter(){
-        page.getResourceManager().getResourceTable().selectRowByText(0,CONSOLEHANDLER);
+    public void updateConsoleHandlerFormatter() {
+        page.getResourceManager().getResourceTable().selectRowByText(0, CONSOLEHANDLER);
         page.edit();
         ConfigFragment editPanelFragment = page.getConfigFragment();
 
@@ -147,8 +147,8 @@ public class ConsoleHandlerTestCase {
 
     @Test
     @InSequence(6)
-    public void removeConsoleHandler(){
-        page.getResourceManager().getResourceTable().selectRowByText(0,CONSOLEHANDLER);
+    public void removeConsoleHandler() {
+        page.getResourceManager().getResourceTable().selectRowByText(0, CONSOLEHANDLER);
         page.remove();
 
         verifier.verifyResource(address, false);

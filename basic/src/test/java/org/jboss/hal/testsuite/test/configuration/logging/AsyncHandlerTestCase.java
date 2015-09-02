@@ -48,7 +48,7 @@ public class AsyncHandlerTestCase {
     private LoggingPage page;
 
     @Before
-    public void before(){
+    public void before() {
         if (ConfigUtils.isDomain()) {
             navigation = new FinderNavigation(browser, DomainConfigEntryPoint.class)
                     .addAddress(FinderNames.CONFIGURATION, FinderNames.PROFILES)
@@ -70,7 +70,7 @@ public class AsyncHandlerTestCase {
 
     @Test
     @InSequence(0)
-    public void addAsyncHandler(){
+    public void addAsyncHandler() {
         page.addAsyncHandler(ASYNCHANDLER, "230");
 
         verifier.verifyResource(address, true);
@@ -78,7 +78,7 @@ public class AsyncHandlerTestCase {
 
     @Test
     @InSequence(1)
-    public void updateAsyncHandlerLevel(){
+    public void updateAsyncHandlerLevel() {
         page.edit();
         ConfigFragment editPanelFragment = page.getConfigFragment();
 
@@ -91,7 +91,7 @@ public class AsyncHandlerTestCase {
 
     @Test // https://issues.jboss.org/browse/HAL-811
     @InSequence(2)
-    public void updateAsyncHandlerQueueLenWithWrongValue(){
+    public void updateAsyncHandlerQueueLenWithWrongValue() {
         page.edit();
         ConfigFragment editPanelFragment = page.getConfigFragment();
 
@@ -104,7 +104,7 @@ public class AsyncHandlerTestCase {
 
     @Test
     @InSequence(3)
-    public void updateAsyncHandlerQueueLen(){
+    public void updateAsyncHandlerQueueLen() {
         page.edit();
         ConfigFragment editPanelFragment = page.getConfigFragment();
 
@@ -117,7 +117,7 @@ public class AsyncHandlerTestCase {
 
     @Test
     @InSequence(4)
-    public void disableAsyncHandler(){
+    public void disableAsyncHandler() {
         page.edit();
         ConfigFragment editPanelFragment = page.getConfigFragment();
 
@@ -131,7 +131,7 @@ public class AsyncHandlerTestCase {
 
     @Test
     @InSequence(5)
-    public void addAsyncHandlerSubhandlers(){
+    public void addAsyncHandlerSubhandlers() {
         page.edit();
         ConfigFragment editPanelFragment = page.getConfigFragment();
 
@@ -144,7 +144,7 @@ public class AsyncHandlerTestCase {
 
     @Test
     @InSequence(6) //https://issues.jboss.org/browse/HAL-819
-    public void addAsyncHandlerWrongSubhandlers(){
+    public void addAsyncHandlerWrongSubhandlers() {
         page.edit();
         ConfigFragment editPanelFragment = page.getConfigFragment();
 
@@ -157,7 +157,7 @@ public class AsyncHandlerTestCase {
 
     @Test
     @InSequence(7)
-    public void removeAsyncHandler(){
+    public void removeAsyncHandler() {
         page.remove();
 
         verifier.verifyResource(address,false);
