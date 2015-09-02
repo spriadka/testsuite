@@ -33,7 +33,7 @@ public class PeriodicTestCase {
 
     private FinderNavigation navigation;
 
-    private ModelNode path = new ModelNode("/subsystem=logging/periodic-rotating-file-handler="+ PERIODICHANDLER);
+    private ModelNode path = new ModelNode("/subsystem=logging/periodic-rotating-file-handler=" + PERIODICHANDLER);
     private ResourceAddress address = new ResourceAddress(path);
     Dispatcher dispatcher = new Dispatcher();
     ResourceVerifier verifier = new ResourceVerifier(dispatcher);
@@ -59,7 +59,7 @@ public class PeriodicTestCase {
 
     @Test
     @InSequence(0)
-    public void updatePeriodicHandlerNamedFormatter(){
+    public void updatePeriodicHandlerNamedFormatter() {
         ConfigFragment editPanelFragment = page.getConfigFragment();
 
         editPanelFragment.getEditor().text("named-formatter", "");
@@ -72,7 +72,7 @@ public class PeriodicTestCase {
 
     @Test
     @InSequence(1)
-    public void updatePeriodicHandlerSuffix(){
+    public void updatePeriodicHandlerSuffix() {
         ConfigFragment editPanelFragment = page.getConfigFragment();
 
         editPanelFragment.getEditor().text("suffix", ".yyyy-MM-dd,HH:mm");
@@ -85,7 +85,7 @@ public class PeriodicTestCase {
 
     @Test
     @InSequence(2)
-    public void updatePeriodicHandlerAppend(){
+    public void updatePeriodicHandlerAppend() {
         ConfigFragment editPanelFragment = page.getConfigFragment();
 
         editPanelFragment.getEditor().checkbox("append", false);
@@ -98,7 +98,7 @@ public class PeriodicTestCase {
 
     @Test
     @InSequence(3)
-    public void updatePeriodicHandlerAutoflush(){
+    public void updatePeriodicHandlerAutoflush() {
         ConfigFragment editPanelFragment = page.getConfigFragment();
 
         editPanelFragment.getEditor().checkbox("autoflush", false);
@@ -111,7 +111,7 @@ public class PeriodicTestCase {
 
     @Test
     @InSequence(4)
-    public void disalbePeriodicHandler(){
+    public void disalbePeriodicHandler() {
         ConfigFragment editPanelFragment = page.getConfigFragment();
 
         editPanelFragment.getEditor().checkbox("enabled", false);
@@ -124,7 +124,7 @@ public class PeriodicTestCase {
 
     @Test
     @InSequence(5)
-    public void updatePeriodicHandlerLevel(){
+    public void updatePeriodicHandlerLevel() {
         ConfigFragment editPanelFragment = page.getConfigFragment();
 
         editPanelFragment.getEditor().select("level","CONFIG");
@@ -136,7 +136,7 @@ public class PeriodicTestCase {
 
     @Test
     @InSequence(6)
-    public void updatePeriodicHandlerToDefualtSettings(){
+    public void updatePeriodicHandlerToDefualtSettings() {
         ConfigFragment editPanelFragment = page.getConfigFragment();
 
         editPanelFragment.getEditor().text("named-formatter", "PATTERN");
@@ -144,7 +144,7 @@ public class PeriodicTestCase {
         editPanelFragment.getEditor().checkbox("append", true);
         editPanelFragment.getEditor().checkbox("autoflush", true);
         editPanelFragment.getEditor().checkbox("enabled", true);
-        editPanelFragment.getEditor().select("level","ALL");
+        editPanelFragment.getEditor().select("level", "ALL");
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);

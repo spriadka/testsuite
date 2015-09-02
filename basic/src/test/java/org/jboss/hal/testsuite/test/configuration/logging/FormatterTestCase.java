@@ -45,7 +45,7 @@ public class FormatterTestCase {
     private LoggingPage page;
 
     @Before
-    public void before(){
+    public void before() {
         navigation = new FinderNavigation(browser,StandaloneConfigEntryPoint.class)
                 .addAddress(FinderNames.CONFIGURATION,FinderNames.SUBSYSTEMS)
                 .addAddress(FinderNames.SUBSYSTEM,"Logging");
@@ -58,7 +58,7 @@ public class FormatterTestCase {
 
     @Test
     @InSequence(0)
-    public void addFormatter(){
+    public void addFormatter() {
         page.addFormatter(NAME, PATTERN);
 
         verifier.verifyResource(address, true);
@@ -66,8 +66,8 @@ public class FormatterTestCase {
 
     @Test
     @InSequence(1)
-    public void updateFormatterPattern(){
-        page.getResourceManager().getResourceTable().selectRowByText(0,NAME);
+    public void updateFormatterPattern() {
+        page.getResourceManager().getResourceTable().selectRowByText(0, NAME);
         page.edit();
         ConfigFragment editPanelFragment = page.getConfigFragment();
 
@@ -80,8 +80,8 @@ public class FormatterTestCase {
 
     @Test
     @InSequence(2)
-    public void updateFormatterColorMap(){
-        page.getResourceManager().getResourceTable().selectRowByText(0,NAME);
+    public void updateFormatterColorMap() {
+        page.getResourceManager().getResourceTable().selectRowByText(0, NAME);
         page.edit();
         ConfigFragment editPanelFragment = page.getConfigFragment();
 
@@ -94,8 +94,8 @@ public class FormatterTestCase {
 
     @Test
     @InSequence(3)
-    public void removeFormatter(){
-        page.getResourceManager().getResourceTable().selectRowByText(0,NAME);
+    public void removeFormatter() {
+        page.getResourceManager().getResourceTable().selectRowByText(0, NAME);
         page.remove();
 
         verifier.verifyResource(address, false);
