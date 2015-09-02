@@ -3,9 +3,13 @@ package org.jboss.hal.testsuite.page.config;
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.hal.testsuite.cli.TimeoutException;
+import org.jboss.hal.testsuite.finder.Application;
+import org.jboss.hal.testsuite.finder.FinderNames;
+import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
 import org.jboss.hal.testsuite.page.ConfigPage;
+import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.PropUtils;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
@@ -15,6 +19,27 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
 
 public class LoggingPage extends ConfigPage {
+    private FinderNavigation navigation;
+
+    public void navigateToLogging() {
+        if (ConfigUtils.isDomain()) {
+            navigation = new FinderNavigation(browser,DomainConfigEntryPoint.class)
+                    .addAddress(FinderNames.CONFIGURATION, FinderNames.PROFILES)
+                    .addAddress(FinderNames.PROFILE, "default")
+                    .addAddress(FinderNames.SUBSYSTEM,"Logging");
+
+            navigation.selectRow().invoke(FinderNames.VIEW);
+            Application.waitUntilVisible();
+
+        } else {
+            navigation = new FinderNavigation(browser,StandaloneConfigEntryPoint.class)
+                    .addAddress(FinderNames.CONFIGURATION,FinderNames.SUBSYSTEMS)
+                    .addAddress(FinderNames.SUBSYSTEM,"Logging");
+
+            navigation.selectRow().invoke(FinderNames.VIEW);
+            Application.waitUntilVisible();
+        }
+    }
 
     public ConfigFragment getConfigFragment() {
         WebElement editPanel = browser.findElement(By.className("default-tabpanel"));
@@ -110,8 +135,8 @@ public class LoggingPage extends ConfigPage {
         switchView("Syslog");
     }
 
-    public void switchToCustom() {
-        switchView("Custom");
+    public void switchToCustomPattern() {
+        switchSubTab("Custom");
     }
 
     public void switchToPeriodicSize() {
