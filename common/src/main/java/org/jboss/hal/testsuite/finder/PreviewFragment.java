@@ -22,6 +22,10 @@
 
 package org.jboss.hal.testsuite.finder;
 
+import static java.util.stream.Collectors.toList;
+
+import java.util.List;
+
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.hal.testsuite.fragment.BaseFragment;
@@ -39,6 +43,12 @@ public class PreviewFragment extends BaseFragment {
         WebElement element = root.findElement(selector);
         // remove the 'Included from profile:' prefix
         return element.getText().substring(22).trim();
+    }
+
+    public List<String> getDisplayedUnorderedList() {
+        By selector = ByJQuery.selector("ul li");
+        Graphene.waitAjax().until().element(root,selector).is().visible();
+        return root.findElements(selector).stream().filter(element -> element.isDisplayed()).map(element -> element.getText()).collect(toList());
     }
 
 }
