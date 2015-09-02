@@ -32,6 +32,6 @@ public class Application {
     public static final By APPLICATION_PANEL = By.className("rhs-content-panel");
 
     public static void waitUntilVisible() {
-        Graphene.waitGui().until().element(APPLICATION_PANEL).is().visible();
+        Graphene.waitModel().until().element(APPLICATION_PANEL).is().visible();
     }
 }
