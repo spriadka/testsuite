@@ -5,6 +5,7 @@ import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.arquillian.graphene.findby.FindByJQuery;
 import org.jboss.hal.testsuite.cli.Library;
+import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.MessageListEntry;
 import org.jboss.hal.testsuite.fragment.NavigationFragment;
 import org.jboss.hal.testsuite.fragment.NotificationCenterFragment;
@@ -277,6 +278,11 @@ public abstract class BasePage {
         Graphene.waitModel().until().element(selector).attribute("class").contains(cellSelectedClass);
         Library.letsSleep(1000);
         return this;
+    }
+
+    public ConfigFragment getConfigFragment() {
+        WebElement editPanel = browser.findElement(By.className("default-tabpanel"));
+        return  Graphene.createPageFragment(ConfigFragment.class, editPanel);
     }
 
     protected By getMenuEqualsSelector(String label) {
