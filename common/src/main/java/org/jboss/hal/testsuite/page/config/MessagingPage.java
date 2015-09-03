@@ -7,6 +7,8 @@ import org.jboss.hal.testsuite.finder.Application;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
+import org.jboss.hal.testsuite.fragment.config.iiop.IIOPConfigArea;
+import org.jboss.hal.testsuite.fragment.config.messaging.MessagingConfigArea;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
 import org.jboss.hal.testsuite.page.ConfigPage;
@@ -54,10 +56,12 @@ public class MessagingPage extends ConfigPage {
     }
 
     public void switchToDiscovery() {
-        //switchView("Discovery");
-        WebElement viewPanel = browser.findElement(By.className("paged-view-navigation-container"));
-        WebElement editLink = viewPanel.findElement(By.linkText("Discovery"));
-        editLink.click();
+        switchView("Discovery");
+    }
+
+    public void switchToProperties() {
+        WebElement btn = browser.findElement(By.linkText("Properties"));
+        btn.click();
     }
 
     public void switchToConnections() {
@@ -67,6 +71,7 @@ public class MessagingPage extends ConfigPage {
     public void selectInTable(String value, int column) {
         getResourceManager().getResourceTable().selectRowByText(column, value);
     }
+
 
     public void addBroadcastGroup(String name, String binding) {
         clickButton("Add");
@@ -79,7 +84,7 @@ public class MessagingPage extends ConfigPage {
     public void addClusterConnection(String name, String dg, String connectorName ,String connectorAddress) {
         clickButton("Add");
         getWindowFragment().getEditor().text("name", name);
-        getWindowFragment().getEditor().text("discoveryGroupName",dg);
+        getWindowFragment().getEditor().text("discoveryGroupName", dg);
         getWindowFragment().getEditor().text("connectorRef",connectorName);
         getWindowFragment().getEditor().text("clusterConnectionAddress", connectorAddress);
         getWindowFragment().clickButton("Save");
@@ -103,5 +108,10 @@ public class MessagingPage extends ConfigPage {
             Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
         } catch (TimeoutException ignored) {
         }
+    }
+
+
+    public MessagingConfigArea getConfig() {
+        return getConfig(MessagingConfigArea.class);
     }
 }
