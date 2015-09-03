@@ -70,7 +70,7 @@ public class ClusterConnectionsTestCase {
         page.selectView("Clustering");
         page.switchToConnections();
 
-        page.addClusterConnection(NAME,"dg-group1","http-connector","jms");
+        page.addClusterConnection(NAME, "dg-group1", "http-connector", "jms");
 
         verifier.verifyResource(address, true);
 

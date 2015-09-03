@@ -7,6 +7,7 @@ import org.jboss.hal.testsuite.finder.Application;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
+import org.jboss.hal.testsuite.fragment.config.messaging.MessagingConfigArea;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
 import org.jboss.hal.testsuite.page.ConfigPage;
@@ -15,6 +16,7 @@ import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.PropUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+import org.openqa.selenium.support.ui.Select;
 
 /**
  * Created by pcyprian on 2.9.15.
@@ -54,10 +56,12 @@ public class MessagingPage extends ConfigPage {
     }
 
     public void switchToDiscovery() {
-        //switchView("Discovery");
-        WebElement viewPanel = browser.findElement(By.className("paged-view-navigation-container"));
-        WebElement editLink = viewPanel.findElement(By.linkText("Discovery"));
-        editLink.click();
+        switchView("Discovery");
+    }
+
+    public void switchToProperties() {
+        WebElement btn = browser.findElement(By.linkText("Properties"));
+        btn.click();
     }
 
     public void switchToConnections() {
@@ -68,19 +72,40 @@ public class MessagingPage extends ConfigPage {
         getResourceManager().getResourceTable().selectRowByText(column, value);
     }
 
+    public void switchType(String type) {
+        //WebElement listBox = browser.findElement(ByJQuery.selector(type));
+        Select select = new Select(browser.findElement(ByJQuery.selector(".gwt-ListBox:visible")));
+        select.selectByValue(type);
+    }
+
     public void addBroadcastGroup(String name, String binding) {
         clickButton("Add");
-        getWindowFragment().getEditor().text("name",name);
+        getWindowFragment().getEditor().text("name", name);
         getWindowFragment().getEditor().text("socketBinding", binding);
         getWindowFragment().clickButton("Save");
     }
 
-
-    public void addClusterConnection(String name, String dg, String connectorName ,String connectorAddress) {
+    public void addInVmAcceptor(String name, String server) {
         clickButton("Add");
         getWindowFragment().getEditor().text("name", name);
-        getWindowFragment().getEditor().text("discoveryGroupName",dg);
-        getWindowFragment().getEditor().text("connectorRef",connectorName);
+        getWindowFragment().getEditor().text("serverId", server);
+        getWindowFragment().clickButton("Save");
+    }
+
+    public void addGenericAcceptor(String name, String binding, String factoryClass) {
+        clickButton("Add");
+        getWindowFragment().getEditor().text("name", name);
+        getWindowFragment().getEditor().text("socketBinding", binding);
+        getWindowFragment().getEditor().text("factoryClass", factoryClass);
+        getWindowFragment().clickButton("Save");
+    }
+
+
+    public void addClusterConnection(String name, String dg, String connectorName, String connectorAddress) {
+        clickButton("Add");
+        getWindowFragment().getEditor().text("name", name);
+        getWindowFragment().getEditor().text("discoveryGroupName", dg);
+        getWindowFragment().getEditor().text("connectorRef", connectorName);
         getWindowFragment().getEditor().text("clusterConnectionAddress", connectorAddress);
         getWindowFragment().clickButton("Save");
     }
@@ -103,5 +128,10 @@ public class MessagingPage extends ConfigPage {
             Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
         } catch (TimeoutException ignored) {
         }
+    }
+
+
+    public MessagingConfigArea getConfig() {
+        return getConfig(MessagingConfigArea.class);
     }
 }
