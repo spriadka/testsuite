@@ -76,8 +76,8 @@ public class DatasourceXAPolicyTestCase {
         navigation = new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
                 .addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
                 .addAddress(FinderNames.SUBSYSTEM, "Datasources")
-                .addAddress("Type","XA")
-                .addAddress("XA Datasource",XANAME);
+                .addAddress("Type", "XA")
+                .addAddress("XA Datasource", XANAME);
 
         navigation.selectRow(true).invoke(FinderNames.VIEW);
         Application.waitUntilVisible();

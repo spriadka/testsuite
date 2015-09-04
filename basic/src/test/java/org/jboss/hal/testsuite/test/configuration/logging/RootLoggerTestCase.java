@@ -80,6 +80,6 @@ public class RootLoggerTestCase {
 
         assertTrue("Config should be saved and closed.", finished);
         verifier.verifyAttribute(address, "handlers", "[\"CONSOLE\",\"FILE\"]");
-        verifier.verifyAttribute(address,"level", "INFO");
+        verifier.verifyAttribute(address, "level", "INFO");
     }
 }

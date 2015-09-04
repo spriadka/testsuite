@@ -46,9 +46,9 @@ public class FormatterTestCase {
 
     @Before
     public void before() {
-        navigation = new FinderNavigation(browser,StandaloneConfigEntryPoint.class)
-                .addAddress(FinderNames.CONFIGURATION,FinderNames.SUBSYSTEMS)
-                .addAddress(FinderNames.SUBSYSTEM,"Logging");
+        navigation = new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
+                .addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
+                .addAddress(FinderNames.SUBSYSTEM, "Logging");
 
         navigation.selectRow().invoke(FinderNames.VIEW);
         Application.waitUntilVisible();

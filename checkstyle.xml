@@ -67,6 +67,9 @@
         <!-- Checks that a token is surrounded by whitespace. -->
         <module name="WhitespaceAround"/>
 
+        <!-- Checks that commas, semicolons and type casts are followed by whitespace. -->
+        <module name="WhitespaceAfter"/>
+
         <!-- Miscellaneous other checks.                   -->
         <module name="UpperEll"/>
         <module name="PackageAnnotation"/>

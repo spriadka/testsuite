@@ -39,7 +39,7 @@ public class PreviewFragment extends BaseFragment {
 
     public String getIncludedFromProfile() {
         By selector = ByJQuery.selector("h3:contains('Included from profile:')");
-        Graphene.waitAjax().until().element(root,selector).is().visible();
+        Graphene.waitAjax().until().element(root, selector).is().visible();
         WebElement element = root.findElement(selector);
         // remove the 'Included from profile:' prefix
         return element.getText().substring(22).trim();
@@ -47,7 +47,7 @@ public class PreviewFragment extends BaseFragment {
 
     public List<String> getDisplayedUnorderedList() {
         By selector = ByJQuery.selector("ul li");
-        Graphene.waitAjax().until().element(root,selector).is().visible();
+        Graphene.waitAjax().until().element(root, selector).is().visible();
         return root.findElements(selector).stream().filter(element -> element.isDisplayed()).map(element -> element.getText()).collect(toList());
     }
 

@@ -44,9 +44,9 @@ public class LogCategoriesTestCase {
 
     @Before
     public void before() {
-        navigation = new FinderNavigation(browser,StandaloneConfigEntryPoint.class)
-                .addAddress(FinderNames.CONFIGURATION,FinderNames.SUBSYSTEMS)
-                .addAddress(FinderNames.SUBSYSTEM,"Logging");
+        navigation = new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
+                .addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
+                .addAddress(FinderNames.SUBSYSTEM, "Logging");
 
         navigation.selectRow().invoke(FinderNames.VIEW);
         Application.waitUntilVisible();
@@ -87,7 +87,7 @@ public class LogCategoriesTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "use-parent-handlers",false);
+        verifier.verifyAttribute(address, "use-parent-handlers", false);
     }
 
     @Test

@@ -52,7 +52,7 @@ public class WebMetricsTestCase {
     private CliClient cliClient = CliClientFactory.getClient();
     private FinderNavigation navigation;
     private DefaultContext statementContext;
-    private static Dispatcher dispatcher;
+    private Dispatcher dispatcher;
 
     @Drone
     private WebDriver browser;
@@ -65,7 +65,7 @@ public class WebMetricsTestCase {
     private DomainRuntimeEntryPoint domainPage;
 
     @Before
-    public void before() throws IOException,TimeoutException,InterruptedException {
+    public void before() throws IOException, TimeoutException, InterruptedException {
         dispatcher = new Dispatcher();
         statementContext = new DefaultContext();
         ResourceAddress addressStats = ADDRESS_TEMPLATE_STATISTICS.resolve(statementContext);
@@ -76,7 +76,7 @@ public class WebMetricsTestCase {
             navigation = new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
                     .addAddress(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
                     .addAddress(FinderNames.HOST, "master")
-                    .addAddress(FinderNames.SERVER,"server-one")
+                    .addAddress(FinderNames.SERVER, "server-one")
                     .addAddress(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
                     .addAddress(FinderNames.SUBSYSTEM, "Undertow");
         }
@@ -84,7 +84,7 @@ public class WebMetricsTestCase {
             navigation = new FinderNavigation(browser, StandaloneRuntimeEntryPoint.class)
                     .addAddress(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
                     .addAddress(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
-                    .addAddress(FinderNames.SUBSYSTEM,"HTTP");
+                    .addAddress(FinderNames.SUBSYSTEM, "HTTP");
         }
 
         navigation.selectRow().invoke("View");
@@ -94,7 +94,7 @@ public class WebMetricsTestCase {
     }
 
     @After
-    public void after() throws IOException,TimeoutException,InterruptedException {
+    public void after() throws IOException, TimeoutException, InterruptedException {
         ResourceAddress addressStats = ADDRESS_TEMPLATE_STATISTICS.resolve(statementContext);
         dispatcher.execute(new Operation.Builder(ModelDescriptionConstants.WRITE_ATTRIBUTE_OPERATION, addressStats).param("name", "statistics-enabled").param("value", "false").build());
         cliClient.reload();
@@ -114,7 +114,7 @@ public class WebMetricsTestCase {
         //MetricsFragment metric = rpcMetricsArea.getMetricsFragment(ERRORS);
         //assertEquals(expectedPercentage, metric.getPercentage(), DELTA);
 
-        assertEquals(expectedErrors,errors);
-        assertEquals(expectedRequests,numberOfRequests);
+        assertEquals(expectedErrors, errors);
+        assertEquals(expectedRequests, numberOfRequests);
     }
 }

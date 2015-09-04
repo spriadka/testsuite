@@ -79,7 +79,7 @@ public class PeriodicTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "suffix",".yyyy-MM-dd,HH:mm");
+        verifier.verifyAttribute(address, "suffix", ".yyyy-MM-dd,HH:mm");
 
     }
 
@@ -92,7 +92,7 @@ public class PeriodicTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "append",false);
+        verifier.verifyAttribute(address, "append", false);
 
     }
 
@@ -105,7 +105,7 @@ public class PeriodicTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "autoflush",false);
+        verifier.verifyAttribute(address, "autoflush", false);
 
     }
 
@@ -118,7 +118,7 @@ public class PeriodicTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "enabled",false);
+        verifier.verifyAttribute(address, "enabled", false);
 
     }
 
@@ -127,7 +127,7 @@ public class PeriodicTestCase {
     public void updatePeriodicHandlerLevel() {
         ConfigFragment editPanelFragment = page.getConfigFragment();
 
-        editPanelFragment.getEditor().select("level","CONFIG");
+        editPanelFragment.getEditor().select("level", "CONFIG");
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);

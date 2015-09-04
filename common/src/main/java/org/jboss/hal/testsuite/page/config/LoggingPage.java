@@ -23,18 +23,18 @@ public class LoggingPage extends ConfigPage {
 
     public void navigateToLogging() {
         if (ConfigUtils.isDomain()) {
-            navigation = new FinderNavigation(browser,DomainConfigEntryPoint.class)
+            navigation = new FinderNavigation(browser, DomainConfigEntryPoint.class)
                     .addAddress(FinderNames.CONFIGURATION, FinderNames.PROFILES)
                     .addAddress(FinderNames.PROFILE, "default")
-                    .addAddress(FinderNames.SUBSYSTEM,"Logging");
+                    .addAddress(FinderNames.SUBSYSTEM, "Logging");
 
             navigation.selectRow().invoke(FinderNames.VIEW);
             Application.waitUntilVisible();
 
         } else {
-            navigation = new FinderNavigation(browser,StandaloneConfigEntryPoint.class)
-                    .addAddress(FinderNames.CONFIGURATION,FinderNames.SUBSYSTEMS)
-                    .addAddress(FinderNames.SUBSYSTEM,"Logging");
+            navigation = new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
+                    .addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
+                    .addAddress(FinderNames.SUBSYSTEM, "Logging");
 
             navigation.selectRow().invoke(FinderNames.VIEW);
             Application.waitUntilVisible();
@@ -59,23 +59,23 @@ public class LoggingPage extends ConfigPage {
         }
     }
 
-    public void addLogger(String name,String category,String level) {
+    public void addLogger(String name, String category, String level) {
         clickButton("Add");
         getWindowFragment().getEditor().text("name", name);
-        getWindowFragment().getEditor().text("category",category);
-        getWindowFragment().getEditor().select("level",level);
-        getWindowFragment().getEditor().checkbox("use-parent-handlers",true);
+        getWindowFragment().getEditor().text("category", category);
+        getWindowFragment().getEditor().select("level", level);
+        getWindowFragment().getEditor().checkbox("use-parent-handlers", true);
         getWindowFragment().clickButton("Save");
     }
 
-    public void addFormatter(String name,String pattern) {
+    public void addFormatter(String name, String pattern) {
         clickButton("Add");
         getWindowFragment().getEditor().text("name", name);
         getWindowFragment().getEditor().text("pattern", pattern);
         getWindowFragment().clickButton("Save");
     }
 
-    public void addAsyncHandler(String name,String queueLen) {
+    public void addAsyncHandler(String name, String queueLen) {
         clickButton("Add");
         getWindowFragment().getEditor().text("name", name);
         getWindowFragment().getEditor().text("queue-length", queueLen);
@@ -88,14 +88,14 @@ public class LoggingPage extends ConfigPage {
         getWindowFragment().clickButton("Save");
     }
 
-    public void addConsoleHandler(String name,String namedFormatter) {
+    public void addConsoleHandler(String name, String namedFormatter) {
         clickButton("Add");
         getWindowFragment().getEditor().text("name", name);
         getWindowFragment().getEditor().text("named-formatter", namedFormatter);
         getWindowFragment().clickButton("Save");
     }
 
-    public void addPeriodicHandler(String name,String suffix) {
+    public void addPeriodicHandler(String name, String suffix) {
         clickButton("Add");
         getWindowFragment().getEditor().text("name", name);
         getWindowFragment().getEditor().text("suffix", suffix);
@@ -105,8 +105,8 @@ public class LoggingPage extends ConfigPage {
     public void addCustomFormatter(String name, String clazz, String module) {
         clickButton("Add");
         getWindowFragment().getEditor().text("name", name);
-        getWindowFragment().getEditor().text("class",clazz);
-        getWindowFragment().getEditor().text("module",module);
+        getWindowFragment().getEditor().text("class", clazz);
+        getWindowFragment().getEditor().text("module", module);
         getWindowFragment().clickButton("Save");
     }
 

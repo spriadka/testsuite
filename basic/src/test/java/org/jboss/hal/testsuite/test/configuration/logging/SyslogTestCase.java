@@ -111,7 +111,7 @@ public class SyslogTestCase {
         page.edit();
         ConfigFragment editPanelFragment = page.getConfigFragment();
 
-        editPanelFragment.getEditor().select("syslog-format","RFC3164");
+        editPanelFragment.getEditor().select("syslog-format", "RFC3164");
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
