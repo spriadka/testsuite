@@ -160,6 +160,6 @@ public class AsyncHandlerTestCase {
     public void removeAsyncHandler() {
         page.remove();
 
-        verifier.verifyResource(address,false);
+        verifier.verifyResource(address, false);
     }
 }

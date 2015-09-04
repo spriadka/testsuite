@@ -54,7 +54,7 @@ public class NetworkInterfacesTestCase {
     private static final String DMR_INTERFACE_ANY_IP6 = INTERFACE_ADDRESS + "=" + INTERFACE_ANY_IP6_NAME;
 
     private static CliClient client = CliClientFactory.getClient();
-    private static ResourceVerifier verifier = new ResourceVerifier(DMR_INTERFACE,client);
+    private static ResourceVerifier verifier = new ResourceVerifier(DMR_INTERFACE, client);
     private static ConfigAreaChecker checker = new ConfigAreaChecker(verifier);
 
     @Drone

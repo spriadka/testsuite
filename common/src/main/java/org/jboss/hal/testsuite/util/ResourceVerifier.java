@@ -118,7 +118,7 @@ public class ResourceVerifier {
                 .executeForResponse(CliUtils.buildCommand(dmrPath, ":read-attribute", new String[]{"name=" + dmrName}))
                 .get("result").asList().stream().map(ModelNode::asString).toArray(String[]::new);
 
-        Assert.assertArrayEquals(expectedValues,actualValues);
+        Assert.assertArrayEquals(expectedValues, actualValues);
     }
 
     /**

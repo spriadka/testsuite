@@ -54,7 +54,7 @@ public class DataSourceMetricsTestCase {
             navigation = new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
                     .addAddress(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
                     .addAddress(FinderNames.HOST, "master")
-                    .addAddress(FinderNames.SERVER,"server-one")
+                    .addAddress(FinderNames.SERVER, "server-one")
                     .addAddress(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
                     .addAddress(FinderNames.SUBSYSTEM, "Datasources");
         }
@@ -62,7 +62,7 @@ public class DataSourceMetricsTestCase {
             navigation = new FinderNavigation(browser, StandaloneRuntimeEntryPoint.class)
                     .addAddress(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
                     .addAddress(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
-                    .addAddress(FinderNames.SUBSYSTEM,"Datasources");
+                    .addAddress(FinderNames.SUBSYSTEM, "Datasources");
         }
 
         navigation.selectRow().invoke("View");

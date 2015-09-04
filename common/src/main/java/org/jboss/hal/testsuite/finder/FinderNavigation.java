@@ -172,7 +172,7 @@ public class FinderNavigation {
                 columnRow[1] = columnRow[0].findElement(rowSelector);
                 columnRow[1].click();
                 hook.performAfterRowClick();
-                Graphene.waitModel().until().element(columnRow[0],rowSelector).attribute("class")
+                Graphene.waitModel().until().element(columnRow[0], rowSelector).attribute("class")
                         .contains("cellTableSelectedRowCell");
 
                 // wait for next column to be visible

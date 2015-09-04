@@ -55,8 +55,8 @@ public class DatasourceNonXAPolicyTestCase {
         navigation = new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
                 .addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
                 .addAddress(FinderNames.SUBSYSTEM, "Datasources")
-                .addAddress("Type","Non-XA")
-                .addAddress("Datasource","ExampleDS");
+                .addAddress("Type", "Non-XA")
+                .addAddress("Datasource", "ExampleDS");
 
         navigation.selectRow().invoke(FinderNames.VIEW);
         Application.waitUntilVisible();

@@ -42,6 +42,6 @@ public class ProfilesConfigurationPage extends DomainConfigurationPage {
     }
 
     public boolean isCreateNewProfileWindowOpened() {
-        return Console.withBrowser(browser).isWindowOpen(ByJQuery.selector(BUTTON_CREATE_NEW_PROFILE_SELECTOR),3,TimeUnit.SECONDS);
+        return Console.withBrowser(browser).isWindowOpen(ByJQuery.selector(BUTTON_CREATE_NEW_PROFILE_SELECTOR), 3, TimeUnit.SECONDS);
     }
 }

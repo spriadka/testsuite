@@ -65,8 +65,8 @@ public class MailTestCase {
     @Before
     public void before() {
         navi = new FinderNavigation(browser, MailSessionsPage.class)
-            .addAddress(FinderNames.CONFIGURATION,FinderNames.SUBSYSTEMS)
-            .addAddress(FinderNames.SUBSYSTEM,"Mail");
+            .addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
+            .addAddress(FinderNames.SUBSYSTEM, "Mail");
     }
 
     @AfterClass
@@ -131,7 +131,7 @@ public class MailTestCase {
     @InSequence(3)
     public void changeDefaultFromOnMailSession() {
         invokeOperationOnMailSession(ATTRIBUTES);
-        Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).getEditor().text("from",FROM);
+        Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).getEditor().text("from", FROM);
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).clickButton("Save");
 
         verifier.verifyAttribute("from", FROM);

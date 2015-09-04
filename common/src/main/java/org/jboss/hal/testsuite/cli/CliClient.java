@@ -219,7 +219,7 @@ public class CliClient {
         String valueInImprovedFormat = value;
         // handling backslash behavior of CLI
         if (!CliConstants.UNDEFINED.equals(value) && ModelType.STRING.equals(readAttributeType(address, name))) {
-            valueInImprovedFormat = "\"" + value.replaceAll("\\\\","\\\\\\\\") + "\"";
+            valueInImprovedFormat = "\"" + value.replaceAll("\\\\", "\\\\\\\\") + "\"";
         }
         String[] attributes = {"name=" + name, "value=" + valueInImprovedFormat};
         String command = CliUtils.buildCommand(address, ":write-attribute", attributes);

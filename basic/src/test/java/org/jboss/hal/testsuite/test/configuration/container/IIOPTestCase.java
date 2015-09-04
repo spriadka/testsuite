@@ -135,7 +135,7 @@ public class IIOPTestCase {
         finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "number-to-reclaim","undefined"); //https://issues.jboss.org/browse/HAL-790
+        verifier.verifyAttribute(address, "number-to-reclaim", "undefined"); //https://issues.jboss.org/browse/HAL-790
     }
 
     @Test
@@ -148,7 +148,7 @@ public class IIOPTestCase {
         boolean finished = editPanelFragment.save();
         log.debug("f : " + finished);
         assertFalse("Config wasn't supposed to be saved, read-write view should be active.", finished);
-        verifier.verifyAttribute(address, "high-water-mark","undefined");
+        verifier.verifyAttribute(address, "high-water-mark", "undefined");
     }
 
     @Test
@@ -211,7 +211,7 @@ public class IIOPTestCase {
 
         boolean result = wizard.name(KEY_VALUE).value(VALUE).finish();
 
-        assertTrue("Property shoudl be added and wizard closed.",result);
+        assertTrue("Property shoudl be added and wizard closed.", result);
 
         List<ResourceTableRowFragment> actual = page.getResourceManager().getResourceTable().getAllRows();
 

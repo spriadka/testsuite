@@ -83,7 +83,7 @@ public class ResourceAdaptersPolicyTestCase {
         navigation = new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
                 .addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
                 .addAddress(FinderNames.SUBSYSTEM, "Resource Adapters")
-                .addAddress("Resource Adapter",NAME_NO_TRANSACTION);
+                .addAddress("Resource Adapter", NAME_NO_TRANSACTION);
 
         navigation.selectRow().invoke(FinderNames.VIEW);
         Application.waitUntilVisible();

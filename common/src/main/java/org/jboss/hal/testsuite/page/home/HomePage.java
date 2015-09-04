@@ -70,7 +70,7 @@ public class HomePage extends BasePage {
         return fragment;
     }
 
-    public <T extends BaseFragment> Map<String,T> getAllBoxes(BoxType box, Class<T> clazz) {
+    public <T extends BaseFragment> Map<String, T> getAllBoxes(BoxType box, Class<T> clazz) {
         By selector = By.className(box.getBoxClass());
 
         List<WebElement> elements = browser.findElements(selector);

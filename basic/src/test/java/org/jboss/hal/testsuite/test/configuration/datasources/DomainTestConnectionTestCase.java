@@ -48,7 +48,7 @@ public class DomainTestConnectionTestCase extends AbstractTestConnectionTestCase
     @BeforeClass
     public static void setup() {  // create needed datasources
         dsNameValid = dsOps.createDataSource(VALID_URL);
-        dsSameNameValid = new DataSourcesOperations(fullHaClient, "full-ha").createDataSource(VALID_URL);///
+        dsSameNameValid = new DataSourcesOperations(fullHaClient, "full-ha").createDataSource(VALID_URL); ///
         dsSameNameInvalid = dsOps.createDataSource(dsSameNameValid, INVALID_URL);
         client.reload();
     }
@@ -56,7 +56,7 @@ public class DomainTestConnectionTestCase extends AbstractTestConnectionTestCase
     @AfterClass
     public static void tearDown() { // remove datasources when finished
         dsOps.removeDataSource(dsNameValid);
-        new DataSourcesOperations(fullHaClient, "full-ha").removeDataSource(dsSameNameValid);///
+        new DataSourcesOperations(fullHaClient, "full-ha").removeDataSource(dsSameNameValid); ///
         dsOps.removeDataSource(dsSameNameInvalid);
     }
 
