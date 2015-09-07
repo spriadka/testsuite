@@ -69,10 +69,8 @@ public class BroadcastGroupsTestCase {
     public void addBroadcastGroup() {
         page.navigateToMessaging();
         page.selectView("Clustering");
-        
         page.addBroadcastGroup(NAME, BINDING);
-
-
+        
         verifier.verifyResource(address, true);
 
         cliClient.executeCommand(remove);

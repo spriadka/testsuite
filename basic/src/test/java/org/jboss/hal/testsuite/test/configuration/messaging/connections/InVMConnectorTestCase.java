@@ -29,18 +29,17 @@ import static org.junit.Assert.assertTrue;
  */
 @RunWith(Arquillian.class)
 @Category(Shared.class)
-public class GenericAcceptorTestCase {
-    private static final String NAME = "generic-text-acceptor";
-    private static final String BINDING = "socket-binding";
-    private static final String FACTORYCLASS = "factoryClass";
-    private static final String ADD = "/subsystem=messaging-activemq/server=default/acceptor=" + NAME + ":add(socket-binding=" + BINDING + ",factory-class=" + FACTORYCLASS + ")";
+public class InVMConnectorTestCase {
+    private static final String NAME = "in-vm-test-connector";
+    private static final String SERVER = "1";
+    private static final String ADD = "/subsystem=messaging-activemq/server=default/in-vm-connector=" + NAME + ":add(server-id=" + SERVER + ")";
     private static final String DOMAIN = "/profile=full-ha" ;
 
     private String command;
-    private String remove = "/subsystem=messaging-activemq/server=default/acceptor=" + NAME + ":remove";
-    private String addProperty = "/subsystem=messaging-activemq/server=default/acceptor=" + NAME + ":write-attribute(name=params.prop,value=test)";
-    private ModelNode path = new ModelNode("/subsystem=messaging-activemq/server=default/acceptor=" + NAME);
-    private ModelNode domainPath = new ModelNode("/profile=full-ha/subsystem=messaging-activemq/server=default/acceptor=" + NAME);
+    private String remove = "/subsystem=messaging-activemq/server=default/in-vm-connector=" + NAME + ":remove";
+    private String addProperty = "/subsystem=messaging-activemq/server=default/in-vm-connector=" + NAME + ":write-attribute(name=params.prop,value=test)";
+    private ModelNode path = new ModelNode("/subsystem=messaging-activemq/server=default/in-vm-connector=" + NAME);
+    private ModelNode domainPath = new ModelNode("/profile=full-ha/subsystem=messaging-activemq/server=default/in-vm-connector=" + NAME);
     private ResourceAddress address;
     Dispatcher dispatcher = new Dispatcher();
     ResourceVerifier verifier = new ResourceVerifier(dispatcher);
@@ -63,18 +62,18 @@ public class GenericAcceptorTestCase {
             command = ADD;
         }
     }
-
     @After
     public void after() {
         cliClient.executeCommand(remove);
     }
 
     @Test
-    public void addGenericAcceptor() {
+    public void addInVmConnector() {
         page.navigateToMessaging();
         page.selectView("Connections");
-        page.switchType("Type: Generic");
-        page.addGenericAcceptor(NAME, BINDING, FACTORYCLASS);
+        page.switchToConnector();
+        page.switchType("Type: In-VM");
+        page.addInVmAcceptor(NAME, SERVER);
 
         verifier.verifyResource(address, true);
 
@@ -84,51 +83,33 @@ public class GenericAcceptorTestCase {
     }
 
     @Test
-    public void updateAcceptorSocketBinding() {
+    public void updateConnectorServerID() {
         cliClient.executeCommand(command);
         page.navigateToMessaging();
         page.selectView("Connections");
-        page.switchType("Type: Generic");
+        page.switchToConnector();
+        page.switchType("Type: In-VM");
         page.selectInTable(NAME, 0);
         page.edit();
 
         ConfigFragment editPanelFragment = page.getConfigFragment();
 
-        editPanelFragment.getEditor().text("socketBinding", "sb");
+        editPanelFragment.getEditor().text("serverId", "0");
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "socket-binding", "sb");
+        verifier.verifyAttribute(address, "server-id", "0");
 
         cliClient.executeCommand(remove);
     }
 
     @Test
-    public void updateGenericAcceptorFacotryClass() {
+    public void updateConnectorProperties() {
         cliClient.executeCommand(command);
         page.navigateToMessaging();
         page.selectView("Connections");
-        page.switchType("Type: Generic");
-        page.selectInTable(NAME, 0);
-        page.edit();
-
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("factoryClass", "fc");
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "factory-class", "fc");
-
-        cliClient.executeCommand(remove);
-    }
-
-    @Test
-    public void updateAcceptorProperties() {
-        cliClient.executeCommand(command);
-        page.navigateToMessaging();
-        page.selectView("Connections");
-        page.switchType("Type: Generic");
+        page.switchToConnector();
+        page.switchType("Type: In-VM");
         page.selectInTable(NAME, 0);
 
         ConfigPropertiesFragment properties = page.getConfig().propertiesConfig();
@@ -142,12 +123,13 @@ public class GenericAcceptorTestCase {
     }
 
     @Test
-    public void removeAcceptorProperties() {
+    public void removeConnectorProperties() {
         cliClient.executeCommand(command);
         cliClient.executeCommand(addProperty);
         page.navigateToMessaging();
         page.selectView("Connections");
-        page.switchType("Type: Generic");
+        page.switchToConnector();
+        page.switchType("Type: In-VM");
         page.selectInTable(NAME, 0);
         ConfigPropertiesFragment properties = page.getConfig().propertiesConfig();
         properties.removeProperty("prop");
@@ -157,13 +139,14 @@ public class GenericAcceptorTestCase {
         cliClient.executeCommand(remove);
     }
 
-    @Test
-    public void removeGenericAcceptor() {
+    @Test //https://issues.jboss.org/browse/HAL-830
+    public void removeInVmConnector() {
         cliClient.executeCommand(command);
 
         page.navigateToMessaging();
         page.selectView("Connections");
-        page.switchType("Type: Generic");
+        page.switchToConnector();
+        page.switchType("Type: In-VM");
 
         verifier.verifyResource(address, true);
 
@@ -172,5 +155,4 @@ public class GenericAcceptorTestCase {
 
         verifier.verifyResource(address, false);
     }
-
 }

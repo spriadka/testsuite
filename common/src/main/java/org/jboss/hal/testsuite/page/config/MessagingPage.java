@@ -60,9 +60,8 @@ public class MessagingPage extends ConfigPage {
         switchView("Discovery");
     }
 
-    public void switchToProperties() {
-        WebElement btn = browser.findElement(By.linkText("Properties"));
-        btn.click();
+    public void switchToConnector() {
+        switchView("Connector");
     }
 
     public void switchToConnections() {

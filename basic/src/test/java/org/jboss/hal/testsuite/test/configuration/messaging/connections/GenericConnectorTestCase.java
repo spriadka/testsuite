@@ -29,18 +29,18 @@ import static org.junit.Assert.assertTrue;
  */
 @RunWith(Arquillian.class)
 @Category(Shared.class)
-public class GenericAcceptorTestCase {
-    private static final String NAME = "generic-text-acceptor";
+public class GenericConnectorTestCase {
+    private static final String NAME = "generic-text-connector";
     private static final String BINDING = "socket-binding";
     private static final String FACTORYCLASS = "factoryClass";
-    private static final String ADD = "/subsystem=messaging-activemq/server=default/acceptor=" + NAME + ":add(socket-binding=" + BINDING + ",factory-class=" + FACTORYCLASS + ")";
+    private static final String ADD = "/subsystem=messaging-activemq/server=default/connector=" + NAME + ":add(socket-binding=" + BINDING + ",factory-class=" + FACTORYCLASS + ")";
     private static final String DOMAIN = "/profile=full-ha" ;
 
     private String command;
-    private String remove = "/subsystem=messaging-activemq/server=default/acceptor=" + NAME + ":remove";
-    private String addProperty = "/subsystem=messaging-activemq/server=default/acceptor=" + NAME + ":write-attribute(name=params.prop,value=test)";
-    private ModelNode path = new ModelNode("/subsystem=messaging-activemq/server=default/acceptor=" + NAME);
-    private ModelNode domainPath = new ModelNode("/profile=full-ha/subsystem=messaging-activemq/server=default/acceptor=" + NAME);
+    private String remove = "/subsystem=messaging-activemq/server=default/connector=" + NAME + ":remove";
+    private String addProperty = "/subsystem=messaging-activemq/server=default/connector=" + NAME + ":write-attribute(name=params.prop,value=test)";
+    private ModelNode path = new ModelNode("/subsystem=messaging-activemq/server=default/connector=" + NAME);
+    private ModelNode domainPath = new ModelNode("/profile=full-ha/subsystem=messaging-activemq/server=default/connector=" + NAME);
     private ResourceAddress address;
     Dispatcher dispatcher = new Dispatcher();
     ResourceVerifier verifier = new ResourceVerifier(dispatcher);
@@ -70,9 +70,10 @@ public class GenericAcceptorTestCase {
     }
 
     @Test
-    public void addGenericAcceptor() {
+    public void addGenericConnector() {
         page.navigateToMessaging();
         page.selectView("Connections");
+        page.switchToConnector();
         page.switchType("Type: Generic");
         page.addGenericAcceptor(NAME, BINDING, FACTORYCLASS);
 
@@ -84,10 +85,11 @@ public class GenericAcceptorTestCase {
     }
 
     @Test
-    public void updateAcceptorSocketBinding() {
+    public void updateConnectorSocketBinding() {
         cliClient.executeCommand(command);
         page.navigateToMessaging();
         page.selectView("Connections");
+        page.switchToConnector();
         page.switchType("Type: Generic");
         page.selectInTable(NAME, 0);
         page.edit();
@@ -104,10 +106,11 @@ public class GenericAcceptorTestCase {
     }
 
     @Test
-    public void updateGenericAcceptorFacotryClass() {
+    public void updateGenericConnectorFactoryClass() {
         cliClient.executeCommand(command);
         page.navigateToMessaging();
         page.selectView("Connections");
+        page.switchToConnector();
         page.switchType("Type: Generic");
         page.selectInTable(NAME, 0);
         page.edit();
@@ -124,10 +127,11 @@ public class GenericAcceptorTestCase {
     }
 
     @Test
-    public void updateAcceptorProperties() {
+    public void updateConnectorProperties() {
         cliClient.executeCommand(command);
         page.navigateToMessaging();
         page.selectView("Connections");
+        page.switchToConnector();
         page.switchType("Type: Generic");
         page.selectInTable(NAME, 0);
 
@@ -142,11 +146,12 @@ public class GenericAcceptorTestCase {
     }
 
     @Test
-    public void removeAcceptorProperties() {
+    public void removeConnectorProperties() {
         cliClient.executeCommand(command);
         cliClient.executeCommand(addProperty);
         page.navigateToMessaging();
         page.selectView("Connections");
+        page.switchToConnector();
         page.switchType("Type: Generic");
         page.selectInTable(NAME, 0);
         ConfigPropertiesFragment properties = page.getConfig().propertiesConfig();
@@ -157,12 +162,13 @@ public class GenericAcceptorTestCase {
         cliClient.executeCommand(remove);
     }
 
-    @Test
-    public void removeGenericAcceptor() {
+    @Test //https://issues.jboss.org/browse/HAL-830
+    public void removeGenericConnector() {
         cliClient.executeCommand(command);
 
         page.navigateToMessaging();
         page.selectView("Connections");
+        page.switchToConnector();
         page.switchType("Type: Generic");
 
         verifier.verifyResource(address, true);
@@ -172,5 +178,4 @@ public class GenericAcceptorTestCase {
 
         verifier.verifyResource(address, false);
     }
-
 }
