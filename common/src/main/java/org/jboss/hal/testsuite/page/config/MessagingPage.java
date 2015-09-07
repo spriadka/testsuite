@@ -64,8 +64,16 @@ public class MessagingPage extends ConfigPage {
         switchView("Connector");
     }
 
+    public void switchToConnectorServices() {
+        switchView("Connector Services");
+    }
+
     public void switchToConnections() {
         switchView("Connections");
+    }
+
+    public void switchToBridges() {
+        switchView("Bridges");
     }
 
     public void selectInTable(String value, int column) {
@@ -100,6 +108,12 @@ public class MessagingPage extends ConfigPage {
         getWindowFragment().clickButton("Save");
     }
 
+    public void addConnetorServices(String name, String factoryClass) {
+        clickButton("Add");
+        getWindowFragment().getEditor().text("name", name);
+        getWindowFragment().getEditor().text("factoryClass", factoryClass);
+        getWindowFragment().clickButton("Save");
+    }
 
 
     public void addClusterConnection(String name, String dg, String connectorName, String connectorAddress) {
