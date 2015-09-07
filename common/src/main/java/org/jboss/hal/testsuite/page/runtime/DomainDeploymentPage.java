@@ -1,6 +1,7 @@
 package org.jboss.hal.testsuite.page.runtime;
 
 import org.jboss.arquillian.graphene.Graphene;
+import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.arquillian.graphene.page.Location;
 import org.jboss.hal.testsuite.fragment.BaseFragment;
 import org.jboss.hal.testsuite.fragment.runtime.DeploymentContentRepositoryArea;
@@ -53,5 +54,12 @@ public class DomainDeploymentPage extends ConfigurationPage {
             Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
         } catch (TimeoutException ignored) {
         }
+    }
+
+    public boolean checkAssingDeploymentNameInAssingContent(String assingName) {
+        WebElement editPanel = browser.findElement(By.className("default-window-content"));
+        String contentText = editPanel.findElement(By.className("gwt-Label")).getText();
+        editPanel.findElement(ByJQuery.selector("button:contains(Cancel)")).click();
+        return contentText.contains(assingName);
     }
 }

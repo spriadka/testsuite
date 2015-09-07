@@ -135,4 +135,63 @@ public class DomainManagedDeploymentsTestCase {
 
         assertFalse("Deployment should not exist", ops.exists(NAME));
     }
+
+    @Test
+    @InSequence(5)
+    public void checkAssingDeploymentName() {
+        //create
+        DeploymentContentRepositoryArea content = page.getDeploymentContent();
+        File deployment = new File(FILE_PATH + FILE_NAME);
+        page.selectMenu("Content Repository");
+        DeploymentWizard wizard = content.add();
+
+        boolean result = wizard.switchToManaged()
+                .nextFluent()
+                .uploadDeployment(deployment)
+                .nextFluent()
+                .name(NAME)
+                .runtimeName(RUNTIME_NAME)
+                .finish();
+        //assing
+        content = page.getDeploymentContent();
+        page.selectMenu("Server Groups").selectMenu("main-server-group");
+
+        wizard = content.add();
+
+        result = wizard.switchToRepository()
+                .nextFluent()
+                .finish();
+        //unassing and remove
+        Console.withBrowser(browser).waitUntilLoaded();
+        Library.letsSleep(10000);
+        Console.withBrowser(browser).refreshAndNavigate(DomainDeploymentPage.class);
+        page.selectMenu("Server Groups").selectMenu(MAIN_SERVER_GROUP).selectMenu(NAME);
+        page.unassign();
+        page.selectMenu("Unassigned Content").selectMenu(NAME).remove();
+        //create 2nd
+        Console.withBrowser(browser).refreshAndNavigate(DomainDeploymentPage.class);
+        content = page.getDeploymentContent();
+        deployment = new File(FILE_PATH + FILE_NAME);
+        page.selectMenu("Content Repository");
+        wizard = content.add();
+
+        result = wizard.switchToManaged()
+                .nextFluent()
+                .uploadDeployment(deployment)
+                .nextFluent()
+                .name("testNew")
+                .runtimeName(RUNTIME_NAME)
+                .finish();
+        //assing 2nd
+        Console.withBrowser(browser).refreshAndNavigate(DomainDeploymentPage.class);
+        content = page.getDeploymentContent();
+        page.selectMenu("Unassigned Content").selectMenu("testNew").clickButton("Assign");
+
+        boolean checkNameResult = page.checkAssingDeploymentNameInAssingContent("testNew");
+
+        assertTrue("Name in asssing content should be name of deployment", checkNameResult);
+        //remove2nd
+        Console.withBrowser(browser).refreshAndNavigate(DomainDeploymentPage.class);
+        page.selectMenu("Unassigned Content").selectMenu("testNew").remove();
+    }
 }
