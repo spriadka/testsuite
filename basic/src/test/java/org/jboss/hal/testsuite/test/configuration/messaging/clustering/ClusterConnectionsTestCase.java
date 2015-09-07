@@ -72,6 +72,7 @@ public class ClusterConnectionsTestCase {
 
         page.addClusterConnection(NAME, "dg-group1", "http-connector", "jms");
 
+
         verifier.verifyResource(address, true);
 
         cliClient.executeCommand(remove);

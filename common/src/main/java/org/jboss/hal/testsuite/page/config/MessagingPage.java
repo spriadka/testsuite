@@ -18,6 +18,7 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
 
+
 /**
  * Created by pcyprian on 2.9.15.
  */
@@ -99,6 +100,7 @@ public class MessagingPage extends ConfigPage {
         getWindowFragment().getEditor().text("factoryClass", factoryClass);
         getWindowFragment().clickButton("Save");
     }
+
 
 
     public void addClusterConnection(String name, String dg, String connectorName, String connectorAddress) {

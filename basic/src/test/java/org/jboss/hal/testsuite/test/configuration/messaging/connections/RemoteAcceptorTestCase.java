@@ -74,6 +74,7 @@ public class RemoteAcceptorTestCase {
         //same fields in acceptor adding
         page.addBroadcastGroup(NAME, BINDING);
 
+
         verifier.verifyResource(address, true);
 
         cliClient.executeCommand(remove);
@@ -82,6 +83,7 @@ public class RemoteAcceptorTestCase {
     }
 
     @Test
+
     public void updateAcceptorSocketBinding() {
         cliClient.executeCommand(command);
         page.navigateToMessaging();
@@ -112,6 +114,7 @@ public class RemoteAcceptorTestCase {
         boolean result = wizard.name("prop").value("test").finish();
 
         assertTrue("Property should be added and wizard closed.", result);
+
         verifier.verifyAttribute(address, "params", "{\"prop\" => \"test\"}");
 
         cliClient.executeCommand(remove);
@@ -123,7 +126,9 @@ public class RemoteAcceptorTestCase {
         cliClient.executeCommand(addProperty);
         page.navigateToMessaging();
         page.selectView("Connections");
+
         page.selectInTable(NAME, 0);
+
         ConfigPropertiesFragment properties = page.getConfig().propertiesConfig();
         properties.removeProperty("prop");
 
