@@ -2,16 +2,15 @@ package org.jboss.hal.testsuite.test.configuration.jgroups;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
-import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.hal.testsuite.cli.CliClient;
 import org.jboss.hal.testsuite.cli.CliClientFactory;
+import org.jboss.hal.testsuite.finder.Application;
+import org.jboss.hal.testsuite.finder.FinderNames;
+import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConfigPropertiesFragment;
 import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConfigPropertyWizard;
-import org.jboss.hal.testsuite.page.config.DomainConfigurationPage;
-import org.jboss.hal.testsuite.page.config.JGroupsPage;
-import org.jboss.hal.testsuite.page.config.StandaloneConfigurationPage;
-import org.jboss.hal.testsuite.page.home.HomePage;
+import org.jboss.hal.testsuite.page.config.*;
 import org.jboss.hal.testsuite.test.util.ConfigAreaChecker;
 import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.jboss.hal.testsuite.util.Console;
@@ -31,8 +30,6 @@ import static org.junit.Assert.assertTrue;
  */
 public class JGroupAbstractTestCase {
 
-    private static boolean initialized = false;
-
     protected static final String PROPERTY_NAME = "URL";
     protected static final String PROPERTY_VALUE = "url";
     protected static final String PROPERTY_NAME_P = "URL1";
@@ -44,45 +41,28 @@ public class JGroupAbstractTestCase {
     private ConfigAreaChecker checker = new ConfigAreaChecker(verifier);
     protected static JGroupsOperations jGroupsOperations = new JGroupsOperations(client);
 
+    private FinderNavigation navigation;
+
     @Drone
     public WebDriver browser;
 
     @Page
     public JGroupsPage page;
 
-
-    public void onlyOnce() {
-        Console.withBrowser(browser).maximizeWindow();
-    }
-
-    public void navigateInDomain() {
-        Graphene.goTo(DomainConfigurationPage.class);
-        Console.withBrowser(browser).waitUntilLoaded();
-        page.selectMenu("Profiles").selectMenu("full-ha").view("JGroups");
-        Console.withBrowser(browser).waitUntilLoaded();
-    }
-
-    private void navigateInStandalone() {
-        Graphene.goTo(StandaloneConfigurationPage.class);
-        Console.withBrowser(browser).waitUntilLoaded();
-        page.selectMenu("Subsystems").view("JGroups");
-        Console.withBrowser(browser).waitUntilLoaded();
-    }
-
     @Before
     public void before() {
-        if (!initialized) {
-            onlyOnce();
-            initialized = true;
-        }
-        Graphene.goTo(HomePage.class);
-        Console.withBrowser(browser).waitUntilLoaded();
         if (ConfigUtils.isDomain()) {
-            navigateInDomain();
+            navigation = new FinderNavigation(browser, DomainConfigEntryPoint.class)
+                    .addAddress(FinderNames.CONFIGURATION, FinderNames.PROFILES)
+                    .addAddress(FinderNames.PROFILE, "full-ha");
         } else {
-            navigateInStandalone();
+            navigation = new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
+                    .addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS);
         }
-        Console.withBrowser(browser).waitUntilLoaded();
+        navigation.addAddress(FinderNames.SUBSYSTEM, "JGroups")
+                .selectRow(true)
+                .invoke(FinderNames.VIEW);
+        Application.waitUntilVisible();
     }
 
     @After
@@ -101,13 +81,26 @@ public class JGroupAbstractTestCase {
 
     @Test
     public void socketBindingEdit() {
+        String name = "jgroups-udp";
+        checker.editTextAndAssert(page, "socketBinding", name).dmrAttribute("socket-binding").invoke();
+    }
+
+    @Test(expected = AssertionError.class)
+    public void socketBindingEditInvalid() {
         String name = RandomStringUtils.randomAlphabetic(6);
         checker.editTextAndAssert(page, "socketBinding", name).dmrAttribute("socket-binding").invoke();
     }
 
     @Test
     public void diagnosticSocketEdit() {
-        String name = RandomStringUtils.randomAlphabetic(6);
+        String name = "jgroups-udp";
+        checker.editTextAndAssert(page, "diagSocketBinding", name)
+                .dmrAttribute("diagnostics-socket-binding").invoke();
+    }
+
+    @Test(expected = AssertionError.class)
+    public void diagnosticSocketEditInvalid() {
+        String name = "qwedfsdg";//non-existing socket binding
         checker.editTextAndAssert(page, "diagSocketBinding", name)
                 .dmrAttribute("diagnostics-socket-binding").invoke();
     }
