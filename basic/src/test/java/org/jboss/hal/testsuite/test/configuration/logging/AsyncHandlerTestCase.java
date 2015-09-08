@@ -6,6 +6,8 @@ import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.junit.InSequence;
 import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Shared;
+import org.jboss.hal.testsuite.cli.CliClient;
+import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.dmr.Dispatcher;
 import org.jboss.hal.testsuite.dmr.ResourceAddress;
 import org.jboss.hal.testsuite.dmr.ResourceVerifier;
@@ -37,10 +39,11 @@ public class AsyncHandlerTestCase {
     private FinderNavigation navigation;
 
     private ModelNode path = new ModelNode("/subsystem=logging/async-handler=" + ASYNCHANDLER);
-    private ModelNode domainPath = new ModelNode("/profile=default/subsystem=logging/async-handler=" + ASYNCHANDLER);
+    private ModelNode domainPath = new ModelNode("/profile=full/subsystem=logging/async-handler=" + ASYNCHANDLER);
     private ResourceAddress address;
     Dispatcher dispatcher = new Dispatcher();
     ResourceVerifier verifier = new ResourceVerifier(dispatcher);
+    CliClient cliClient = CliClientFactory.getClient();
 
     @Drone
     private WebDriver browser;
@@ -52,7 +55,7 @@ public class AsyncHandlerTestCase {
         if (ConfigUtils.isDomain()) {
             navigation = new FinderNavigation(browser, DomainConfigEntryPoint.class)
                     .addAddress(FinderNames.CONFIGURATION, FinderNames.PROFILES)
-                    .addAddress(FinderNames.PROFILE, "default")
+                    .addAddress(FinderNames.PROFILE, "full")
                     .addAddress(FinderNames.SUBSYSTEM, "Logging");
             address = new ResourceAddress(domainPath);
         } else {
@@ -143,7 +146,7 @@ public class AsyncHandlerTestCase {
     }
 
     @Test
-    @InSequence(6) //https://issues.jboss.org/browse/HAL-819
+    @InSequence(6) //https://issues.jboss.org/browse/HAL-819 - FIXED
     public void addAsyncHandlerWrongSubhandlers() {
         page.edit();
         ConfigFragment editPanelFragment = page.getConfigFragment();
@@ -153,6 +156,7 @@ public class AsyncHandlerTestCase {
 
         assertTrue("Config should be saved and closed. But handlers are not really saved.", finished);
         verifier.verifyAttribute(address, "subhandlers", "[\"CONSOLE\",\"FILE\"]");
+        cliClient.reload();
     }
 
     @Test
