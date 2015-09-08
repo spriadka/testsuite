@@ -68,6 +68,10 @@ public class MessagingPage extends ConfigPage {
         switchView("Connector Services");
     }
 
+    public void switchToConnectionFactories() {
+        switchView("Connection Factories");
+    }
+
     public void switchToConnections() {
         switchView("Connections");
     }
@@ -81,7 +85,6 @@ public class MessagingPage extends ConfigPage {
     }
 
     public void switchType(String type) {
-        //WebElement listBox = browser.findElement(ByJQuery.selector(type));
         Select select = new Select(browser.findElement(ByJQuery.selector(".gwt-ListBox:visible")));
         select.selectByValue(type);
     }
@@ -112,6 +115,20 @@ public class MessagingPage extends ConfigPage {
         clickButton("Add");
         getWindowFragment().getEditor().text("name", name);
         getWindowFragment().getEditor().text("factoryClass", factoryClass);
+        getWindowFragment().clickButton("Save");
+    }
+
+    public void addQueue(String name, String jndiName) {
+        clickButton("Add");
+        getWindowFragment().getEditor().text("name", name);
+        getWindowFragment().getEditor().text("entries", jndiName);
+        getWindowFragment().clickButton("Save");
+    }
+    public void addFactory(String name, String jndiName, String connector) {
+        clickButton("Add");
+        getWindowFragment().getEditor().text("name", name);
+        getWindowFragment().getEditor().text("jndiName", jndiName);
+        getWindowFragment().getEditor().text("connector", connector);
         getWindowFragment().clickButton("Save");
     }
 

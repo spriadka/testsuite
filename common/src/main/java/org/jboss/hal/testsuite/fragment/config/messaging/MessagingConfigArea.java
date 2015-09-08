@@ -11,4 +11,8 @@ public class MessagingConfigArea extends ConfigAreaFragment {
     public ConfigPropertiesFragment propertiesConfig() {
         return switchTo("Properties", ConfigPropertiesFragment.class);
     }
+
+    public ConfigPropertiesFragment topicsConfig() {
+        return switchTo("Topics", ConfigPropertiesFragment.class);
+    }
 }
