@@ -2,6 +2,7 @@ package org.jboss.hal.testsuite.page.config;
 
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.ByJQuery;
+import org.jboss.hal.testsuite.cli.Library;
 import org.jboss.hal.testsuite.cli.TimeoutException;
 import org.jboss.hal.testsuite.finder.Application;
 import org.jboss.hal.testsuite.finder.FinderNames;
@@ -51,9 +52,58 @@ public class MessagingPage extends ConfigPage {
         }
     }
 
+    public void navigateToMessagingProvider() {
+        if (ConfigUtils.isDomain()) {
+            navigation = new FinderNavigation(browser, DomainConfigEntryPoint.class)
+                    .addAddress(FinderNames.CONFIGURATION, FinderNames.PROFILES)
+                    .addAddress(FinderNames.PROFILE, "full-ha")
+                    .addAddress(FinderNames.SUBSYSTEM, "Messaging");
+        } else {
+            navigation = new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
+                    .addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
+                    .addAddress(FinderNames.SUBSYSTEM, "Messaging");
+        }
+    }
+
+    public void selectProvider(String provider) {
+        if (ConfigUtils.isDomain()) {
+            navigation = new FinderNavigation(browser, DomainConfigEntryPoint.class)
+                    .addAddress(FinderNames.CONFIGURATION, FinderNames.PROFILES)
+                    .addAddress(FinderNames.PROFILE, "full-ha")
+                    .addAddress(FinderNames.SUBSYSTEM, "Messaging")
+                    .addAddress("Messaging Provider", provider);
+        } else {
+            navigation = new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
+                    .addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
+                    .addAddress(FinderNames.SUBSYSTEM, "Messaging")
+                    .addAddress("Messaging Provider", provider);
+        }
+    }
+
     public void selectView(String view) {
         navigation.selectRow().invoke(view);
         Application.waitUntilVisible();
+    }
+
+    public void makeNavigation() {
+        navigation.selectRow();
+        Library.letsSleep(1000);
+    }
+
+    public void createProvider(String name, boolean enabledSecurity, String secirityDomain, String clusterUser, String clusterPassword) {
+        WebElement add = browser.findElement(ByJQuery.selector("div.btn,.primary"));
+        add.click();
+        getWindowFragment().getEditor().text("name", name);
+        getWindowFragment().getEditor().checkbox("security-enabled", enabledSecurity);
+        getWindowFragment().getEditor().text("security-domain", secirityDomain);
+        getWindowFragment().getEditor().text("cluster-user", clusterUser);
+        getWindowFragment().getEditor().text("cluster-password", clusterPassword);
+        getWindowFragment().clickButton("Save");
+    }
+
+    public void removeProvider() {
+        navigation.selectRow().invoke("Remove");
+        getWindowFragment().clickButton("Confirm");
     }
 
     public void switchToDiscovery() {
