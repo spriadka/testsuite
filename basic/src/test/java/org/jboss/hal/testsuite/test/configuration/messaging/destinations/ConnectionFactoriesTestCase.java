@@ -37,7 +37,6 @@ public class ConnectionFactoriesTestCase {
     private ModelNode path = new ModelNode("/subsystem=messaging-activemq/server=default/connection-factory=" + NAME);
     private ModelNode domainPath = new ModelNode("/profile=full-ha/subsystem=messaging-activemq/server=default/connection-factory=" + NAME);
     private ResourceAddress address;
-    private ResourceAddress topicsAddress;
     Dispatcher dispatcher = new Dispatcher();
     ResourceVerifier verifier = new ResourceVerifier(dispatcher);
     CliClient cliClient = CliClientFactory.getClient();

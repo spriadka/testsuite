@@ -72,8 +72,20 @@ public class MessagingPage extends ConfigPage {
         switchView("Connection Factories");
     }
 
+    public void switchToSecuritySettings() {
+        switchView("Security Settings");
+    }
+
+    public void switchToAddressSettings() {
+        switchView("Address Settings");
+    }
+
     public void switchToConnections() {
         switchView("Connections");
+    }
+
+    public void switchToDiverts() {
+        switchView("Diverts");
     }
 
     public void switchToBridges() {
@@ -111,10 +123,31 @@ public class MessagingPage extends ConfigPage {
         getWindowFragment().clickButton("Save");
     }
 
+    public void addDiverts(String name, String divert, String forward) {
+        clickButton("Add");
+        getWindowFragment().getEditor().text("routingName", name);
+        getWindowFragment().getEditor().text("divertAddress", divert);
+        getWindowFragment().getEditor().text("forwardingAddress", forward);
+        getWindowFragment().clickButton("Save");
+    }
+
     public void addConnetorServices(String name, String factoryClass) {
         clickButton("Add");
         getWindowFragment().getEditor().text("name", name);
         getWindowFragment().getEditor().text("factoryClass", factoryClass);
+        getWindowFragment().clickButton("Save");
+    }
+
+    public void addSecuritySettings(String pattern, String role) {
+        clickButton("Add");
+        getWindowFragment().getEditor().text("pattern", pattern);
+        getWindowFragment().getEditor().text("role", role);
+        getWindowFragment().clickButton("Save");
+    }
+
+    public void addAddressSettings(String pattern) {
+        clickButton("Add");
+        getWindowFragment().getEditor().text("pattern", pattern);
         getWindowFragment().clickButton("Save");
     }
 
@@ -140,6 +173,11 @@ public class MessagingPage extends ConfigPage {
         getWindowFragment().getEditor().text("connectorRef", connectorName);
         getWindowFragment().getEditor().text("clusterConnectionAddress", connectorAddress);
         getWindowFragment().clickButton("Save");
+    }
+
+    public void clickAdvanced() {
+        WebElement advanced = browser.findElement(By.linkText("Advanced"));
+        advanced.click();
     }
 
     public Editor edit() {
