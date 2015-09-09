@@ -10,7 +10,9 @@ import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConfigPropertiesFragment;
 import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConfigPropertyWizard;
-import org.jboss.hal.testsuite.page.config.*;
+import org.jboss.hal.testsuite.page.config.DomainConfigEntryPoint;
+import org.jboss.hal.testsuite.page.config.JGroupsPage;
+import org.jboss.hal.testsuite.page.config.StandaloneConfigEntryPoint;
 import org.jboss.hal.testsuite.test.util.ConfigAreaChecker;
 import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.jboss.hal.testsuite.util.Console;
@@ -100,7 +102,7 @@ public class JGroupAbstractTestCase {
 
     @Test(expected = AssertionError.class)
     public void diagnosticSocketEditInvalid() {
-        String name = "qwedfsdg";//non-existing socket binding
+        String name = "qwedfsdg"; //non-existing socket binding
         checker.editTextAndAssert(page, "diagSocketBinding", name)
                 .dmrAttribute("diagnostics-socket-binding").invoke();
     }
