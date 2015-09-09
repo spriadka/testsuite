@@ -172,6 +172,7 @@ public class EETestCaseAbstract {
 
     /**
      * Only use in domain mode
+     *
      * @param server name of server
      * @return True if given server is running
      */
@@ -186,6 +187,7 @@ public class EETestCaseAbstract {
 
     /**
      * Only use in domain mode
+     *
      * @param servers list of servers from which will be filtered non-running servers
      * @return List of all running servers
      */
@@ -202,6 +204,7 @@ public class EETestCaseAbstract {
 
     /**
      * Only use in domain mode
+     *
      * @return List of all servers present on host=master
      */
     private List<String> listAllServerNames() {
