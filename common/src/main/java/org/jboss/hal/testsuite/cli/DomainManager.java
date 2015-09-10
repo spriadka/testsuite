@@ -530,7 +530,7 @@ public class DomainManager extends ServerManager {
      * @param server name of server
      * @return True if given server is running
      */
-    private boolean isServerRunning(String server) {
+    public boolean isServerRunning(String server) {
         return checkServerState(server, "running");
     }
 

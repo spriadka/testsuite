@@ -23,7 +23,6 @@
 package org.jboss.hal.testsuite.cli;
 
 import org.apache.commons.io.FileUtils;
-import org.jboss.hal.testsuite.dmr.Dispatcher;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,8 +35,6 @@ import java.io.IOException;
 public class StandaloneManager extends ServerManager {
 
     private static Logger log = LoggerFactory.getLogger(StandaloneManager.class);
-
-    private Dispatcher dispatcher = new Dispatcher();
 
     public StandaloneManager(CliClient cliClient) {
         super(cliClient);

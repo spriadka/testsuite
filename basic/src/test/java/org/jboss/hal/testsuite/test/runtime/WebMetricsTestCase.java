@@ -8,7 +8,6 @@ import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.cli.CliClient;
 import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.cli.DomainManager;
-import org.jboss.hal.testsuite.cli.Library;
 import org.jboss.hal.testsuite.dmr.AddressTemplate;
 import org.jboss.hal.testsuite.dmr.DefaultContext;
 import org.jboss.hal.testsuite.dmr.Dispatcher;
@@ -53,7 +52,7 @@ public class WebMetricsTestCase {
     private CliClient cliClient = CliClientFactory.getClient();
     private FinderNavigation navigation;
     private DefaultContext statementContext;
-    private static Dispatcher dispatcher;
+    private Dispatcher dispatcher;
 
     @Drone
     private WebDriver browser;
@@ -73,8 +72,7 @@ public class WebMetricsTestCase {
         dispatcher.execute(new Operation.Builder(ModelDescriptionConstants.WRITE_ATTRIBUTE_OPERATION, addressStats).param("name", "statistics-enabled").param("value", "true").build());
 
         if (ConfigUtils.isDomain()) {
-            DomainManager domainManager = new DomainManager(dispatcher);
-            domainManager.reloadIfRequiredAndWaitUntilRunning(60000);
+            new DomainManager(cliClient).reloadAndWaitUntilRunning(60000);
             navigation = new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
                     .addAddress(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
                     .addAddress(FinderNames.HOST, "master")
