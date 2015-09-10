@@ -106,6 +106,21 @@ public class MessagingPage extends ConfigPage {
         getWindowFragment().clickButton("Confirm");
     }
 
+    public void InvokeProviderSettings() {
+        navigation.selectRow().invoke("Provider Settings");
+        Library.letsSleep(1000);
+    }
+
+    public void switchToSecurityTab() {
+        WebElement security = browser.findElement(ByJQuery.selector("div.gwt-Label:contains(Security)"));
+        security.click();
+    }
+
+    public void switchToJournalTab() {
+        WebElement security = browser.findElement(ByJQuery.selector("div.gwt-Label:contains(Journal)"));
+        security.click();
+    }
+
     public void switchToDiscovery() {
         switchView("Discovery");
     }

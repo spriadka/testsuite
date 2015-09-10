@@ -31,7 +31,7 @@ public class DivertsTestCase {
     private static final String NAME = "test-divert";
     private static final String DIVERTADDRESS = "divert";
     private static final String FORWATDADDRESS = "forward";
-    private static final String ADD = "/subsystem=messaging-activemq/server==default/divert=" + NAME + ":add(divert-address="
+    private static final String ADD = "/subsystem=messaging-activemq/server=default/divert=" + NAME + ":add(divert-address="
             + DIVERTADDRESS + ",forwarding-address=" + FORWATDADDRESS + ",routing-name=" + NAME + ")";
     private static final String DOMAIN = "/profile=full-ha";
 
