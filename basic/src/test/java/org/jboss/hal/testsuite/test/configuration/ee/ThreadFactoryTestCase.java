@@ -33,10 +33,10 @@ public class ThreadFactoryTestCase extends EETestCaseAbstract {
     private final String CONTEXT_SERVICE = "context-service";
     private final String PRIORITY = "priority";
 
-    //attribute-names
-    private final String JNDI_NAME_ADDR = "jndi-name";
-    private final String CONTEXT_SERVICE_ADDR = "context-service";
-    private final String PRIORITY_ADDR = "priority";
+    //attribute names
+    private final String JNDI_NAME_ATTR = "jndi-name";
+    private final String CONTEXT_SERVICE_ATTR = "context-service";
+    private final String PRIORITY_ATTR = "priority";
 
     //values
     private final String NUMERIC_VALID = "7";
@@ -67,12 +67,12 @@ public class ThreadFactoryTestCase extends EETestCaseAbstract {
 
     @Test
     public void editContextService() throws IOException, InterruptedException {
-        editTextAndVerify(address, CONTEXT_SERVICE, CONTEXT_SERVICE_ADDR, "default");
+        editTextAndVerify(address, CONTEXT_SERVICE, CONTEXT_SERVICE_ATTR, "default");
     }
 
     @Test
     public void editJNDIName() throws IOException, InterruptedException {
-        editTextAndVerify(address, JNDI_NAME, JNDI_NAME_ADDR, JNDI_VALID);
+        editTextAndVerify(address, JNDI_NAME, JNDI_NAME_ATTR, JNDI_VALID);
     }
 
     @Ignore("Currently, there is an inconsistency in JNDI name format (in datasources subsystem java:/ prefix is required)")
@@ -83,7 +83,7 @@ public class ThreadFactoryTestCase extends EETestCaseAbstract {
 
     @Test
     public void editPriority() throws IOException, InterruptedException {
-        editTextAndVerify(address, PRIORITY, PRIORITY_ADDR, NUMERIC_VALID);
+        editTextAndVerify(address, PRIORITY, PRIORITY_ATTR, NUMERIC_VALID);
     }
 
     @Test

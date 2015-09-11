@@ -39,14 +39,14 @@ public class ScheduledExecutorTestCase extends EETestCaseAbstract {
     private final String THREAD_FACTORY = "thread-factory";
 
     //names
-    private final String CONTEXT_SERVICE_ADDR = "context-service";
-    private final String CORE_THREADS_ADDR = "core-threads";
-    private final String HUNG_TASK_THRESHOLD_ADDR = "hung-task-threshold";
-    private final String JNDI_NAME_ADDR = "jndi-name";
-    private final String KEEPALIVE_TIME_ADDR = "keepalive-time";
-    private final String LONG_RUNNING_TASKS_ADDR = "long-running-tasks";
-    private final String REJECT_POLICY_ADDR = "reject-policy";
-    private final String THREAD_FACTORY_ADDR = "thread-factory";
+    private final String CONTEXT_SERVICE_ATTR = "context-service";
+    private final String CORE_THREADS_ATTR = "core-threads";
+    private final String HUNG_TASK_THRESHOLD_ATTR = "hung-task-threshold";
+    private final String JNDI_NAME_ATTR = "jndi-name";
+    private final String KEEPALIVE_TIME_ATTR = "keepalive-time";
+    private final String LONG_RUNNING_TASKS_ATTR = "long-running-tasks";
+    private final String REJECT_POLICY_ATTR = "reject-policy";
+    private final String THREAD_FACTORY_ATTR = "thread-factory";
 
     //values
     private final String NUMERIC_VALID = "7";
@@ -78,12 +78,12 @@ public class ScheduledExecutorTestCase extends EETestCaseAbstract {
 
     @Test
     public void editContextService() throws IOException, InterruptedException {
-        editTextAndVerify(address, CONTEXT_SERVICE, CONTEXT_SERVICE_ADDR, "default");
+        editTextAndVerify(address, CONTEXT_SERVICE, CONTEXT_SERVICE_ATTR, "default");
     }
 
     @Test
     public void editCoreThreads() throws IOException, InterruptedException {
-        editTextAndVerify(address, CORE_THREADS, CORE_THREADS_ADDR, NUMERIC_VALID);
+        editTextAndVerify(address, CORE_THREADS, CORE_THREADS_ATTR, NUMERIC_VALID);
     }
 
     @Test
@@ -93,7 +93,7 @@ public class ScheduledExecutorTestCase extends EETestCaseAbstract {
 
     @Test
     public void editHungTaskThreshold() throws IOException, InterruptedException {
-        editTextAndVerify(address, HUNG_TASK_THRESHOLD, HUNG_TASK_THRESHOLD_ADDR, NUMERIC_VALID);
+        editTextAndVerify(address, HUNG_TASK_THRESHOLD, HUNG_TASK_THRESHOLD_ATTR, NUMERIC_VALID);
     }
 
     @Test
@@ -103,7 +103,7 @@ public class ScheduledExecutorTestCase extends EETestCaseAbstract {
 
     @Test
     public void editJNDIName() throws IOException, InterruptedException {
-        editTextAndVerify(address, JNDI_NAME, JNDI_NAME_ADDR, JNDI_VALID);
+        editTextAndVerify(address, JNDI_NAME, JNDI_NAME_ATTR, JNDI_VALID);
     }
 
     @Ignore("Currently, there is an inconsistency in JNDI name format (in datasources subsystem java:/ prefix is required)")
@@ -114,7 +114,7 @@ public class ScheduledExecutorTestCase extends EETestCaseAbstract {
 
     @Test
     public void editKeepAliveTime() throws IOException, InterruptedException {
-        editTextAndVerify(address, KEEPALIVE_TIME, KEEPALIVE_TIME_ADDR, NUMERIC_VALID);
+        editTextAndVerify(address, KEEPALIVE_TIME, KEEPALIVE_TIME_ATTR, NUMERIC_VALID);
     }
 
     @Test
@@ -124,22 +124,22 @@ public class ScheduledExecutorTestCase extends EETestCaseAbstract {
 
     @Test
     public void setLongRunningTasksToTrue() throws IOException, InterruptedException {
-        editCheckboxAndVerify(address, LONG_RUNNING_TASKS, LONG_RUNNING_TASKS_ADDR, true);
+        editCheckboxAndVerify(address, LONG_RUNNING_TASKS, LONG_RUNNING_TASKS_ATTR, true);
     }
 
     @Test
     public void setLongRunningTasksToFalse() throws IOException, InterruptedException {
-        editCheckboxAndVerify(address, LONG_RUNNING_TASKS, LONG_RUNNING_TASKS_ADDR, false);
+        editCheckboxAndVerify(address, LONG_RUNNING_TASKS, LONG_RUNNING_TASKS_ATTR, false);
     }
 
     @Test
     public void selectRejectPolicy() throws IOException, InterruptedException {
-        selectOptionAndVerify(address, REJECT_POLICY, REJECT_POLICY_ADDR, REJECT_POLICY_VALID);
+        selectOptionAndVerify(address, REJECT_POLICY, REJECT_POLICY_ATTR, REJECT_POLICY_VALID);
     }
 
     @Test
     public void editThreadFactory() throws IOException, InterruptedException {
-        editTextAndVerify(address, THREAD_FACTORY, THREAD_FACTORY_ADDR);
+        editTextAndVerify(address, THREAD_FACTORY, THREAD_FACTORY_ATTR);
     }
 
     @Test
@@ -175,7 +175,7 @@ public class ScheduledExecutorTestCase extends EETestCaseAbstract {
         ResourceAddress address = new ResourceAddress(eeAddress).add(EE_CHILD, name);
         dispatcher.execute(new Operation.Builder("add", address)
                 .param(JNDI_NAME, JNDI_DEFAULT + name)
-                .param(CORE_THREADS_ADDR, 5)
+                .param(CORE_THREADS_ATTR, 5)
                 .build());
         return name;
     }
