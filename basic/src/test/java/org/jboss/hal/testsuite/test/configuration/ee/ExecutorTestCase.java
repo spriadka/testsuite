@@ -59,20 +59,22 @@ public class ExecutorTestCase extends EETestCaseAbstract {
     private final String JNDI_VALID = JNDI_DEFAULT + RandomStringUtils.randomAlphanumeric(6);
     private final String REJECT_POLICY_VALID = "RETRY_ABORT";
 
+    private final String EE_CHILD = "managed-executor-service";
+
     private ResourceAddress address;
     private String executorService;
 
     @After
     public void after() {
-        removeExecutorService(executorService);
+        removeEEChild(EE_CHILD, executorService);
     }
 
     @Before
     public void before() {
         executorService = createExecutorService();
-        address = new ResourceAddress(eeAddress).add("managed-executor-service", executorService);
+        address = new ResourceAddress(eeAddress).add(EE_CHILD, executorService);
         reloadIfRequiredAndWaitForRunning();
-        navigateToEEServices();
+        page.navigate();
         page.switchSubTab("Executor");
         page.getResourceManager().getResourceTable().selectRowByText(0, executorService);
     }
@@ -171,24 +173,22 @@ public class ExecutorTestCase extends EETestCaseAbstract {
 
         assertTrue("Window should be closed", result);
         assertTrue("Executor should be present in table", config.resourceIsPresent(name));
-        ResourceAddress address = new ResourceAddress(eeAddress).add("managed-executor-service", name);
+        ResourceAddress address = new ResourceAddress(eeAddress).add(EE_CHILD, name);
         verifier.verifyResource(address, true, 5000);
     }
 
     @Test
     public void removeExecutorInGUI() {
-        String name = createExecutorService();
         ConfigFragment config = page.getConfigFragment();
-        config.getResourceManager().removeResource(name).confirm();
+        config.getResourceManager().removeResource(executorService).confirm();
 
-        Library.letsSleep(500);
-        Assert.assertFalse("Executor should not be present in table", config.resourceIsPresent(name));
-        Assert.assertFalse("Executor should not be present on server", removeExecutorService(name));
+        Assert.assertFalse("Executor should not be present in table", config.resourceIsPresent(executorService));
+        Assert.assertFalse("Executor should not be present on server", removeEEChild(EE_CHILD, executorService));
     }
 
     private String createExecutorService() {
         String name = RandomStringUtils.randomAlphanumeric(6);
-        ResourceAddress address = new ResourceAddress(eeAddress).add("managed-executor-service", name);
+        ResourceAddress address = new ResourceAddress(eeAddress).add(EE_CHILD, name);
         dispatcher.execute(new Operation.Builder("add", address)
                 .param(JNDI_NAME, JNDI_DEFAULT + name)
                 .param(CORE_THREADS_ATTR, 5)
@@ -196,8 +196,4 @@ public class ExecutorTestCase extends EETestCaseAbstract {
         return name;
     }
 
-    private Boolean removeExecutorService(String name) {
-        ResourceAddress address = new ResourceAddress(eeAddress).add("managed-executor-service", name);
-        return dispatcher.execute(new Operation.Builder("remove", address).build()).isSuccessful();
-    }
 }

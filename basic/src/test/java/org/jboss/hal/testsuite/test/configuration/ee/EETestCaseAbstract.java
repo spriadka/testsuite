@@ -2,34 +2,25 @@ package org.jboss.hal.testsuite.test.configuration.ee;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
-import org.jboss.arquillian.graphene.Graphene;
-import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.cli.DomainManager;
 import org.jboss.hal.testsuite.dmr.AddressTemplate;
 import org.jboss.hal.testsuite.dmr.DefaultContext;
 import org.jboss.hal.testsuite.dmr.Dispatcher;
+import org.jboss.hal.testsuite.dmr.Operation;
 import org.jboss.hal.testsuite.dmr.ResourceAddress;
 import org.jboss.hal.testsuite.dmr.ResourceVerifier;
 import org.jboss.hal.testsuite.dmr.StatementContext;
-import org.jboss.hal.testsuite.finder.Application;
-import org.jboss.hal.testsuite.finder.FinderNames;
-import org.jboss.hal.testsuite.finder.FinderNavigation;
-import org.jboss.hal.testsuite.fragment.ConfigFragment;
-import org.jboss.hal.testsuite.page.config.ConfigurationPage;
-import org.jboss.hal.testsuite.page.config.DomainConfigEntryPoint;
-import org.jboss.hal.testsuite.page.config.StandaloneConfigEntryPoint;
+import org.jboss.hal.testsuite.fragment.config.ee.EEConfigFragment;
+import org.jboss.hal.testsuite.page.config.EEServicesPage;
 import org.jboss.hal.testsuite.util.ConfigUtils;
-import org.jboss.hal.testsuite.util.Console;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 
 import java.io.IOException;
-import java.util.concurrent.TimeUnit;
 
 /**
  * @author Jan Kasik
@@ -41,7 +32,7 @@ public class EETestCaseAbstract {
     protected WebDriver browser;
 
     @Page
-    protected ConfigurationPage page;
+    protected EEServicesPage page;
 
     protected Dispatcher dispatcher;
     protected ResourceVerifier verifier;
@@ -62,34 +53,8 @@ public class EETestCaseAbstract {
         dispatcher.close();
     }
 
-    protected void navigateToEEServices() {
-        FinderNavigation navigation;
-        if (ConfigUtils.isDomain()) {
-            navigation = new FinderNavigation(browser, DomainConfigEntryPoint.class);
-            navigation.addAddress(FinderNames.CONFIGURATION, FinderNames.PROFILES)
-                    .addAddress(FinderNames.PROFILE, "full")
-                    .addAddress(FinderNames.SUBSYSTEM, "EE");
-        } else {
-            navigation = new FinderNavigation(browser, StandaloneConfigEntryPoint.class);
-            navigation.addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
-                    .addAddress(FinderNames.SUBSYSTEM, "EE");
-        }
-        navigation.selectRow().invoke(FinderNames.VIEW);
-        Application.waitUntilVisible();
-        //TODO: remove this after HAL-836 is resolved
-        By selector = ByJQuery.selector(".link-bar-first");
-        browser.findElement(selector).click();
-        Console.withBrowser(browser).waitUntilLoaded();
-        page.view("EE");
-        Console.withBrowser(browser).waitUntilLoaded();
-        //END OF REMOVE
-        page.switchTab("Services");
-    }
-
     protected void editTextAndVerify(ResourceAddress address, String identifier, String attributeName, String value) throws IOException, InterruptedException {
-        ConfigFragment config = page.getConfigFragment();
-        config.edit().text(identifier, value);
-        config.save();
+        page.getConfigFragment().editTextAndSave(identifier, value);
         reloadIfRequiredAndWaitForRunning();
         verifier.verifyAttribute(address, attributeName, value);
     }
@@ -99,17 +64,13 @@ public class EETestCaseAbstract {
     }
 
     protected void editCheckboxAndVerify(ResourceAddress address, String identifier, String attributeName, Boolean value) throws IOException, InterruptedException {
-        ConfigFragment config = page.getConfigFragment();
-        config.edit().checkbox(identifier, value);
-        config.save();
+        page.getConfigFragment().editCheckboxAndSave(identifier, value);
         reloadIfRequiredAndWaitForRunning();
         verifier.verifyAttribute(address, attributeName, value.toString());
     }
 
     public void selectOptionAndVerify(ResourceAddress address, String identifier, String attributeName, String value) throws IOException, InterruptedException {
-        ConfigFragment config = page.getConfigFragment();
-        config.edit().select(identifier, value);
-        config.save();
+        page.getConfigFragment().selectOptionAndSave(identifier, value);
         reloadIfRequiredAndWaitForRunning();
         verifier.verifyAttribute(address, attributeName, value);
     }
@@ -123,25 +84,15 @@ public class EETestCaseAbstract {
         }
     }
 
-    protected Boolean isErrorShowedInForm() {
-        By selector = ByJQuery.selector("div.form-item-error-desc:visible");
-        return isElementVisible(selector);
-    }
-
-    protected Boolean isElementVisible(By selector) {
-        try {
-            Graphene.waitModel().withTimeout(5, TimeUnit.SECONDS).until().element(selector).is().visible();
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
     protected void verifyIfErrorAppears(String identifier, String value) {
-        ConfigFragment config = page.getConfigFragment();
-        config.edit().text(identifier, value);
-        config.save();
-        Assert.assertTrue(isErrorShowedInForm());
+        EEConfigFragment config = page.getConfigFragment();
+        config.editTextAndSave(identifier, value);
+        Assert.assertTrue(config.isErrorShowedInForm());
         config.cancel();
+    }
+
+    protected boolean removeEEChild(String childType, String name) {
+        ResourceAddress address = new ResourceAddress(eeAddress).add(childType, name);
+        return dispatcher.execute(new Operation.Builder("remove", address).build()).isSuccessful();
     }
 }

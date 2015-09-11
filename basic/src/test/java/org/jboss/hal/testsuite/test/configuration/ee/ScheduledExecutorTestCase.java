@@ -66,14 +66,14 @@ public class ScheduledExecutorTestCase extends EETestCaseAbstract {
         executorService = createScheduledExecutorService();
         address = new ResourceAddress(eeAddress).add(EE_CHILD, executorService);
         reloadIfRequiredAndWaitForRunning();
-        navigateToEEServices();
+        page.navigate();
         page.switchSubTab("Scheduled Executor");
         page.getResourceManager().getResourceTable().selectRowByText(0, executorService);
     }
 
     @After
     public void after() {
-        removeScheduledExecutorService(executorService);
+        removeEEChild(EE_CHILD, executorService);
     }
 
     @Test
@@ -162,12 +162,11 @@ public class ScheduledExecutorTestCase extends EETestCaseAbstract {
 
     @Test
     public void removeExecutorInGUI() {
-        String name = createScheduledExecutorService();
         ConfigFragment config = page.getConfigFragment();
-        config.getResourceManager().removeResource(name).confirm();
+        config.getResourceManager().removeResource(executorService).confirm();
 
-        Assert.assertFalse("Executor should not be present in table", config.resourceIsPresent(name));
-        Assert.assertFalse("Executor should not be present on server", removeScheduledExecutorService(name));
+        Assert.assertFalse("Executor should not be present in table", config.resourceIsPresent(executorService));
+        Assert.assertFalse("Executor should not be present on server", removeEEChild(EE_CHILD, executorService));
     }
 
     private String createScheduledExecutorService() {
@@ -178,10 +177,5 @@ public class ScheduledExecutorTestCase extends EETestCaseAbstract {
                 .param(CORE_THREADS_ATTR, 5)
                 .build());
         return name;
-    }
-
-    private Boolean removeScheduledExecutorService(String name) {
-        ResourceAddress address = new ResourceAddress(eeAddress).add(EE_CHILD, name);
-        return dispatcher.execute(new Operation.Builder("remove", address).build()).isSuccessful();
     }
 }

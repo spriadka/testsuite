@@ -5,7 +5,11 @@ import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.dmr.Operation;
 import org.jboss.hal.testsuite.dmr.ResourceAddress;
+import org.jboss.hal.testsuite.fragment.ConfigFragment;
+import org.jboss.hal.testsuite.fragment.formeditor.Editor;
+import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -13,6 +17,8 @@ import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
+
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Jan Kasik
@@ -35,6 +41,8 @@ public class ContextServicesTestCase extends EETestCaseAbstract {
     private final String JNDI_DEFAULT = "java:/";
     private final String JNDI_VALID = JNDI_DEFAULT + RandomStringUtils.randomAlphanumeric(6);
 
+    private final String EE_CHILD = "context-service";
+
     private ResourceAddress address;
     private String contextService;
 
@@ -42,15 +50,15 @@ public class ContextServicesTestCase extends EETestCaseAbstract {
     public void before() {
         contextService = createContextService();
         reloadIfRequiredAndWaitForRunning();
-        address = new ResourceAddress(eeAddress).add("context-service", contextService);
-        navigateToEEServices();
+        address = new ResourceAddress(eeAddress).add(EE_CHILD, contextService);
+        page.navigate();
         page.switchSubTab("Context Service");
         page.getResourceManager().getResourceTable().selectRowByText(0, contextService);
     }
 
     @After
     public void after() {
-        removeContextService(contextService);
+        removeEEChild(EE_CHILD, contextService);
     }
 
     @Test
@@ -74,18 +82,39 @@ public class ContextServicesTestCase extends EETestCaseAbstract {
         editCheckboxAndVerify(address, USE_TRANSACTIONAL, USE_TRANSACTIONAL_ATTR, false);
     }
 
+    @Test
+    public void addContextServiceInGUI() {
+        String name = RandomStringUtils.randomAlphanumeric(6);
+        ConfigFragment config = page.getConfigFragment();
+        WizardWindow wizard = config.getResourceManager().addResource();
+
+        Editor editor = wizard.getEditor();
+        editor.text("name", name);
+        editor.text(JNDI_NAME, JNDI_VALID);
+        boolean result = wizard.finish();
+
+        assertTrue("Window should be closed", result);
+        assertTrue("Executor should be present in table", config.resourceIsPresent(name));
+        ResourceAddress address = new ResourceAddress(eeAddress).add(EE_CHILD, name);
+        verifier.verifyResource(address, true, 5000);
+    }
+
+    @Test
+    public void removeContextServiceInGUI() {
+        ConfigFragment config = page.getConfigFragment();
+        config.getResourceManager().removeResource(contextService).confirm();
+
+        Assert.assertFalse("Executor should not be present in table", config.resourceIsPresent(contextService));
+        Assert.assertFalse("Executor should not be present on server", removeEEChild(EE_CHILD, contextService));
+    }
+
     private String createContextService() {
         String name = RandomStringUtils.randomAlphanumeric(6);
-        ResourceAddress address = new ResourceAddress(eeAddress).add("context-service", name);
+        ResourceAddress address = new ResourceAddress(eeAddress).add(EE_CHILD, name);
         dispatcher.execute(new Operation.Builder("add", address)
                 .param("jndi-name", JNDI_DEFAULT + name)
                 .build());
         return name;
-    }
-
-    private void removeContextService(String name) {
-        ResourceAddress address =  new ResourceAddress(eeAddress).add("context-service", name);
-        dispatcher.execute(new Operation.Builder("remove", address).build());
     }
 
 }

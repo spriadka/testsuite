@@ -52,7 +52,7 @@ public class ThreadFactoryTestCase extends EETestCaseAbstract {
 
     @After
     public void after() {
-        removeThreadFactory(threadFactory);
+        removeEEChild(EE_CHILD, threadFactory);
     }
 
     @Before
@@ -60,7 +60,7 @@ public class ThreadFactoryTestCase extends EETestCaseAbstract {
         threadFactory = createThreadFactory();
         address = new ResourceAddress(eeAddress).add(EE_CHILD, threadFactory);
         reloadIfRequiredAndWaitForRunning();
-        navigateToEEServices();
+        page.navigate();
         page.switchSubTab("Thread Factories");
         page.getResourceManager().getResourceTable().selectRowByText(0, threadFactory);
     }
@@ -110,12 +110,11 @@ public class ThreadFactoryTestCase extends EETestCaseAbstract {
 
     @Test
     public void removeThreadFactoryInGUI() {
-        String name = createThreadFactory();
         ConfigFragment config = page.getConfigFragment();
-        config.getResourceManager().removeResource(name).confirm();
+        config.getResourceManager().removeResource(threadFactory).confirm();
 
-        Assert.assertFalse("Executor should not be present in table", config.resourceIsPresent(name));
-        Assert.assertFalse("Executor should not be present on server", removeThreadFactory(name));
+        Assert.assertFalse("Executor should not be present in table", config.resourceIsPresent(threadFactory));
+        Assert.assertFalse("Executor should not be present on server", removeEEChild(EE_CHILD, threadFactory));
     }
 
     private String createThreadFactory() {
@@ -125,10 +124,5 @@ public class ThreadFactoryTestCase extends EETestCaseAbstract {
                 .param(JNDI_NAME, JNDI_DEFAULT + name)
                 .build());
         return name;
-    }
-
-    private boolean removeThreadFactory(String name) {
-        ResourceAddress address = new ResourceAddress(eeAddress).add(EE_CHILD, name);
-        return dispatcher.execute(new Operation.Builder("remove", address).build()).isSuccessful();
     }
 }
