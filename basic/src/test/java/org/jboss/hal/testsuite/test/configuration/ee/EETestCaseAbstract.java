@@ -45,17 +45,15 @@ public class EETestCaseAbstract {
 
     protected Dispatcher dispatcher;
     protected ResourceVerifier verifier;
-
-    private StatementContext context = new DefaultContext();
-    private AddressTemplate serverTemplate = AddressTemplate.of("/host=master/server=*");
-    protected AddressTemplate eeAddressTemplate = AddressTemplate.of("{default.profile}/subsystem=ee");
     protected ResourceAddress eeAddress;
+    private StatementContext context;
 
     @Before
     public void mainBefore() {
+        context  = new DefaultContext();
         dispatcher = new Dispatcher();
         verifier = new ResourceVerifier(dispatcher);
-        eeAddress = eeAddressTemplate.resolve(context);
+        eeAddress =  AddressTemplate.of("{default.profile}/subsystem=ee").resolve(context);
     }
 
     @After
