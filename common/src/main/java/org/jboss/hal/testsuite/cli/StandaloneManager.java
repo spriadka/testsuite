@@ -40,7 +40,6 @@ public class StandaloneManager extends ServerManager {
         super(cliClient);
     }
 
-
     /**
      * Checks whether server is in running state or not using CLI
      *
@@ -128,4 +127,5 @@ public class StandaloneManager extends ServerManager {
         }
         return isRunning;
     }
+
 }

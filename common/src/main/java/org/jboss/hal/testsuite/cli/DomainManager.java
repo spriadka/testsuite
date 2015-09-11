@@ -25,6 +25,7 @@ package org.jboss.hal.testsuite.cli;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
@@ -36,6 +37,7 @@ import org.slf4j.LoggerFactory;
  * @author Martin Simka
  */
 public class DomainManager extends ServerManager {
+
     private static final Logger log = LoggerFactory.getLogger(DomainManager.class);
 
     public DomainManager(CliClient cliClient) {
@@ -450,6 +452,7 @@ public class DomainManager extends ServerManager {
         return waitUntilAvailable(getDefaultHost(), timeout);
     }
 
+
     /**
      * Checks whether default host will become available before specified timeout passes
      *
@@ -471,5 +474,114 @@ public class DomainManager extends ServerManager {
             }
         }
         return isRunning;
+    }
+
+    /**
+     * Reloads server(s) and waits until server(s) is(are) running again
+     *
+     * @param timeout max time to wait for server to start, in milliseconds
+     */
+    public void reloadIfRequiredAndWaitUntilRunning(long timeout) {
+        if (isReloadRequired(listRunningServers(getDefaultHost()))) {
+            reloadAndWaitUntilRunning(timeout);
+        }
+    }
+
+    /**
+     * Reloads server(s), which require reload and waits until server(s) is(are) running again
+     *
+     * @param timeout max time to wait for server to start, in milliseconds
+     */
+    public void reloadAndWaitUntilRunning(long timeout) {
+        List<String> servers = filterAllRunningServers(listRunningServers(getDefaultHost()));
+        reloadServers();
+        waitUntilRunning(servers, timeout);
+    }
+
+    /**
+     * Wait for servers to become running in given timeout
+     * @param servers names of servers which will be waited for
+     * @param timeout time is milliseconds
+     * @throws TimeoutException when all servers are not running in given timeout
+     */
+    public void waitUntilRunning(final List<String> servers, final long timeout) throws TimeoutException {
+        final int step = 500;
+        long decTimeout = timeout;
+        while (!isServersRunning(servers)) {
+            if (decTimeout <= 0) {
+                throw new TimeoutException("Servers are not running in " + timeout);
+            }
+            decTimeout -= step;
+            Library.letsSleep(step);
+        }
+    }
+
+    /**
+     * Returns true if all given servers are running
+     * @param servers name of servers which state will be checked
+     * @return true if all servers are running
+     */
+    public boolean isServersRunning(List<String> servers) {
+        return servers.stream().anyMatch(server -> !isServerRunning(server));
+    }
+
+    /**
+     * Return true if server is running
+     * @param server name of server
+     * @return True if given server is running
+     */
+    public boolean isServerRunning(String server) {
+        return checkServerState(server, "running");
+    }
+
+    /**
+     * Filters out all servers which are not running
+     * @param servers list of servers from which will be filtered non-running servers
+     * @return List of all running servers
+     */
+    public List<String> filterAllRunningServers(List<String> servers) {
+        List<String> running = new LinkedList<>();
+        for (String server : servers) {
+            if (isServerRunning(server)) {
+                running.add(server);
+            }
+        }
+        return running;
+    }
+
+    /**
+     * Returns true if for any server in list is required reload
+     * @param servers list of server names which state will be checked
+     * @return true if any server requires reload
+     */
+    public boolean isReloadRequired(List<String> servers) {
+        servers.stream().anyMatch(server -> isReloadRequiredForServerOnDomain(server));
+        for (String server : servers) {
+            if (isReloadRequiredForServerOnDomain(server)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Return true if given server requires reload
+     * @param server server which state will be checked
+     * @return true if server requires reload
+     */
+    public boolean isReloadRequiredForServerOnDomain(String server) {
+        return checkServerState(server, "restart-required");
+    }
+
+    public void reloadServers() {
+        cliClient.reload(true);
+    }
+
+    public boolean checkServerState(String server, String state) {
+        final String result = cliClient.executeForResult(
+                "/host=" + getDefaultHost() +
+                "/server=" + server +
+                ":read-attribute(name=server-state)");
+        return result.toLowerCase().contains(state);
     }
 }

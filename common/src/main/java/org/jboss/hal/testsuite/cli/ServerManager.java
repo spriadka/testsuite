@@ -82,5 +82,6 @@ public abstract class ServerManager {
      * @return true if server becomes available before timeout passes, false otherwise
      */
     public abstract boolean waitUntilAvailable(long timeout);
+
 }
 

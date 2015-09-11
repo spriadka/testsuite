@@ -7,6 +7,7 @@ import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
 import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.cli.CliClient;
 import org.jboss.hal.testsuite.cli.CliClientFactory;
+import org.jboss.hal.testsuite.cli.DomainManager;
 import org.jboss.hal.testsuite.dmr.AddressTemplate;
 import org.jboss.hal.testsuite.dmr.DefaultContext;
 import org.jboss.hal.testsuite.dmr.Dispatcher;
@@ -42,7 +43,6 @@ public class WebMetricsTestCase {
 
     public static final String NUMBER_OF_REQUESTS = "Request Count";
     public static final String ERRORS = "Error Count";
-    public static final int DELTA = 3;
 
     static final AddressTemplate ADDRESS_TEMPLATE = AddressTemplate
             .of("{default.profile}/subsystem=undertow/server=default-server/http-listener=default");
@@ -70,9 +70,9 @@ public class WebMetricsTestCase {
         statementContext = new DefaultContext();
         ResourceAddress addressStats = ADDRESS_TEMPLATE_STATISTICS.resolve(statementContext);
         dispatcher.execute(new Operation.Builder(ModelDescriptionConstants.WRITE_ATTRIBUTE_OPERATION, addressStats).param("name", "statistics-enabled").param("value", "true").build());
-        cliClient.reload();
 
         if (ConfigUtils.isDomain()) {
+            new DomainManager(cliClient).reloadAndWaitUntilRunning(60000);
             navigation = new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
                     .addAddress(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
                     .addAddress(FinderNames.HOST, "master")
