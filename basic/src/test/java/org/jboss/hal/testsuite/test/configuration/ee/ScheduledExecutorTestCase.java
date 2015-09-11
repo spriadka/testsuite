@@ -29,44 +29,43 @@ import static org.junit.Assert.assertTrue;
 public class ScheduledExecutorTestCase extends EETestCaseAbstract {
 
     //identifiers
-    private static final String CONTEXT_SERVICE = "context-service";
-    private static final String CORE_THREADS = "core-threads";
-    private static final String HUNG_TASK_THRESHOLD = "hung-task-threshold";
-    private static final String JNDI_NAME = "jndi-name";
-    private static final String KEEPALIVE_TIME = "keepalive-time";
-    private static final String LONG_RUNNING_TASKS = "long-running-tasks";
-    private static final String REJECT_POLICY = "reject-policy";
-    private static final String THREAD_FACTORY = "thread-factory";
+    private final String CONTEXT_SERVICE = "context-service";
+    private final String CORE_THREADS = "core-threads";
+    private final String HUNG_TASK_THRESHOLD = "hung-task-threshold";
+    private final String JNDI_NAME = "jndi-name";
+    private final String KEEPALIVE_TIME = "keepalive-time";
+    private final String LONG_RUNNING_TASKS = "long-running-tasks";
+    private final String REJECT_POLICY = "reject-policy";
+    private final String THREAD_FACTORY = "thread-factory";
 
     //names
-    private static final String CONTEXT_SERVICE_ADDR = "context-service";
-    private static final String CORE_THREADS_ADDR = "core-threads";
-    private static final String HUNG_TASK_THRESHOLD_ADDR = "hung-task-threshold";
-    private static final String JNDI_NAME_ADDR = "jndi-name";
-    private static final String KEEPALIVE_TIME_ADDR = "keepalive-time";
-    private static final String LONG_RUNNING_TASKS_ADDR = "long-running-tasks";
-    private static final String REJECT_POLICY_ADDR = "reject-policy";
-    private static final String THREAD_FACTORY_ADDR = "thread-factory";
+    private final String CONTEXT_SERVICE_ADDR = "context-service";
+    private final String CORE_THREADS_ADDR = "core-threads";
+    private final String HUNG_TASK_THRESHOLD_ADDR = "hung-task-threshold";
+    private final String JNDI_NAME_ADDR = "jndi-name";
+    private final String KEEPALIVE_TIME_ADDR = "keepalive-time";
+    private final String LONG_RUNNING_TASKS_ADDR = "long-running-tasks";
+    private final String REJECT_POLICY_ADDR = "reject-policy";
+    private final String THREAD_FACTORY_ADDR = "thread-factory";
 
     //values
-    private static final String NUMERIC_VALID = "7";
-    private static final String NUMERIC_INVALID = "7f";
-    private static final String JNDI_INVALID = "test";
-    private static final String JNDI_DEFAULT = "java:/";
-    private static final String JNDI_VALID = JNDI_DEFAULT + RandomStringUtils.randomAlphanumeric(6);
-    private static final String REJECT_POLICY_VALID = "RETRY_ABORT";
+    private final String NUMERIC_VALID = "7";
+    private final String NUMERIC_INVALID = "7f";
+    private final String JNDI_INVALID = "test";
+    private final String JNDI_DEFAULT = "java:/";
+    private final String JNDI_VALID = JNDI_DEFAULT + RandomStringUtils.randomAlphanumeric(6);
+    private final String REJECT_POLICY_VALID = "RETRY_ABORT";
 
-    private static final String EE_CHILD = "managed-scheduled-executor-service";
+    private final String EE_CHILD = "managed-scheduled-executor-service";
 
-
-    private static ResourceAddress address;
-    private static String executorService;
+    private ResourceAddress address;
+    private String executorService;
 
     @Before
     public void before() {
         executorService = createScheduledExecutorService();
         address = new ResourceAddress(eeAddress).add(EE_CHILD, executorService);
-        reloadAndWaitForRunning();
+        reloadIfRequiredAndWaitForRunning();
         navigateToEEServices();
         page.switchSubTab("Scheduled Executor");
         page.getResourceManager().getResourceTable().selectRowByText(0, executorService);

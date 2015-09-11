@@ -29,38 +29,38 @@ import static org.junit.Assert.assertTrue;
 public class ExecutorTestCase extends EETestCaseAbstract {
 
     //identifiers
-    private static final String CONTEXT_SERVICE = "context-service";
-    private static final String CORE_THREADS = "core-threads";
-    private static final String HUNG_TASK_THRESHOLD = "hung-task-threshold";
-    private static final String JNDI_NAME = "jndi-name";
-    private static final String KEEPALIVE_TIME = "keepalive-time";
-    private static final String LONG_RUNNING_TASKS = "long-running-tasks";
-    private static final String MAX_THREADS = "max-threads";
-    private static final String QUEUE_LENGTH = "queue-length";
-    private static final String REJECT_POLICY = "reject-policy";
-    private static final String THREAD_FACTORY = "thread-factory";
+    private final String CONTEXT_SERVICE = "context-service";
+    private final String CORE_THREADS = "core-threads";
+    private final String HUNG_TASK_THRESHOLD = "hung-task-threshold";
+    private final String JNDI_NAME = "jndi-name";
+    private final String KEEPALIVE_TIME = "keepalive-time";
+    private final String LONG_RUNNING_TASKS = "long-running-tasks";
+    private final String MAX_THREADS = "max-threads";
+    private final String QUEUE_LENGTH = "queue-length";
+    private final String REJECT_POLICY = "reject-policy";
+    private final String THREAD_FACTORY = "thread-factory";
 
     //names
-    private static final String CONTEXT_SERVICE_ADDR = "context-service";
-    private static final String CORE_THREADS_ADDR = "core-threads";
-    private static final String HUNG_TASK_THRESHOLD_ADDR = "hung-task-threshold";
-    private static final String JNDI_NAME_ADDR = "jndi-name";
-    private static final String KEEPALIVE_TIME_ADDR = "keepalive-time";
-    private static final String LONG_RUNNING_TASKS_ADDR = "long-running-tasks";
-    private static final String MAX_THREADS_ADDR = "max-threads";
-    private static final String QUEUE_LENGTH_ADDR = "queue-length";
-    private static final String REJECT_POLICY_ADDR = "reject-policy";
-    private static final String THREAD_FACTORY_ADDR = "thread-factory";
+    private final String CONTEXT_SERVICE_ADDR = "context-service";
+    private final String CORE_THREADS_ADDR = "core-threads";
+    private final String HUNG_TASK_THRESHOLD_ADDR = "hung-task-threshold";
+    private final String JNDI_NAME_ADDR = "jndi-name";
+    private final String KEEPALIVE_TIME_ADDR = "keepalive-time";
+    private final String LONG_RUNNING_TASKS_ADDR = "long-running-tasks";
+    private final String MAX_THREADS_ADDR = "max-threads";
+    private final String QUEUE_LENGTH_ADDR = "queue-length";
+    private final String REJECT_POLICY_ADDR = "reject-policy";
+    private final String THREAD_FACTORY_ADDR = "thread-factory";
 
     //values
-    private static final String NUMERIC_VALID = "7";
-    private static final String NUMERIC_INVALID = "7f";
-    private static final String JNDI_DEFAULT = "java:/";
-    private static final String JNDI_VALID = JNDI_DEFAULT + RandomStringUtils.randomAlphanumeric(6);
-    private static final String REJECT_POLICY_VALID = "RETRY_ABORT";
+    private final String NUMERIC_VALID = "7";
+    private final String NUMERIC_INVALID = "7f";
+    private final String JNDI_DEFAULT = "java:/";
+    private final String JNDI_VALID = JNDI_DEFAULT + RandomStringUtils.randomAlphanumeric(6);
+    private final String REJECT_POLICY_VALID = "RETRY_ABORT";
 
     private ResourceAddress address;
-    private static String executorService;
+    private String executorService;
 
     @After
     public void after() {
@@ -71,7 +71,7 @@ public class ExecutorTestCase extends EETestCaseAbstract {
     public void before() {
         executorService = createExecutorService();
         address = new ResourceAddress(eeAddress).add("managed-executor-service", executorService);
-        reloadAndWaitForRunning();
+        reloadIfRequiredAndWaitForRunning();
         navigateToEEServices();
         page.switchSubTab("Executor");
         page.getResourceManager().getResourceTable().selectRowByText(0, executorService);

@@ -23,25 +23,25 @@ import java.io.IOException;
 public class ContextServicesTestCase extends EETestCaseAbstract {
 
     //identifiers
-    private static final String JNDI_NAME = "jndi-name";
-    private static final String USE_TRANSACTIONAL = "use-transaction-setup-provider";
+    private final String JNDI_NAME = "jndi-name";
+    private final String USE_TRANSACTIONAL = "use-transaction-setup-provider";
 
     //attribute-names
-    private static final String JNDI_NAME_ATTR = "jndi-name";
-    private static final String USE_TRANSACTIONAL_ATTR = "use-transaction-setup-provider";
+    private final String JNDI_NAME_ATTR = "jndi-name";
+    private final String USE_TRANSACTIONAL_ATTR = "use-transaction-setup-provider";
 
     //values
-    private static final String JNDI_INVALID = "test";
-    private static final String JNDI_DEFAULT = "java:/";
-    private static final String JNDI_VALID = JNDI_DEFAULT + RandomStringUtils.randomAlphanumeric(6);
+    private final String JNDI_INVALID = "test";
+    private final String JNDI_DEFAULT = "java:/";
+    private final String JNDI_VALID = JNDI_DEFAULT + RandomStringUtils.randomAlphanumeric(6);
 
-    private static ResourceAddress address;
-    private static String contextService;
+    private ResourceAddress address;
+    private String contextService;
 
     @Before
     public void before() {
         contextService = createContextService();
-        reloadAndWaitForRunning();
+        reloadIfRequiredAndWaitForRunning();
         address = new ResourceAddress(eeAddress).add("context-service", contextService);
         navigateToEEServices();
         page.switchSubTab("Context Service");

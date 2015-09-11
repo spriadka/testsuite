@@ -29,26 +29,26 @@ import static org.junit.Assert.assertTrue;
 public class ThreadFactoryTestCase extends EETestCaseAbstract {
 
     //identifiers
-    private static final String JNDI_NAME = "jndi-name";
-    private static final String CONTEXT_SERVICE = "context-service";
-    private static final String PRIORITY = "priority";
+    private final String JNDI_NAME = "jndi-name";
+    private final String CONTEXT_SERVICE = "context-service";
+    private final String PRIORITY = "priority";
 
     //attribute-names
-    private static final String JNDI_NAME_ADDR = "jndi-name";
-    private static final String CONTEXT_SERVICE_ADDR = "context-service";
-    private static final String PRIORITY_ADDR = "priority";
+    private final String JNDI_NAME_ADDR = "jndi-name";
+    private final String CONTEXT_SERVICE_ADDR = "context-service";
+    private final String PRIORITY_ADDR = "priority";
 
     //values
-    private static final String NUMERIC_VALID = "7";
-    private static final String NUMERIC_INVALID = "7f";
-    private static final String JNDI_INVALID = "test";
-    private static final String JNDI_DEFAULT = "java:/";
-    private static final String JNDI_VALID = JNDI_DEFAULT + RandomStringUtils.randomAlphanumeric(6);
+    private final String NUMERIC_VALID = "7";
+    private final String NUMERIC_INVALID = "7f";
+    private final String JNDI_INVALID = "test";
+    private final String JNDI_DEFAULT = "java:/";
+    private final String JNDI_VALID = JNDI_DEFAULT + RandomStringUtils.randomAlphanumeric(6);
 
-    private static final String EE_CHILD = "managed-thread-factory";
+    private final String EE_CHILD = "managed-thread-factory";
 
-    private static ResourceAddress address;
-    private static String threadFactory;
+    private ResourceAddress address;
+    private String threadFactory;
 
     @After
     public void after() {
@@ -59,7 +59,7 @@ public class ThreadFactoryTestCase extends EETestCaseAbstract {
     public void before() {
         threadFactory = createThreadFactory();
         address = new ResourceAddress(eeAddress).add(EE_CHILD, threadFactory);
-        reloadAndWaitForRunning();
+        reloadIfRequiredAndWaitForRunning();
         navigateToEEServices();
         page.switchSubTab("Thread Factories");
         page.getResourceManager().getResourceTable().selectRowByText(0, threadFactory);
