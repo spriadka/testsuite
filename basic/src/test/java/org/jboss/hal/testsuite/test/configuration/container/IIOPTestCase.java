@@ -44,7 +44,6 @@ import org.jboss.hal.testsuite.page.config.IIOPPage;
 import org.jboss.hal.testsuite.page.config.StandaloneConfigurationPage;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
