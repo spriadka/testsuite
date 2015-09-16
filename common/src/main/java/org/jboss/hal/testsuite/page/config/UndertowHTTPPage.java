@@ -28,4 +28,25 @@ public class UndertowHTTPPage extends UndertowPage implements Navigatable {
         Application.waitUntilVisible();
     }
 
+    public UndertowHTTPPage selectHTTPServer(String serverName) {
+        getResourceManager().getResourceTable().selectRowByText(0, serverName).view();
+        return this;
+    }
+
+    public void switchToAJPListeners() {
+        switchSubTab("AJP Listener");
+    }
+
+    public void switchToHTTPListeners() {
+        switchSubTab("HTTP Listener");
+    }
+
+    public void switchToHTTPSListeners() {
+        switchSubTab("HTTPS Listener");
+    }
+
+    public void switchToHosts() {
+        switchSubTab("Hosts");
+    }
+
 }
