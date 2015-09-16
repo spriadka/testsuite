@@ -5,11 +5,14 @@ import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.dmr.AddressTemplate;
+import org.jboss.hal.testsuite.dmr.Dispatcher;
 import org.jboss.hal.testsuite.dmr.Operation;
 import org.jboss.hal.testsuite.dmr.ResourceAddress;
-import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.page.config.UndertowHTTPPage;
+import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
@@ -97,17 +100,32 @@ public class HTTPListenerTestCase extends UndertowTestCaseAbstract {
     private final String NUMERIC_VALID = "25";
     private final String NUMERIC_INVALID = "25fazf";
 
-    private AddressTemplate httpTemplate = undertowAddressTemplate.append("/server=*");
-    private String httpServer;
+    private AddressTemplate httpListenerTemplate = httpServerTemplate.append("/http-listener=*");
+    private static String httpServer;
+    private String httpListener;
     private ResourceAddress address;
+
+    @BeforeClass
+    public static void setUp() {
+        httpServer = createHTTPServer(dispatcher);
+    }
 
     @Before
     public void before() {
-        httpServer = createHTTPServer();
-        address = httpTemplate.resolve(context, httpServer);
+        httpListener = createHTTPListener(dispatcher);
+        address = httpListenerTemplate.resolve(context, httpServer, httpListener);
         page.navigate();
-        page.getResourceManager().getResourceTable().selectRowByText(0, httpServer).view();
-        page.switchSubTab("HTTP Listener");
+        page.selectHTTPServer(httpServer).switchToHTTPListeners();
+    }
+
+    @After
+    public void after() {
+        removeHTTPListener(httpListener);
+    }
+
+    @AfterClass
+    public void tearDown() {
+        removeHTTPServer(dispatcher, httpServer);
     }
 
     @Test
@@ -397,12 +415,18 @@ public class HTTPListenerTestCase extends UndertowTestCaseAbstract {
         verifyIfErrorAppears(WRITE_TIMEOUT, NUMERIC_INVALID);
     }
 
-    private String createHTTPServer() {
+    private String createHTTPListener(Dispatcher dispatcher) {
         String name = RandomStringUtils.randomAlphanumeric(6);
-        ResourceAddress address = httpTemplate.resolve(context, name);
-        dispatcher.execute(new Operation.Builder(FinderNames.ADD, address).build());
+        ResourceAddress address = httpListenerTemplate.resolve(context, httpServer, name);
+        dispatcher.execute(new Operation.Builder("add", address)
+                .param("socket-binding", "http")
+                .build());
         return name;
     }
 
+    private void removeHTTPListener(String httpListener) {
+        ResourceAddress address = httpListenerTemplate.resolve(context, httpServer, httpListener);
+        dispatcher.execute(new Operation.Builder("remove", address).build());
+    }
 
 }
