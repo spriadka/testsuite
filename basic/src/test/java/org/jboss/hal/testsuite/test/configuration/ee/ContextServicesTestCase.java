@@ -94,7 +94,7 @@ public class ContextServicesTestCase extends EETestCaseAbstract {
         boolean result = wizard.finish();
 
         assertTrue("Window should be closed", result);
-        assertTrue("Executor should be present in table", config.resourceIsPresent(name));
+        assertTrue("Context service should be present in table", config.resourceIsPresent(name));
         ResourceAddress address = new ResourceAddress(eeAddress).add(EE_CHILD, name);
         verifier.verifyResource(address, true, 5000);
     }
@@ -104,8 +104,8 @@ public class ContextServicesTestCase extends EETestCaseAbstract {
         ConfigFragment config = page.getConfigFragment();
         config.getResourceManager().removeResource(contextService).confirm();
 
-        Assert.assertFalse("Executor should not be present in table", config.resourceIsPresent(contextService));
-        Assert.assertFalse("Executor should not be present on server", removeEEChild(EE_CHILD, contextService));
+        Assert.assertFalse("Context service should not be present in table", config.resourceIsPresent(contextService));
+        Assert.assertFalse("Context service should not be present on server", removeEEChild(EE_CHILD, contextService));
     }
 
     private String createContextService() {

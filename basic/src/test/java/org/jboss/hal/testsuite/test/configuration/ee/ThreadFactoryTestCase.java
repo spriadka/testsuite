@@ -103,7 +103,7 @@ public class ThreadFactoryTestCase extends EETestCaseAbstract {
         boolean result = wizard.finish();
 
         assertTrue("Window should be closed", result);
-        assertTrue("Executor should be present in table", config.resourceIsPresent(name));
+        assertTrue("Thread factory should be present in table", config.resourceIsPresent(name));
         ResourceAddress address = new ResourceAddress(eeAddress).add(EE_CHILD, name);
         verifier.verifyResource(address, true, 5000);
     }
@@ -113,8 +113,8 @@ public class ThreadFactoryTestCase extends EETestCaseAbstract {
         ConfigFragment config = page.getConfigFragment();
         config.getResourceManager().removeResource(threadFactory).confirm();
 
-        Assert.assertFalse("Executor should not be present in table", config.resourceIsPresent(threadFactory));
-        Assert.assertFalse("Executor should not be present on server", removeEEChild(EE_CHILD, threadFactory));
+        Assert.assertFalse("Thread factory should not be present in table", config.resourceIsPresent(threadFactory));
+        Assert.assertFalse("Thread factory should not be present on server", removeEEChild(EE_CHILD, threadFactory));
     }
 
     private String createThreadFactory() {
