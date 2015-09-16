@@ -198,7 +198,6 @@ public class IIOPTestCase {
         verifier.verifyAttribute(address, "auth-method", "username_password");
     }
 
-    @Ignore("After removing property, empty properties tag left in xml configuration and server cannot run more. https://issues.jboss.org/browse/HAL-791")
     @Test
     @InSequence(5)
     public void addProperty(){
@@ -215,7 +214,6 @@ public class IIOPTestCase {
         assertEquals("Talbe should have one row.", 1, actual.size());
     }
 
-    @Ignore("After removing property, empty properties tag left in xml configuration and server cannot run more. https://issues.jboss.org/browse/HAL-791")
     @Test
     @InSequence(6)
     public void removeProperty(){
