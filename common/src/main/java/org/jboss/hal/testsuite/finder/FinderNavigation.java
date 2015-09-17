@@ -60,6 +60,7 @@ public class FinderNavigation {
     private final Class<? extends BasePage> page;
     private final List<AddressTuple> address;
     private final Hook hook;
+    private boolean refresh;
 
     /**
      * This constructor should not be used regularly! <br />
@@ -72,6 +73,7 @@ public class FinderNavigation {
         this.page = page;
         this.hook = hook;
         this.address = new ArrayList<>();
+        this.refresh = true;
     }
 
     /**
@@ -161,8 +163,9 @@ public class FinderNavigation {
 
     private WebElement[] navigate(Boolean exactRowText) {
         WebElement[] columnRow = new WebElement[2];
-        Console.withBrowser(browser).refreshAndNavigate(page);
-
+        if (refresh) {
+            Console.withBrowser(browser).refreshAndNavigate(page);
+        }
         for (int i = 0; i < address.size(); i++) {
             AddressTuple tuple = address.get(i);
 
@@ -183,6 +186,19 @@ public class FinderNavigation {
             }
         }
         return columnRow;
+    }
+
+    /**
+     * This method should be called after normal finder navigation was called and made with selectRow or selectColumn
+     * so user is navigated to some page.
+     * It is good when you want to re-navigate at some page you are currently on.
+     * You can only move in submenus on current page.
+     * @return empty navigation without refresh and navigation to HomePage
+     */
+    public FinderNavigation resetNavigation() {
+        address.clear();
+        this.refresh = false;
+        return this;
     }
 
     private By columnSelector(String name) {
