@@ -1,14 +1,12 @@
 package org.jboss.hal.testsuite.test.rbac;
 
-import junit.framework.Assert;
 import org.jboss.arquillian.drone.api.annotation.Drone;
-import org.jboss.arquillian.graphene.Graphene;
+import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.finder.Application;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
-import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.page.runtime.StandaloneRuntimeEntryPoint;
 import org.jboss.hal.testsuite.util.Authentication;
 import org.jboss.hal.testsuite.util.RbacRole;
@@ -21,7 +19,7 @@ import org.openqa.selenium.WebElement;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.NoSuchElementException;
+import org.openqa.selenium.NoSuchElementException;
 
 import static org.junit.Assert.assertTrue;
 
@@ -108,7 +106,7 @@ public class RuntimeAccessErrorTestCase {
                 .addAddress(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
                 .addAddress(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
                 .addAddress(FinderNames.SUBSYSTEM, "HTTP"); //domain mode different
-        navigateToPageAndStorePathOnError(navigation, acc,pathSubsystem + "/HTTP");
+        navigateToPageAndStorePathOnError(navigation, acc, pathSubsystem + "/HTTP");
 
         navigation = new FinderNavigation(browser, StandaloneRuntimeEntryPoint.class)
                 .addAddress(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
@@ -124,10 +122,11 @@ public class RuntimeAccessErrorTestCase {
         //messages
         navigation.selectRow().invoke("View");
         Application.waitUntilVisible();
-        containsInsufficientPrivilegesWindow();
-        if (containsInsufficientPrivilegesWindow()) {
+        clickMessageMenu();
+        if (errorMessageExists()) {
             acc.add(path + " \n");
         }
+        clearMessages();
     }
 
     public String getPathsWithError(List<String> paths) {
@@ -139,13 +138,25 @@ public class RuntimeAccessErrorTestCase {
         return builder.toString();
     }
 
-    public boolean containsInsufficientPrivilegesWindow() {
-        WebElement error = null;
+    public void clickMessageMenu() {
+        WebElement menu = browser.findElement(ByJQuery.selector("div.notification-button:visible"));
+        menu.click();
+    }
+
+    public void clearMessages() {
+        clickMessageMenu();
+        browser.findElement(ByJQuery.selector("a:contains(\'Clear\')")).click();
+    }
+
+
+    public boolean errorMessageExists() {
+        clickMessageMenu();
         try {
-            error =  browser.findElement(By.className("default-window"));
-        } catch (NoSuchElementException ex) { }
-        finally {
-            return (error != null);
+            WebElement message =  browser.findElement(By.xpath("//div[@class='message-list-item']//" +
+                    "div[@class='message-list-item' and contains(text(), 'error')]"));
+        } catch (NoSuchElementException ex) {
+            return false;
         }
+        return true;
     }
 }

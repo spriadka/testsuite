@@ -1,14 +1,12 @@
 package org.jboss.hal.testsuite.page.admin;
 
-import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.graphene.Graphene;
+import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.arquillian.graphene.page.Location;
 import org.jboss.hal.testsuite.cli.TimeoutException;
-import org.jboss.hal.testsuite.finder.Application;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
-import org.jboss.hal.testsuite.fragment.WindowFragment;
 import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
 import org.jboss.hal.testsuite.page.BasePage;
 import org.jboss.hal.testsuite.util.Console;
@@ -21,8 +19,30 @@ import org.openqa.selenium.WebElement;
 @Location("#rbac")
 public class RoleAssignmentPage extends BasePage {
     private FinderNavigation navigation;
+    private String roleMapping = "/core-service=management/access=authorization/role-mapping=";
+    private String include = "/include=";
 
-    public void createGroup(String name, String realm) {
+    public String prepareAdd(String name, String type, String realm) {
+        return "/include=" + name + ":add(name=" + name + ",type=" + type + ",realm=" + realm + ")";
+    }
+
+    public String preparePathGroup(String name, String realm, String role, boolean group) {
+        if (group) {
+            return roleMapping + role + include + "group-" + name + "@" + realm;
+        } else {
+            return roleMapping + role + include + name;
+        }
+    }
+
+    public String preparePathUser(String name, String realm, String role, boolean user) {
+        if (user) {
+            return roleMapping + role + include + "user-" + name + "@" + realm;
+        } else {
+            return roleMapping + role + include + name;
+        }
+    }
+
+    public void createGroup(String name, String realm, String role) {
         navigation = new FinderNavigation(browser, RoleAssignmentPage.class)
                 .addAddress(FinderNames.BROWSE_BY, "Groups")
                 .addAddress("Group");
@@ -31,6 +51,63 @@ public class RoleAssignmentPage extends BasePage {
         getWindowFragment().getEditor().text("name", name);
         getWindowFragment().getEditor().text("realm", realm);
         getWindowFragment().clickButton("Save");
+
+        navigation.resetNavigation()
+                .addAddress(FinderNames.BROWSE_BY, "Roles")
+                .addAddress("Role", role)
+                .addAddress("Membership", "Include")
+                .addAddress("Member");
+
+        navigation.selectColumn().invoke("Add");
+        selectMember(name, realm);
+    }
+
+    public void selectMember(String name, String realm) {
+        WebElement member =  browser.findElement(ByJQuery.selector("[title*=\'" + name + " (at) " + realm + "\']:visible"));
+        member.click();
+        getWindowFragment().clickButton("Save");
+    }
+
+    public void selectRole(String role) {
+        WebElement member =  browser.findElement(ByJQuery.selector("[title*=\'" + role + "\']:visible"));
+        member.click();
+        getWindowFragment().clickButton("Save");
+    }
+
+    public void addInclude(String name, String realm, String role) {
+       /* navigation = new FinderNavigation(browser, RoleAssignmentPage.class)
+                .refreshPage(true)
+                .addAddress(FinderNames.BROWSE_BY, "Groups")
+                .addAddress("Group",name + "@" + realm)
+                .addAddress("Assignment", "Include")
+                .addAddress("Role");
+        navigation.selectColumn(); //.invoke("Add");
+        WebElement sndAdd = browser.findElement(ByJQuery.selector("div.btn,.primary:contains(\'Add\'):eq(1)"));
+        sndAdd.click();
+        selectRole(role); // try to fix */
+        navigation = new FinderNavigation(browser, RoleAssignmentPage.class)
+                .addAddress(FinderNames.BROWSE_BY, "Roles")
+                .addAddress("Role", role)
+                .addAddress("Membership", "Include")
+                .addAddress("Member");
+
+        navigation.selectColumn().invoke("Add");
+        selectMember(name, realm);
+
+    }
+
+    public void removeInclude(String name, String realm, String role) {
+        navigation = new FinderNavigation(browser, RoleAssignmentPage.class)
+                .addAddress(FinderNames.BROWSE_BY, "Roles")
+                .addAddress("Role", role)
+                .addAddress("Membership", "Include")
+                .addAddress("Member", name + "@" + realm);
+
+        navigation.selectRow().invoke("Remove");
+        try {
+            Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
+        } catch (TimeoutException ignored) {
+        }
     }
 
     public void removeGroup(String name, String realm) {
@@ -44,7 +121,7 @@ public class RoleAssignmentPage extends BasePage {
         }
     }
 
-    public void addUser(String name, String realm) {
+    public void addUser(String name, String realm, String role) {
         navigation = new FinderNavigation(browser, RoleAssignmentPage.class)
                 .addAddress(FinderNames.BROWSE_BY, "Users")
                 .addAddress("User");
@@ -53,6 +130,15 @@ public class RoleAssignmentPage extends BasePage {
         getWindowFragment().getEditor().text("name", name);
         getWindowFragment().getEditor().text("realm", realm);
         getWindowFragment().clickButton("Save");
+
+        navigation.resetNavigation()
+                .addAddress(FinderNames.BROWSE_BY, "Roles")
+                .addAddress("Role", role)
+                .addAddress("Membership", "Include")
+                .addAddress("Member");
+
+        navigation.selectColumn().invoke("Add");
+        selectMember(name, realm);
     }
 
     public void removeUser(String name, String realm) {
