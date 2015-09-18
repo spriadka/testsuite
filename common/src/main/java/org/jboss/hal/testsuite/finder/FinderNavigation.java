@@ -24,6 +24,7 @@ package org.jboss.hal.testsuite.finder;
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.hal.testsuite.page.BasePage;
 import org.jboss.hal.testsuite.util.Console;
+import org.jboss.hal.testsuite.util.Find;
 import org.jboss.hal.testsuite.util.PropUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -172,7 +173,7 @@ public class FinderNavigation {
             columnRow[0] = browser.findElement(columnSelector(tuple.column));
             if (!WILDCARD.equals(tuple.row)) {
                 By rowSelector = exactRowText ? rowSelectorEquals(tuple.row) : rowSelector(tuple.row);
-                columnRow[1] = columnRow[0].findElement(rowSelector);
+                columnRow[1] = new Find().elementWithGuiTimeout(columnRow[0], rowSelector);
                 columnRow[1].click();
                 hook.performAfterRowClick();
                 Graphene.waitModel().until().element(columnRow[0], rowSelector).attribute("class")
