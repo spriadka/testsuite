@@ -3,7 +3,9 @@ package org.jboss.hal.testsuite.page.config;
 import org.jboss.hal.testsuite.finder.Application;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
+import org.jboss.hal.testsuite.page.Navigatable;
 import org.jboss.hal.testsuite.util.ConfigUtils;
+import org.jboss.hal.testsuite.util.Console;
 
 /**
  * @author Jan Kasik <jkasik@redhat.com>
@@ -24,12 +26,20 @@ public class UndertowHTTPPage extends UndertowPage implements Navigatable {
         }
         navigation.addAddress(FinderNames.SUBSYSTEM, "Undertow")
                 .addAddress("Settings", "HTTP")
-                .selectRow();
+                .selectRow().invoke(FinderNames.VIEW);
         Application.waitUntilVisible();
+        switchTab("HTTP Server");
+        Console.withBrowser(browser).waitUntilLoaded();
     }
 
     public UndertowHTTPPage selectHTTPServer(String serverName) {
-        getResourceManager().getResourceTable().selectRowByText(0, serverName).view();
+        getResourceManager().selectByName(serverName);
+        return this;
+    }
+
+    public UndertowHTTPPage viewHTTPServer(String serverName) {
+        getResourceManager().viewByName(serverName);
+        Console.withBrowser(browser).waitUntilLoaded();
         return this;
     }
 

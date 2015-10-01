@@ -1,9 +1,17 @@
 package org.jboss.hal.testsuite.page.config;
 
+import org.jboss.arquillian.graphene.Graphene;
+import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.hal.testsuite.finder.Application;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
+import org.jboss.hal.testsuite.fragment.ConfigFragment;
+import org.jboss.hal.testsuite.page.Navigatable;
 import org.jboss.hal.testsuite.util.ConfigUtils;
+import org.jboss.hal.testsuite.util.Console;
+import org.jboss.hal.testsuite.util.PropUtils;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
 /**
  * @author Jan Kasik <jkasik@redhat.com>
@@ -24,7 +32,43 @@ public class UndertowServletPage extends UndertowPage implements Navigatable {
         }
         navigation.addAddress(FinderNames.SUBSYSTEM, "Undertow")
                 .addAddress("Settings", "Servlet/JSP")
-                .selectRow();
+                .selectRow().invoke(FinderNames.VIEW);
         Application.waitUntilVisible();
+    }
+
+    public UndertowServletPage selectServletContainer(String containerName) {
+        getResourceManager().selectByName(containerName);
+        return this;
+    }
+
+    public UndertowServletPage viewServletContainer(String containerName) {
+        getResourceManager().viewByName(containerName);
+        Console.withBrowser(browser).waitUntilLoaded();
+        return this;
+    }
+
+    public void switchToJSP() {
+        switchSubTab("JSP");
+    }
+
+    public void switchToWebSockets() {
+        switchSubTab("Web Sockets");
+    }
+
+    public void switchToSessions() {
+        switchSubTab("Sessions");
+    }
+
+    public void switchToCookies() {
+        switchSubTab("Cookies");
+    }
+
+    public void switchToJSPDevelopment() {
+        getConfig().switchTo("Development");//TODO: navigations hangs
+    }
+
+
+    public void switchToJSPAttributes() {
+        getConfig().switchTo("Attributes");
     }
 }
