@@ -3,13 +3,17 @@ package org.jboss.hal.testsuite.fragment.config.undertow;
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
+import org.jboss.hal.testsuite.util.PropUtils;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 
 /**
  * @author Jan Kasik <jkasik@redhat.com>
  *         Created on 15.9.15.
  */
 public class UndertowFragment extends ConfigFragment {
+
+    private static final By CONTENT_ROOT = ByJQuery.selector("." + PropUtils.get("page.content.rhs.class") + ":visible");
 
     public Boolean isErrorShowedInForm() {
         By selector = ByJQuery.selector("div.form-item-error-desc:visible");
