@@ -204,6 +204,10 @@ public class FinderNavigation {
         return this;
     }
 
+    public void clearNavigation() {
+        if (address.size() > 0 ) address.clear();
+    }
+
     private By columnSelector(String name) {
         return By.cssSelector("[data-column=\"" + name + "\"]");
     }
