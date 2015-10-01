@@ -1,15 +1,11 @@
 package org.jboss.hal.testsuite.test.configuration.undertow;
 
-import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.dmr.AddressTemplate;
-import org.jboss.hal.testsuite.dmr.Dispatcher;
-import org.jboss.hal.testsuite.dmr.Operation;
 import org.jboss.hal.testsuite.dmr.ResourceAddress;
 import org.jboss.hal.testsuite.page.config.UndertowHTTPPage;
-import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -50,7 +46,6 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
     private final String MAX_PARAMETERS = "max-parameters";
     private final String MAX_POST_SIZE = "max-post-size";
     private final String NO_REQUEST_TIMEOUT = "no-request-timeout";
-    private final String PROXY_ADDRESS_FORWARDING = "proxy-address-forwarding";
     private final String READ_TIMEOUT = "read-timeout";
     private final String RECEIVE_BUFFER = "receive-buffer";
     private final String RECORD_REQUEST_START_TIME = "record-request-start-time";
@@ -88,7 +83,6 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
     private final String MAX_PARAMETERS_ATTR = "max-parameters";
     private final String MAX_POST_SIZE_ATTR = "max-post-size";
     private final String NO_REQUEST_TIMEOUT_ATTR = "no-request-timeout";
-    private final String PROXY_ADDRESS_FORWARDING_ATTR = "proxy-address-forwarding";
     private final String READ_TIMEOUT_ATTR = "read-timeout";
     private final String RECEIVE_BUFFER_ATTR = "receive-buffer";
     private final String RECORD_REQUEST_START_TIME_ATTR = "record-request-start-time";
@@ -110,33 +104,30 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
     private final String NUMERIC_VALID = "25";
     private final String NUMERIC_INVALID = "25fazf";
     private final String VERIFY_CLIENT_VALUE = "REQUIRED";
+    private final String SECURITY_REALM_VALUE = "ApplicationRealm";
 
-    private AddressTemplate httpsListenerTemplate = httpServerTemplate.append("/https-listener=*");
+    private static AddressTemplate httpsListenerTemplate = httpServerTemplate.append("/https-listener=*");
     private static String httpServer;
-    private String httpsListener;
-    private ResourceAddress address;
+    private static String httpsListener;
+    private static ResourceAddress address;
 
     @BeforeClass
     public static void setUp() {
-        httpServer = createHTTPServer(dispatcher);
+        httpServer = operations.createHTTPServer();
+        httpsListener = operations.createHTTPSListener(httpServer);
+        address = httpsListenerTemplate.resolve(context, httpServer, httpsListener);
     }
 
     @Before
     public void before() {
-        httpsListener = createHTTPSListener(dispatcher);
-        address = httpsListenerTemplate.resolve(context, httpServer, httpsListener);
         page.navigate();
-        page.selectHTTPServer(httpServer).switchToHTTPSListeners();
-    }
-
-    @After
-    public void after() {
-        removeHTTPSListener(httpsListener);
+        page.viewHTTPServer(httpServer).switchToHTTPSListeners();
     }
 
     @AfterClass
-    public void tearDown() {
-        removeHTTPServer(dispatcher, httpServer);
+    public static void tearDown() {
+        operations.removeHTTPSListener(httpServer, httpsListener);
+        operations.removeHTTPServer(httpServer);
     }
 
     @Test
@@ -181,7 +172,7 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
 
     @Test
     public void editBufferPool() throws IOException, InterruptedException {
-        editTextAndVerify(address, BUFFER_POOL, BUFFER_POOL_ATTR);
+        editTextAndVerify(address, BUFFER_POOL, BUFFER_POOL_ATTR, BUFFER_POOL_VALUE_VALID);
     }
 
     @Test
@@ -315,16 +306,6 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
     }
 
     @Test
-    public void setProxyAddressForwardingToTrue() throws IOException, InterruptedException {
-        editCheckboxAndVerify(address, PROXY_ADDRESS_FORWARDING, PROXY_ADDRESS_FORWARDING_ATTR, true);
-    }
-
-    @Test
-    public void setProxyAddressForwardingToFalse() throws IOException, InterruptedException {
-        editCheckboxAndVerify(address, PROXY_ADDRESS_FORWARDING, PROXY_ADDRESS_FORWARDING_ATTR, false);
-    }
-
-    @Test
     public void editReadTimeout() throws IOException, InterruptedException {
         editTextAndVerify(address, READ_TIMEOUT, READ_TIMEOUT_ATTR, NUMERIC_VALID);
     }
@@ -376,7 +357,7 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
 
     @Test
     public void editSecurityRealm() throws IOException, InterruptedException {
-        editTextAndVerify(address, SECURITY_REALM, SECURITY_REALM_ATTR);
+        editTextAndVerify(address, SECURITY_REALM, SECURITY_REALM_ATTR, SECURITY_REALM_VALUE);
     }
 
     @Test
@@ -446,7 +427,7 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
 
     @Test
     public void editWorker() throws IOException, InterruptedException {
-        editTextAndVerify(address, WORKER, WORKER_ATTR);
+        editTextAndVerify(address, WORKER, WORKER_ATTR, WORKER_VALUE_VALID);
     }
 
     @Test
@@ -457,20 +438,6 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
     @Test
     public void editWriteTimeoutInvalid() throws IOException, InterruptedException {
         verifyIfErrorAppears(WRITE_TIMEOUT, NUMERIC_INVALID);
-    }
-
-    private String createHTTPSListener(Dispatcher dispatcher) {
-        String name = RandomStringUtils.randomAlphanumeric(6);
-        ResourceAddress address = httpsListenerTemplate.resolve(context, httpServer, name);
-        dispatcher.execute(new Operation.Builder("add", address)
-                .param("socket-binding", "http")
-                .build());
-        return name;
-    }
-
-    private void removeHTTPSListener(String httpsListener) {
-        ResourceAddress address = httpsListenerTemplate.resolve(context, httpServer, httpsListener);
-        dispatcher.execute(new Operation.Builder("remove", address).build());
     }
 
 }
