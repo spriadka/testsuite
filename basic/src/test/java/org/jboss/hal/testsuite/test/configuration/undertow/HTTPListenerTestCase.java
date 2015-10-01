@@ -329,7 +329,7 @@ public class HTTPListenerTestCase extends UndertowTestCaseAbstract {
 
     @Test
     public void editRedirectSocket() throws IOException, InterruptedException {
-        editTextAndVerify(address, REDIRECT_SOCKET, REDIRECT_SOCKET_ATTR);
+        editTextAndVerify(address, REDIRECT_SOCKET, REDIRECT_SOCKET_ATTR, SOCKET_BINDING_VALUE_VALID);
     }
 
     @Test
@@ -364,7 +364,7 @@ public class HTTPListenerTestCase extends UndertowTestCaseAbstract {
 
     @Test
     public void editSocketBinding() throws IOException, InterruptedException {
-        editTextAndVerify(address, SOCKET_BINDING, SOCKET_BINDING_ATTR);
+        editTextAndVerify(address, SOCKET_BINDING, SOCKET_BINDING_ATTR, SOCKET_BINDING_VALUE_VALID);
     }
 
     @Test
