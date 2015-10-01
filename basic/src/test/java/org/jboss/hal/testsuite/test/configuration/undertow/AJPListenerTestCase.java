@@ -1,21 +1,19 @@
 package org.jboss.hal.testsuite.test.configuration.undertow;
 
-import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.dmr.AddressTemplate;
-import org.jboss.hal.testsuite.dmr.Dispatcher;
-import org.jboss.hal.testsuite.dmr.Operation;
 import org.jboss.hal.testsuite.dmr.ResourceAddress;
 import org.jboss.hal.testsuite.page.config.UndertowHTTPPage;
-import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 
@@ -25,7 +23,7 @@ import java.io.IOException;
  */
 @RunWith(Arquillian.class)
 @Category(Shared.class)
-public class AJPListenerTestCase extends HTTPListenerTestCase {
+public class AJPListenerTestCase extends UndertowTestCaseAbstract {
 
     @Page
     private UndertowHTTPPage page;
@@ -96,32 +94,30 @@ public class AJPListenerTestCase extends HTTPListenerTestCase {
     private final String NUMERIC_VALID = "25";
     private final String NUMERIC_INVALID = "25fazf";
 
-    private AddressTemplate ajpListenerTemplate = httpServerTemplate.append("/ajp-listener=*");
+    private static AddressTemplate ajpListenerTemplate = httpServerTemplate.append("/ajp-listener=*");
     private static String httpServer;
-    private String httpsListener;
-    private ResourceAddress address;
+    private static String ajpListener;
+    private static ResourceAddress address;
+
+    private static final Logger log = LoggerFactory.getLogger(AJPListenerTestCase.class);
 
     @BeforeClass
     public static void setUp() {
-        httpServer = createHTTPServer(dispatcher);
+        httpServer = operations.createHTTPServer();
+        ajpListener = operations.createAJPListener(httpServer);
+        address = ajpListenerTemplate.resolve(context, httpServer, ajpListener);
     }
 
     @Before
     public void before() {
-        httpsListener = createAJPListener(dispatcher);
-        address = ajpListenerTemplate.resolve(context, httpServer, httpsListener);
         page.navigate();
-        page.selectHTTPServer(httpServer).switchToAJPListeners();
-    }
-
-    @After
-    public void after() {
-        removeAJPListener(httpsListener);
+        page.viewHTTPServer(httpServer).switchToAJPListeners();
     }
 
     @AfterClass
-    public void tearDown() {
-        removeHTTPServer(dispatcher, httpServer);
+    public static void tearDown() {
+        operations.removeAJPListener(httpServer, ajpListener);
+        operations.removeHTTPServer(httpServer);
     }
 
     @Test
@@ -166,7 +162,7 @@ public class AJPListenerTestCase extends HTTPListenerTestCase {
 
     @Test
     public void editBufferPool() throws IOException, InterruptedException {
-        editTextAndVerify(address, BUFFER_POOL, BUFFER_POOL_ATTR);
+        editTextAndVerify(address, BUFFER_POOL, BUFFER_POOL_ATTR, BUFFER_POOL_VALUE_VALID);
     }
 
     @Test
@@ -179,7 +175,7 @@ public class AJPListenerTestCase extends HTTPListenerTestCase {
         editCheckboxAndVerify(address, DECODE_URL, DECODE_URL_ATTR, false);
     }
 
-    //TODO:DISALLOWED METHODS
+    //@Test
 
     @Test
     public void setEnabledToTrue() throws IOException, InterruptedException {
@@ -373,7 +369,7 @@ public class AJPListenerTestCase extends HTTPListenerTestCase {
 
     @Test
     public void editWorker() throws IOException, InterruptedException {
-        editTextAndVerify(address, WORKER, WORKER_ATTR);
+        editTextAndVerify(address, WORKER, WORKER_ATTR, WORKER_VALUE_VALID);
     }
 
     @Test
@@ -384,20 +380,6 @@ public class AJPListenerTestCase extends HTTPListenerTestCase {
     @Test
     public void editWriteTimeoutInvalid() throws IOException, InterruptedException {
         verifyIfErrorAppears(WRITE_TIMEOUT, NUMERIC_INVALID);
-    }
-
-    private String createAJPListener(Dispatcher dispatcher) {
-        String name = RandomStringUtils.randomAlphanumeric(6);
-        ResourceAddress address = ajpListenerTemplate.resolve(context, httpServer, name);
-        dispatcher.execute(new Operation.Builder("add", address)
-                .param("socket-binding", "http")
-                .build());
-        return name;
-    }
-
-    private void removeAJPListener(String ajpListener) {
-        ResourceAddress address = ajpListenerTemplate.resolve(context, httpServer, ajpListener);
-        dispatcher.execute(new Operation.Builder("remove", address).build());
     }
 
 }
