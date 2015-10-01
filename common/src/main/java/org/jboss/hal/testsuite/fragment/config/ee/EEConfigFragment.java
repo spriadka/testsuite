@@ -12,7 +12,7 @@ import org.openqa.selenium.By;
  */
 public class EEConfigFragment extends ConfigFragment {
 
-    public Boolean isErrorShowedInForm() {
+    public Boolean isErrorShownInForm() {
         By selector = ByJQuery.selector("div.form-item-error-desc:visible");
         return isElementVisible(selector);
     }

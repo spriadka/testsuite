@@ -87,7 +87,7 @@ public class EETestCaseAbstract {
     protected void verifyIfErrorAppears(String identifier, String value) {
         EEConfigFragment config = page.getConfigFragment();
         config.editTextAndSave(identifier, value);
-        Assert.assertTrue(config.isErrorShowedInForm());
+        Assert.assertTrue(config.isErrorShownInForm());
         config.cancel();
     }
 
