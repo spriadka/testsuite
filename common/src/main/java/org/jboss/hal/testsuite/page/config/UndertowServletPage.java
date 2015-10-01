@@ -1,17 +1,11 @@
 package org.jboss.hal.testsuite.page.config;
 
-import org.jboss.arquillian.graphene.Graphene;
-import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.hal.testsuite.finder.Application;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
-import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.page.Navigatable;
 import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.jboss.hal.testsuite.util.Console;
-import org.jboss.hal.testsuite.util.PropUtils;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 
 /**
  * @author Jan Kasik <jkasik@redhat.com>
