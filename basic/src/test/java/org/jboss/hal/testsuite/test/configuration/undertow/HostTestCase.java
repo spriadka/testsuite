@@ -2,13 +2,14 @@ package org.jboss.hal.testsuite.test.configuration.undertow;
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.arquillian.graphene.page.Page;
+import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.dmr.AddressTemplate;
 import org.jboss.hal.testsuite.dmr.Dispatcher;
 import org.jboss.hal.testsuite.dmr.Operation;
 import org.jboss.hal.testsuite.dmr.ResourceAddress;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
-import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
 import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
 import org.jboss.hal.testsuite.page.config.UndertowHTTPPage;
 import org.junit.After;
@@ -17,6 +18,8 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
+import org.junit.runner.RunWith;
 
 import java.io.IOException;
 
@@ -24,6 +27,8 @@ import java.io.IOException;
  * @author Jan Kasik <jkasik@redhat.com>
  *         Created on 15.9.15.
  */
+@RunWith(Arquillian.class)
+@Category(Shared.class)
 public class HostTestCase extends UndertowTestCaseAbstract {
 
     @Page
@@ -50,7 +55,7 @@ public class HostTestCase extends UndertowTestCaseAbstract {
 
     @BeforeClass
     public static void setUp() {
-        httpServer = createHTTPServer(dispatcher);
+        httpServer = operations.createHTTPServer();
     }
 
     @Before
@@ -58,7 +63,7 @@ public class HostTestCase extends UndertowTestCaseAbstract {
         httpServerHost = createHTTPServerHostHost(dispatcher);
         address = hostTemplate.resolve(context, httpServer, httpServerHost);
         page.navigate();
-        page.selectHTTPServer(httpServer).switchToHosts();
+        page.viewHTTPServer(httpServer).switchToHosts();
     }
 
     @After
@@ -68,7 +73,7 @@ public class HostTestCase extends UndertowTestCaseAbstract {
 
     @AfterClass
     public static void tearDown() {
-        removeHTTPServer(dispatcher, httpServer);
+        operations.removeHTTPServer(httpServer);
     }
 
     @Test
@@ -130,7 +135,7 @@ public class HostTestCase extends UndertowTestCaseAbstract {
 
         Assert.assertFalse("HTTP server host should not be present in table", config.resourceIsPresent(name));
         ResourceAddress address = hostTemplate.resolve(context, httpServer, name);
-        verifier.verifyResource(address, false);//HTTP server host should not be present on server
+        verifier.verifyResource(address, false); //HTTP server host should not be present on the server
     }
 
     private String createHTTPServerHostHost(Dispatcher dispatcher) {
