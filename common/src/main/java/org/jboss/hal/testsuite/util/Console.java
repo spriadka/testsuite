@@ -287,6 +287,16 @@ public class Console {
         return this;
     }
 
+    public <T extends BasePage> Console waitForFirstNavigationPanel(Class<T> clazz) {
+        browser.navigate().refresh();
+        Graphene.goTo(HomePage.class);
+        waitUntilLoaded();
+        Graphene.goTo(clazz);
+        waitUntilLoaded().maximizeWindow();
+        Graphene.waitModel().until().element(By.className("navigation-column")).is().visible();
+        return this;
+    }
+
     public UserFragment getUserFragment() {
         ByJQuery selector = ByJQuery.selector("." + PropUtils.get("header.textlink.class") + ":has(i." + PropUtils.get("icon.user.class") + ")");
         return Graphene.createPageFragment(UserFragment.class, browser.findElement(selector));
