@@ -234,8 +234,8 @@ public class MessagingPage extends ConfigPage {
     public void addClusterConnection(String name, String dg, String connectorName, String connectorAddress) {
         clickButton("Add");
         getWindowFragment().getEditor().text("name", name);
-        getWindowFragment().getEditor().text("discoveryGroupName", dg);
-        getWindowFragment().getEditor().text("connectorRef", connectorName);
+        getWindowFragment().getEditor().text("discoveryGroup", dg);
+        getWindowFragment().getEditor().text("connectorName", connectorName);
         getWindowFragment().getEditor().text("clusterConnectionAddress", connectorAddress);
         getWindowFragment().clickButton("Save");
     }
