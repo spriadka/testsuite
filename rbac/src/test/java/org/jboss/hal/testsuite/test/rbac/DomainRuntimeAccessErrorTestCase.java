@@ -3,32 +3,32 @@ package org.jboss.hal.testsuite.test.rbac;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.hal.testsuite.category.Standalone;
+import org.jboss.hal.testsuite.category.Domain;
 import org.jboss.hal.testsuite.finder.Application;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
-import org.jboss.hal.testsuite.page.runtime.StandaloneRuntimeEntryPoint;
+import org.jboss.hal.testsuite.page.runtime.DomainRuntimeEntryPoint;
 import org.jboss.hal.testsuite.util.Authentication;
 import org.jboss.hal.testsuite.util.RbacRole;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.openqa.selenium.NoSuchElementException;
 
 import static org.junit.Assert.assertTrue;
 
 /**
- * Created by pcyprian on 11.9.15.
+ * Created by pcyprian on 1.10.15.
  */
 @RunWith(Arquillian.class)
-@Category(Standalone.class)
-public class RuntimeAccessErrorTestCase {
+@Category(Domain.class)
+public class DomainRuntimeAccessErrorTestCase {
 
     private FinderNavigation navigation;
 
@@ -57,59 +57,79 @@ public class RuntimeAccessErrorTestCase {
         List<String> acc = new ArrayList<String>();
         String path = "/StandaloneServer";
         String pathSubsystem = path + "/Subsystem";
-        navigation = new FinderNavigation(browser, StandaloneRuntimeEntryPoint.class)
-                .addAddress(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
+        navigation = new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
+                .addAddress(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
+                .addAddress(FinderNames.HOST, "master")
+                .addAddress(FinderNames.SERVER, "server-one")
                 .addAddress(FinderNames.MONITOR, "JVM");
         navigateToPageAndStorePathOnError(navigation, acc, path + "/JVM");
 
-        navigation = new FinderNavigation(browser, StandaloneRuntimeEntryPoint.class)
-                .addAddress(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
+        navigation = new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
+                .addAddress(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
+                .addAddress(FinderNames.HOST, "master")
+                .addAddress(FinderNames.SERVER, "server-one")
                 .addAddress(FinderNames.MONITOR, "Environment");
         navigateToPageAndStorePathOnError(navigation, acc, path + "/Environment");
 
-        navigation = new FinderNavigation(browser, StandaloneRuntimeEntryPoint.class)
-                .addAddress(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
+        navigation = new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
+                .addAddress(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
+                .addAddress(FinderNames.HOST, "master")
+                .addAddress(FinderNames.SERVER, "server-one")
                 .addAddress(FinderNames.MONITOR, FinderNames.LOG_FILES);
         navigateToPageAndStorePathOnError(navigation, acc, path + "/LogFiles");
 
-        navigation = new FinderNavigation(browser, StandaloneRuntimeEntryPoint.class)
-                .addAddress(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
+        navigation = new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
+                .addAddress(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
+                .addAddress(FinderNames.HOST, "master")
+                .addAddress(FinderNames.SERVER, "server-one")
                 .addAddress(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
                 .addAddress(FinderNames.SUBSYSTEM, "Datasources");
         navigateToPageAndStorePathOnError(navigation, acc, pathSubsystem + "/Datasources");
 
-        navigation = new FinderNavigation(browser, StandaloneRuntimeEntryPoint.class)
-                .addAddress(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
+        navigation = new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
+                .addAddress(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
+                .addAddress(FinderNames.HOST, "master")
+                .addAddress(FinderNames.SERVER, "server-one")
                 .addAddress(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
                 .addAddress(FinderNames.SUBSYSTEM, "JPA");
         navigateToPageAndStorePathOnError(navigation, acc, pathSubsystem + "/JPA");
 
-        navigation = new FinderNavigation(browser, StandaloneRuntimeEntryPoint.class)
-                .addAddress(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
+        navigation = new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
+                .addAddress(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
+                .addAddress(FinderNames.HOST, "master")
+                .addAddress(FinderNames.SERVER, "server-one")
                 .addAddress(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
                 .addAddress(FinderNames.SUBSYSTEM, "JNDI View");
         navigateToPageAndStorePathOnError(navigation, acc, pathSubsystem + "/JNDI_View");
 
-        navigation = new FinderNavigation(browser, StandaloneRuntimeEntryPoint.class)
-                .addAddress(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
+        navigation = new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
+                .addAddress(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
+                .addAddress(FinderNames.HOST, "master")
+                .addAddress(FinderNames.SERVER, "server-one")
                 .addAddress(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
                 .addAddress(FinderNames.SUBSYSTEM, "Transactions");
         navigateToPageAndStorePathOnError(navigation, acc, pathSubsystem + "/Transacitons");
 
-        navigation = new FinderNavigation(browser, StandaloneRuntimeEntryPoint.class)
-                .addAddress(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
+        navigation = new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
+                .addAddress(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
+                .addAddress(FinderNames.HOST, "master")
+                .addAddress(FinderNames.SERVER, "server-one")
                 .addAddress(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
                 .addAddress(FinderNames.SUBSYSTEM, "Transaction Logs");
         navigateToPageAndStorePathOnError(navigation, acc, pathSubsystem + "/TransactionLogs");
 
-        navigation = new FinderNavigation(browser, StandaloneRuntimeEntryPoint.class)
-                .addAddress(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
+        navigation = new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
+                .addAddress(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
+                .addAddress(FinderNames.HOST, "master")
+                .addAddress(FinderNames.SERVER, "server-one")
                 .addAddress(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
-                .addAddress(FinderNames.SUBSYSTEM, "HTTP"); //domain mode different
-        navigateToPageAndStorePathOnError(navigation, acc, pathSubsystem + "/HTTP");
+                .addAddress(FinderNames.SUBSYSTEM, "Undertow");
+        navigateToPageAndStorePathOnError(navigation, acc, pathSubsystem + "/Undertow");
 
-        navigation = new FinderNavigation(browser, StandaloneRuntimeEntryPoint.class)
-                .addAddress(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
+        navigation = new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
+                .addAddress(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
+                .addAddress(FinderNames.HOST, "master")
+                .addAddress(FinderNames.SERVER, "server-one")
                 .addAddress(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
                 .addAddress(FinderNames.SUBSYSTEM, "Webservices");
         navigateToPageAndStorePathOnError(navigation, acc, pathSubsystem + "/WebServices");

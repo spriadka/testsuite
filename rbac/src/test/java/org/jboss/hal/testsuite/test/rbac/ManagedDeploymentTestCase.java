@@ -6,6 +6,7 @@ import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Shared;
+import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.fragment.runtime.DeploymentWizard;
 import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
@@ -36,8 +37,8 @@ import static org.junit.Assert.assertEquals;
 public class ManagedDeploymentTestCase {
     private static final String FILE_PATH = "src/test/resources/";
     private static final String FILE_NAME = "mockWar.war";
-    private static final String NAME = "n_" + RandomStringUtils.randomAlphanumeric(5) + ".war";
     private static final String RUNTIME_NAME = "rn_" + RandomStringUtils.randomAlphanumeric(5) + ".war";
+    private String NAME;
 
     private FinderNavigation navigation;
 
@@ -46,6 +47,7 @@ public class ManagedDeploymentTestCase {
 
     @Before
     public void before() {
+        NAME = "n_" + RandomStringUtils.randomAlphanumeric(5) + ".war";
         if (ConfigUtils.isDomain()) {
             navigation = new FinderNavigation(browser, DomainDeploymentPage.class);
         } else {
@@ -58,7 +60,9 @@ public class ManagedDeploymentTestCase {
         Authentication.with(browser).authenticate(RbacRole.ADMINISTRATOR);
         checkButtons(true);
         createDeployment(true);
+        if (ConfigUtils.isDomain()) assingDeployment();
         enableDeployment();
+        if (ConfigUtils.isDomain()) unassingDeployment();
         removeDeployment();
     }
 
@@ -68,16 +72,20 @@ public class ManagedDeploymentTestCase {
         Authentication.with(browser).authenticate(RbacRole.MAINTAINER);
         checkButtons(true);
         createDeployment(true);
+        if (ConfigUtils.isDomain()) assingDeployment();
         enableDeployment();
+        if (ConfigUtils.isDomain()) unassingDeployment();
         removeDeployment();
     }
 
     @Test
     public void deployer() throws Exception {
-        Authentication.with(browser).authenticate(RbacRole.ADMINISTRATOR);
+        Authentication.with(browser).authenticate(RbacRole.DEPLOYER);
         checkButtons(true);
         createDeployment(true);
+        if (ConfigUtils.isDomain()) assingDeployment();
         enableDeployment();
+        if (ConfigUtils.isDomain()) unassingDeployment();
         removeDeployment();
     }
 
@@ -90,8 +98,14 @@ public class ManagedDeploymentTestCase {
 
 
     public void checkButtons(boolean visible) {
-        navigation.addAddress("Deployment").selectColumn();
-
+        if (ConfigUtils.isDomain()) {
+            navigation = new FinderNavigation(browser, DomainDeploymentPage.class)
+                        .addAddress(FinderNames.BROWSE_BY, "Content Repository")
+                    .addAddress("All Content");
+            navigation.selectColumn();
+        } else {
+            navigation.addAddress("Deployment").selectColumn();
+        }
         By selector = ByJQuery.selector(".btn.primary:contains('Add')");
         try {
             boolean displayed = browser.findElement(selector).isDisplayed();
@@ -104,25 +118,49 @@ public class ManagedDeploymentTestCase {
     }
 
     public void createDeployment(boolean shouldSucceed) {
-        navigation.selectColumn().invoke("Add");
+        if (ConfigUtils.isDomain()) {
+            navigation = new FinderNavigation(browser, DomainDeploymentPage.class)
+                    .addAddress(FinderNames.BROWSE_BY, "Content Repository")
+                    .addAddress("All Content");
+            navigation.selectColumn().invoke("Add");
+        } else {
+            navigation.selectColumn().invoke("Add");
+        }
         File deployment = new File(FILE_PATH + FILE_NAME);
 
         DeploymentWizard wizard = Console.withBrowser(browser).openedWizard(DeploymentWizard.class);
-
-        boolean result = wizard.nextFluent()
-                .uploadDeployment(deployment)
-                .nextFluent()
-                .name(NAME)
-                .runtimeName(RUNTIME_NAME)
-                .enableAfterDeployment(false)
-                .finish();
+        boolean result = false;
+        if (ConfigUtils.isDomain()) {
+            result = wizard.nextFluent()
+                    .uploadDeployment(deployment)
+                    .nextFluent()
+                    .name(NAME)
+                    .runtimeName(RUNTIME_NAME)
+                    .finish();
+        } else {
+            result = wizard.nextFluent()
+                    .uploadDeployment(deployment)
+                    .nextFluent()
+                    .name(NAME)
+                    .runtimeName(RUNTIME_NAME)
+                    .enableAfterDeployment(false)
+                    .finish();
+        }
 
         assertEquals(shouldSucceed, result);
         Graphene.waitGui().until().element(wizard.getRoot()).is().not().present();
     }
 
     private void removeDeployment() {
-        navigation.addAddress("Deployment", NAME).selectRow().invoke("Remove");
+        if (ConfigUtils.isDomain()) {
+            navigation = new FinderNavigation(browser, DomainDeploymentPage.class)
+                    .addAddress(FinderNames.BROWSE_BY, "Content Repository")
+                    .addAddress("All Content", NAME);
+            navigation.selectRow().invoke("Remove");
+        } else {
+            navigation.addAddress("Deployment", NAME).selectRow().invoke("Remove");
+        }
+
         ConfirmationWindow window = Console.withBrowser(browser).openedWindow(ConfirmationWindow.class);
         window.confirm();
         if (!window.isClosed()) Assert.fail();
@@ -130,9 +168,38 @@ public class ManagedDeploymentTestCase {
     }
 
     private void enableDeployment() {
-        navigation.addAddress("Deployment", NAME).selectRow().invoke("Enable");
+        if (ConfigUtils.isDomain()) {
+            navigation = new FinderNavigation(browser, DomainDeploymentPage.class)
+                    .addAddress(FinderNames.BROWSE_BY, "Server Groups")
+                    .addAddress(FinderNames.SERVER_GROUP, "main-server-group")
+                    .addAddress("Deployment", NAME);
+            navigation.selectRow().invoke("Enable");
+        } else {
+            navigation.addAddress("Deployment", NAME).selectRow().invoke("Enable");
+        }
+
         ConfirmationWindow window = Console.withBrowser(browser).openedWindow(ConfirmationWindow.class);
         window.confirm();
+        Graphene.waitGui().until().element(window.getRoot()).is().not().present();
+    }
+
+    private void assingDeployment() {
+        navigation = new FinderNavigation(browser, DomainDeploymentPage.class)
+                .addAddress(FinderNames.BROWSE_BY, "Content Repository")
+                .addAddress("All Content", NAME);
+        navigation.selectRow().invoke("Assign");
+        ConfirmationWindow window = Console.withBrowser(browser).openedWindow(ConfirmationWindow.class);
+        window.clickButton("Assign");
+        Graphene.waitGui().until().element(window.getRoot()).is().not().present();
+    }
+
+    private void unassingDeployment() {
+        navigation = new FinderNavigation(browser, DomainDeploymentPage.class)
+                .addAddress(FinderNames.BROWSE_BY, "Content Repository")
+                .addAddress("All Content", NAME);
+        navigation.selectRow().invoke("Unassign");
+        ConfirmationWindow window = Console.withBrowser(browser).openedWindow(ConfirmationWindow.class);
+        window.clickButton("Assign");
         Graphene.waitGui().until().element(window.getRoot()).is().not().present();
     }
 

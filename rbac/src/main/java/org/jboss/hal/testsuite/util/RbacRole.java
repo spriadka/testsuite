@@ -12,6 +12,10 @@ public enum RbacRole {
     ADMINISTRATOR("Administrator"),
     SUPERUSER("SuperUser"),
     AUDITOR("Auditor"),
+    MAIN_ADMINISTRATOR("MainAdministrator"),
+    OTHER_ADMINISTRATOR("OtherAdministrator"),
+    HOST_MASTER_ADMINISTRATOR("HostMasterAdministrator"),
+    HOST_SLAVE_ADMINISTRATOR("HostSlaveAdministrator"),
 
     /*// Group scoped roles
     MAIN_DEPLOYER,
