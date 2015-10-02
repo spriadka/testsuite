@@ -1,4 +1,4 @@
-package org.jboss.hal.testsuite.test.configuration.container;
+package org.jboss.hal.testsuite.test.configuration.ee;
 
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
