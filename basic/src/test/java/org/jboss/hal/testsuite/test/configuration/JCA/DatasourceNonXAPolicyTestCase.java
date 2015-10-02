@@ -86,7 +86,7 @@ public class DatasourceNonXAPolicyTestCase {
         boolean finished = editPanelFragment.save();
         assertTrue("Config should be saved and closed.", finished);
 
-        verifier.verifyAttribute(address, "capacity-decrementer-properties", WATERMARK);
+        verifier.verifyAttribute(address, "capacity-decrementer-properties", "{\"Watermark\" => \"9\"}");
     }
 
     @Test
@@ -134,7 +134,7 @@ public class DatasourceNonXAPolicyTestCase {
         boolean finished = editPanelFragment.save();
         assertTrue("Config should be saved and closed.", finished);
 
-        verifier.verifyAttribute(address, "capacity-incrementer-properties", SIZE);
+        verifier.verifyAttribute(address, "capacity-incrementer-properties", "{\"Size\" => \"7\"}");
     }
 
     @Test
