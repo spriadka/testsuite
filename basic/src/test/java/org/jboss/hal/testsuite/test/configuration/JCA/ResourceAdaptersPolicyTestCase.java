@@ -99,7 +99,7 @@ public class ResourceAdaptersPolicyTestCase {
     @InSequence(0)
     public void setDecrementerClass() {
         ConfigFragment editPanelFragment = jcaPage.getConfigFragment();
-        editPanelFragment.getEditor(). select("capacityDecrementerClass", "org.jboss.jca.core.connectionmanager.pool.capacity.WatermarkDecrementer");
+        editPanelFragment.getEditor(). select("capacity-decrementer-class", "org.jboss.jca.core.connectionmanager.pool.capacity.WatermarkDecrementer");
 
         boolean finished = editPanelFragment.save();
         assertTrue("Config should be saved and closed.", finished);
@@ -111,12 +111,12 @@ public class ResourceAdaptersPolicyTestCase {
     @InSequence(1)
     public void setDecrementerProperty() {
         ConfigFragment editPanelFragment = jcaPage.getConfigFragment();
-        editPanelFragment.getEditor().text("capacityDecrementerProperties", WATERMARK);
+        editPanelFragment.getEditor().text("capacity-decrementer-properties", WATERMARK);
 
         boolean finished = editPanelFragment.save();
         assertTrue("Config should be saved and closed.", finished);
 
-        verifier.verifyAttribute(address, "capacity-decrementer-properties", WATERMARK);
+        verifier.verifyAttribute(address, "capacity-decrementer-properties", "[(\"Watermark\" => \"9\")]");
 
     }
 
@@ -124,7 +124,7 @@ public class ResourceAdaptersPolicyTestCase {
     @InSequence(2)
     public void unsetDecrementerProperty() {
         ConfigFragment editPanelFragment = jcaPage.getConfigFragment();
-        editPanelFragment.getEditor().text("capacityDecrementerProperties", "");
+        editPanelFragment.getEditor().text("capacity-decrementer-properties", "");
 
         boolean finished = editPanelFragment.save();
         assertTrue("Config should be saved and closed.", finished);
@@ -136,7 +136,7 @@ public class ResourceAdaptersPolicyTestCase {
     @InSequence(3)
     public void unsetDecrementerClass() {
         ConfigFragment editPanelFragment = jcaPage.getConfigFragment();
-        editPanelFragment.getEditor().select("capacityDecrementerClass", "");
+        editPanelFragment.getEditor().select("capacity-decrementer-class", "");
 
         boolean finished = editPanelFragment.save();
         assertTrue("Config should be saved and closed.", finished);
@@ -148,7 +148,7 @@ public class ResourceAdaptersPolicyTestCase {
     @InSequence(4)
     public void setIncrementerClass() {
         ConfigFragment editPanelFragment = jcaPage.getConfigFragment();
-        editPanelFragment.getEditor(). select("capacityIncrementerClass", "org.jboss.jca.core.connectionmanager.pool.capacity.SizeIncrementer");
+        editPanelFragment.getEditor(). select("capacity-incrementer-class", "org.jboss.jca.core.connectionmanager.pool.capacity.SizeIncrementer");
 
         boolean finished = editPanelFragment.save();
         assertTrue("Config should be saved and closed.", finished);
@@ -160,19 +160,19 @@ public class ResourceAdaptersPolicyTestCase {
     @InSequence(5)
     public void setIncrementerProperty() {
         ConfigFragment editPanelFragment = jcaPage.getConfigFragment();
-        editPanelFragment.getEditor().text("capacityIncrementerProperties", SIZE);
+        editPanelFragment.getEditor().text("capacity-incrementer-properties", SIZE);
 
         boolean finished = editPanelFragment.save();
         assertTrue("Config should be saved and closed.", finished);
 
-        verifier.verifyAttribute(address, "capacity-incrementer-properties", SIZE);
+        verifier.verifyAttribute(address, "capacity-incrementer-properties", "[(\"Size\" => \"7\")]");
     }
 
     @Test
     @InSequence(6)
     public void unsetIncrementerProperty() {
         ConfigFragment editPanelFragment = jcaPage.getConfigFragment();
-        editPanelFragment.getEditor().text("capacityIncrementerProperties", "");
+        editPanelFragment.getEditor().text("capacity-incrementer-properties", "");
 
         boolean finished = editPanelFragment.save();
         assertTrue("Config should be saved and closed.", finished);
@@ -184,7 +184,7 @@ public class ResourceAdaptersPolicyTestCase {
     @InSequence(7)
     public void unsetIncrementerClass() {
         ConfigFragment editPanelFragment = jcaPage.getConfigFragment();
-        editPanelFragment.getEditor().select("capacityIncrementerClass", "");
+        editPanelFragment.getEditor().select("capacit-incrementer-class", "");
 
         boolean finished = editPanelFragment.save();
         assertTrue("Config should be saved and closed.", finished);
