@@ -226,7 +226,7 @@ public class MessagingPage extends ConfigPage {
         clickButton("Add");
         getWindowFragment().getEditor().text("name", name);
         getWindowFragment().getEditor().text("jndiName", jndiName);
-        getWindowFragment().getEditor().text("connector", connector);
+        getWindowFragment().getEditor().text("connectors", connector);
         getWindowFragment().clickButton("Save");
     }
 
