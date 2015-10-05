@@ -1,12 +1,17 @@
 package org.jboss.hal.testsuite.test.configuration.undertow;
 
+import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.dmr.AddressTemplate;
 import org.jboss.hal.testsuite.dmr.ResourceAddress;
+import org.jboss.hal.testsuite.fragment.ConfigFragment;
+import org.jboss.hal.testsuite.fragment.formeditor.Editor;
+import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
 import org.jboss.hal.testsuite.page.config.UndertowHTTPPage;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -109,12 +114,14 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
     private static AddressTemplate httpsListenerTemplate = httpServerTemplate.append("/https-listener=*");
     private static String httpServer;
     private static String httpsListener;
+    private static String httpsListenerToBeRemoved;
     private static ResourceAddress address;
 
     @BeforeClass
     public static void setUp() {
         httpServer = operations.createHTTPServer();
         httpsListener = operations.createHTTPSListener(httpServer);
+        httpsListenerToBeRemoved = operations.createHTTPSListener(httpServer);
         address = httpsListenerTemplate.resolve(context, httpServer, httpsListener);
     }
 
@@ -438,6 +445,40 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
     @Test
     public void editWriteTimeoutInvalid() throws IOException, InterruptedException {
         verifyIfErrorAppears(WRITE_TIMEOUT, NUMERIC_INVALID);
+    }
+
+    @Test
+    public void addHTTPSListenerInGUI() {
+        String name = RandomStringUtils.randomAlphanumeric(6);
+        String socketBinding = operations.createSocketBinding();
+        ConfigFragment config = page.getConfigFragment();
+        WizardWindow wizard = config.getResourceManager().addResource();
+
+        Editor editor = wizard.getEditor();
+        editor.text("name", name);
+        editor.text(SECURITY_REALM, SECURITY_REALM_VALUE);
+        editor.text(SOCKET_BINDING, socketBinding);
+        boolean result = wizard.finish();
+
+        Assert.assertTrue("Window should be closed", result);
+        Assert.assertTrue("HTTPS listener should be present in table", config.resourceIsPresent(name));
+        ResourceAddress address = httpsListenerTemplate.resolve(context, httpServer, name);
+        verifier.verifyResource(address, true);
+        verifier.verifyAttribute(address, SOCKET_BINDING, socketBinding);
+        verifier.verifyAttribute(address, SECURITY_REALM, SECURITY_REALM_VALUE);
+        operations.removeSocketBinding(socketBinding);
+    }
+
+    @Test
+    public void removeHTTPSListenerInGUI() {
+        ConfigFragment config = page.getConfigFragment();
+        config.getResourceManager()
+                .removeResource(httpsListenerToBeRemoved)
+                .confirm();
+
+        ResourceAddress address = httpsListenerTemplate.resolve(context, httpServer, httpsListenerToBeRemoved);
+        Assert.assertFalse("HTTPS listener host should not be present in table", config.resourceIsPresent(httpsListenerToBeRemoved));
+        verifier.verifyResource(address, false); //HTTP server host should not be present on the server
     }
 
 }

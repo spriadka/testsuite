@@ -1,12 +1,17 @@
 package org.jboss.hal.testsuite.test.configuration.undertow;
 
+import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.dmr.AddressTemplate;
 import org.jboss.hal.testsuite.dmr.ResourceAddress;
+import org.jboss.hal.testsuite.fragment.ConfigFragment;
+import org.jboss.hal.testsuite.fragment.formeditor.Editor;
+import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
 import org.jboss.hal.testsuite.page.config.UndertowHTTPPage;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -97,6 +102,7 @@ public class AJPListenerTestCase extends UndertowTestCaseAbstract {
     private static AddressTemplate ajpListenerTemplate = httpServerTemplate.append("/ajp-listener=*");
     private static String httpServer;
     private static String ajpListener;
+    private static String ajpListenerToBeRemoved;
     private static ResourceAddress address;
 
     private static final Logger log = LoggerFactory.getLogger(AJPListenerTestCase.class);
@@ -105,6 +111,7 @@ public class AJPListenerTestCase extends UndertowTestCaseAbstract {
     public static void setUp() {
         httpServer = operations.createHTTPServer();
         ajpListener = operations.createAJPListener(httpServer);
+        ajpListenerToBeRemoved = operations.createAJPListener(httpServer);
         address = ajpListenerTemplate.resolve(context, httpServer, ajpListener);
     }
 
@@ -339,7 +346,7 @@ public class AJPListenerTestCase extends UndertowTestCaseAbstract {
 
     @Test
     public void editSocketBinding() throws IOException, InterruptedException {
-        editTextAndVerify(address, SOCKET_BINDING, SOCKET_BINDING_ATTR);
+        editTextAndVerify(address, SOCKET_BINDING, SOCKET_BINDING_ATTR, SOCKET_BINDING_VALUE_VALID);
     }
 
     @Test
@@ -381,5 +388,38 @@ public class AJPListenerTestCase extends UndertowTestCaseAbstract {
     public void editWriteTimeoutInvalid() throws IOException, InterruptedException {
         verifyIfErrorAppears(WRITE_TIMEOUT, NUMERIC_INVALID);
     }
+
+    @Test
+    public void addAJPListenerInGUI() {
+        String name = RandomStringUtils.randomAlphanumeric(6);
+        String socketBinding = operations.createSocketBinding();
+        ConfigFragment config = page.getConfigFragment();
+        WizardWindow wizard = config.getResourceManager().addResource();
+
+        Editor editor = wizard.getEditor();
+        editor.text("name", name);
+        editor.text(SOCKET_BINDING, socketBinding);
+        boolean result = wizard.finish();
+
+        Assert.assertTrue("Window should be closed", result);
+        Assert.assertTrue("AJP listener should be present in table", config.resourceIsPresent(name));
+        ResourceAddress address = ajpListenerTemplate.resolve(context, httpServer, name);
+        verifier.verifyResource(address, true);
+        verifier.verifyAttribute(address, SOCKET_BINDING, socketBinding);
+        operations.removeSocketBinding(socketBinding);
+    }
+
+    @Test
+    public void removeAJPListenerInGUI() {
+        ConfigFragment config = page.getConfigFragment();
+        config.getResourceManager()
+                .removeResource(ajpListenerToBeRemoved)
+                .confirm();
+
+        ResourceAddress address = ajpListenerTemplate.resolve(context, httpServer, ajpListenerToBeRemoved);
+        Assert.assertFalse("AJP listener host should not be present in table", config.resourceIsPresent(ajpListenerToBeRemoved));
+        verifier.verifyResource(address, false); //HTTP server host should not be present on the server
+    }
+
 
 }

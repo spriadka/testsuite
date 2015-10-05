@@ -1,12 +1,17 @@
 package org.jboss.hal.testsuite.test.configuration.undertow;
 
+import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.dmr.AddressTemplate;
 import org.jboss.hal.testsuite.dmr.ResourceAddress;
+import org.jboss.hal.testsuite.fragment.ConfigFragment;
+import org.jboss.hal.testsuite.fragment.formeditor.Editor;
+import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
 import org.jboss.hal.testsuite.page.config.UndertowHTTPPage;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -99,19 +104,21 @@ public class HTTPListenerTestCase extends UndertowTestCaseAbstract {
     private static AddressTemplate httpListenerTemplate = httpServerTemplate.append("/http-listener=*");
     private static String httpServer;
     private static String httpListener;
+    private static String httpListenerToBeRemoved;
     private static ResourceAddress address;
 
     @BeforeClass
     public static void setUp() {
         httpServer = operations.createHTTPServer();
         httpListener = operations.createHTTPListener(httpServer);
+        httpListenerToBeRemoved = operations.createHTTPListener(httpServer);
         address = httpListenerTemplate.resolve(context, httpServer, httpListener);
     }
 
     @Before
     public void before() {
         page.navigate();
-        page.viewHTTPServer(httpServer).switchToHTTPListeners();
+        page.viewHTTPServer(httpServer).switchToHTTPListeners().selectItemInTableByText(httpListener);
     }
 
     @AfterClass
@@ -405,6 +412,37 @@ public class HTTPListenerTestCase extends UndertowTestCaseAbstract {
     @Test
     public void editWriteTimeoutInvalid() throws IOException, InterruptedException {
         verifyIfErrorAppears(WRITE_TIMEOUT, NUMERIC_INVALID);
+    }
+
+    @Test
+    public void addHTTPListenerInGUI() {
+        String name = RandomStringUtils.randomAlphanumeric(6);
+        ConfigFragment config = page.getConfigFragment();
+        WizardWindow wizard = config.getResourceManager().addResource();
+
+        Editor editor = wizard.getEditor();
+        editor.text("name", name);
+        editor.text(SOCKET_BINDING, SOCKET_BINDING_VALUE_VALID);
+        boolean result = wizard.finish();
+
+        Assert.assertTrue("Window should be closed", result);
+        Assert.assertTrue("HTTP listener should be present in table", config.resourceIsPresent(name));
+        ResourceAddress address = httpListenerTemplate.resolve(context, httpServer, name);
+        verifier.verifyResource(address, true);
+        verifier.verifyAttribute(address, SOCKET_BINDING, SOCKET_BINDING_VALUE_VALID);
+        operations.removeHTTPListener(httpServer, name);
+    }
+
+    @Test
+    public void removeHTTPListenerInGUI() {
+        ConfigFragment config = page.getConfigFragment();
+        config.getResourceManager()
+                .removeResource(httpListenerToBeRemoved)
+                .confirm();
+
+        ResourceAddress address = httpListenerTemplate.resolve(context, httpServer, httpListenerToBeRemoved);
+        Assert.assertFalse("HTTP listener host should not be present in table", config.resourceIsPresent(httpListenerToBeRemoved));
+        verifier.verifyResource(address, false); //HTTP server host should not be present on the server
     }
 
 }
