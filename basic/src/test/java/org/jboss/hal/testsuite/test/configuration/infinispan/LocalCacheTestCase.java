@@ -2,7 +2,8 @@ package org.jboss.hal.testsuite.test.configuration.infinispan;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.hal.testsuite.cli.CliUtils;
+import org.jboss.hal.testsuite.dmr.AddressTemplate;
+import org.jboss.hal.testsuite.dmr.Operation;
 import org.jboss.hal.testsuite.fragment.config.infinispan.CacheWizard;
 import org.jboss.hal.testsuite.category.Standalone;
 import org.junit.Assert;
@@ -28,10 +29,12 @@ public class LocalCacheTestCase extends AbstractCacheTestCase {
                 .finish();
 
         Assert.assertTrue("Window should be closed", result);
-        verifier.verifyResource(getDmrBase() + name, true);
+        reloadIfRequiredAndWaitForRunning();
+        validVerifier.verifyResource(cacheAddress.resolve(context, name));
 
         page.content().getResourceManager().removeResourceAndConfirm(name);
-        verifier.verifyResource(getDmrBase() + name, false);
+        reloadIfRequiredAndWaitForRunning();
+        validVerifier.verifyResource(cacheAddress.resolve(context, name), false);
     }
 
     @Before
@@ -40,24 +43,21 @@ public class LocalCacheTestCase extends AbstractCacheTestCase {
     }
 
     @Override
-    public String getDmrBase() {
-        return ABSTRACT_DMR_BASE + "/local-cache=";
+    protected AddressTemplate getCacheTemplate() {
+        return ABSTRACT_CACHE_TEMPLATE.append("/local-cache=*");
     }
 
     public void addCache() {
-        String addCache = CliUtils.buildCommand(cacheDmr, ":add");
-        String addTransaction = CliUtils.buildCommand(transactionDmr, ":add");
-        String addLocking = CliUtils.buildCommand(lockingDmr, ":add");
-        String addStore = CliUtils.buildCommand(storeDmr, ":add", new String[]{"class=clazz"});
-        client.executeCommand(addCache);
-        client.executeCommand(addTransaction);
-        client.executeCommand(addLocking);
-        client.executeCommand(addStore);
+        dispatcher.execute(new Operation.Builder("add", cacheAddress.resolve(context, cacheName)).build());
+        dispatcher.execute(new Operation.Builder("add", transactionTemplate.resolve(context, cacheName)).build());
+        dispatcher.execute(new Operation.Builder("add", storeTemplate.resolve(context, cacheName))
+                .param("class", "org.infinispan.configuration.cache.SingleFileStoreConfigurationBuilder")
+                .build());
+        dispatcher.execute(new Operation.Builder("add", lockingTemplate.resolve(context, cacheName)).build());
     }
 
     public void deleteCache() {
-        String cmd = CliUtils.buildCommand(cacheDmr, ":remove");
-        client.executeCommand(cmd);
+        dispatcher.execute(new Operation.Builder("remove", cacheAddress.resolve(context, cacheName)).build());
     }
 }
 
