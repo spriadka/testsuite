@@ -5,42 +5,41 @@ import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.hal.testsuite.cli.CliClient;
 import org.jboss.hal.testsuite.cli.CliClientFactory;
+import org.jboss.hal.testsuite.cli.DomainManager;
+import org.jboss.hal.testsuite.dmr.AddressTemplate;
+import org.jboss.hal.testsuite.dmr.DefaultContext;
+import org.jboss.hal.testsuite.dmr.Dispatcher;
+import org.jboss.hal.testsuite.dmr.ResourceAddress;
+import org.jboss.hal.testsuite.dmr.StatementContext;
+import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.config.infinispan.CacheWizard;
 import org.jboss.hal.testsuite.page.config.HibernateCachePage;
-import org.jboss.hal.testsuite.test.util.ConfigAreaChecker;
 import org.jboss.hal.testsuite.util.ConfigUtils;
-import org.jboss.hal.testsuite.util.Console;
-import org.jboss.hal.testsuite.util.ResourceVerifier;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.WebDriver;
 
-import static org.jboss.hal.testsuite.cli.CliConstants.CACHE_CONTAINER_ADDRESS;
-import static org.jboss.hal.testsuite.cli.CliConstants.DOMAIN_CACHE_CONTAINER_ADDRESS;
-
 /**
  * @author mkrajcov <mkrajcov@redhat.com>
  */
 public abstract class AbstractCacheTestCase {
 
-
-    protected static final String CACHE_CONTAINER = "hibernate";
-    protected static final String ABSTRACT_DMR_BASE = (ConfigUtils.isDomain() ? DOMAIN_CACHE_CONTAINER_ADDRESS : CACHE_CONTAINER_ADDRESS) + "=" + CACHE_CONTAINER;
+    protected static final AddressTemplate ABSTRACT_CACHE_TEMPLATE = AddressTemplate.of("{default.profile}/subsystem=infinispan/cache-container=hibernate");
 
     protected final String cacheName = "cache_" + RandomStringUtils.randomAlphanumeric(5);
-    protected final String cacheDmr = getDmrBase() + cacheName;
-    protected final String lockingDmr = cacheDmr + "/locking=LOCKING";
-    protected final String transactionDmr = cacheDmr + "/transaction=TRANSACTION";
-    protected final String storeDmr = cacheDmr + "/store=STORE";
+    protected final AddressTemplate cacheAddress = getCacheTemplate();
+
+    protected final AddressTemplate lockingTemplate = cacheAddress.append("/locking=LOCKING");
+    protected final AddressTemplate transactionTemplate = cacheAddress.append("/transaction=TRANSACTION");
+    protected final AddressTemplate storeTemplate = cacheAddress.append("/store=STORE");
 
     protected CliClient client = CliClientFactory.getClient();
-    protected ResourceVerifier verifier = new ResourceVerifier(cacheDmr, client);
-    protected ResourceVerifier lockingVerifier = new ResourceVerifier(lockingDmr, client);
-    protected ResourceVerifier transactionVerifier = new ResourceVerifier(transactionDmr, client);
-    protected ResourceVerifier storeVerifier = new ResourceVerifier(storeDmr, client);
-    protected ConfigAreaChecker checker = new ConfigAreaChecker(verifier);
+
+    protected Dispatcher dispatcher = new Dispatcher();
+    protected org.jboss.hal.testsuite.dmr.ResourceVerifier validVerifier = new org.jboss.hal.testsuite.dmr.ResourceVerifier(dispatcher);
+    protected StatementContext context = new DefaultContext();
 
     @Drone
     public WebDriver browser;
@@ -51,14 +50,17 @@ public abstract class AbstractCacheTestCase {
     @Before
     public void before() {
         addCache();
-        Console.withBrowser(browser).refreshAndNavigate(HibernateCachePage.class);
+        reloadIfRequiredAndWaitForRunning();
+        page.navigate();
+        page.selectCache(cacheName);
     }
 
     @After
     public void after() {
         deleteCache();
-        client.reload(false);
+        reloadIfRequiredAndWaitForRunning();
     }
+
 
     @Test
     public void createCache() {
@@ -71,157 +73,209 @@ public abstract class AbstractCacheTestCase {
                 .finish();
 
         Assert.assertTrue("Window should be closed", result);
-        verifier.verifyResource(getDmrBase() + name, true);
+        validVerifier.verifyResource(cacheAddress.resolve(context, name));
 
         page.content().getResourceManager().removeResourceAndConfirm(name);
-        verifier.verifyResource(getDmrBase() + name, false);
+        validVerifier.verifyResource(cacheAddress.resolve(context, name), false);
     }
 
     //ATTRIBUTES
+    //Fails due to [HAL-872]
     @Test
     public void editStartMode() {
-        checker.editSelectAndAssert(page, "start", "LAZY").rowName(cacheName).invoke();
+        ResourceAddress address = cacheAddress.resolve(context, cacheName);
+        selectOptionAndVerify(address, "start", "LAZY");
     }
 
-    //Fails due to [JBEAP-359]
     @Test
     public void editJndiName() {
-        checker.editTextAndAssert(page, "jndi-name", "java:/" + cacheName).rowName(cacheName).invoke();
+        ResourceAddress address = cacheAddress.resolve(context, cacheName);
+        editTextAndVerify(address, "jndi-name", "java:/" + cacheName);
     }
 
-    //Fails due to [JBEAP-359]
+    //Fails due to [HAL-872]
     @Test
     public void editBatching() {
-        checker.editCheckboxAndAssert(page, "batching", true).rowName(cacheName).invoke();
-        checker.editCheckboxAndAssert(page, "batching", false).rowName(cacheName).invoke();
+        page.getConfig().switchTo("Store");
+        ResourceAddress address = storeTemplate.resolve(context, cacheName);
+        editCheckboxAndVerify(address, "batching", true);
+        page.selectCache(cacheName);
+        editCheckboxAndVerify(address, "batching", false);
     }
 
-    //Fails due to [JBEAP-359]
+    //Fails due to [HAL-872]
     @Test
     public void editIndexing() {
-        checker.editSelectAndAssert(page, "indexing", "LOCAL").rowName(cacheName).invoke();
-        checker.editSelectAndAssert(page, "indexing", "ALL").rowName(cacheName).invoke();
-        checker.editSelectAndAssert(page, "indexing", "NONE").rowName(cacheName).invoke();
+        page.getConfig().switchTo("Store");
+        ResourceAddress address = storeTemplate.resolve(context, cacheName);
+        selectOptionAndVerify(address, "indexing", "LOCAL");
+        page.selectCache(cacheName);
+        selectOptionAndVerify(address, "indexing", "ALL");
+        page.selectCache(cacheName);
+        selectOptionAndVerify(address, "indexing", "NONE");
     }
 
     //STORE
-    //Fails due to [JBEAP-361]
     @Test
     public void editShared() {
-        checker.editCheckboxAndAssert(page, "shared", true).withVerifier(storeVerifier)
-                .tab("Store").rowName(cacheName).invoke();
-        checker.editCheckboxAndAssert(page, "shared", false).withVerifier(storeVerifier)
-                .tab("Store").rowName(cacheName).invoke();
+        page.getConfig().switchTo("Store");
+        ResourceAddress address = storeTemplate.resolve(context, cacheName);
+        editCheckboxAndVerify(address, "shared", true);
+        page.selectCache(cacheName);
+        editCheckboxAndVerify(address, "shared", false);
     }
 
     @Test
     public void editPassivation() {
-        checker.editCheckboxAndAssert(page, "passivation", true).withVerifier(storeVerifier)
-                .tab("Store").rowName(cacheName).invoke();
-        checker.editCheckboxAndAssert(page, "passivation", false).withVerifier(storeVerifier)
-                .tab("Store").rowName(cacheName).invoke();
+        page.getConfig().switchTo("Store");
+        ResourceAddress address = storeTemplate.resolve(context, cacheName);
+        editCheckboxAndVerify(address, "passivation", true);
+        page.selectCache(cacheName);
+        editCheckboxAndVerify(address, "passivation", false);
     }
 
-    //Fails due to [JBEAP-361]
     @Test
     public void editPreload() {
-        checker.editCheckboxAndAssert(page, "preload", true).withVerifier(storeVerifier)
-                .tab("Store").rowName(cacheName).invoke();
-        checker.editCheckboxAndAssert(page, "preload", false).withVerifier(storeVerifier)
-                .tab("Store").rowName(cacheName).invoke();
+        page.getConfig().switchTo("Store");
+        ResourceAddress address = storeTemplate.resolve(context, cacheName);
+        editCheckboxAndVerify(address, "preload", true);
+        page.selectCache(cacheName);
+        editCheckboxAndVerify(address, "preload", false);
     }
 
     @Test
     public void editFetchState() {
-        checker.editCheckboxAndAssert(page, "fetch-state", true).withVerifier(storeVerifier)
-                .tab("Store").rowName(cacheName).invoke();
-        checker.editCheckboxAndAssert(page, "fetch-state", false).withVerifier(storeVerifier)
-                .tab("Store").rowName(cacheName).invoke();
+        page.getConfig().switchTo("Store");
+        ResourceAddress address = storeTemplate.resolve(context, cacheName);
+        editCheckboxAndVerify(address, "fetch-state", true);
+        page.selectCache(cacheName);
+        editCheckboxAndVerify(address, "fetch-state", false);
     }
 
     @Test
     public void editPurge() {
-        checker.editCheckboxAndAssert(page, "purge", true).withVerifier(storeVerifier)
-                .tab("Store").rowName(cacheName).invoke();
-        checker.editCheckboxAndAssert(page, "purge", false).withVerifier(storeVerifier)
-                .tab("Store").rowName(cacheName).invoke();
+        page.getConfig().switchTo("Store");
+        ResourceAddress address = storeTemplate.resolve(context, cacheName);
+        editCheckboxAndVerify(address, "purge", true);
+        page.selectCache(cacheName);
+        editCheckboxAndVerify(address, "purge", false);
     }
 
-    //Fails due to [JBEAP-361]
     @Test
     public void editSingleton() {
-        checker.editCheckboxAndAssert(page, "singleton", true).withVerifier(storeVerifier)
-                .tab("Store").rowName(cacheName).invoke();
-        checker.editCheckboxAndAssert(page, "singleton", false).withVerifier(storeVerifier)
-                .tab("Store").rowName(cacheName).invoke();
+        page.getConfig().switchTo("Store");
+        ResourceAddress address = storeTemplate.resolve(context, cacheName);
+        editCheckboxAndVerify(address, "singleton", true);
+        page.selectCache(cacheName);
+        editCheckboxAndVerify(address, "singleton", false);
     }
 
     //LOCKING
     @Test
     public void editConcurrencyLevel() {
-        checker.editTextAndAssert(page, "concurrency-level", "1").withVerifier(lockingVerifier)
-                .tab("Locking").rowName(cacheName).invoke();
-        checker.editTextAndAssert(page, "concurrency-level", "-1").expectError()
-                .tab("Locking").rowName(cacheName).invoke();
+        page.getConfig().switchTo("Locking");
+        ResourceAddress address = lockingTemplate.resolve(context, cacheName);
+        editTextAndVerify(address, "concurrency-level", "1");
+        verifyIfErrorAppears("concurrency-level", "-1");
     }
 
     @Test
     public void editIsolation() {
-        checker.editSelectAndAssert(page, "isolation", "REPEATABLE_READ").withVerifier(lockingVerifier)
-                .tab("Locking").rowName(cacheName).invoke();
-        checker.editSelectAndAssert(page, "isolation", "NONE").withVerifier(lockingVerifier)
-                .tab("Locking").rowName(cacheName).invoke();
-        checker.editSelectAndAssert(page, "isolation", "SERIALIZABLE").withVerifier(lockingVerifier)
-                .tab("Locking").rowName(cacheName).invoke();
+        page.getConfig().switchTo("Locking");
+        ResourceAddress address = lockingTemplate.resolve(context, cacheName);
+        selectOptionAndVerify(address, "isolation", "REPEATABLE_READ");
+        page.selectCache(cacheName);
+        selectOptionAndVerify(address, "isolation", "NONE");
+        page.selectCache(cacheName);
+        selectOptionAndVerify(address, "isolation", "SERIALIZABLE");
     }
 
-    //Fails due to [JBEAP-361]
+
     @Test
     public void editStriping() {
-        checker.editCheckboxAndAssert(page, "striping", true).withVerifier(lockingVerifier)
-                .tab("Locking").rowName(cacheName).invoke();
-        checker.editCheckboxAndAssert(page, "striping", false).withVerifier(lockingVerifier)
-                .tab("Locking").rowName(cacheName).invoke();
+        page.getConfig().switchTo("Locking");
+        ResourceAddress address = lockingTemplate.resolve(context, cacheName);
+        editCheckboxAndVerify(address, "striping", true);
+        page.selectCache(cacheName);
+        editCheckboxAndVerify(address, "striping", false);
     }
 
     @Test
     public void editAcquireTimeout() {
-        checker.editTextAndAssert(page, "acquire-timeout", "5000").withVerifier(lockingVerifier)
-                .tab("Locking").rowName(cacheName).invoke();
-        checker.editTextAndAssert(page, "acquire-timeout", "-1").expectError()
-                .tab("Locking").rowName(cacheName).invoke();
+        page.getConfig().switchTo("Locking");
+        ResourceAddress address = lockingTemplate.resolve(context, cacheName);
+        verifyIfErrorAppears("acquire-timeout", "-1");
+        page.selectCache(cacheName);
+        editTextAndVerify(address, "acquire-timeout", "5000");
     }
 
     //TRANSACTION
     @Test
     public void editMode() {
-        checker.editSelectAndAssert(page, "mode", "NONE").withVerifier(transactionVerifier)
-                .tab("Transaction").rowName(cacheName).dmrAttribute("mode").invoke();
-        checker.editSelectAndAssert(page, "mode", "NON_XA").withVerifier(transactionVerifier)
-                .tab("Transaction").rowName(cacheName).dmrAttribute("mode").invoke();
+        page.getConfig().switchTo("Transaction");
+        ResourceAddress address = transactionTemplate.resolve(context, cacheName);
+        selectOptionAndVerify(address, "mode", "NONE");
+        page.selectCache(cacheName);
+        selectOptionAndVerify(address, "mode", "NON_XA");
     }
 
     @Test
     public void editLocking() {
-        checker.editSelectAndAssert(page, "locking", "OPTIMISTIC").withVerifier(transactionVerifier)
-                .tab("Transaction").rowName(cacheName).invoke();
-        checker.editSelectAndAssert(page, "locking", "PESSIMISTIC").withVerifier(transactionVerifier)
-                .tab("Transaction").rowName(cacheName).invoke();
+        page.getConfig().switchTo("Transaction");
+        ResourceAddress address = transactionTemplate.resolve(context, cacheName);
+        selectOptionAndVerify(address, "locking", "OPTIMISTIC");
+        page.selectCache(cacheName);
+        selectOptionAndVerify(address, "locking", "PESSIMISTIC");
     }
 
     @Test
     public void editStopTimeout() {
-        checker.editTextAndAssert(page, "stop-timeout", "13400").withVerifier(transactionVerifier)
-                .tab("Transaction").rowName(cacheName).invoke();
-        checker.editTextAndAssert(page, "stop-timeout", "150asdf50").expectError()
-                .tab("Transaction").rowName(cacheName).invoke();
-        checker.editTextAndAssert(page, "stop-timeout", "-15000").expectError()
-                .tab("Transaction").rowName(cacheName).invoke();
+        page.getConfig().switchTo("Transaction");
+        ResourceAddress address = transactionTemplate.resolve(context, cacheName);
+        editTextAndVerify(address, "stop-timeout", "13400");
+        page.selectCache(cacheName);
+        verifyIfErrorAppears("stop-timeout", "150asdf50");
+        page.selectCache(cacheName);
+        verifyIfErrorAppears("stop-timeout", "-15000");
     }
 
-    public abstract String getDmrBase();
+    protected void editTextAndVerify(ResourceAddress address, String identifier, String value) {
+        page.editTextAndSave(identifier, value);
+        reloadIfRequiredAndWaitForRunning();
+        validVerifier.verifyAttribute(address, identifier, value);
+    }
+
+    protected void selectOptionAndVerify(ResourceAddress address, String identifier, String value) {
+        page.selectOptionAndSave(identifier, value);
+        reloadIfRequiredAndWaitForRunning();
+        validVerifier.verifyAttribute(address, identifier, value);
+    }
+
+    protected void verifyIfErrorAppears(String identifier, String value) {
+        ConfigFragment config = page.getConfigFragment();
+        page.editTextAndSave(identifier, value);
+        Assert.assertTrue(page.isErrorShownInForm());
+        config.cancel();
+    }
+
+    protected void editCheckboxAndVerify(ResourceAddress address, String identifier, Boolean value) {
+        page.editCheckboxAndSave(identifier, value);
+        reloadIfRequiredAndWaitForRunning();
+        validVerifier.verifyAttribute(address, identifier, value.toString());
+    }
+
+    protected abstract AddressTemplate getCacheTemplate();
 
     public abstract void addCache();
 
     public abstract void deleteCache();
+
+    protected void reloadIfRequiredAndWaitForRunning() {
+        int timeout = 60000;
+        if (ConfigUtils.isDomain()) {
+            new DomainManager(client).reloadAndWaitUntilRunning(timeout);
+        } else {
+            client.reload(false);
+        }
+    }
 }

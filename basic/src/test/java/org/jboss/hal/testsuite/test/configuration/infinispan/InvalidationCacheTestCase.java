@@ -1,8 +1,9 @@
 package org.jboss.hal.testsuite.test.configuration.infinispan;
 
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.hal.testsuite.cli.CliUtils;
 import org.jboss.hal.testsuite.category.Standalone;
+import org.jboss.hal.testsuite.dmr.AddressTemplate;
+import org.jboss.hal.testsuite.dmr.Operation;
 import org.junit.Before;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
@@ -14,9 +15,10 @@ import org.junit.runner.RunWith;
 @Category(Standalone.class)
 public class InvalidationCacheTestCase extends AbstractCacheTestCase {
 
+
     @Override
-    public String getDmrBase() {
-        return ABSTRACT_DMR_BASE + "/invalidation-cache=";
+    protected AddressTemplate getCacheTemplate() {
+        return ABSTRACT_CACHE_TEMPLATE.append("/invalidation-cache=*");
     }
 
     @Before
@@ -25,19 +27,18 @@ public class InvalidationCacheTestCase extends AbstractCacheTestCase {
     }
 
     public void addCache() {
-        String addCache = CliUtils.buildCommand(cacheDmr, ":add", new String[]{"mode=SYNC"});
-        String addTransaction = CliUtils.buildCommand(transactionDmr, ":add");
-        String addLocking = CliUtils.buildCommand(lockingDmr, ":add");
-        String addStore = CliUtils.buildCommand(storeDmr, ":add", new String[]{"class=clazz"});
-        client.executeCommand(addCache);
-        client.executeCommand(addTransaction);
-        client.executeCommand(addLocking);
-        client.executeCommand(addStore);
+        dispatcher.execute(new Operation.Builder("add", cacheAddress.resolve(context, cacheName))
+                .param("mode", "SYNC")
+                .build());
+        dispatcher.execute(new Operation.Builder("add", transactionTemplate.resolve(context, cacheName)).build());
+        dispatcher.execute(new Operation.Builder("add", storeTemplate.resolve(context, cacheName))
+                .param("class", "org.infinispan.configuration.cache.SingleFileStoreConfigurationBuilder")
+                .build());
+        dispatcher.execute(new Operation.Builder("add", lockingTemplate.resolve(context, cacheName)).build());
     }
 
     public void deleteCache() {
-        String cmd = CliUtils.buildCommand(cacheDmr, ":remove");
-        client.executeCommand(cmd);
+        dispatcher.execute(new Operation.Builder("remove", cacheAddress.resolve(context, cacheName)).build());
     }
 }
 

@@ -24,6 +24,8 @@ package org.jboss.hal.testsuite.finder;
 import org.jboss.arquillian.graphene.Graphene;
 import org.openqa.selenium.By;
 
+import java.util.concurrent.TimeUnit;
+
 /**
  * @author Harald Pehl
  */
@@ -33,5 +35,9 @@ public class Application {
 
     public static void waitUntilVisible() {
         Graphene.waitModel().until().element(APPLICATION_PANEL).is().visible();
+    }
+
+    public static void waitUntilVisible(int timeout) {
+        Graphene.waitModel().withTimeout(timeout, TimeUnit.SECONDS).until().element(APPLICATION_PANEL).is().visible();
     }
 }
