@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.jboss.dmr.ModelNode;
 import org.slf4j.Logger;
@@ -493,8 +494,10 @@ public class DomainManager extends ServerManager {
      * @param timeout max time to wait for server to start, in milliseconds
      */
     public void reloadAndWaitUntilRunning(long timeout) {
-        List<String> servers = filterAllRunningServers(listRunningServers(getDefaultHost()));
+        List<String> all = listRunningServers(getDefaultHost());
+        List<String> servers = filterAllRunningServers(all);
         reloadServers();
+        waitUntilAvailable(timeout);
         waitUntilRunning(servers, timeout);
     }
 
@@ -505,15 +508,25 @@ public class DomainManager extends ServerManager {
      * @throws TimeoutException when all servers are not running in given timeout
      */
     public void waitUntilRunning(final List<String> servers, final long timeout) throws TimeoutException {
-        final int step = 500;
-        long decTimeout = timeout;
-        while (!isServersRunning(servers)) {
-            if (decTimeout <= 0) {
-                throw new TimeoutException("Servers are not running in " + timeout);
+        if (servers.isEmpty()) {
+            log.debug("No servers for waiting were specified!");
+        } else {
+            final int step = 500;
+            long decTimeout = timeout;
+            while (isServersRunning(servers)) {
+                if (decTimeout <= 0) {
+                    throw new TimeoutException("Servers are not running in " + timeout);
+                }
+                decTimeout -= step;
+                log.debug("Waiting another " + step + "ms for server to become running.");
+                Library.letsSleep(step);
             }
-            decTimeout -= step;
-            Library.letsSleep(step);
         }
+
+    }
+
+    public List<String> filterNotStoppedOrSuspendedServers(List<String> servers) {
+        return servers.stream().filter(server -> !isServerStoppedOrSuspended(server)).collect(Collectors.toList());
     }
 
     /**
@@ -535,16 +548,14 @@ public class DomainManager extends ServerManager {
     }
 
     /**
-     * Filters out all servers which are not running
+     * Return list of servers whose status is STARTED
      * @param servers list of servers from which will be filtered non-running servers
      * @return List of all running servers
      */
     public List<String> filterAllRunningServers(List<String> servers) {
         List<String> running = new LinkedList<>();
         for (String server : servers) {
-            if (isServerRunning(server)) {
-                running.add(server);
-            }
+            if (checkServerStatus(server, "STARTED")) running.add(server);
         }
         return running;
     }
@@ -555,13 +566,7 @@ public class DomainManager extends ServerManager {
      * @return true if any server requires reload
      */
     public boolean isReloadRequired(List<String> servers) {
-        servers.stream().anyMatch(server -> isReloadRequiredForServerOnDomain(server));
-        for (String server : servers) {
-            if (isReloadRequiredForServerOnDomain(server)) {
-                return true;
-            }
-        }
-        return false;
+        return servers.stream().anyMatch(this::isReloadRequiredForServerOnDomain);
     }
 
     /**
@@ -570,18 +575,45 @@ public class DomainManager extends ServerManager {
      * @return true if server requires reload
      */
     public boolean isReloadRequiredForServerOnDomain(String server) {
+        return checkServerState(server, "reload-required");
+    }
+
+    /**
+     * Return true if given server requires restart
+     * @param server server which state will be checked
+     * @return true if server requires restart
+     */
+    public boolean isRestartRequiredForServerOnDomain(String server) {
         return checkServerState(server, "restart-required");
     }
 
+    /**
+     * Return true if server is stopped or suspended
+     * @param server server which state will be checked
+     * @return true if server is stopped or suspended
+     */
+    public boolean isServerStoppedOrSuspended(String server) {
+        return  checkServerState(server, "stopped") ||
+                checkServerState(server, "suspended");
+    }
+
     public void reloadServers() {
-        cliClient.reload(true);
+        cliClient.executeForSuccess(":reload-servers");
     }
 
     public boolean checkServerState(String server, String state) {
         final String result = cliClient.executeForResult(
                 "/host=" + getDefaultHost() +
                 "/server=" + server +
-                ":read-attribute(name=server-state)");
+                ":read-attribute(name=server-state,include-defaults=true)");
         return result.toLowerCase().contains(state);
+    }
+
+    public boolean checkServerStatus(String server, String status) {
+        final String result = cliClient.executeForResult(
+                "/host=" + getDefaultHost() +
+                "/server-config=" + server +
+                ":read-attribute(name=status,include-defaults=true)");
+        return result.equalsIgnoreCase(status);
     }
 }
