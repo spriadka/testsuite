@@ -3,7 +3,6 @@ package org.jboss.hal.testsuite.test.configuration.undertow;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
-import org.jboss.hal.testsuite.cli.Library;
 import org.jboss.hal.testsuite.dmr.AddressTemplate;
 import org.jboss.hal.testsuite.dmr.DefaultContext;
 import org.jboss.hal.testsuite.dmr.Dispatcher;
@@ -36,7 +35,7 @@ public abstract class UndertowTestCaseAbstract {
     //shared valid values
     protected static String WORKER_VALUE_VALID;
     protected static String BUFFER_POOL_VALUE_VALID;
-    protected String SOCKET_BINDING_VALUE_VALID = "https";
+    protected static String SOCKET_BINDING_VALUE_VALID;
     protected String NUMERIC_VALID = "25";
     protected String NUMERIC_INVALID = "25dfs";
     protected String BUFFER_CACHE_VALUE_VALID = "";
@@ -54,18 +53,19 @@ public abstract class UndertowTestCaseAbstract {
         operations = new UndertowOperations(dispatcher);
         WORKER_VALUE_VALID = operations.createWorker();
         BUFFER_POOL_VALUE_VALID = operations.createBufferPool();
+        SOCKET_BINDING_VALUE_VALID = operations.createSocketBinding();
     }
 
     @AfterClass
     public static void mainTearDown() {
         operations.removeWorker(WORKER_VALUE_VALID);
         operations.removeBufferPool(BUFFER_POOL_VALUE_VALID);
+        operations.removeSocketBinding(SOCKET_BINDING_VALUE_VALID);
         dispatcher.close();
     }
 
     protected void editTextAndVerify(ResourceAddress address, String identifier, String attributeName, String value) throws IOException, InterruptedException {
         page.getConfigFragment().editTextAndSave(identifier, value);
-        Library.letsSleep(5000);
         UndertowOperations.reloadIfRequiredAndWaitForRunning();
         verifier.verifyAttribute(address, attributeName, value);
     }
