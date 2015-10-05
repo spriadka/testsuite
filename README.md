@@ -7,13 +7,13 @@ and [Graphene](https://docs.jboss.org/author/display/ARQGRA2/Home) Arquillian ex
 * JDK 8 or higher
 * Maven 3.0.4 or higher
 * Firefox browser (tested on 31.2.0 esr version, will probably not run with far older or younger versions)
-* Wildfly (9 or higher) or EAP (7 or higher)
+* Wildfly (10 or higher) or EAP (7 or higher)
 
 You can download it here:
 <http://wildfly.org/downloads/> or <http://www.jboss.org/products/eap/download/>
 
 Currently it's necessary to unsecure the management http-interface to be able to run testsuite.
-E.g. for standalone Wildfly 9 using CLI:
+E.g. for standalone Wildfly 10 using CLI:
 ```
 /core-service=management/management-interface=http-interface:undefine-attribute(name=security-realm)
 :reload
@@ -27,7 +27,9 @@ E.g. for standalone Wildfly 9 using CLI:
 
 Can be one of those:
 * `-Pbasic,standalone` ... run basic tests against standalone mode
-* `-Pbasic,domain`` ... run basic tests against domain mode
+* `-Pbasic,domain` ... run basic tests against domain mode
+* `-Prbac,standalone` ... run RBAC related tests against standalone mode
+* `-Prbac,domain` ... run RBAC related tests against domain mode
 
 ### Required jboss.dist parameter
 
