@@ -17,6 +17,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.concurrent.ThreadLocalRandom;
+
 /**
  * @author Jan Kasik <jkasik@redhat.com>
  *         Created on 17.9.15.
@@ -28,13 +30,15 @@ public class UndertowOperations {
     private Dispatcher dispatcher;
     private StatementContext context = new DefaultContext();
     private AddressTemplate undertowAddressTemplate = AddressTemplate.of("{default.profile}/subsystem=undertow");
-    private AddressTemplate ioWorkerAdressTemplate = AddressTemplate.of("{default.profile}/subsystem=io/worker=*");
-    private AddressTemplate ioBufferPoolAdressTemplate = AddressTemplate.of("{default.profile}/subsystem=io/buffer-pool=*");
+    private AddressTemplate ioWorkerAddressTemplate = AddressTemplate.of("{default.profile}/subsystem=io/worker=*");
+    private AddressTemplate ioBufferPoolAddressTemplate = AddressTemplate.of("{default.profile}/subsystem=io/buffer-pool=*");
+    private AddressTemplate socketBindingAddressTemplate = AddressTemplate.of("/socket-binding-group=full-sockets/socket-binding=*");
     private AddressTemplate httpServerTemplate = undertowAddressTemplate.append("/server=*");
     private AddressTemplate servletContainerTemplate = undertowAddressTemplate.append("/servlet-container=*");
     private AddressTemplate ajpListenerTemplate = httpServerTemplate.append("/ajp-listener=*");
     private AddressTemplate httpListenerTemplate = httpServerTemplate.append("/http-listener=*");
     private AddressTemplate httpsListenerTemplate = httpServerTemplate.append("/https-listener=*");
+    private AddressTemplate hostTemplate = httpServerTemplate.append("/host=*");
 
     public UndertowOperations(Dispatcher dispatcher) {
         this.dispatcher = dispatcher;
@@ -45,7 +49,7 @@ public class UndertowOperations {
         if (ConfigUtils.isDomain()) {
             new DomainManager(CliClientFactory.getClient()).reloadIfRequiredAndWaitUntilRunning(timeout);
         } else {
-            CliClientFactory.getClient().reload();
+            CliClientFactory.getClient().reload(false);
         }
     }
 
@@ -60,7 +64,7 @@ public class UndertowOperations {
 
     public String createAJPListener(String httpServer) {
         String name = RandomStringUtils.randomAlphanumeric(6);
-        Map<String, String> params = ImmutableMap.of("socket-binding", "ajp");
+        Map<String, String> params = ImmutableMap.of("socket-binding", createSocketBinding());
         executeAddAction(ajpListenerTemplate.resolve(context, httpServer, name), params);
         return name;
     }
@@ -71,7 +75,7 @@ public class UndertowOperations {
 
     public String createHTTPListener(String httpServer) {
         String name = RandomStringUtils.randomAlphanumeric(6);
-        Map<String, String> params = ImmutableMap.of("socket-binding", "https");
+        Map<String, String> params = ImmutableMap.of("socket-binding", createSocketBinding());
         executeAddAction(httpListenerTemplate.resolve(context, httpServer, name), params);
         return name;
     }
@@ -83,7 +87,7 @@ public class UndertowOperations {
     public String createHTTPSListener(String httpServer) {
         String name = RandomStringUtils.randomAlphanumeric(6);
         ResourceAddress address = httpsListenerTemplate.resolve(context, httpServer, name);
-        Map <String, String> properties = ImmutableMap.of("socket-binding", "https", "security-realm", "ManagementRealm");
+        Map <String, String> properties = ImmutableMap.of("socket-binding", createSocketBinding(), "security-realm", "ManagementRealm");
         executeAddAction(address, properties);
         return name;
     }
@@ -91,6 +95,30 @@ public class UndertowOperations {
     public void removeHTTPSListener(String httpServer, String listenerName) {
         ResourceAddress address = httpsListenerTemplate.resolve(context, httpServer, listenerName);
         executeRemoveAction(address);
+    }
+
+    public String createHTTPServerHost(String httpServer) {
+        String hostName = RandomStringUtils.randomNumeric(6);
+        createHTTPServerHost(httpServer, hostName);
+        return hostName;
+    }
+
+    public String createHTTPServerHost(String httpServer, String hostName) {
+        ResourceAddress address = hostTemplate.resolve(context, httpServer, hostName);
+        executeAddAction(address);
+        return hostName;
+    }
+
+    public void removeHTTPServerHost(String httpServer, String ajpListener) {
+        ResourceAddress address = hostTemplate.resolve(context, httpServer, ajpListener);
+        executeRemoveAction(address);
+    }
+
+    public void removeHTTPServerHostIfExists(String httpServer, String ajpListener) {
+        ResourceAddress address = hostTemplate.resolve(context, httpServer, ajpListener);
+        if (executeReadResourceAction(address)) {
+            executeRemoveAction(address);
+        }
     }
 
     public String createHTTPServer() {
@@ -120,13 +148,16 @@ public class UndertowOperations {
         reloadIfRequiredAndWaitForRunning();
     }
 
+    private boolean executeReadResourceAction(ResourceAddress address) {
+        return dispatcher.execute(new Operation.Builder("read-resource", address).build()).isSuccessful();
+    }
+
     private void executeAddAction(ResourceAddress address, Map<String, String> params) {
         Operation.Builder operationBuilder = new Operation.Builder("add", address);
         for (Map.Entry<String, String> entry : params.entrySet()) {
             operationBuilder.param(entry.getKey(), entry.getValue());
         }
         DmrResponse response = dispatcher.execute(operationBuilder.build());
-        log.debug(response.response.asString());
         reloadIfRequiredAndWaitForRunning();
     }
 
@@ -136,25 +167,38 @@ public class UndertowOperations {
 
     public String createWorker() {
         String name = RandomStringUtils.randomAlphanumeric(6);
-        ResourceAddress address = ioWorkerAdressTemplate.resolve(context, name);
+        ResourceAddress address = ioWorkerAddressTemplate.resolve(context, name);
         executeAddAction(address);
         return name;
     }
 
     public void removeWorker(String name) {
-        ResourceAddress address = ioWorkerAdressTemplate.resolve(context, name);
+        ResourceAddress address = ioWorkerAddressTemplate.resolve(context, name);
         executeRemoveAction(address);
     }
 
     public String createBufferPool() {
         String name = RandomStringUtils.randomAlphanumeric(6);
-        ResourceAddress address = ioBufferPoolAdressTemplate.resolve(context, name);
+        ResourceAddress address = ioBufferPoolAddressTemplate.resolve(context, name);
         executeAddAction(address);
         return name;
     }
 
     public void removeBufferPool(String name) {
-        ResourceAddress address = ioBufferPoolAdressTemplate.resolve(context, name);
+        ResourceAddress address = ioBufferPoolAddressTemplate.resolve(context, name);
+        executeRemoveAction(address);
+    }
+
+    public String createSocketBinding() {
+        String name = RandomStringUtils.randomAlphanumeric(6);
+        ResourceAddress address = socketBindingAddressTemplate.resolve(context, name);
+        Map<String, String> params = ImmutableMap.of("port", String.valueOf(ThreadLocalRandom.current().nextInt(1000, 9999)));
+        executeAddAction(address, params);
+        return  name;
+    }
+
+    public void removeSocketBinding(String name) {
+        ResourceAddress address = socketBindingAddressTemplate.resolve(context, name);
         executeRemoveAction(address);
     }
 }
