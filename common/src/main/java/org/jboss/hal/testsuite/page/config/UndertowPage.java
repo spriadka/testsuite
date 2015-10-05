@@ -6,18 +6,13 @@ import org.jboss.hal.testsuite.finder.Application;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.fragment.ConfigAreaFragment;
-import org.jboss.hal.testsuite.fragment.ConfigFragment;
-import org.jboss.hal.testsuite.fragment.config.socketbindings.InboundSocketBindingFragment;
 import org.jboss.hal.testsuite.fragment.config.undertow.UndertowFragment;
 import org.jboss.hal.testsuite.page.Navigatable;
 import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.PropUtils;
 import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
-
-import java.util.List;
 
 /**
  * @author Jan Kasik <jkasik@redhat.com>
@@ -26,7 +21,7 @@ import java.util.List;
 public class UndertowPage extends ConfigurationPage implements Navigatable {
 
     private static final By CONTENT_ROOT = ByJQuery.selector("." + PropUtils.get("page.content.rhs.class")
-            + ":visible:has(." + PropUtils.get("configarea.content.class")+ ":visible)");
+            + ":visible:has(." + PropUtils.get("configarea.content.class") + ":visible)");
 
     public void navigate() {
         FinderNavigation navigation;

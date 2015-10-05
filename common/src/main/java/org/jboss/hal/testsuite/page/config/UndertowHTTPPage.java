@@ -43,20 +43,28 @@ public class UndertowHTTPPage extends UndertowPage implements Navigatable {
         return this;
     }
 
-    public void switchToAJPListeners() {
+    public UndertowHTTPPage switchToAJPListeners() {
         switchSubTab("AJP Listener");
+        return this;
     }
 
-    public void switchToHTTPListeners() {
+    public UndertowHTTPPage switchToHTTPListeners() {
         switchSubTab("HTTP Listener");
+        return this;
     }
 
-    public void switchToHTTPSListeners() {
+    public UndertowHTTPPage switchToHTTPSListeners() {
         switchSubTab("HTTPS Listener");
+        return this;
     }
 
-    public void switchToHosts() {
+    public UndertowHTTPPage switchToHosts() {
         switchSubTab("Hosts");
+        return this;
+    }
+
+    public void selectItemInTableByText(String text) {
+        getResourceManager().selectByName(text);
     }
 
 }

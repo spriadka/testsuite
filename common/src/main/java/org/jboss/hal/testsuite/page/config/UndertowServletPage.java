@@ -58,7 +58,7 @@ public class UndertowServletPage extends UndertowPage implements Navigatable {
     }
 
     public void switchToJSPDevelopment() {
-        getConfig().switchTo("Development");//TODO: navigations hangs
+        getConfig().switchTo("Development");
     }
 
 
