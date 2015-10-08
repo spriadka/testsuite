@@ -61,4 +61,6 @@ public class BridgesTestCase {
     public void after() {
         cliClient.executeCommand(remove);
     }
+    // TODO tests
+    //https://issues.jboss.org/browse/HAL-831 https://issues.jboss.org/browse/HAL-880
 }

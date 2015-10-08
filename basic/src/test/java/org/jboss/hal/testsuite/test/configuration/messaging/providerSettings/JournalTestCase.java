@@ -134,7 +134,7 @@ public class JournalTestCase {
         boolean finished =  page.getWindowFragment().save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "journal-min-files", "0");
+        verifier.verifyAttribute(address, "journal-min-files", "2");
     }
 
     @Test

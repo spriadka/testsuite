@@ -157,7 +157,7 @@ public class GenericConnectorTestCase {
         ConfigPropertiesFragment properties = page.getConfig().propertiesConfig();
         properties.removeProperty("prop");
 
-        verifier.verifyAttribute(address, "params", "{}");
+        verifier.verifyAttribute(address, "params", "undefined");
 
         cliClient.executeCommand(remove);
     }
