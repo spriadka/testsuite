@@ -166,7 +166,6 @@ public class ExecutorTestCase extends EETestCaseAbstract {
 
         Editor editor = wizard.getEditor();
         editor.text("name", name);
-        editor.text(CORE_THREADS, NUMERIC_VALID);
         editor.text(JNDI_NAME, JNDI_VALID);
         boolean result = wizard.finish();
 
