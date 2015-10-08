@@ -50,16 +50,8 @@ public class RoleAssignmentPage extends BasePage {
 
         getWindowFragment().getEditor().text("name", name);
         getWindowFragment().getEditor().text("realm", realm);
+        getWindowFragment().getEditor().select("role", role);
         getWindowFragment().clickButton("Save");
-
-        navigation.resetNavigation()
-                .addAddress(FinderNames.BROWSE_BY, "Roles")
-                .addAddress("Role", role)
-                .addAddress("Membership", "Include")
-                .addAddress("Member");
-
-        navigation.selectColumn().invoke("Add");
-        selectMember(name, realm);
     }
 
     public void selectMember(String name, String realm) {
@@ -129,16 +121,17 @@ public class RoleAssignmentPage extends BasePage {
 
         getWindowFragment().getEditor().text("name", name);
         getWindowFragment().getEditor().text("realm", realm);
+        getWindowFragment().getEditor().select("role", role);
         getWindowFragment().clickButton("Save");
 
-        navigation.resetNavigation()
+       /* navigation.resetNavigation()
                 .addAddress(FinderNames.BROWSE_BY, "Roles")
                 .addAddress("Role", role)
                 .addAddress("Membership", "Include")
                 .addAddress("Member");
 
         navigation.selectColumn().invoke("Add");
-        selectMember(name, realm);
+        selectMember(name, realm);*/
     }
 
     public void removeUser(String name, String realm) {
