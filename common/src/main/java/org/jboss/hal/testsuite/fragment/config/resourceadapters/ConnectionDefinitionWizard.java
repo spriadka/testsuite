@@ -7,8 +7,8 @@ import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
  */
 public class ConnectionDefinitionWizard extends WizardWindow {
     private static final String NAME = "name";
-    private static final String JNDI_NAME = "jndiName";
-    private static final String CONNECTION_CLASS = "connectionClass";
+    private static final String JNDI_NAME = "jndi-name";
+    private static final String CONNECTION_CLASS = "class-name";
 
     public ConnectionDefinitionWizard name(String value) {
         getEditor().text(NAME, value);

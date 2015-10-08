@@ -8,8 +8,8 @@ import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
 public class AdminObjectWizard extends WizardWindow {
 
     private static final String NAME = "name";
-    private static final String JNDI_NAME = "jndiName";
-    private static final String CLASS_NAME = "adminClass";
+    private static final String JNDI_NAME = "jndi-name";
+    private static final String CLASS_NAME = "class-name";
 
     public AdminObjectWizard name(String value) {
         getEditor().text(NAME, value);
