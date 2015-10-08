@@ -9,7 +9,7 @@ public class ResourceAdapterWizard extends WizardWindow {
     private static final String NAME = "name";
     private static final String ARCHIVE = "archive";
     private static final String MODULE = "module";
-    private static final String TX = "transactionSupport";
+    private static final String TX = "transaction-support";
 
     public ResourceAdapterWizard name(String value) {
         getEditor().text(NAME, value);

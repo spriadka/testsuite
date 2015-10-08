@@ -145,7 +145,6 @@ public class ResourceAdaptersTestCase {
 
         boolean result =
                 wizard.name(CONNECTION_DEFINITION_NAME)
-                .jndiName(CONNECTION_DEFINITION_JNDI_NAME)
                 .connectionClass(CONNECTION_DEFINITION_CLASS)
                 .finish();
 
@@ -170,7 +169,6 @@ public class ResourceAdaptersTestCase {
 
         boolean result =
                 wizard.name(ADMIN_OBJECT_NAME)
-                .jndiName(ADMIN_OBJECT_JNDI_NAME)
                 .className(ADMIN_OBJECT_CLASS)
                 .finish();
 
