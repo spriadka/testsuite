@@ -96,4 +96,33 @@ public class ConfigFragment extends BaseFragment {
         }
         return true;
     }
+
+    public Boolean editTextAndSave(String identifier, String value) {
+        edit().text(identifier, value);
+        return save();
+    }
+
+    public Boolean editCheckboxAndSave(String identifier, Boolean value) {
+        edit().checkbox(identifier, value);
+        return save();
+    }
+
+    public Boolean selectOptionAndSave(String identifier, String value) {
+        edit().select(identifier, value);
+        return save();
+    }
+
+    public Boolean isErrorShownInForm() {
+        By selector = ByJQuery.selector("div.form-item-error-desc:visible");
+        return isElementVisible(selector);
+    }
+
+    private Boolean isElementVisible(By selector) {
+        try {
+            Graphene.waitAjax().until().element(selector).is().visible();
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }

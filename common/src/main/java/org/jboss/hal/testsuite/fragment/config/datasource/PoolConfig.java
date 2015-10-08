@@ -40,10 +40,4 @@ public class PoolConfig extends ConfigFragment {
         save();
     }
 
-    public void selectOptionAndSave(String identifier, String value) {
-        Editor editor = edit();
-        editor.select(identifier, value);
-        save();
-    }
-
 }

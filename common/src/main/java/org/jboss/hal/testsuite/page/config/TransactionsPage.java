@@ -1,12 +1,32 @@
 package org.jboss.hal.testsuite.page.config;
 
 import org.jboss.arquillian.graphene.page.Location;
+import org.jboss.hal.testsuite.finder.Application;
+import org.jboss.hal.testsuite.finder.FinderNames;
+import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.page.ConfigPage;
+import org.jboss.hal.testsuite.page.Navigatable;
+import org.jboss.hal.testsuite.util.ConfigUtils;
 
 /**
  * @author mkrajcov <mkrajcov@redhat.com>
  */
 @Location("#transactions")
-public class TransactionsPage extends ConfigPage {
+public class TransactionsPage extends ConfigPage implements Navigatable {
+
+    public void navigate() {
+        FinderNavigation navigation;
+        if (ConfigUtils.isDomain()) {
+            navigation = new FinderNavigation(browser, DomainConfigEntryPoint.class)
+                    .addAddress(FinderNames.CONFIGURATION, FinderNames.PROFILES)
+                    .addAddress(FinderNames.PROFILE, "full");
+        } else {
+            navigation = new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
+                    .addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS);
+        }
+        navigation.addAddress(FinderNames.SUBSYSTEM, "Transactions");
+        navigation.selectRow().invoke(FinderNames.VIEW);
+        Application.waitUntilVisible();
+    }
 
 }
