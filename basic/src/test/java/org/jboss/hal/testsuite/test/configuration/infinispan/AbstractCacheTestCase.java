@@ -97,6 +97,7 @@ public abstract class AbstractCacheTestCase {
     @Test
     public void editBatching() {
         page.getConfig().switchTo("Store");
+        page.selectCache(cacheName);
         ResourceAddress address = storeTemplate.resolve(context, cacheName);
         editCheckboxAndVerify(address, "batching", true);
         page.selectCache(cacheName);
@@ -107,6 +108,7 @@ public abstract class AbstractCacheTestCase {
     @Test
     public void editIndexing() {
         page.getConfig().switchTo("Store");
+        page.selectCache(cacheName);
         ResourceAddress address = storeTemplate.resolve(context, cacheName);
         selectOptionAndVerify(address, "indexing", "LOCAL");
         page.selectCache(cacheName);
@@ -119,6 +121,7 @@ public abstract class AbstractCacheTestCase {
     @Test
     public void editShared() {
         page.getConfig().switchTo("Store");
+        page.selectCache(cacheName);
         ResourceAddress address = storeTemplate.resolve(context, cacheName);
         editCheckboxAndVerify(address, "shared", true);
         page.selectCache(cacheName);
@@ -128,6 +131,7 @@ public abstract class AbstractCacheTestCase {
     @Test
     public void editPassivation() {
         page.getConfig().switchTo("Store");
+        page.selectCache(cacheName);
         ResourceAddress address = storeTemplate.resolve(context, cacheName);
         editCheckboxAndVerify(address, "passivation", true);
         page.selectCache(cacheName);
@@ -137,6 +141,7 @@ public abstract class AbstractCacheTestCase {
     @Test
     public void editPreload() {
         page.getConfig().switchTo("Store");
+        page.selectCache(cacheName);
         ResourceAddress address = storeTemplate.resolve(context, cacheName);
         editCheckboxAndVerify(address, "preload", true);
         page.selectCache(cacheName);
@@ -146,6 +151,7 @@ public abstract class AbstractCacheTestCase {
     @Test
     public void editFetchState() {
         page.getConfig().switchTo("Store");
+        page.selectCache(cacheName);
         ResourceAddress address = storeTemplate.resolve(context, cacheName);
         editCheckboxAndVerify(address, "fetch-state", true);
         page.selectCache(cacheName);
@@ -155,6 +161,7 @@ public abstract class AbstractCacheTestCase {
     @Test
     public void editPurge() {
         page.getConfig().switchTo("Store");
+        page.selectCache(cacheName);
         ResourceAddress address = storeTemplate.resolve(context, cacheName);
         editCheckboxAndVerify(address, "purge", true);
         page.selectCache(cacheName);
@@ -164,6 +171,7 @@ public abstract class AbstractCacheTestCase {
     @Test
     public void editSingleton() {
         page.getConfig().switchTo("Store");
+        page.selectCache(cacheName);
         ResourceAddress address = storeTemplate.resolve(context, cacheName);
         editCheckboxAndVerify(address, "singleton", true);
         page.selectCache(cacheName);
@@ -174,6 +182,7 @@ public abstract class AbstractCacheTestCase {
     @Test
     public void editConcurrencyLevel() {
         page.getConfig().switchTo("Locking");
+        page.selectCache(cacheName);
         ResourceAddress address = lockingTemplate.resolve(context, cacheName);
         editTextAndVerify(address, "concurrency-level", "1");
         verifyIfErrorAppears("concurrency-level", "-1");
@@ -182,6 +191,7 @@ public abstract class AbstractCacheTestCase {
     @Test
     public void editIsolation() {
         page.getConfig().switchTo("Locking");
+        page.selectCache(cacheName);
         ResourceAddress address = lockingTemplate.resolve(context, cacheName);
         selectOptionAndVerify(address, "isolation", "REPEATABLE_READ");
         page.selectCache(cacheName);
@@ -194,6 +204,7 @@ public abstract class AbstractCacheTestCase {
     @Test
     public void editStriping() {
         page.getConfig().switchTo("Locking");
+        page.selectCache(cacheName);
         ResourceAddress address = lockingTemplate.resolve(context, cacheName);
         editCheckboxAndVerify(address, "striping", true);
         page.selectCache(cacheName);
@@ -203,6 +214,7 @@ public abstract class AbstractCacheTestCase {
     @Test
     public void editAcquireTimeout() {
         page.getConfig().switchTo("Locking");
+        page.selectCache(cacheName);
         ResourceAddress address = lockingTemplate.resolve(context, cacheName);
         verifyIfErrorAppears("acquire-timeout", "-1");
         page.selectCache(cacheName);
@@ -213,6 +225,7 @@ public abstract class AbstractCacheTestCase {
     @Test
     public void editMode() {
         page.getConfig().switchTo("Transaction");
+        page.selectCache(cacheName);
         ResourceAddress address = transactionTemplate.resolve(context, cacheName);
         selectOptionAndVerify(address, "mode", "NONE");
         page.selectCache(cacheName);
@@ -222,6 +235,7 @@ public abstract class AbstractCacheTestCase {
     @Test
     public void editLocking() {
         page.getConfig().switchTo("Transaction");
+        page.selectCache(cacheName);
         ResourceAddress address = transactionTemplate.resolve(context, cacheName);
         selectOptionAndVerify(address, "locking", "OPTIMISTIC");
         page.selectCache(cacheName);
@@ -231,6 +245,7 @@ public abstract class AbstractCacheTestCase {
     @Test
     public void editStopTimeout() {
         page.getConfig().switchTo("Transaction");
+        page.selectCache(cacheName);
         ResourceAddress address = transactionTemplate.resolve(context, cacheName);
         editTextAndVerify(address, "stop-timeout", "13400");
         page.selectCache(cacheName);

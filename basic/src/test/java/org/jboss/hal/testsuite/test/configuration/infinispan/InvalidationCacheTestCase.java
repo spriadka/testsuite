@@ -1,7 +1,7 @@
 package org.jboss.hal.testsuite.test.configuration.infinispan;
 
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.hal.testsuite.category.Standalone;
+import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.dmr.AddressTemplate;
 import org.jboss.hal.testsuite.dmr.Operation;
 import org.junit.Before;
@@ -12,7 +12,7 @@ import org.junit.runner.RunWith;
  * @author mkrajcov <mkrajcov@redhat.com>
  */
 @RunWith(Arquillian.class)
-@Category(Standalone.class)
+@Category(Shared.class)
 public class InvalidationCacheTestCase extends AbstractCacheTestCase {
 
 

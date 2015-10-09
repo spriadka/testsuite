@@ -26,7 +26,8 @@ public class HibernateCachePage extends ConfigPage implements Navigatable {
                     .addAddress(FinderNames.CONFIGURATION, FinderNames.PROFILES)
                     .addAddress(FinderNames.PROFILE, "full");
         } else {
-            navigation = new FinderNavigation(browser, StandaloneConfigEntryPoint.class);
+            navigation = new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
+                    .addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS);
         }
         navigation.addAddress(FinderNames.SUBSYSTEM, "Infinispan")
                 .addAddress("Cache Container", "hibernate");
@@ -94,7 +95,7 @@ public class HibernateCachePage extends ConfigPage implements Navigatable {
     }
 
     public void selectCache(String name) {
-        getResourceManager().getResourceTable().selectRowByText(0, name).click();
+        getResourceManager().selectByName(name);
     }
 
 

@@ -5,18 +5,17 @@ import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.junit.InSequence;
-import org.jboss.hal.testsuite.category.Standalone;
+import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.cli.CliClient;
 import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.cli.CliUtils;
 import org.jboss.hal.testsuite.fragment.config.infinispan.CacheContainerWizard;
-import org.jboss.hal.testsuite.page.config.ConfigurationPage;
-import org.jboss.hal.testsuite.page.config.StandaloneConfigurationPage;
+import org.jboss.hal.testsuite.page.config.CacheContainersPage;
 import org.jboss.hal.testsuite.test.util.ConfigAreaChecker;
-import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.ResourceVerifier;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
@@ -29,7 +28,7 @@ import static org.junit.Assert.assertTrue;
  * @author mkrajcov <mkrajcov@redhat.com>
  */
 @RunWith(Arquillian.class)
-@Category(Standalone.class)
+@Category(Shared.class)
 public class CacheContainersTestCase {
 
     private static final String CACHE_CONTAINER_NAME = "cc_" + RandomStringUtils.randomAlphabetic(5);
@@ -39,6 +38,7 @@ public class CacheContainersTestCase {
     private static final String LISTENER_EXECUTOR = "le_" + RandomStringUtils.randomAlphanumeric(5);
     private static final String REPLICATION_QUEUE_EXECUTOR = "rqe_" + RandomStringUtils.randomAlphanumeric(5);
     private static final String TRANSPORT_VALUE = "1000";
+    private static final String ALIASES_VALUE = "this\nthat";
 
     private final String cacheContainerName = "container_" + RandomStringUtils.randomAlphanumeric(5);
     private final String cacheContainerDmr = CACHE_CONTAINER_ADDRESS + "=" + cacheContainerName;
@@ -54,12 +54,12 @@ public class CacheContainersTestCase {
     public WebDriver browser;
 
     @Page
-    public StandaloneConfigurationPage page;
+    public CacheContainersPage page;
 
     @Before
     public void before() {
         addCacheContainer();
-        Console.withBrowser(browser).refreshAndNavigate(StandaloneConfigurationPage.class);
+        page.navigate();
     }
 
     @After
@@ -70,7 +70,7 @@ public class CacheContainersTestCase {
     @Test
     @InSequence(0)
     public void createCacheContainer() {
-        CacheContainerWizard wizard = page.subsystems().selectMenu("Infinispan").add(CacheContainerWizard.class);
+        CacheContainerWizard wizard = page.invokeAddCacheContainer();
         boolean result = wizard.name(CACHE_CONTAINER_NAME).finish();
 
         assertTrue("Window should be closed.", result);
@@ -81,70 +81,109 @@ public class CacheContainersTestCase {
     @Test
     @InSequence(1)
     public void removeCacheContainer() {
-        navigateToCache(CACHE_CONTAINER_NAME).remove();
+        page.removeCacheContainer(CACHE_CONTAINER_NAME);
 
         attrVerifier.verifyResource(CACHE_CONTAINER_ADDRESS + "=" + CACHE_CONTAINER_NAME, false);
 
     }
 
+    @Ignore("This setting is not present anymore.")
     @Test
     public void editStartMode() {
-        navigateToCache(cacheContainerName).option("Container Settings");
+        page.invokeContainerSettings(cacheContainerName);
         attrChecker.editSelectAndAssert(page, "start", START).invoke();
     }
 
     @Test
     public void editJndiName() {
-        navigateToCache(cacheContainerName).option("Container Settings");
+        page.invokeContainerSettings(cacheContainerName);
         attrChecker.editTextAndAssert(page, "jndi-name", JNDI_NAME).invoke();
     }
 
     @Test
+    public void editDefaultCache() {
+        page.invokeContainerSettings(cacheContainerName);
+        attrChecker.editTextAndAssert(page, "default-cache", RandomStringUtils.randomAlphanumeric(5)).invoke();
+    }
+
+    @Test
+    public void editModule() {
+        page.invokeContainerSettings(cacheContainerName);
+        attrChecker.editTextAndAssert(page, "module", RandomStringUtils.randomAlphanumeric(5)).invoke();
+    }
+
+    @Test
+    public void setStatisticsEnabledToTrue() {
+        page.invokeContainerSettings(cacheContainerName);
+        attrChecker.editCheckboxAndAssert(page, "statistics-enabled", true).invoke();
+    }
+
+    @Test
+    public void setStatisticsEnabledToFalse() {
+        page.invokeContainerSettings(cacheContainerName);
+        attrChecker.editCheckboxAndAssert(page, "statistics-enabled", false).invoke();
+    }
+
+    @Test
+    public void editAliases() {
+        page.invokeContainerSettings(cacheContainerName);
+        attrChecker.editTextAndAssert(page, "aliases", ALIASES_VALUE).invoke();
+    }
+
+    @Ignore("This setting is not present anymore.")
+    @Test
     public void editEvictionExecutor() {
-        navigateToCache(cacheContainerName).option("Container Settings");
+        page.invokeContainerSettings(cacheContainerName);
         attrChecker.editTextAndAssert(page, "eviction-executor", EVICTION_EXECUTOR).invoke();
     }
 
+    @Ignore("This setting is not present anymore.")
     @Test
     public void editListenerExecutor() {
-        navigateToCache(cacheContainerName).option("Container Settings");
+        page.invokeContainerSettings(cacheContainerName);
         attrChecker.editTextAndAssert(page, "listener-executor", LISTENER_EXECUTOR).invoke();
     }
 
+    @Ignore("This setting is not present anymore.")
     @Test
     public void editReplicationQueueExecutor() {
-        navigateToCache(cacheContainerName).option("Container Settings");
+        page.invokeContainerSettings(cacheContainerName);
         attrChecker.editTextAndAssert(page, "replication-queue-executor", REPLICATION_QUEUE_EXECUTOR).invoke();
     }
 
+    @Ignore("This setting is not present anymore.")
     @Test
     public void editStack() {
-        navigateToCache(cacheContainerName).option("Transport Settings");
+        page.invokeTransportSettings(cacheContainerName);
         transportChecker.editTextAndAssert(page, "stack", TRANSPORT_VALUE)
                 .invoke();
     }
 
+    @Ignore("This setting is not present anymore.")
     @Test
     public void editExecutor() {
-        navigateToCache(cacheContainerName).option("Transport Settings");
+        page.invokeTransportSettings(cacheContainerName);
         transportChecker.editTextAndAssert(page, "executor", TRANSPORT_VALUE)
                 .invoke();
     }
 
     @Test
     public void editLockTimeout() {
-        navigateToCache(cacheContainerName).option("Transport Settings");
+        page.invokeTransportSettings(cacheContainerName);
         transportChecker.editTextAndAssert(page, "lock-timeout", TRANSPORT_VALUE)
                 .invoke();
     }
 
-    private ConfigurationPage navigateToCache(String cache) {
-        return page.subsystems().selectMenu("Infinispan").selectMenu(cache);
+    @Test
+    public void editChannel() {
+        page.invokeTransportSettings(cacheContainerName);
+        transportChecker.editTextAndAssert(page, "channel", TRANSPORT_VALUE)
+                .invoke();
     }
 
     private void addCacheContainer() {
         String addContainer = CliUtils.buildCommand(cacheContainerDmr, ":add");
-        String addTransport = CliUtils.buildCommand(transportDmr, ":add", new String[]{"stack=500"});
+        String addTransport = CliUtils.buildCommand(transportDmr, ":add");
         client.executeCommand(addContainer);
         client.executeCommand(addTransport);
     }
