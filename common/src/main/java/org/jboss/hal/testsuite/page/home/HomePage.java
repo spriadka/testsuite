@@ -1,96 +1,51 @@
 package org.jboss.hal.testsuite.page.home;
 
 import org.jboss.arquillian.graphene.Graphene;
+import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.arquillian.graphene.page.Location;
-import org.jboss.hal.testsuite.fragment.BaseFragment;
-import org.jboss.hal.testsuite.fragment.homepage.HomepageInfoFragment;
+import org.jboss.hal.testsuite.fragment.homepage.HomepageModuleFragment;
 import org.jboss.hal.testsuite.fragment.homepage.HomepageSideBarFragment;
-import org.jboss.hal.testsuite.fragment.homepage.HomepageTaskFragment;
 import org.jboss.hal.testsuite.page.BasePage;
+import org.jboss.hal.testsuite.page.Navigatable;
+import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.PropUtils;
 import org.openqa.selenium.By;
-import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 
 /**
  * @author jcechace
  */
 @Location("#home")
-public class HomePage extends BasePage {
+public class HomePage extends BasePage implements Navigatable {
 
-    public static enum BoxType {
-
-        TASK("homepage.task.class", "homepage.task.header.class"),
-        INFO("homepage.info.class", "homepage.info.header.class");
-
-        private final String headerClass;
-        private final String boxClass;
-
-        private BoxType(String boxClass, String headerClass) {
-            this.boxClass = PropUtils.get(boxClass);
-            this.headerClass = PropUtils.get(headerClass);
-        }
-
-        public String getHeaderClass() {
-            return headerClass;
-        }
-
-        public String getBoxClass() {
-            return boxClass;
-        }
-
-        @Override
-        public String toString() {
-            return super.toString().toLowerCase() + " box";
-        }
+    public void navigate() {
+        browser.navigate().refresh();
+        Graphene.goTo(HomePage.class);
+        Console.withBrowser(browser).waitUntilLoaded().maximizeWindow();
     }
 
-    public HomepageTaskFragment getTaskBox(String identifier) {
-        return getBox(identifier, BoxType.TASK, HomepageTaskFragment.class);
-    }
+    /**
+     * @return null if no matching element is found
+     */
+    public HomepageModuleFragment getModule(String title) {
 
-    public HomepageInfoFragment getInfoBox(String identifier) {
-        return getBox(identifier, BoxType.INFO, HomepageInfoFragment.class);
-    }
+        String moduleClass = PropUtils.get("homepage.module.class");
+        By anyModuleSelector = By.className(moduleClass);
 
-    public <T extends BaseFragment> T getBox(String identifier, BoxType box, Class<T> clazz) {
-        Map<String, T> boxes = getAllBoxes(box, clazz);
+        String moduleHeaderClass = PropUtils.get("homepage.module.header.class");
+        By moduleTitleSelector = ByJQuery.selector("." + moduleHeaderClass + ":contains('" + title + "'):visible");
 
-        T fragment = boxes.get(identifier.toLowerCase());
+        Optional<WebElement> module = getContentRoot().findElements(anyModuleSelector).stream().filter(anyModule -> {
+            return !anyModule.findElements(moduleTitleSelector).isEmpty();
+        }).findFirst();
 
-        if (fragment == null) {
-            throw new NoSuchElementException("Unable to found " + box + " with identifier: "
-                + identifier);
+        if (module.isPresent()) {
+            return Graphene.createPageFragment(HomepageModuleFragment.class, module.get());
         }
-
-        return fragment;
+        return null;
     }
-
-    public <T extends BaseFragment> Map<String, T> getAllBoxes(BoxType box, Class<T> clazz) {
-        By selector = By.className(box.getBoxClass());
-
-        List<WebElement> elements = browser.findElements(selector);
-        Map<String, T> tasks = new HashMap<String, T>();
-
-        for (WebElement element : elements) {
-            By headerSelector = By.className(box.getHeaderClass());
-            WebElement header = element.findElement(headerSelector);
-
-            String id = header.getAttribute("id");
-            String[] classAttr = id.split("_"); // only prefix up to first "_"
-            String key = classAttr[box == BoxType.TASK ? 0 : classAttr.length - 1].toLowerCase();
-            T task = Graphene.createPageFragment(clazz, element);
-
-            tasks.put(key, task);
-        }
-
-        return tasks;
-    }
-
 
     public HomepageSideBarFragment getSideBar() {
         By selector = By.className(PropUtils.get("homepage.sidebar.class"));
