@@ -11,4 +11,12 @@ public class JGroupsConfigArea extends ConfigAreaFragment {
         return switchTo("Properties", ConfigPropertiesFragment.class);
     }
 
+    public JGroupsProtocolPropertiesFragment protocolPropertiesConfig() {
+        return switchTo("Properties", JGroupsProtocolPropertiesFragment.class);
+    }
+
+    public JGroupsTransportPropertiesFragment transportPropertiesConfig() {
+        return switchTo("Properties", JGroupsTransportPropertiesFragment.class);
+    }
+
 }

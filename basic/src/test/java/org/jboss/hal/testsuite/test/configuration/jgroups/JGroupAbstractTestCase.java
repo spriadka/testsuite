@@ -3,13 +3,16 @@ package org.jboss.hal.testsuite.test.configuration.jgroups;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
+import org.jboss.arquillian.junit.InSequence;
 import org.jboss.hal.testsuite.cli.CliClient;
 import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.finder.Application;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
-import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConfigPropertiesFragment;
-import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConfigPropertyWizard;
+import org.jboss.hal.testsuite.fragment.config.jgroups.JGroupsProtocolPropertiesFragment;
+import org.jboss.hal.testsuite.fragment.config.jgroups.JGroupsProtocolPropertyWizard;
+import org.jboss.hal.testsuite.fragment.config.jgroups.JGroupsTransportPropertiesFragment;
+import org.jboss.hal.testsuite.fragment.config.jgroups.JGroupsTransportPropertyWizard;
 import org.jboss.hal.testsuite.page.config.DomainConfigEntryPoint;
 import org.jboss.hal.testsuite.page.config.JGroupsPage;
 import org.jboss.hal.testsuite.page.config.StandaloneConfigEntryPoint;
@@ -164,33 +167,35 @@ public class JGroupAbstractTestCase {
 
     @Test
     public void createTransportProperty() {
-        ConfigPropertiesFragment properties = page.getConfig().propertiesConfig();
-        ConfigPropertyWizard wizard = properties.addProperty();
-        wizard.name(PROPERTY_NAME).value(PROPERTY_VALUE).finish();
+        JGroupsTransportPropertiesFragment properties = page.getConfig().transportPropertiesConfig();
+        JGroupsTransportPropertyWizard wizard = properties.addProperty();
+        wizard.key(PROPERTY_NAME).value(PROPERTY_VALUE).finish();
         assertTrue(jGroupsOperations.verifyTransportProperty(PROPERTY_NAME, PROPERTY_VALUE));
     }
 
     @Test
     public void removeTransportProperty() {
-        ConfigPropertiesFragment properties = page.getConfig().propertiesConfig();
+        JGroupsTransportPropertiesFragment properties = page.getConfig().transportPropertiesConfig();
         properties.removeProperty(PROPERTY_NAME_P);
         assertFalse(jGroupsOperations.verifyTransportProperty(PROPERTY_NAME_P, PROPERTY_VALUE_P));
     }
 
 
+    @InSequence(2)
     @Test
     public void createProtocolProperty() {
         page.switchToProtocol(DEFAULT_PROTOCOL);
-        ConfigPropertiesFragment properties = page.getConfig().propertiesConfig();
-        ConfigPropertyWizard wizard = properties.addProperty();
-        wizard.name(PROPERTY_NAME).value(PROPERTY_VALUE).finish();
+        JGroupsProtocolPropertiesFragment properties = page.getConfig().protocolPropertiesConfig();
+        JGroupsProtocolPropertyWizard wizard = properties.addProperty();
+        wizard.key(PROPERTY_NAME).value(PROPERTY_VALUE).finish();
         assertTrue(jGroupsOperations.verifyProtocolProperty(DEFAULT_PROTOCOL, PROPERTY_NAME, PROPERTY_VALUE));
     }
 
+    @InSequence(1)
     @Test
     public void removeProtocolProperty() {
         page.switchToProtocol(DEFAULT_PROTOCOL);
-        ConfigPropertiesFragment properties = page.getConfig().propertiesConfig();
+        JGroupsProtocolPropertiesFragment properties = page.getConfig().protocolPropertiesConfig();
         properties.removeProperty(PROPERTY_NAME_P);
         assertFalse(jGroupsOperations.verifyProtocolProperty(DEFAULT_PROTOCOL, PROPERTY_NAME_P, PROPERTY_VALUE_P));
     }
