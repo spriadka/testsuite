@@ -2,10 +2,10 @@ package org.jboss.hal.testsuite.test.configuration.infinispan;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.dmr.AddressTemplate;
 import org.jboss.hal.testsuite.dmr.Operation;
 import org.jboss.hal.testsuite.fragment.config.infinispan.CacheWizard;
-import org.jboss.hal.testsuite.category.Standalone;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,7 +16,7 @@ import org.junit.runner.RunWith;
  * @author mkrajcov <mkrajcov@redhat.com>
  */
 @RunWith(Arquillian.class)
-@Category(Standalone.class)
+@Category(Shared.class)
 public class LocalCacheTestCase extends AbstractCacheTestCase {
 
     @Override

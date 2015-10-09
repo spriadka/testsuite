@@ -1,7 +1,7 @@
 package org.jboss.hal.testsuite.test.configuration.infinispan;
 
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.hal.testsuite.category.Standalone;
+import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.dmr.AddressTemplate;
 import org.jboss.hal.testsuite.dmr.Operation;
 import org.junit.Before;
@@ -12,7 +12,7 @@ import org.junit.runner.RunWith;
  * @author mkrajcov <mkrajcov@redhat.com>
  */
 @RunWith(Arquillian.class)
-@Category(Standalone.class)
+@Category(Shared.class)
 public class ReplicatedCacheTestCase extends AbstractCacheTestCase {
 
     @Override
@@ -30,10 +30,10 @@ public class ReplicatedCacheTestCase extends AbstractCacheTestCase {
                 .param("mode", "SYNC")
                 .build());
         dispatcher.execute(new Operation.Builder("add", transactionTemplate.resolve(context, cacheName)).build());
-        dispatcher.execute(new Operation.Builder("add", storeTemplate.resolve(context, cacheName)).build());
-        dispatcher.execute(new Operation.Builder("add", lockingTemplate.resolve(context, cacheName))
+        dispatcher.execute(new Operation.Builder("add", storeTemplate.resolve(context, cacheName))
                 .param("class", "org.infinispan.configuration.cache.SingleFileStoreConfigurationBuilder")
                 .build());
+        dispatcher.execute(new Operation.Builder("add", lockingTemplate.resolve(context, cacheName)).build());
     }
 
     public void deleteCache() {
