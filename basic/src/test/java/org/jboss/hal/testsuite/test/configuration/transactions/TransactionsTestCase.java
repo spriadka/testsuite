@@ -1,4 +1,4 @@
-package org.jboss.hal.testsuite.test.configuration.container;
+package org.jboss.hal.testsuite.test.configuration.transactions;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
@@ -8,8 +8,10 @@ import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.cli.DomainManager;
 import org.jboss.hal.testsuite.dmr.AddressTemplate;
+import org.jboss.hal.testsuite.dmr.Composite;
 import org.jboss.hal.testsuite.dmr.DefaultContext;
 import org.jboss.hal.testsuite.dmr.Dispatcher;
+import org.jboss.hal.testsuite.dmr.Operation;
 import org.jboss.hal.testsuite.dmr.ResourceAddress;
 import org.jboss.hal.testsuite.dmr.StatementContext;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
@@ -25,6 +27,11 @@ import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
 
 import java.io.IOException;
+
+import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.NAME;
+import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.UNDEFINE_ATTRIBUTE_OPERATION;
+import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.VALUE;
+import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.WRITE_ATTRIBUTE_OPERATION;
 
 /**
  * @author mkrajcov <mkrajcov@redhat.com>
@@ -81,7 +88,7 @@ public class TransactionsTestCase {
     private final String JDBC_STATE_STORE_TABLE_PREFIX_ATTR = "jdbc-state-store-table-prefix";
     private final String JDBC_STORE_DATASOURCE_ATTR = "jdbc-store-datasource";
 
-    private AddressTemplate transactionsTemplate = AddressTemplate.of("/subsystem=transactions/");
+    private AddressTemplate transactionsTemplate = AddressTemplate.of("{default.profile}/subsystem=transactions/");
     private StatementContext context = new DefaultContext();
     private ResourceAddress address = transactionsTemplate.resolve(context);
     private Dispatcher dispatcher = new Dispatcher();
@@ -125,6 +132,7 @@ public class TransactionsTestCase {
 
     @Test
     public void setUseJournalStoreToTrue() throws IOException, InterruptedException {
+        setEnableToUseJDBCStore(false);
         editCheckboxAndVerify(address, USE_JOURNAL_STORE, USE_JOURNAL_STORE_ATTR, true);
     }
 
@@ -135,11 +143,13 @@ public class TransactionsTestCase {
 
     @Test
     public void setJournalStoreEnableAsyncIOToTrue() throws IOException, InterruptedException {
+        prepareForJournalStoreConfiguration();
         editCheckboxAndVerify(address, JOURNAL_STORE_ENABLE_ASYNC_IO, JOURNAL_STORE_ENABLE_ASYNC_IO_ATTR, true);
     }
 
     @Test
     public void setJournalStoreEnableAsyncIOToFalse() throws IOException, InterruptedException {
+        prepareForJournalStoreConfiguration();
         editCheckboxAndVerify(address, JOURNAL_STORE_ENABLE_ASYNC_IO, JOURNAL_STORE_ENABLE_ASYNC_IO_ATTR, false);
     }
 
@@ -173,15 +183,6 @@ public class TransactionsTestCase {
     }
 
 
-    @Ignore("\"failure-description\" => \"WFLYCTL0105: process-id-uuid is invalid in combination with process-id-socket-binding\"")
-    @Test
-    public void editProcessIdSocket() {
-    }
-
-    @Ignore("\"failure-description\" => \"WFLYCTL0105: process-id-uuid is invalid in combination with process-id-socket-binding\"")
-    @Test
-    public void editMaxPorts() {
-    }
 
     @Test
     public void editSocketBinding() throws IOException, InterruptedException {
@@ -221,6 +222,7 @@ public class TransactionsTestCase {
 
     @Test
     public void setUseJDBCStoreToTrue() throws IOException, InterruptedException {
+        setEnableToUseJournalStore(false);
         page.getConfig().switchTo("JDBC");
         editCheckboxAndVerify(address, USE_JDBC_STORE, USE_JDBC_STORE_ATTR, true);
     }
@@ -233,48 +235,107 @@ public class TransactionsTestCase {
 
     @Test
     public void setJDBCActionStoreDropTableToTrue() throws IOException, InterruptedException {
+        prepareForJDBCConfiguration();
         page.getConfig().switchTo("JDBC");
         editCheckboxAndVerify(address, JDBC_ACTION_STORE_DROP_TABLE, JDBC_ACTION_STORE_DROP_TABLE_ATTR, true);
     }
 
     @Test
     public void setJDBCActionStoreDropTableToFalse() throws IOException, InterruptedException {
+        prepareForJDBCConfiguration();
         page.getConfig().switchTo("JDBC");
         editCheckboxAndVerify(address, JDBC_ACTION_STORE_DROP_TABLE, JDBC_ACTION_STORE_DROP_TABLE_ATTR, false);
     }
 
     @Test
     public void setJDBCCommunicationStoreDropTableToTrue() throws IOException, InterruptedException {
+        prepareForJDBCConfiguration();
         page.getConfig().switchTo("JDBC");
         editCheckboxAndVerify(address, JDBC_COMMUNICATION_STORE_DROP_TABLE, JDBC_COMMUNICATION_STORE_DROP_TABLE_ATTR, true);
     }
 
     @Test
     public void setJDBCCommunicationStoreDropTableToFalse() throws IOException, InterruptedException {
+        prepareForJDBCConfiguration();
         page.getConfig().switchTo("JDBC");
         editCheckboxAndVerify(address, JDBC_COMMUNICATION_STORE_DROP_TABLE, JDBC_COMMUNICATION_STORE_DROP_TABLE_ATTR, false);
     }
 
     @Test
     public void setJDBCStateStoreDropTableToTrue() throws IOException, InterruptedException {
+        prepareForJDBCConfiguration();
         page.getConfig().switchTo("JDBC");
-        editCheckboxAndVerify(address, JDBC_STATE_STORE_DROP_TABLE,  JDBC_STATE_STORE_DROP_TABLE_ATTR, true);
+        editCheckboxAndVerify(address, JDBC_STATE_STORE_DROP_TABLE, JDBC_STATE_STORE_DROP_TABLE_ATTR, true);
     }
 
     @Test
     public void setJDBStateStoreDropTableToFalse() throws IOException, InterruptedException {
+        prepareForJDBCConfiguration();
         page.getConfig().switchTo("JDBC");
-        editCheckboxAndVerify(address, JDBC_STATE_STORE_DROP_TABLE,  JDBC_STATE_STORE_DROP_TABLE_ATTR, false);
+        editCheckboxAndVerify(address, JDBC_STATE_STORE_DROP_TABLE, JDBC_STATE_STORE_DROP_TABLE_ATTR, false);
+    }
+
+    @Test
+    public void editJDBCStateStoreTablePrefix() throws IOException, InterruptedException {
+        prepareForJDBCConfiguration();
+        page.getConfig().switchTo("JDBC");
+        editTextAndVerify(address, JDBC_STATE_STORE_TABLE_PREFIX, JDBC_STATE_STORE_TABLE_PREFIX_ATTR);
+    }
+
+    @Test
+    public void editJDBCCommunicationStoreTablePrefix() throws IOException, InterruptedException {
+        prepareForJDBCConfiguration();
+        page.getConfig().switchTo("JDBC");
+        editTextAndVerify(address, JDBC_COMMUNICATION_STORE_TABLE_PREFIX, JDBC_COMMUNICATION_STORE_TABLE_PREFIX_ATTR);
+    }
+
+    @Test
+    public void editJDBCActionStoreTablePrefix() throws IOException, InterruptedException {
+        prepareForJDBCConfiguration();
+        page.getConfig().switchTo("JDBC");
+        editTextAndVerify(address, JDBC_ACTION_STORE_TABLE_PREFIX, JDBC_ACTION_STORE_TABLE_PREFIX_ATTR);
+    }
+
+    @Test
+    public void editJDBCStoreDataSource() throws IOException, InterruptedException {
+        prepareForJDBCConfiguration();
+        page.getConfig().switchTo("JDBC");
+        editTextAndVerify(address, JDBC_STORE_DATASOURCE, JDBC_STORE_DATASOURCE_ATTR);
     }
 
     @Test
     public void setProcessIDUUIDToTrue() throws IOException, InterruptedException {
-        editCheckboxAndVerify(address, PROCESS_ID_UUID,  PROCESS_ID_UUID_ATTR, true);
+        prepareProcessIDConfiguration("", true);
+        page.getConfig().switchTo("Process ID");
+        editCheckboxAndVerify(address, PROCESS_ID_UUID, PROCESS_ID_UUID_ATTR, true);
     }
 
     @Test
     public void setProcessIDUUIDToFalse() throws IOException, InterruptedException {
-        editCheckboxAndVerify(address, PROCESS_ID_UUID,  PROCESS_ID_UUID_ATTR, false);
+        prepareProcessIDConfiguration("asd", false);
+        page.getConfig().switchTo("Process ID");
+        editCheckboxAndVerify(address, PROCESS_ID_UUID, PROCESS_ID_UUID_ATTR, false);
+    }
+
+    @Test
+    public void editProcessIDSocketBinding() throws IOException, InterruptedException {
+        prepareProcessIDConfiguration("fghsd", false);
+        page.getConfig().switchTo("Process ID");
+        editTextAndVerify(address, PROCESS_ID_SOCKET_BINDING, PROCESS_ID_SOCKET_BINDING_ATTR);
+    }
+
+    @Test
+    public void editProcessIDSocketMaxPorts() throws IOException, InterruptedException {
+        prepareProcessIDConfiguration("", true);
+        page.getConfig().switchTo("Process ID");
+        editTextAndVerify(address, PROCESS_ID_SOCKET_MAX_PORTS, PROCESS_ID_SOCKET_MAX_PORTS_ATTR);
+    }
+
+    @Test
+    public void editProcessIDSocketMaxPortsInvalid() throws IOException, InterruptedException {
+        prepareProcessIDConfiguration("", true);
+        page.getConfig().switchTo("Process ID");
+        verifyIfErrorAppears(PROCESS_ID_SOCKET_MAX_PORTS, "adfs");
     }
 
     //helper methods
@@ -300,20 +361,63 @@ public class TransactionsTestCase {
         verifier.verifyAttribute(address, attributeName, value);
     }
 
-    protected void verifyIfErrorAppears(String identifier, String value) {
+    private void verifyIfErrorAppears(String identifier, String value) {
         ConfigFragment config = page.getConfigFragment();
         config.editTextAndSave(identifier, value);
         Assert.assertTrue(config.isErrorShownInForm());
         config.cancel();
     }
 
-    protected void reloadIfRequiredAndWaitForRunning() {
+    private void reloadIfRequiredAndWaitForRunning() {
         final int timeout = 60000;
         if (ConfigUtils.isDomain()) {
             new DomainManager(CliClientFactory.getClient()).reloadIfRequiredAndWaitUntilRunning(timeout);
         } else {
             CliClientFactory.getClient().reload(false);
         }
+    }
+
+    private void prepareForJDBCConfiguration() {
+        setEnableToUseJournalStore(false);
+        setEnableToUseJDBCStore(true);
+    }
+
+    private void setEnableToUseJournalStore(boolean enable) {
+        dispatcher.execute(new Operation.Builder(WRITE_ATTRIBUTE_OPERATION, address)
+                .param(NAME, USE_JOURNAL_STORE_ATTR)
+                .param(VALUE, enable)
+                .build());
+        reloadIfRequiredAndWaitForRunning();
+    }
+
+    private void setEnableToUseJDBCStore(boolean enable) {
+        dispatcher.execute(new Operation.Builder(WRITE_ATTRIBUTE_OPERATION, address)
+                .param(NAME, USE_JDBC_STORE_ATTR)
+                .param(VALUE, enable)
+                .build());
+        reloadIfRequiredAndWaitForRunning();
+    }
+
+    private void prepareForJournalStoreConfiguration() {
+        setEnableToUseJDBCStore(false);
+        setEnableToUseJournalStore(true);
+    }
+
+    private void prepareProcessIDConfiguration(String socketBinding, boolean enableProcessUUID) {
+        Operation setEnable = new Operation.Builder(WRITE_ATTRIBUTE_OPERATION, address)
+                .param(NAME, PROCESS_ID_UUID_ATTR)
+                .param(VALUE, enableProcessUUID)
+                .build();
+        Operation undefineSocketBinding = new Operation.Builder(UNDEFINE_ATTRIBUTE_OPERATION, address)
+                .param(NAME, PROCESS_ID_SOCKET_BINDING_ATTR)
+                .build();
+        Operation setSocketBinding = new Operation.Builder(WRITE_ATTRIBUTE_OPERATION, address)
+                .param(NAME, PROCESS_ID_SOCKET_BINDING_ATTR)
+                .param(VALUE, socketBinding)
+                .build();
+        Operation editSocketBinding = socketBinding.isEmpty() ? undefineSocketBinding : setSocketBinding;
+        Composite composite = new Composite(setEnable, editSocketBinding);
+        dispatcher.execute(composite);
     }
 
 }
