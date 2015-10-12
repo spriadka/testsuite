@@ -38,7 +38,7 @@ import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.WRI
  */
 @RunWith(Arquillian.class)
 @Category(Shared.class)
-public class TransactionsTestCase {
+public class TransactionsTestCase extends TransactionsAbstractTestCase {
 
     private final String DEFAULT_TIMEOUT = "default-timeout";
     private final String ENABLE_TSM_STATUS = "enable-tsm-status";
@@ -47,9 +47,6 @@ public class TransactionsTestCase {
     private final String NODE_IDENTIFIER = "node-identifier";
     private final String STATISTICS_ENABLED = "statistics-enabled";
     private final String USE_JOURNAL_STORE = "use-journal-store";
-    private final String PROCESS_ID_UUID = "process-id-uuid";
-    private final String PROCESS_ID_SOCKET_BINDING = "process-id-socket-binding";
-    private final String PROCESS_ID_SOCKET_MAX_PORTS = "process-id-socket-max-ports";
     private final String SOCKET_BINDING = "socket-binding";
     private final String STATUS_SOCKET_BINDING = "status-socket-binding";
     private final String RECOVERY_LISTENER = "recovery-listener";
@@ -71,9 +68,6 @@ public class TransactionsTestCase {
     private final String NODE_IDENTIFIER_ATTR = "node-identifier";
     private final String STATISTICS_ENABLED_ATTR = "statistics-enabled";
     private final String USE_JOURNAL_STORE_ATTR = "use-journal-store";
-    private final String PROCESS_ID_UUID_ATTR = "process-id-uuid";
-    private final String PROCESS_ID_SOCKET_BINDING_ATTR = "process-id-socket-binding";
-    private final String PROCESS_ID_SOCKET_MAX_PORTS_ATTR = "process-id-socket-max-ports";
     private final String SOCKET_BINDING_ATTR = "socket-binding";
     private final String STATUS_SOCKET_BINDING_ATTR = "status-socket-binding";
     private final String RECOVERY_LISTENER_ATTR = "recovery-listener";
@@ -87,12 +81,6 @@ public class TransactionsTestCase {
     private final String JDBC_STATE_STORE_DROP_TABLE_ATTR = "jdbc-state-store-drop-table";
     private final String JDBC_STATE_STORE_TABLE_PREFIX_ATTR = "jdbc-state-store-table-prefix";
     private final String JDBC_STORE_DATASOURCE_ATTR = "jdbc-store-datasource";
-
-    private AddressTemplate transactionsTemplate = AddressTemplate.of("{default.profile}/subsystem=transactions/");
-    private StatementContext context = new DefaultContext();
-    private ResourceAddress address = transactionsTemplate.resolve(context);
-    private Dispatcher dispatcher = new Dispatcher();
-    private org.jboss.hal.testsuite.dmr.ResourceVerifier verifier = new org.jboss.hal.testsuite.dmr.ResourceVerifier(dispatcher);
 
     @Drone
     public WebDriver browser;
@@ -303,79 +291,7 @@ public class TransactionsTestCase {
         editTextAndVerify(address, JDBC_STORE_DATASOURCE, JDBC_STORE_DATASOURCE_ATTR);
     }
 
-    @Test
-    public void setProcessIDUUIDToTrue() throws IOException, InterruptedException {
-        prepareProcessIDConfiguration("", true);
-        page.getConfig().switchTo("Process ID");
-        editCheckboxAndVerify(address, PROCESS_ID_UUID, PROCESS_ID_UUID_ATTR, true);
-    }
 
-    @Test
-    public void setProcessIDUUIDToFalse() throws IOException, InterruptedException {
-        prepareProcessIDConfiguration("asd", false);
-        page.getConfig().switchTo("Process ID");
-        editCheckboxAndVerify(address, PROCESS_ID_UUID, PROCESS_ID_UUID_ATTR, false);
-    }
-
-    @Test
-    public void editProcessIDSocketBinding() throws IOException, InterruptedException {
-        prepareProcessIDConfiguration("fghsd", false);
-        page.getConfig().switchTo("Process ID");
-        editTextAndVerify(address, PROCESS_ID_SOCKET_BINDING, PROCESS_ID_SOCKET_BINDING_ATTR);
-    }
-
-    @Test
-    public void editProcessIDSocketMaxPorts() throws IOException, InterruptedException {
-        prepareProcessIDConfiguration("", true);
-        page.getConfig().switchTo("Process ID");
-        editTextAndVerify(address, PROCESS_ID_SOCKET_MAX_PORTS, PROCESS_ID_SOCKET_MAX_PORTS_ATTR);
-    }
-
-    @Test
-    public void editProcessIDSocketMaxPortsInvalid() throws IOException, InterruptedException {
-        prepareProcessIDConfiguration("", true);
-        page.getConfig().switchTo("Process ID");
-        verifyIfErrorAppears(PROCESS_ID_SOCKET_MAX_PORTS, "adfs");
-    }
-
-    //helper methods
-    protected void editTextAndVerify(ResourceAddress address, String identifier, String attributeName, String value) throws IOException, InterruptedException {
-        page.getConfigFragment().editTextAndSave(identifier, value);
-        reloadIfRequiredAndWaitForRunning();
-        verifier.verifyAttribute(address, attributeName, value);
-    }
-
-    protected void editTextAndVerify(ResourceAddress address, String identifier,String attributeName) throws IOException, InterruptedException {
-        editTextAndVerify(address, identifier, attributeName, RandomStringUtils.randomAlphabetic(6));
-    }
-
-    protected void editCheckboxAndVerify(ResourceAddress address, String identifier, String attributeName, Boolean value) throws IOException, InterruptedException {
-        page.getConfigFragment().editCheckboxAndSave(identifier, value);
-        reloadIfRequiredAndWaitForRunning();
-        verifier.verifyAttribute(address, attributeName, value.toString());
-    }
-
-    public void selectOptionAndVerify(ResourceAddress address, String identifier, String attributeName, String value) throws IOException, InterruptedException {
-        page.getConfigFragment().selectOptionAndSave(identifier, value);
-        reloadIfRequiredAndWaitForRunning();
-        verifier.verifyAttribute(address, attributeName, value);
-    }
-
-    private void verifyIfErrorAppears(String identifier, String value) {
-        ConfigFragment config = page.getConfigFragment();
-        config.editTextAndSave(identifier, value);
-        Assert.assertTrue(config.isErrorShownInForm());
-        config.cancel();
-    }
-
-    private void reloadIfRequiredAndWaitForRunning() {
-        final int timeout = 60000;
-        if (ConfigUtils.isDomain()) {
-            new DomainManager(CliClientFactory.getClient()).reloadIfRequiredAndWaitUntilRunning(timeout);
-        } else {
-            CliClientFactory.getClient().reload(false);
-        }
-    }
 
     private void prepareForJDBCConfiguration() {
         setEnableToUseJournalStore(false);
@@ -403,21 +319,6 @@ public class TransactionsTestCase {
         setEnableToUseJournalStore(true);
     }
 
-    private void prepareProcessIDConfiguration(String socketBinding, boolean enableProcessUUID) {
-        Operation setEnable = new Operation.Builder(WRITE_ATTRIBUTE_OPERATION, address)
-                .param(NAME, PROCESS_ID_UUID_ATTR)
-                .param(VALUE, enableProcessUUID)
-                .build();
-        Operation undefineSocketBinding = new Operation.Builder(UNDEFINE_ATTRIBUTE_OPERATION, address)
-                .param(NAME, PROCESS_ID_SOCKET_BINDING_ATTR)
-                .build();
-        Operation setSocketBinding = new Operation.Builder(WRITE_ATTRIBUTE_OPERATION, address)
-                .param(NAME, PROCESS_ID_SOCKET_BINDING_ATTR)
-                .param(VALUE, socketBinding)
-                .build();
-        Operation editSocketBinding = socketBinding.isEmpty() ? undefineSocketBinding : setSocketBinding;
-        Composite composite = new Composite(setEnable, editSocketBinding);
-        dispatcher.execute(composite);
-    }
+
 
 }
