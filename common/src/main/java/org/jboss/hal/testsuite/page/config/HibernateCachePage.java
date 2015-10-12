@@ -32,7 +32,7 @@ public class HibernateCachePage extends ConfigPage implements Navigatable {
         navigation.addAddress(FinderNames.SUBSYSTEM, "Infinispan")
                 .addAddress("Cache Container", "hibernate");
         navigation.selectRow().invoke(FinderNames.VIEW);
-        Application.waitUntilVisible(20);
+        Application.waitUntilVisible(50);
     }
 
     private static final By CONTENT = By.id(PropUtils.get("page.content.id"));
