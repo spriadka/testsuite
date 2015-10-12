@@ -9,6 +9,7 @@ import org.jboss.hal.testsuite.dmr.AddressTemplate;
 import org.jboss.hal.testsuite.dmr.DefaultContext;
 import org.jboss.hal.testsuite.dmr.Dispatcher;
 import org.jboss.hal.testsuite.dmr.ResourceAddress;
+import org.jboss.hal.testsuite.dmr.ResourceVerifier;
 import org.jboss.hal.testsuite.dmr.StatementContext;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.page.config.TransactionsPage;
@@ -24,11 +25,19 @@ import java.io.IOException;
  */
 public abstract class TransactionsTestCaseAbstract {
 
-    protected AddressTemplate transactionsTemplate = AddressTemplate.of("{default.profile}/subsystem=transactions/");
-    protected StatementContext context = new DefaultContext();
-    protected ResourceAddress address = transactionsTemplate.resolve(context);
-    protected Dispatcher dispatcher = new Dispatcher();
-    protected org.jboss.hal.testsuite.dmr.ResourceVerifier verifier = new org.jboss.hal.testsuite.dmr.ResourceVerifier(dispatcher);
+    protected static AddressTemplate transactionsTemplate = AddressTemplate.of("{default.profile}/subsystem=transactions/");
+    protected static StatementContext context = new DefaultContext();
+    protected static ResourceAddress address = transactionsTemplate.resolve(context);
+    protected static Dispatcher dispatcher = new Dispatcher();
+    protected ResourceVerifier verifier = new ResourceVerifier(dispatcher);
+
+    protected final String JOURNAL_STORE_ENABLE_ASYNC_IO = "journal-store-enable-async-io";
+    protected final static String USE_JDBC_STORE = "use-jdbc-store";
+    protected final static String USE_JOURNAL_STORE = "use-journal-store";
+
+    protected final String JOURNAL_STORE_ENABLE_ASYNC_IO_ATTR = "journal-store-enable-async-io";
+    protected final static String USE_JDBC_STORE_ATTR = "use-jdbc-store";
+    protected final static String USE_JOURNAL_STORE_ATTR = "use-journal-store";
 
     @Drone
     public WebDriver browser;

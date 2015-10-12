@@ -27,11 +27,9 @@ public class TransactionsTestCase extends TransactionsTestCaseAbstract {
 
     private final String DEFAULT_TIMEOUT = "default-timeout";
     private final String ENABLE_TSM_STATUS = "enable-tsm-status";
-    private final String JOURNAL_STORE_ENABLE_ASYNC_IO = "journal-store-enable-async-io";
     private final String JTS = "jts";
     private final String NODE_IDENTIFIER = "node-identifier";
     private final String STATISTICS_ENABLED = "statistics-enabled";
-    private final String USE_JOURNAL_STORE = "use-journal-store";
     private final String SOCKET_BINDING = "socket-binding";
     private final String STATUS_SOCKET_BINDING = "status-socket-binding";
     private final String RECOVERY_LISTENER = "recovery-listener";
@@ -40,11 +38,9 @@ public class TransactionsTestCase extends TransactionsTestCaseAbstract {
 
     private final String DEFAULT_TIMEOUT_ATTR = "default-timeout";
     private final String ENABLE_TSM_STATUS_ATTR = "enable-tsm-status";
-    private final String JOURNAL_STORE_ENABLE_ASYNC_IO_ATTR = "journal-store-enable-async-io";
     private final String JTS_ATTR = "jts";
     private final String NODE_IDENTIFIER_ATTR = "node-identifier";
     private final String STATISTICS_ENABLED_ATTR = "statistics-enabled";
-    private final String USE_JOURNAL_STORE_ATTR = "use-journal-store";
     private final String SOCKET_BINDING_ATTR = "socket-binding";
     private final String STATUS_SOCKET_BINDING_ATTR = "status-socket-binding";
     private final String RECOVERY_LISTENER_ATTR = "recovery-listener";
@@ -80,29 +76,6 @@ public class TransactionsTestCase extends TransactionsTestCaseAbstract {
     @Test
     public void setJTSToFalse() throws IOException, InterruptedException {
         editCheckboxAndVerify(address, JTS, JTS_ATTR, false);
-    }
-
-    @Test
-    public void setUseJournalStoreToTrue() throws IOException, InterruptedException {
-        setEnableToUseJDBCStore(false);
-        editCheckboxAndVerify(address, USE_JOURNAL_STORE, USE_JOURNAL_STORE_ATTR, true);
-    }
-
-    @Test
-    public void setUseJournalStoreToFalse() throws IOException, InterruptedException {
-        editCheckboxAndVerify(address, USE_JOURNAL_STORE, USE_JOURNAL_STORE_ATTR, false);
-    }
-
-    @Test
-    public void setJournalStoreEnableAsyncIOToTrue() throws IOException, InterruptedException {
-        prepareForJournalStoreConfiguration();
-        editCheckboxAndVerify(address, JOURNAL_STORE_ENABLE_ASYNC_IO, JOURNAL_STORE_ENABLE_ASYNC_IO_ATTR, true);
-    }
-
-    @Test
-    public void setJournalStoreEnableAsyncIOToFalse() throws IOException, InterruptedException {
-        prepareForJournalStoreConfiguration();
-        editCheckboxAndVerify(address, JOURNAL_STORE_ENABLE_ASYNC_IO, JOURNAL_STORE_ENABLE_ASYNC_IO_ATTR, false);
     }
 
     @Test
