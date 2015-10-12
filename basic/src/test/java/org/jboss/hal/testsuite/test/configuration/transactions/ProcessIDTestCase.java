@@ -25,7 +25,7 @@ import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.WRI
  */
 @RunWith(Arquillian.class)
 @Category(Shared.class)
-public class ProcessIDTestCase extends TransactionsAbstractTestCase {
+public class ProcessIDTestCase extends TransactionsTestCaseAbstract {
 
     private final String PROCESS_ID_UUID = "process-id-uuid";
     private final String PROCESS_ID_SOCKET_BINDING = "process-id-socket-binding";
