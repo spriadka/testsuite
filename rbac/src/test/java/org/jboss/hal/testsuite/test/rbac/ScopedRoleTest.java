@@ -1,6 +1,5 @@
 package org.jboss.hal.testsuite.test.rbac;
 
-import junit.framework.Assert;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.arquillian.graphene.page.Page;
@@ -16,6 +15,8 @@ import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+
+import static org.junit.Assert.assertFalse;
 
 /**
  * Created by pcyprian on 2.10.15.
@@ -42,7 +43,7 @@ public class ScopedRoleTest {
 
         WebElement type = browser.findElement(ByJQuery.selector("#form-gwt-uid-31_type"));
 
-        Assert.assertFalse("Scope type is expected to be read-only.", type.isEnabled());
+        assertFalse("Scope type is expected to be read-only.", type.isEnabled());
 
         page.getWindowFragment().clickButton("Cancel");
     }
