@@ -85,7 +85,9 @@ public class LoggingPage extends ConfigPage {
     public void addFileHandler(String name) {
         clickButton("Add");
         getWindowFragment().getEditor().text("name", name);
-        getWindowFragment().clickButton("Save");
+        getWindowFragment().clickButton("Next");
+        getWindowFragment().getEditor().text("path", "/logs/");
+        getWindowFragment().getEditor().clickButton("Finish");
     }
 
     public void addConsoleHandler(String name, String namedFormatter) {
@@ -95,11 +97,13 @@ public class LoggingPage extends ConfigPage {
         getWindowFragment().clickButton("Save");
     }
 
-    public void addPeriodicHandler(String name, String suffix) {
+    public void addPeriodicSizeHandler(String name, String suffix) {
         clickButton("Add");
         getWindowFragment().getEditor().text("name", name);
         getWindowFragment().getEditor().text("suffix", suffix);
-        getWindowFragment().clickButton("Save");
+        getWindowFragment().clickButton("Next");
+        getWindowFragment().getEditor().text("path", "/logs/");
+        getWindowFragment().getEditor().clickButton("Finish");
     }
 
     public void addCustomFormatter(String name, String clazz, String module) {
@@ -129,6 +133,12 @@ public class LoggingPage extends ConfigPage {
 
     public void switchToPeriodic() {
         switchView("Periodic");
+    }
+
+    public void switchToSize() {
+        WebElement viewPanel = browser.findElement(By.className("paged-view-navigation-container"));
+        WebElement editLink = viewPanel.findElement(By.linkText("Size"));
+        editLink.click();
     }
 
     public void switchToSyslog() {
