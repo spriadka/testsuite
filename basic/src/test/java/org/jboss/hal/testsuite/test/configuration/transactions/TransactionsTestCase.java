@@ -4,7 +4,6 @@ import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Shared;
-import org.jboss.hal.testsuite.dmr.Operation;
 import org.jboss.hal.testsuite.page.config.TransactionsPage;
 import org.junit.Before;
 import org.junit.Test;
@@ -13,11 +12,6 @@ import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
 
 import java.io.IOException;
-
-import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.NAME;
-import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.VALUE;
-import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.WRITE_ATTRIBUTE_OPERATION;
-
 /**
  * @author mkrajcov <mkrajcov@redhat.com>
  */
@@ -111,14 +105,18 @@ public class TransactionsTestCase extends TransactionsTestCaseAbstract {
 
     @Test
     public void editSocketBinding() throws IOException, InterruptedException {
+        String socketBinding = operations.createSocketBinding();
         page.getConfig().switchTo("Recovery");
-        editTextAndVerify(address, SOCKET_BINDING, SOCKET_BINDING_ATTR);
+        editTextAndVerify(address, SOCKET_BINDING, SOCKET_BINDING_ATTR, socketBinding);
+        operations.removeSocketBinding(socketBinding);
     }
 
     @Test
     public void editStatusSocketBinding() throws IOException, InterruptedException {
+        String socketBinding = operations.createSocketBinding();
         page.getConfig().switchTo("Recovery");
-        editTextAndVerify(address, STATUS_SOCKET_BINDING, STATUS_SOCKET_BINDING_ATTR);
+        editTextAndVerify(address, STATUS_SOCKET_BINDING, STATUS_SOCKET_BINDING_ATTR, socketBinding);
+        operations.removeSocketBinding(socketBinding);
     }
 
     @Test

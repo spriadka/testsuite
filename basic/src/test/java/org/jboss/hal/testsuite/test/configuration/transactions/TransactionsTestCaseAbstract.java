@@ -30,14 +30,15 @@ public abstract class TransactionsTestCaseAbstract {
     protected static ResourceAddress address = transactionsTemplate.resolve(context);
     protected static Dispatcher dispatcher = new Dispatcher();
     protected ResourceVerifier verifier = new ResourceVerifier(dispatcher);
+    protected static TransactionsOperations operations = new TransactionsOperations(dispatcher);
 
     protected final String JOURNAL_STORE_ENABLE_ASYNC_IO = "journal-store-enable-async-io";
-    protected final static String USE_JDBC_STORE = "use-jdbc-store";
-    protected final static String USE_JOURNAL_STORE = "use-journal-store";
+    protected static final String USE_JDBC_STORE = "use-jdbc-store";
+    protected static final String USE_JOURNAL_STORE = "use-journal-store";
 
     protected final String JOURNAL_STORE_ENABLE_ASYNC_IO_ATTR = "journal-store-enable-async-io";
-    protected final static String USE_JDBC_STORE_ATTR = "use-jdbc-store";
-    protected final static String USE_JOURNAL_STORE_ATTR = "use-journal-store";
+    protected static final String USE_JDBC_STORE_ATTR = "use-jdbc-store";
+    protected static final String USE_JOURNAL_STORE_ATTR = "use-journal-store";
 
     @Drone
     public WebDriver browser;
@@ -48,23 +49,23 @@ public abstract class TransactionsTestCaseAbstract {
     //helper methods
     protected void editTextAndVerify(ResourceAddress address, String identifier, String attributeName, String value) throws IOException, InterruptedException {
         page.getConfigFragment().editTextAndSave(identifier, value);
-        reloadIfRequiredAndWaitForRunning();
+        TransactionsOperations.reloadIfRequiredAndWaitForRunning();
         verifier.verifyAttribute(address, attributeName, value);
     }
 
-    protected void editTextAndVerify(ResourceAddress address, String identifier,String attributeName) throws IOException, InterruptedException {
+    protected void editTextAndVerify(ResourceAddress address, String identifier, String attributeName) throws IOException, InterruptedException {
         editTextAndVerify(address, identifier, attributeName, RandomStringUtils.randomAlphabetic(6));
     }
 
     protected void editCheckboxAndVerify(ResourceAddress address, String identifier, String attributeName, Boolean value) throws IOException, InterruptedException {
         page.getConfigFragment().editCheckboxAndSave(identifier, value);
-        reloadIfRequiredAndWaitForRunning();
+        TransactionsOperations.reloadIfRequiredAndWaitForRunning();
         verifier.verifyAttribute(address, attributeName, value.toString());
     }
 
     protected void selectOptionAndVerify(ResourceAddress address, String identifier, String attributeName, String value) throws IOException, InterruptedException {
         page.getConfigFragment().selectOptionAndSave(identifier, value);
-        reloadIfRequiredAndWaitForRunning();
+        TransactionsOperations.reloadIfRequiredAndWaitForRunning();
         verifier.verifyAttribute(address, attributeName, value);
     }
 
@@ -73,14 +74,5 @@ public abstract class TransactionsTestCaseAbstract {
         config.editTextAndSave(identifier, value);
         Assert.assertTrue(config.isErrorShownInForm());
         config.cancel();
-    }
-
-    protected void reloadIfRequiredAndWaitForRunning() {
-        final int timeout = 60000;
-        if (ConfigUtils.isDomain()) {
-            new DomainManager(CliClientFactory.getClient()).reloadIfRequiredAndWaitUntilRunning(timeout);
-        } else {
-            CliClientFactory.getClient().reload(false);
-        }
     }
 }

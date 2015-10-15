@@ -24,6 +24,7 @@ import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.WRI
  * @author Jan Kasik <jkasik@redhat.com>
  *         Created on 12.10.15.
  */
+//Some tests might fail due to the HAL-883
 @RunWith(Arquillian.class)
 @Category(Shared.class)
 public class JDBCTestCase extends TransactionsTestCaseAbstract {
@@ -122,7 +123,7 @@ public class JDBCTestCase extends TransactionsTestCaseAbstract {
     }
 
     private static void prepareForJDBCConfiguration() {
-        Operation undefineUseJournalStore = new Operation.Builder(WRITE_ATTRIBUTE_OPERATION, address)
+        Operation disableUseJournalStore = new Operation.Builder(WRITE_ATTRIBUTE_OPERATION, address)
                 .param(NAME, USE_JOURNAL_STORE_ATTR)
                 .param(VALUE, false)
                 .build();
@@ -130,6 +131,6 @@ public class JDBCTestCase extends TransactionsTestCaseAbstract {
                 .param(NAME, USE_JDBC_STORE_ATTR)
                 .param(VALUE, true)
                 .build();
-        dispatcher.execute(new Composite(undefineUseJournalStore, enableUseJDBCStore));
+        dispatcher.execute(new Composite(disableUseJournalStore, enableUseJDBCStore));
     }
 }

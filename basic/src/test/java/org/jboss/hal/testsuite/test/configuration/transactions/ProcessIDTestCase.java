@@ -1,13 +1,15 @@
 package org.jboss.hal.testsuite.test.configuration.transactions;
 
-import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.dmr.Composite;
 import org.jboss.hal.testsuite.dmr.Operation;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
+import org.jboss.hal.testsuite.test.configuration.undertow.UndertowOperations;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
@@ -35,12 +37,24 @@ public class ProcessIDTestCase extends TransactionsTestCaseAbstract {
     private final String PROCESS_ID_SOCKET_BINDING_ATTR = "process-id-socket-binding";
     private final String PROCESS_ID_SOCKET_MAX_PORTS_ATTR = "process-id-socket-max-ports";
 
+    private static String socketBinding;
+
+    @BeforeClass
+    public static void setUp() {
+        socketBinding = operations.createSocketBinding();
+    }
+
     @Before
     public void before() {
         prepareProcessIDConfiguration("", true);
-        reloadIfRequiredAndWaitForRunning();
+        TransactionsOperations.reloadIfRequiredAndWaitForRunning();
         page.navigate();
         page.getConfig().switchTo("Process ID");
+    }
+
+    @AfterClass
+    public static void tearDown() {
+        operations.removeSocketBinding(socketBinding);
     }
 
     @Test
@@ -50,17 +64,21 @@ public class ProcessIDTestCase extends TransactionsTestCaseAbstract {
 
     @Test
     public void setProcessIDUUIDToFalse() throws IOException, InterruptedException {
-        editAndVerifyUUIDAndSocketBinding(false, RandomStringUtils.randomAlphanumeric(6));
+        editAndVerifyUUIDAndSocketBinding(false, socketBinding);
     }
 
     @Test
     public void editProcessIDSocketBinding() throws IOException, InterruptedException {
-        editAndVerifyUUIDAndSocketBinding(false, RandomStringUtils.randomAlphanumeric(6));
+        editAndVerifyUUIDAndSocketBinding(false, socketBinding);
     }
 
+    //Failing due to JBEAP-1357
     @Test
     public void editProcessIDSocketMaxPorts() throws IOException, InterruptedException {
-        editTextAndVerify(address, PROCESS_ID_SOCKET_MAX_PORTS, PROCESS_ID_SOCKET_MAX_PORTS_ATTR);
+        prepareProcessIDConfiguration(socketBinding, false);
+        page.navigate();
+        page.getConfig().switchTo("Process ID");
+        editTextAndVerify(address, PROCESS_ID_SOCKET_MAX_PORTS, PROCESS_ID_SOCKET_MAX_PORTS_ATTR, "15");
     }
 
     @Test
@@ -98,8 +116,9 @@ public class ProcessIDTestCase extends TransactionsTestCaseAbstract {
 
     private void editAndVerifyUUIDAndSocketBinding(boolean enableUUID, String socketBinding) {
         editUUIDAndSocketBinding(enableUUID, socketBinding);
-        reloadIfRequiredAndWaitForRunning();
-        verifier.verifyAttribute(address, PROCESS_ID_SOCKET_BINDING_ATTR, socketBinding);
+        TransactionsOperations.reloadIfRequiredAndWaitForRunning();
+        String expected = enableUUID ? "undefined" : socketBinding;
+        verifier.verifyAttribute(address, PROCESS_ID_SOCKET_BINDING_ATTR, expected);
         verifier.verifyAttribute(address, PROCESS_ID_UUID_ATTR, enableUUID);
     }
 }

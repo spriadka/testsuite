@@ -22,6 +22,7 @@ import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.WRI
  */
 @RunWith(Arquillian.class)
 @Category(Shared.class)
+//Some test might fail due to the HAL-883
 public class JournalTestCase extends TransactionsTestCaseAbstract {
 
     //TODO prepare for JournalStore Config
