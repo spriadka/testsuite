@@ -6,7 +6,6 @@ import org.jboss.hal.testsuite.dmr.Composite;
 import org.jboss.hal.testsuite.dmr.Operation;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
-import org.jboss.hal.testsuite.test.configuration.undertow.UndertowOperations;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;

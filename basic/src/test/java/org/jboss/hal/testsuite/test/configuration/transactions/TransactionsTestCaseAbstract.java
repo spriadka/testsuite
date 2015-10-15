@@ -3,8 +3,6 @@ package org.jboss.hal.testsuite.test.configuration.transactions;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
-import org.jboss.hal.testsuite.cli.CliClientFactory;
-import org.jboss.hal.testsuite.cli.DomainManager;
 import org.jboss.hal.testsuite.dmr.AddressTemplate;
 import org.jboss.hal.testsuite.dmr.DefaultContext;
 import org.jboss.hal.testsuite.dmr.Dispatcher;
@@ -13,7 +11,6 @@ import org.jboss.hal.testsuite.dmr.ResourceVerifier;
 import org.jboss.hal.testsuite.dmr.StatementContext;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.page.config.TransactionsPage;
-import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.junit.Assert;
 import org.openqa.selenium.WebDriver;
 
