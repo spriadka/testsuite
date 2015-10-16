@@ -1,6 +1,7 @@
 package org.jboss.hal.testsuite.test.configuration.security;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.cli.DomainManager;
@@ -11,12 +12,12 @@ import org.jboss.hal.testsuite.dmr.ResourceAddress;
 import org.jboss.hal.testsuite.dmr.ResourceVerifier;
 import org.jboss.hal.testsuite.dmr.StatementContext;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
-import org.jboss.hal.testsuite.fragment.config.ee.EEConfigFragment;
 import org.jboss.hal.testsuite.page.config.SecurityPage;
 import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
+import org.openqa.selenium.WebDriver;
 
 import java.io.IOException;
 
@@ -28,6 +29,9 @@ public abstract class SecurityTestCaseAbstract {
 
     @Page
     public SecurityPage page;
+
+    @Drone
+    public WebDriver browser;
 
     protected final String CODE = "code";
     protected final String FLAG = "flag";
@@ -54,7 +58,7 @@ public abstract class SecurityTestCaseAbstract {
     }
 
     @AfterClass
-    public void tearDown() {
+    public static void tearDown() {
         dispatcher.close();
     }
 

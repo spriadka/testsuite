@@ -7,10 +7,13 @@ import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.config.security.SecurityDomainAddWizard;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
+import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
 import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
 import org.jboss.hal.testsuite.page.Navigatable;
 import org.jboss.hal.testsuite.util.ConfigUtils;
+import org.jboss.hal.testsuite.util.Console;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 
 /**
  * @author Jan Kasik <jkasik@redhat.com>
@@ -33,7 +36,8 @@ public class SecurityPage extends ConfigurationPage implements Navigatable {
         }
         navigation.addAddress(FinderNames.SUBSYSTEM, "Security")
                 .addAddress(SECURITY_DOMAIN);
-        navigation.selectColumn();
+        navigation.selectColumn(true);
+        Console.withBrowser(browser).waitUntilLoaded();
     }
 
     public void viewJBossEJBPolicy() {
@@ -115,5 +119,15 @@ public class SecurityPage extends ConfigurationPage implements Navigatable {
         }
     }
 
+    public void removeSecurityDomain(String name) {
+        try {
+            navigation.resetNavigation().addAddress(SECURITY_DOMAIN, name).selectRow().invoke("Remove");
+        } catch (TimeoutException ignored) {
+        }
+        Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
+    }
 
+    public boolean isDomainPresent(String name) {
+        return navigation.resetNavigation().addAddress(SECURITY_DOMAIN, name).selectColumn().rowIsPresent(name, 60l, navigation);
+    }
 }
