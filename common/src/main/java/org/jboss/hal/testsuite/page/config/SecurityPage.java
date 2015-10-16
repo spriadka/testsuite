@@ -2,6 +2,7 @@ package org.jboss.hal.testsuite.page.config;
 
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.ByJQuery;
+import org.jboss.hal.testsuite.finder.Application;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
@@ -59,6 +60,7 @@ public class SecurityPage extends ConfigurationPage implements Navigatable {
 
     public void viewSecurityDomain(String name) {
         navigation.resetNavigation().addAddress(SECURITY_DOMAIN, name).selectRow().invoke(FinderNames.VIEW);
+        Application.waitUntilVisible();
     }
 
     public void switchToAuthentication() {
@@ -77,7 +79,28 @@ public class SecurityPage extends ConfigurationPage implements Navigatable {
         switchSubTab("ACL");
     }
 
+    public void switchToIdentityTrust() {
+        switchSubTab("Identity Trust");
+    }
+
     public void addAuthenticationModule(String name, String code) {
+        WizardWindow wizard = getResourceManager().addResource();
+        Editor editor = wizard.getEditor();
+        editor.text("name", name);
+        editor.text("code", code);
+        editor.select("flag", "optional");
+        wizard.finish();
+    }
+
+    public void addAuditModule(String name, String code) {
+        WizardWindow wizard = getResourceManager().addResource();
+        Editor editor = wizard.getEditor();
+        editor.text("name", name);
+        editor.text("code", code);
+        wizard.finish();
+    }
+
+    public void addTrustModule(String name, String code) {
         WizardWindow wizard = getResourceManager().addResource();
         Editor editor = wizard.getEditor();
         editor.text("name", name);
@@ -129,5 +152,9 @@ public class SecurityPage extends ConfigurationPage implements Navigatable {
 
     public boolean isDomainPresent(String name) {
         return navigation.resetNavigation().addAddress(SECURITY_DOMAIN, name).selectColumn().rowIsPresent(name, 60l, navigation);
+    }
+
+    public void selectModule(String name) {
+        getResourceManager().selectByName(name);
     }
 }
