@@ -18,6 +18,8 @@ public enum RbacRole {
     HOST_SLAVE_ADMINISTRATOR("HostSlaveAdministrator"),
     MAIN_MONITOR("MainMonitor"),
     HOST_MASTER_MONITOR("HostMasterMonitor"),
+    MAIN_OPERATOR("MainOperator"),
+    HOST_MASTER_OPERATOR("HostMasterOperator"),
 
     /*// Group scoped roles
     MAIN_DEPLOYER,

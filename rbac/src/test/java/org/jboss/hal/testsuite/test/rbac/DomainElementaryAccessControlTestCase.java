@@ -6,7 +6,7 @@ import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
-import org.jboss.hal.testsuite.category.Standalone;
+import org.jboss.hal.testsuite.category.Domain;
 import org.jboss.hal.testsuite.cli.Library;
 import org.jboss.hal.testsuite.dmr.AddressTemplate;
 import org.jboss.hal.testsuite.dmr.DefaultContext;
@@ -18,7 +18,7 @@ import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
-import org.jboss.hal.testsuite.page.config.StandaloneConfigurationPage;
+import org.jboss.hal.testsuite.page.config.DomainConfigurationPage;
 import org.jboss.hal.testsuite.util.Authentication;
 import org.jboss.hal.testsuite.util.PropUtils;
 import org.jboss.hal.testsuite.util.RbacRole;
@@ -36,14 +36,13 @@ import org.openqa.selenium.WebDriver;
 import static org.junit.Assert.assertEquals;
 
 /**
- * @author mkrajcov <mkrajcov@redhat.com>
+ * Created by pcyprian on 16.10.15.
  */
-
 @RunWith(Arquillian.class)
-@Category(Standalone.class)
-public class ElementaryAccessControlTestCase {
+@Category(Domain.class)
+public class DomainElementaryAccessControlTestCase {
 
-    private static final AddressTemplate ADDRESS_TEMPLATE = AddressTemplate.of("{default.profile}/subsystem=datasources/data-source=*");
+    private static final AddressTemplate ADDRESS_TEMPLATE = AddressTemplate.of("/profile=default/subsystem=datasources/data-source=*");
 
     private String addressName = "ds_" + RandomStringUtils.randomAlphanumeric(5);
     private DefaultContext statementContext = new DefaultContext();
@@ -60,7 +59,7 @@ public class ElementaryAccessControlTestCase {
         dispatcher.execute(new Operation.Builder(ModelDescriptionConstants.ADD, address).param("connection-url", "url")
                 .param("jndi-name", "java:/" + addressName).param("driver-name", "h2")
                 .param("user-name", "un").param("password", "pw").param("enabled", "false").build());
-        navigation = new FinderNavigation(browser, StandaloneConfigurationPage.class);
+        navigation = new FinderNavigation(browser, DomainConfigurationPage.class);
     }
 
     @After
@@ -97,8 +96,38 @@ public class ElementaryAccessControlTestCase {
         accessRestrictedPage(true);
     }
 
+    @Test
+    public void mainAdministrator() throws Exception {
+        Authentication.with(browser).authenticate(RbacRole.MAIN_ADMINISTRATOR);
+        goToDatasource();
+        checkAttribute(true, true);
+        checkSensitiveAttribute(true, true);
+        accessRestrictedPage(true);
+    }
+
+    @Test
+    public void mainMonitor() throws Exception {
+        Authentication.with(browser).authenticate(RbacRole.MAIN_MONITOR);
+        goToDatasource();
+        checkAttribute(true, false);
+        checkSensitiveAttribute(false, false);
+        accessRestrictedPage(false);
+    }
+
+    @Test
+    public void hostMasterAdministrator() throws Exception {
+        Authentication.with(browser).authenticate(RbacRole.HOST_MASTER_ADMINISTRATOR);
+        goToDatasource();
+        checkAttribute(true, false);
+        checkSensitiveAttribute(false, false);
+        accessRestrictedPage(false);
+    }
+
+
+
     private void goToDatasource() {
-        navigation.addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
+        navigation.addAddress(FinderNames.CONFIGURATION, FinderNames.PROFILES)
+                .addAddress(FinderNames.PROFILE, "default")
                 .addAddress(FinderNames.SUBSYSTEM, "Datasources")
                 .addAddress("Type", "Non-XA")
                 .addAddress("Datasource", addressName)
@@ -129,6 +158,7 @@ public class ElementaryAccessControlTestCase {
             Editor editor = attributes.edit();
             editor.text("jndiName", "java:jboss/" + addressName);
             attributes.save();
+            Library.letsSleep(1500);
             verifier.verifyAttribute(address, "jndi-name", "java:jboss/" + addressName);
         }
         else {
@@ -192,7 +222,8 @@ public class ElementaryAccessControlTestCase {
 
 
     private void accessRestrictedPage(boolean shouldSucceed) {
-        navigation.addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
+        navigation.addAddress(FinderNames.CONFIGURATION, FinderNames.PROFILES)
+                .addAddress(FinderNames.PROFILE, "default")
                 .addAddress(FinderNames.SUBSYSTEM, "Security")
                 .addAddress("Security Domain", "other");
         boolean permissions = true;
@@ -204,5 +235,4 @@ public class ElementaryAccessControlTestCase {
         }
         assertEquals("Problem with access to page.",  shouldSucceed, permissions);
     }
-
 }

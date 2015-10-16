@@ -6,8 +6,6 @@ import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Domain;
-import org.jboss.hal.testsuite.cli.CliClient;
-import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.cli.Library;
 import org.jboss.hal.testsuite.cli.TimeoutException;
 import org.jboss.hal.testsuite.dmr.Dispatcher;
@@ -40,7 +38,6 @@ public class HostScopedRoleTestCase {
     private ResourceAddress address;
     Dispatcher dispatcher = new Dispatcher();
     ResourceVerifier verifier = new ResourceVerifier(dispatcher);
-    CliClient cliClient = CliClientFactory.getClient();
 
     @Drone
     private WebDriver browser;
@@ -202,16 +199,6 @@ public class HostScopedRoleTestCase {
         page.getWindowFragment().getEditor().text("scope", scope);
         page.getWindowFragment().getEditor().checkbox("includeAll", includeAll);
         page.getWindowFragment().clickButton("Save");
-    }
-
-    public void addRole_CLI(String role, String host) {
-        String cmd = command + NAME + ":add(base-role=" + role + ",hosts=[" + host + "])";
-        cliClient.executeCommand(cmd);
-    }
-
-    public void removeRole_CLI() {
-        String cmd = command + NAME + ":remove";
-        cliClient.executeCommand(cmd);
     }
 
     public void refresh() {

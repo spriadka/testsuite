@@ -31,8 +31,6 @@ public class AdministratorGroupRoleAssignmentTestCase {
 
     private static final String TYPE = "GROUP";
 
-   // private ModelNode domainPath = new ModelNode("/core-service=management/access=authorization" +
-   //        "/role-mapping=" + role + "/include=" + NAME);
     private ResourceAddress address1;
     private ResourceAddress address2;
     Dispatcher dispatcher = new Dispatcher();
