@@ -288,11 +288,7 @@ public class Console {
     }
 
     public <T extends BasePage> Console waitForFirstNavigationPanel(Class<T> clazz) {
-        browser.navigate().refresh();
-        Graphene.goTo(HomePage.class);
-        waitUntilLoaded();
-        Graphene.goTo(clazz);
-        waitUntilLoaded().maximizeWindow();
+        refreshAndNavigate(clazz);
         Graphene.waitModel().until().element(By.className("navigation-column")).is().visible();
         return this;
     }

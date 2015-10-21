@@ -204,6 +204,12 @@ public class FinderNavigation {
         return this;
     }
 
+
+    /**
+     * Method delete all inserted addresses.
+     * After method navigation has only page where to navigate, but no addresses in submenus.
+     * Navigation has still active refresh.
+     */
     public void clearNavigation() {
         if (address.size() > 0 ) address.clear();
     }
