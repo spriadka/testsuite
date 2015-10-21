@@ -63,6 +63,11 @@ public class DeploymentWizard extends WizardWindow {
         return this;
     }
 
+    public DeploymentWizard enableAfterDeployment(boolean enable) {
+        getEditor().checkbox("enableAfterDeployment", enable);
+        return this;
+    }
+
     public DeploymentWizard path(String path) {
         getEditor().text(PATH, path);
         return this;

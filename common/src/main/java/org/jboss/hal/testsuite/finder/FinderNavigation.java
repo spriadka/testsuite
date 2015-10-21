@@ -94,7 +94,8 @@ public class FinderNavigation {
     }
 
     public FinderNavigation(final WebDriver browser, final Class<? extends BasePage> page) {
-        this(browser, page, ()-> { } );
+        this(browser, page, () -> {
+        });
     }
 
     /**
@@ -165,7 +166,8 @@ public class FinderNavigation {
     private WebElement[] navigate(Boolean exactRowText) {
         WebElement[] columnRow = new WebElement[2];
         if (refresh) {
-            Console.withBrowser(browser).refreshAndNavigate(page);
+           // Console.withBrowser(browser).refreshAndNavigate(page);
+            Console.withBrowser(browser).waitForFirstNavigationPanel(page);
         }
         for (int i = 0; i < address.size(); i++) {
             AddressTuple tuple = address.get(i);
@@ -200,6 +202,16 @@ public class FinderNavigation {
         address.clear();
         this.refresh = false;
         return this;
+    }
+
+
+    /**
+     * Method delete all inserted addresses.
+     * After method navigation has only page where to navigate, but no addresses in submenus.
+     * Navigation has still active refresh.
+     */
+    public void clearNavigation() {
+        if (address.size() > 0 ) address.clear();
     }
 
     private By columnSelector(String name) {
