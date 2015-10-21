@@ -121,6 +121,11 @@ public class MessagingPage extends ConfigPage {
         security.click();
     }
 
+    public void switchToConnectionManagementTab() {
+        WebElement security = browser.findElement(ByJQuery.selector("div.gwt-Label:contains(Connection Management)"));
+        security.click();
+    }
+
     public void switchToDiscovery() {
         switchView("Discovery");
     }
@@ -164,6 +169,15 @@ public class MessagingPage extends ConfigPage {
     public void switchType(String type) {
         Select select = new Select(browser.findElement(ByJQuery.selector(".gwt-ListBox:visible")));
         select.selectByValue(type);
+    }
+
+    public void addBridge(String name, String queue, String address, String connector) {
+        clickButton("Add");
+        getWindowFragment().getEditor().text("name", name);
+        getWindowFragment().getEditor().text("queueName", queue);
+        getWindowFragment().getEditor().text("forwardingAddress", address);
+        getWindowFragment().getEditor().text("staticConnectors", connector);
+        getWindowFragment().clickButton("Save");
     }
 
     public void addBroadcastGroup(String name, String binding) {
