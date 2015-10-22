@@ -24,8 +24,6 @@ package org.jboss.hal.testsuite.dmr;
 import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
 import org.jboss.dmr.ModelNode;
 
-import java.util.stream.Collectors;
-
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.READ_ATTRIBUTE_OPERATION;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.READ_RESOURCE_OPERATION;
 import static org.junit.Assert.assertArrayEquals;
@@ -108,7 +106,7 @@ public class ResourceVerifier {
     public void verifyAttribute(ResourceAddress address, String attribute, String[] expected, int timeout) {
         DmrResponse response = dispatcher.execute(readAttributeOperation(address, attribute, timeout));
         assertTrue(response.isSuccessful());
-        String[] values = response.payload().asList().stream().map(ModelNode::asString).toArray(size -> new String[size]);
+        String[] values = response.payload().asList().stream().map(ModelNode::asString).toArray(String[]::new);
         assertArrayEquals(expected, values);
     }
 
