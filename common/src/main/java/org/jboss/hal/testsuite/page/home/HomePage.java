@@ -4,7 +4,7 @@ import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.arquillian.graphene.page.Location;
 import org.jboss.hal.testsuite.fragment.homepage.HomepageModuleFragment;
-import org.jboss.hal.testsuite.fragment.homepage.HomepageSideBarFragment;
+import org.jboss.hal.testsuite.fragment.homepage.HomepageNeedHelpSectionFragment;
 import org.jboss.hal.testsuite.page.BasePage;
 import org.jboss.hal.testsuite.page.Navigatable;
 import org.jboss.hal.testsuite.util.Console;
@@ -20,6 +20,11 @@ import java.util.Optional;
 @Location("#home")
 public class HomePage extends BasePage implements Navigatable {
 
+    private static final String
+        MODULE_CLASS = PropUtils.get("homepage.module.class"),
+        MODULE_HEADER_CLASS = PropUtils.get("homepage.module.header.class"),
+        MODULE_COLUMN_CLASS = PropUtils.get("homepage.module.column.class");
+
     public void navigate() {
         browser.navigate().refresh();
         Graphene.goTo(HomePage.class);
@@ -31,11 +36,8 @@ public class HomePage extends BasePage implements Navigatable {
      */
     public HomepageModuleFragment getModule(String title) {
 
-        String moduleClass = PropUtils.get("homepage.module.class");
-        By anyModuleSelector = By.className(moduleClass);
-
-        String moduleHeaderClass = PropUtils.get("homepage.module.header.class");
-        By moduleTitleSelector = ByJQuery.selector("." + moduleHeaderClass + ":contains('" + title + "'):visible");
+        By anyModuleSelector = By.className(MODULE_CLASS);
+        By moduleTitleSelector = ByJQuery.selector("." + MODULE_HEADER_CLASS + ":contains('" + title + "'):visible");
 
         Optional<WebElement> module = getContentRoot().findElements(anyModuleSelector).stream().filter(anyModule -> {
             return !anyModule.findElements(moduleTitleSelector).isEmpty();
@@ -47,14 +49,12 @@ public class HomePage extends BasePage implements Navigatable {
         return null;
     }
 
-    public HomepageSideBarFragment getSideBar() {
-        By selector = By.className(PropUtils.get("homepage.sidebar.class"));
-        WebElement sidebarRoot = browser.findElement(selector);
-
-        HomepageSideBarFragment sidebar = Graphene.createPageFragment(HomepageSideBarFragment.class,
-                sidebarRoot);
-
-        return sidebar;
+    public HomepageNeedHelpSectionFragment getNeedHelpSection(String sectionLabel) {
+        By select =
+                ByJQuery.selector("." + MODULE_CLASS + ":has(." + MODULE_HEADER_CLASS + ":contains('Need Help?'))"
+                        + " ." + MODULE_COLUMN_CLASS + ":has(p:contains('" + sectionLabel + "'))");
+        WebElement sectionRoot = browser.findElement(select);
+        return Graphene.createPageFragment(HomepageNeedHelpSectionFragment.class, sectionRoot);
     }
 
 }
