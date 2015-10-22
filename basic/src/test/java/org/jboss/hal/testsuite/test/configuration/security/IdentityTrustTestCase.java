@@ -24,7 +24,6 @@ import java.io.IOException;
 public class IdentityTrustTestCase extends SecurityTestCaseAbstract {
 
     private static final AddressTemplate TRUST_TEMPLATE = SECURITY_DOMAIN_TEMPLATE.append("identity-trust=classic/trust-module=*");
-    private static final String JBOSS_EJB_POLICY =  "jboss-ejb-policy";
     private static ResourceAddress TRUST_ADDRESS;
     private static String loginModule;
 
@@ -51,7 +50,7 @@ public class IdentityTrustTestCase extends SecurityTestCaseAbstract {
         String name = "tm_" + RandomStringUtils.randomAlphanumeric(6);
         String code = "code_" + RandomStringUtils.randomAlphanumeric(6) + "-" + name;
         page.addTrustModule(name, code);
-        Assert.assertTrue("Provider module should be present in table", page.getConfigFragment().resourceIsPresent(name));
+        Assert.assertTrue("Trust module should be present in table", page.getConfigFragment().resourceIsPresent(name));
         verifier.verifyResource(TRUST_TEMPLATE.resolve(context, JBOSS_EJB_POLICY, name));
     }
 

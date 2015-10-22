@@ -71,13 +71,19 @@ public class AuthenticationTestCase extends SecurityTestCaseAbstract {
         selectOptionAndVerify(AUTHENTICATION_ADDRESS, FLAG, FLAG_ATTR, FLAG_VALUE);
     }
 
-    protected static String addLoginModule() {
+    private static String addLoginModule() {
+        addAuthentication();
         String name = "lm_" + RandomStringUtils.randomAlphanumeric(6);
         dispatcher.execute(new Operation.Builder("add", AUTHENTICATION_TEMPLATE.resolve(context, JBOSS_EJB_POLICY, name))
                 .param("code", RandomStringUtils.randomAlphanumeric(8))
                 .param("flag", "optional")
                 .build());
         return name;
+    }
+
+    private static void addAuthentication() {
+        dispatcher.execute(new Operation.Builder("add", SECURITY_DOMAIN_TEMPLATE.append("authentication=*").resolve(context, JBOSS_EJB_POLICY, "classic"))
+                .build());
     }
 
 }

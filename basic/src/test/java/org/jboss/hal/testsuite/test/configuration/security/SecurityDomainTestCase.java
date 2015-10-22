@@ -23,7 +23,7 @@ public class SecurityDomainTestCase extends SecurityTestCaseAbstract {
         String name = "sd_" + RandomStringUtils.randomAlphanumeric(6);
         SecurityDomainAddWizard wizard = page.addSecurityDomain();
         wizard.name(name)
-            .cacheType("cache_" + RandomStringUtils.randomAlphanumeric(6))
+            .cacheType("default")
             .finish();
         Assert.assertTrue("Security domain should be visible", page.isDomainPresent(name));
         verifier.verifyResource(SECURITY_DOMAIN_TEMPLATE.resolve(context, name));

@@ -18,6 +18,7 @@ import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.openqa.selenium.WebDriver;
 
 import java.io.IOException;
@@ -49,11 +50,22 @@ public abstract class SecurityTestCaseAbstract {
     protected final String FLAG_VALUE = "optional";
     protected final String[] MODULE_OPTIONS_VALUE = new String[]{"example=value", "test=example"};
 
-    protected static Dispatcher dispatcher = new Dispatcher();
-    protected static StatementContext context = new DefaultContext();
-    protected ResourceVerifier verifier = new ResourceVerifier(dispatcher);
+    protected static Dispatcher dispatcher;
+    protected static StatementContext context;
+    protected static ResourceVerifier verifier;
+
+    protected static final String JBOSS_EJB_POLICY =  "jboss-ejb-policy";
+    protected static final String JBOSS_WEB_POLICY =  "jboss-web-policy";
+    protected static final String OTHER = "other";
 
     protected static final AddressTemplate SECURITY_DOMAIN_TEMPLATE = AddressTemplate.of("{default.profile}/subsystem=security/security-domain=*/");
+
+    @BeforeClass
+    public static void mainSetUp() {
+        dispatcher = new Dispatcher();
+        context = new DefaultContext();
+        verifier = new ResourceVerifier(dispatcher);
+    }
 
     @Before
     public void mainBefore() {
