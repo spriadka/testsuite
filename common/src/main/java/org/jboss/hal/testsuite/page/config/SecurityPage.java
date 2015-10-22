@@ -30,7 +30,7 @@ public class SecurityPage extends ConfigurationPage implements Navigatable {
         if (ConfigUtils.isDomain()) {
             navigation = new FinderNavigation(browser, DomainConfigEntryPoint.class)
                     .addAddress(FinderNames.CONFIGURATION, FinderNames.PROFILES)
-                    .addAddress(FinderNames.PROFILE, "full");
+                    .addAddress(FinderNames.PROFILE, ConfigUtils.getDefaultProfile());
         } else {
             navigation = new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
                     .addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEM);
@@ -55,7 +55,7 @@ public class SecurityPage extends ConfigurationPage implements Navigatable {
 
     public SecurityDomainAddWizard addSecurityDomain() {
         navigation.resetNavigation().addAddress(SECURITY_DOMAIN).selectColumn().invoke(FinderNames.ADD);
-        return getResourceManager().addResource(SecurityDomainAddWizard.class);
+        return Console.withBrowser(browser).openedWindow(SecurityDomainAddWizard.class);
     }
 
     public void viewSecurityDomain(String name) {
@@ -77,6 +77,10 @@ public class SecurityPage extends ConfigurationPage implements Navigatable {
 
     public void switchToACL() {
         switchSubTab("ACL");
+    }
+
+    public void switchToMapping() {
+        switchSubTab("Mapping");
     }
 
     public void switchToIdentityTrust() {
@@ -151,10 +155,19 @@ public class SecurityPage extends ConfigurationPage implements Navigatable {
     }
 
     public boolean isDomainPresent(String name) {
-        return navigation.resetNavigation().addAddress(SECURITY_DOMAIN, name).selectColumn().rowIsPresent(name, 60l, navigation);
+        return navigation.resetNavigation().addAddress(SECURITY_DOMAIN, name).selectColumn().rowIsPresent(name, 60L, navigation);
     }
 
     public void selectModule(String name) {
         getResourceManager().selectByName(name);
+    }
+
+    public void addMappingModule(String name, String code, String type) {
+        WizardWindow wizard = getResourceManager().addResource();
+        Editor editor = wizard.getEditor();
+        editor.text("name", name);
+        editor.text("type", type);
+        editor.text("code", code);
+        wizard.finish();
     }
 }

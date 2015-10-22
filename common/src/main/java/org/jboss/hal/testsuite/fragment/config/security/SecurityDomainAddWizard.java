@@ -14,7 +14,7 @@ public class SecurityDomainAddWizard extends WizardWindow {
     }
 
     public SecurityDomainAddWizard cacheType(String cache) {
-        getEditor().text("cache-type", cache);
+        getEditor().select("cache-type", cache);
         return this;
     }
 }
