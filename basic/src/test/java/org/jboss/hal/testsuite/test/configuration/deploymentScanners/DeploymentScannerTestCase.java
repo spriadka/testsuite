@@ -15,6 +15,7 @@ import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
 import org.jboss.hal.testsuite.page.config.DeploymentScannerPage;
 import org.jboss.hal.testsuite.util.Console;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
@@ -33,7 +34,7 @@ public class DeploymentScannerTestCase {
 
     private ModelNode path = new ModelNode("/subsystem=deployment-scanner/scanner=" + NAME);
     private ResourceAddress address = new ResourceAddress(path);
-    Dispatcher dispatcher = new Dispatcher();
+    static Dispatcher dispatcher = new Dispatcher();
     ResourceVerifier verifier = new ResourceVerifier(dispatcher);
     private CliClient cliClient = CliClientFactory.getClient();
     private String add = "/subsystem=deployment-scanner/scanner=" + NAME + ":add(path=" + PATH + ")";
@@ -49,6 +50,11 @@ public class DeploymentScannerTestCase {
     public void after() {
         cliClient.executeCommand("/subsystem=deployment-scanner/scanner=" + NAME + ":remove");
         cliClient.reload();
+    }
+
+    @AfterClass
+    public static void cleanUp() {
+        dispatcher.close();
     }
 
     @Test
