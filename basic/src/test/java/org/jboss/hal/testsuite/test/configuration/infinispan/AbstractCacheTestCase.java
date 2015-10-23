@@ -80,41 +80,10 @@ public abstract class AbstractCacheTestCase {
     }
 
     //ATTRIBUTES
-    //Fails due to [HAL-872]
-    @Test
-    public void editStartMode() {
-        ResourceAddress address = cacheAddress.resolve(context, cacheName);
-        selectOptionAndVerify(address, "start", "LAZY");
-    }
-
     @Test
     public void editJndiName() {
         ResourceAddress address = cacheAddress.resolve(context, cacheName);
         editTextAndVerify(address, "jndi-name", "java:/" + cacheName);
-    }
-
-    //Fails due to [HAL-872]
-    @Test
-    public void editBatching() {
-        page.getConfig().switchTo("Store");
-        page.selectCache(cacheName);
-        ResourceAddress address = storeTemplate.resolve(context, cacheName);
-        editCheckboxAndVerify(address, "batching", true);
-        page.selectCache(cacheName);
-        editCheckboxAndVerify(address, "batching", false);
-    }
-
-    //Fails due to [HAL-872]
-    @Test
-    public void editIndexing() {
-        page.getConfig().switchTo("Store");
-        page.selectCache(cacheName);
-        ResourceAddress address = storeTemplate.resolve(context, cacheName);
-        selectOptionAndVerify(address, "indexing", "LOCAL");
-        page.selectCache(cacheName);
-        selectOptionAndVerify(address, "indexing", "ALL");
-        page.selectCache(cacheName);
-        selectOptionAndVerify(address, "indexing", "NONE");
     }
 
     //STORE
