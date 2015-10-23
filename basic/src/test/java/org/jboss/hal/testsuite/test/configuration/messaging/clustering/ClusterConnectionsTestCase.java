@@ -14,7 +14,9 @@ import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.page.config.MessagingPage;
 import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
@@ -39,14 +41,20 @@ public class ClusterConnectionsTestCase {
     private ModelNode path = new ModelNode("/subsystem=messaging-activemq/server=default/cluster-connection=" + NAME);
     private ModelNode domainPath = new ModelNode("/profile=full-ha/subsystem=messaging-activemq/server=default/cluster-connection=" + NAME);
     private ResourceAddress address;
-    Dispatcher dispatcher = new Dispatcher();
-    ResourceVerifier verifier = new ResourceVerifier(dispatcher);
+    private static Dispatcher dispatcher;
+    private static ResourceVerifier verifier;
     CliClient cliClient = CliClientFactory.getClient();
 
     @Drone
     private WebDriver browser;
     @Page
     private MessagingPage page;
+
+    @BeforeClass
+    public static void setUp() {
+        dispatcher = new Dispatcher();
+        verifier = new ResourceVerifier(dispatcher);
+    }
 
     @Before
     public void before() {
@@ -62,6 +70,11 @@ public class ClusterConnectionsTestCase {
     @After
     public void after() {
         cliClient.executeCommand(remove);
+    }
+
+    @AfterClass
+    public static void tearDown() {
+        dispatcher.close();
     }
 
     @Test //https://issues.jboss.org/browse/HAL-827

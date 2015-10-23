@@ -23,7 +23,9 @@ import org.jboss.hal.testsuite.util.Authentication;
 import org.jboss.hal.testsuite.util.PropUtils;
 import org.jboss.hal.testsuite.util.RbacRole;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
@@ -45,12 +47,23 @@ public class ElementaryAccessControlTestCase {
 
     private static final AddressTemplate ADDRESS_TEMPLATE = AddressTemplate.of("{default.profile}/subsystem=datasources/data-source=*");
 
-    private String addressName = "ds_" + RandomStringUtils.randomAlphanumeric(5);
-    private DefaultContext statementContext = new DefaultContext();
-    private Dispatcher dispatcher = new Dispatcher();
+    private static String addressName = "ds_" + RandomStringUtils.randomAlphanumeric(5);
+    private static DefaultContext statementContext = new DefaultContext();
+    private static Dispatcher dispatcher;
     private FinderNavigation navigation;
-    private ResourceAddress address = ADDRESS_TEMPLATE.resolve(statementContext, addressName);
-    private ResourceVerifier verifier = new ResourceVerifier(dispatcher);
+    private static ResourceAddress address = ADDRESS_TEMPLATE.resolve(statementContext, addressName);
+    private static ResourceVerifier verifier;
+
+    @BeforeClass
+    public static void beforeClass() {
+        dispatcher = new Dispatcher();
+        verifier  = new ResourceVerifier(dispatcher);
+    }
+
+    @AfterClass
+    public static void afterClass() {
+        dispatcher.close();
+    }
 
     @Drone
     public WebDriver browser;

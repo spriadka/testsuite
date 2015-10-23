@@ -43,7 +43,9 @@ import org.jboss.hal.testsuite.fragment.shared.table.ResourceTableRowFragment;
 import org.jboss.hal.testsuite.page.config.IIOPPage;
 import org.jboss.hal.testsuite.page.config.StandaloneConfigurationPage;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
@@ -75,9 +77,20 @@ public class IIOPTestCase {
     private ResourceAddress address = new ResourceAddress(path);
     private ModelNode transactionPath = new ModelNode("/subsystem=transactions");
     private ResourceAddress transactionAddress = new ResourceAddress(transactionPath);
-    Dispatcher dispatcher = new Dispatcher();
-    ResourceVerifier verifier = new ResourceVerifier(dispatcher);
-    private CliClient cliClient = CliClientFactory.getClient();
+    private static Dispatcher dispatcher;
+    private static ResourceVerifier verifier;
+    CliClient cliClient = CliClientFactory.getClient();
+
+    @BeforeClass
+    public static void setUp() {
+        dispatcher = new Dispatcher();
+        verifier  = new ResourceVerifier(dispatcher);
+    }
+
+    @AfterClass
+    public static void tearDown() {
+        dispatcher.close();
+    }
 
     @Page
     IIOPPage page;

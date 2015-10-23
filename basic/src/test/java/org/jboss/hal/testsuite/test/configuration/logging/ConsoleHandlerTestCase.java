@@ -17,7 +17,9 @@ import org.jboss.hal.testsuite.page.config.DomainConfigEntryPoint;
 import org.jboss.hal.testsuite.page.config.LoggingPage;
 import org.jboss.hal.testsuite.page.config.StandaloneConfigEntryPoint;
 import org.jboss.hal.testsuite.util.ConfigUtils;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
@@ -38,8 +40,19 @@ public class ConsoleHandlerTestCase {
     private ModelNode path = new ModelNode("/subsystem=logging/console-handler=" + CONSOLEHANDLER);
     private ModelNode domainPath = new ModelNode("/profile=default/subsystem=logging/console-handler=" + CONSOLEHANDLER);
     private ResourceAddress address;
-    Dispatcher dispatcher = new Dispatcher();
-    ResourceVerifier verifier = new ResourceVerifier(dispatcher);
+    private static Dispatcher dispatcher;
+    private static ResourceVerifier verifier;
+
+    @BeforeClass
+    public static void setUp() {
+        dispatcher = new Dispatcher();
+        verifier  = new ResourceVerifier(dispatcher);
+    }
+
+    @AfterClass
+    public static void tearDown() {
+        dispatcher.close();
+    }
 
     @Drone
     private WebDriver browser;

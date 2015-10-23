@@ -14,7 +14,9 @@ import org.jboss.hal.testsuite.dmr.ResourceVerifier;
 import org.jboss.hal.testsuite.page.admin.RoleAssignmentPage;
 import org.jboss.hal.testsuite.util.Authentication;
 import org.jboss.hal.testsuite.util.RbacRole;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
@@ -30,8 +32,8 @@ public class SuperuserUserRoleAssignmentTestCase {
 
     private ResourceAddress address1;
     private ResourceAddress address2;
-    Dispatcher dispatcher = new Dispatcher();
-    ResourceVerifier verifier = new ResourceVerifier(dispatcher);
+    static Dispatcher dispatcher;
+    static ResourceVerifier verifier;
     CliClient cliClient = CliClientFactory.getClient();
 
     private String role;
@@ -44,6 +46,17 @@ public class SuperuserUserRoleAssignmentTestCase {
 
     @Page
     private RoleAssignmentPage page;
+
+    @BeforeClass
+    public static void beforeClass() {
+        dispatcher = new Dispatcher();
+        verifier  = new ResourceVerifier(dispatcher);
+    }
+
+    @AfterClass
+    public static void afterClass() {
+        dispatcher.close();
+    }
 
     @Before
     public void setUp() {

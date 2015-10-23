@@ -13,7 +13,9 @@ import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.page.config.JCAPage;
 import org.jboss.hal.testsuite.page.config.StandaloneConfigEntryPoint;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
@@ -33,8 +35,19 @@ public class JCASubsystemTestCase {
     private ModelNode pathArchive = new ModelNode("/subsystem=jca/archive-validation=archive-validation");
     private ModelNode pathBean = new ModelNode("/subsystem=jca/bean-validation=bean-validation");
     private ResourceAddress address = new ResourceAddress(path1);
-    Dispatcher dispatcher = new Dispatcher();
-    ResourceVerifier verifier = new ResourceVerifier(dispatcher);
+    private static Dispatcher dispatcher;
+    private static ResourceVerifier verifier;
+
+    @BeforeClass
+    public static void setUp() {
+        dispatcher = new Dispatcher();
+        verifier  = new ResourceVerifier(dispatcher);
+    }
+
+    @AfterClass
+    public static void tearDown() {
+        dispatcher.close();
+    }
 
     @Drone
     private WebDriver browser;

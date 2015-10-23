@@ -10,14 +10,17 @@ import org.jboss.hal.testsuite.dmr.AddressTemplate;
 import org.jboss.hal.testsuite.dmr.DefaultContext;
 import org.jboss.hal.testsuite.dmr.Dispatcher;
 import org.jboss.hal.testsuite.dmr.ResourceAddress;
+import org.jboss.hal.testsuite.dmr.ResourceVerifier;
 import org.jboss.hal.testsuite.dmr.StatementContext;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.config.infinispan.CacheWizard;
 import org.jboss.hal.testsuite.page.config.HibernateCachePage;
 import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.openqa.selenium.WebDriver;
 
@@ -37,8 +40,8 @@ public abstract class AbstractCacheTestCase {
 
     protected CliClient client = CliClientFactory.getClient();
 
-    protected Dispatcher dispatcher = new Dispatcher();
-    protected org.jboss.hal.testsuite.dmr.ResourceVerifier validVerifier = new org.jboss.hal.testsuite.dmr.ResourceVerifier(dispatcher);
+    protected static Dispatcher dispatcher;
+    protected static ResourceVerifier validVerifier;
     protected StatementContext context = new DefaultContext();
 
     @Drone
@@ -46,6 +49,12 @@ public abstract class AbstractCacheTestCase {
 
     @Page
     public HibernateCachePage page;
+
+    @BeforeClass
+    public static void beforeClass() {
+        dispatcher = new Dispatcher();
+        validVerifier = new ResourceVerifier(dispatcher);
+    }
 
     @Before
     public void before() {
@@ -59,6 +68,11 @@ public abstract class AbstractCacheTestCase {
     public void after() {
         deleteCache();
         reloadIfRequiredAndWaitForRunning();
+    }
+
+    @AfterClass
+    public static void tearDown() {
+        dispatcher.close();
     }
 
 

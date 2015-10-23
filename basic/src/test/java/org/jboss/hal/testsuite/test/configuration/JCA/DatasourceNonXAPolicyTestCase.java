@@ -6,8 +6,6 @@ import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.junit.InSequence;
 import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Standalone;
-import org.jboss.hal.testsuite.cli.CliClient;
-import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.dmr.Dispatcher;
 import org.jboss.hal.testsuite.dmr.ResourceAddress;
 import org.jboss.hal.testsuite.dmr.ResourceVerifier;
@@ -18,7 +16,9 @@ import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConfigPropertiesFragment;
 import org.jboss.hal.testsuite.page.config.JCAPage;
 import org.jboss.hal.testsuite.page.config.StandaloneConfigEntryPoint;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
@@ -41,9 +41,19 @@ public class DatasourceNonXAPolicyTestCase {
 
     private ModelNode path = new ModelNode("/subsystem=datasources/data-source=ExampleDS");
     private ResourceAddress address = new ResourceAddress(path);
-    Dispatcher dispatcher = new Dispatcher();
-    ResourceVerifier verifier = new ResourceVerifier(dispatcher);
-    private CliClient cliClient = CliClientFactory.getClient();
+    private static Dispatcher dispatcher;
+    private static ResourceVerifier verifier;
+
+    @BeforeClass
+    public static void setUp() {
+        dispatcher = new Dispatcher();
+        verifier  = new ResourceVerifier(dispatcher);
+    }
+
+    @AfterClass
+    public static void tearDown() {
+        dispatcher.close();
+    }
 
     @Drone
     private WebDriver browser;

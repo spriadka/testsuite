@@ -15,7 +15,9 @@ import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.page.config.LoggingPage;
 import org.jboss.hal.testsuite.page.config.StandaloneConfigEntryPoint;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
@@ -35,8 +37,19 @@ public class PeriodicTestCase {
 
     private ModelNode path = new ModelNode("/subsystem=logging/periodic-rotating-file-handler=" + PERIODICHANDLER);
     private ResourceAddress address = new ResourceAddress(path);
-    Dispatcher dispatcher = new Dispatcher();
-    ResourceVerifier verifier = new ResourceVerifier(dispatcher);
+    private static Dispatcher dispatcher;
+    private static ResourceVerifier verifier;
+
+    @BeforeClass
+    public static void setUp() {
+        dispatcher = new Dispatcher();
+        verifier  = new ResourceVerifier(dispatcher);
+    }
+
+    @AfterClass
+    public static void tearDown() {
+        dispatcher.close();
+    }
 
     @Drone
     private WebDriver browser;

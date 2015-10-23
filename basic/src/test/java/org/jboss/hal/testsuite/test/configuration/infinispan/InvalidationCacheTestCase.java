@@ -22,7 +22,7 @@ public class InvalidationCacheTestCase extends AbstractCacheTestCase {
     }
 
     @Before
-    public void setUp() {
+    public void before_() {
         page.invalidation();
     }
 

@@ -43,17 +43,14 @@ public class DatasourceXAPolicyTestCase {
 
     private ModelNode path = new ModelNode("/subsystem=datasources/xa-data-source=XA-ExampleDS");
     private ResourceAddress address = new ResourceAddress(path);
-    Dispatcher dispatcher = new Dispatcher();
-    ResourceVerifier verifier = new ResourceVerifier(dispatcher);
-    private static CliClient cliClient = CliClientFactory.getClient();
-
-    @Drone
-    private WebDriver browser;
-    @Page
-    private JCAPage jcaPage;
+    private static Dispatcher dispatcher;
+    private static ResourceVerifier verifier;
+    private static  CliClient cliClient = CliClientFactory.getClient();
 
     @BeforeClass
     public static void setUp() {
+        dispatcher = new Dispatcher();
+        verifier  = new ResourceVerifier(dispatcher);
         String command = "xa-data-source add" +
                 profile +
                 " --name=" + XANAME +
@@ -65,11 +62,17 @@ public class DatasourceXAPolicyTestCase {
 
     @AfterClass
     public static void tearDown() {
+        dispatcher.close();
         String command = "xa-data-source remove" +
                 profile +
                 " --name=" + XANAME;
         cliClient.executeCommand(command);
     }
+
+    @Drone
+    private WebDriver browser;
+    @Page
+    private JCAPage jcaPage;
 
     @Before
     public void before() {

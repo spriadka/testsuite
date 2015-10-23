@@ -14,7 +14,9 @@ import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.page.config.MessagingPage;
 import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
@@ -40,9 +42,20 @@ public class DiscoveryGroupsTestCase {
     private ModelNode path = new ModelNode("/subsystem=messaging-activemq/server=default/discovery-group=" + NAME);
     private ModelNode domainPath = new ModelNode("/profile=full-ha/subsystem=messaging-activemq/server=default/discovery-group=" + NAME);
     private ResourceAddress address;
-    Dispatcher dispatcher = new Dispatcher();
-    ResourceVerifier verifier = new ResourceVerifier(dispatcher);
+    private static Dispatcher dispatcher;
+    private static ResourceVerifier verifier;
     CliClient cliClient = CliClientFactory.getClient();
+
+    @BeforeClass
+    public static void setUp() {
+        dispatcher = new Dispatcher();
+        verifier  = new ResourceVerifier(dispatcher);
+    }
+
+    @AfterClass
+    public static void tearDown() {
+        dispatcher.close();
+    }
 
     @Drone
     private WebDriver browser;
