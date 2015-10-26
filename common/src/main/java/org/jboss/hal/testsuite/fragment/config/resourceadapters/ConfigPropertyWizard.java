@@ -7,7 +7,7 @@ import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
  */
 public class ConfigPropertyWizard extends WizardWindow {
 
-    private static final String NAME = "name";
+    private static final String NAME = "key";
     private static final String VALUE = "value";
 
     public ConfigPropertyWizard name(String value) {
