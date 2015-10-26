@@ -1,17 +1,11 @@
 package org.jboss.hal.testsuite.page.config;
 
 import org.jboss.arquillian.graphene.Graphene;
-import org.jboss.arquillian.graphene.findby.ByJQuery;
-import org.jboss.hal.testsuite.cli.Library;
 import org.jboss.hal.testsuite.finder.Application;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
-import org.jboss.hal.testsuite.fragment.formeditor.Editor;
-import org.jboss.hal.testsuite.util.Console;
-import org.jboss.hal.testsuite.util.PropUtils;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 
 /**
@@ -33,31 +27,7 @@ public class DeploymentScannerPage extends ConfigurationPage {
         return  Graphene.createPageFragment(ConfigFragment.class, editPanel);
     }
 
-    public Editor edit() {
-        WebElement button = getEditButton();
-        button.click();
-        Graphene.waitGui().until().element(button).is().not().visible();
-        return getConfig().getEditor();
-
-    }
-
-    private WebElement getEditButton() {
-        By selector = ByJQuery.selector("." + PropUtils.get("configarea.edit.button.class") + ":visible");
-        return getContentRoot().findElement(selector);
-    }
-
-    public boolean save() {
-        WebElement button = getButton(PropUtils.get("configarea.save.button.label"));
-        if (!button.isDisplayed()) {
-            Console.withBrowser(browser).pageDown();
-            Library.letsSleep(100);
-        }
-        button.click();
-        try {
-            Graphene.waitModel().until().element(getEditButton()).is().visible();
-            return true;
-        } catch (WebDriverException e) {
-            return false;
-        }
+    public ConfigFragment getMainConfigFragment() {
+        return Graphene.createPageFragment(ConfigFragment.class, getContentRoot());
     }
 }

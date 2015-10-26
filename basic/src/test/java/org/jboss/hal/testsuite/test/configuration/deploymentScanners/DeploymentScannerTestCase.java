@@ -93,7 +93,7 @@ public class DeploymentScannerTestCase {
 
         page.navigateToDeploymentScanners();
         page.getResourceManager().getResourceTable().selectRowByText(0, NAME);
-        page.edit().text("path", "../standalone");
+        page.getMainConfigFragment().edit().text("path", "../standalone");
         page.clickButton("Save");
 
         verifier.verifyAttribute(address, "path", "../standalone", 100);
@@ -107,7 +107,7 @@ public class DeploymentScannerTestCase {
 
         page.navigateToDeploymentScanners();
         page.getResourceManager().getResourceTable().selectRowByText(0, NAME);
-        page.edit().text("relative-to", "jboss");
+        page.getMainConfigFragment().edit().text("relative-to", "jboss");
         page.clickButton("Save");
 
         verifier.verifyAttribute(address, "relative-to", "jboss", 100);
@@ -121,7 +121,7 @@ public class DeploymentScannerTestCase {
 
         page.navigateToDeploymentScanners();
         page.getResourceManager().getResourceTable().selectRowByText(0, NAME);
-        page.edit().checkbox("runtime-failure-causes-rollback", true);
+        page.getMainConfigFragment().edit().checkbox("runtime-failure-causes-rollback", true);
         page.clickButton("Save");
 
         verifier.verifyAttribute(address, "runtime-failure-causes-rollback", true, 100);
@@ -135,7 +135,7 @@ public class DeploymentScannerTestCase {
 
         page.navigateToDeploymentScanners();
         page.getResourceManager().getResourceTable().selectRowByText(0, NAME);
-        page.edit().checkbox("auto-deploy-exploded", true);
+        page.getMainConfigFragment().edit().checkbox("auto-deploy-exploded", true);
         page.clickButton("Save");
 
         verifier.verifyAttribute(address, "auto-deploy-exploded", true, 100);
@@ -149,7 +149,7 @@ public class DeploymentScannerTestCase {
 
         page.navigateToDeploymentScanners();
         page.getResourceManager().getResourceTable().selectRowByText(0, NAME);
-        page.edit().checkbox("auto-deploy-xml", false);
+        page.getMainConfigFragment().edit().checkbox("auto-deploy-xml", false);
         page.clickButton("Save");
 
         verifier.verifyAttribute(address, "auto-deploy-xml", false, 100);
@@ -163,7 +163,7 @@ public class DeploymentScannerTestCase {
 
         page.navigateToDeploymentScanners();
         page.getResourceManager().getResourceTable().selectRowByText(0, NAME);
-        page.edit().checkbox("auto-deploy-zipped", false);
+        page.getMainConfigFragment().edit().checkbox("auto-deploy-zipped", false);
         page.clickButton("Save");
 
         verifier.verifyAttribute(address, "auto-deploy-zipped", false, 100);
@@ -177,7 +177,7 @@ public class DeploymentScannerTestCase {
 
         page.navigateToDeploymentScanners();
         page.getResourceManager().getResourceTable().selectRowByText(0, NAME);
-        page.edit().checkbox("scan-enabled", false);
+        page.getMainConfigFragment().edit().checkbox("scan-enabled", false);
         page.clickButton("Save");
 
         verifier.verifyAttribute(address, "scan-enabled", false, 100);
@@ -191,7 +191,7 @@ public class DeploymentScannerTestCase {
 
         page.navigateToDeploymentScanners();
         page.getResourceManager().getResourceTable().selectRowByText(0, NAME);
-        page.edit().text("deployment-timeout", "10");
+        page.getMainConfigFragment().edit().text("deployment-timeout", "10");
         page.clickButton("Save");
 
         verifier.verifyAttribute(address, "deployment-timeout", "10", 100);
@@ -205,7 +205,7 @@ public class DeploymentScannerTestCase {
 
         page.navigateToDeploymentScanners();
         page.getResourceManager().getResourceTable().selectRowByText(0, NAME);
-        page.edit().text("scan-interval", "1");
+        page.getMainConfigFragment().edit().text("scan-interval", "1");
         page.clickButton("Save");
 
         verifier.verifyAttribute(address, "scan-interval", "1", 100);
@@ -219,8 +219,8 @@ public class DeploymentScannerTestCase {
 
         page.navigateToDeploymentScanners();
         page.getResourceManager().getResourceTable().selectRowByText(0, NAME);
-        page.edit().text("scan-interval", "-1");
-        boolean finished = page.save();
+        page.getMainConfigFragment().edit().text("scan-interval", "-1");
+        boolean finished = page.getMainConfigFragment().save();
 
         assertFalse("Config should not be saved.", finished);
         verifier.verifyAttribute(address, "scan-interval", "0", 100);
