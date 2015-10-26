@@ -60,7 +60,7 @@ public class SyslogTestCase {
     @Test
     @InSequence(0)
     public void addSyslogHandler() {
-        page.addFileHandler(SYSLOGHANDLER);
+        page.addSyslogHandler(SYSLOGHANDLER);
 
         verifier.verifyResource(address, true);
     }
