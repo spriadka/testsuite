@@ -43,4 +43,12 @@ public class BaseFragment {
         WebElement button = getButton(label);
         button.click();
     }
+
+    /**
+     * @param dmrAttributeName .. {@code data-dmr-attr} attribute of {@code <tr>} tag
+     */
+    public String getAttributeValue(String dmrAttributeName) {
+        return root.findElement(ByJQuery.selector("tr[data-dmr-attr='" + dmrAttributeName + "'] .form-item-value"))
+                .getText();
+    }
 }

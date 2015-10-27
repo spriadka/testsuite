@@ -20,33 +20,17 @@
  * 02110-1301 USA, or see the FSF site: http://www.fsf.org.
  */
 
-package org.jboss.hal.testsuite.fragment.config.batch;
+package org.jboss.hal.testsuite.fragment.shared.modal;
 
-import org.jboss.hal.testsuite.fragment.ConfigFragment;
-import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
-import org.jboss.hal.testsuite.fragment.shared.table.ResourceTableFragment;
-import org.jboss.hal.testsuite.fragment.shared.table.ResourceTableRowFragment;
+import org.jboss.hal.testsuite.fragment.WindowFragment;
 
 /**
- * Created by pjelinek on Oct 15, 2015
+ * Created by pjelinek on Oct 27, 2015
  */
-public class BatchConfigFragment extends ConfigFragment {
+public class VersionInfoWindow extends WindowFragment {
 
-    public WizardWindow openAddWizard() {
-        return getResourceManager().addResource();
+    public String getProductVersion() {
+        return getAttributeValue("product_version");
     }
 
-    /**
-     * @see ResourceTableFragment#selectRowByText(int, String)
-     */
-    public ResourceTableRowFragment selectTableRow(String name) {
-        return getResourceManager().getResourceTable().selectRowByText(0, name);
-    }
-
-    /**
-     * @see ResourceTableFragment#getRowByText(int, String)
-     */
-    public ResourceTableRowFragment getTableRow(String name) {
-        return getResourceManager().getResourceTable().getRowByText(0, name);
-    }
 }
