@@ -42,6 +42,11 @@ E.g. `-Djboss.dist=/home/user/workspace/wildfly/build/target/wildfly-9.0.0.Alpha
 Path to Firefox binary file. If not provided system default firefox will be used.
 E.g. `-Darq.extension.webdriver.firefox_binary=/home/user/apps/firefox-31.2.0esr/firefox`
 
+### Optional take.screenshot.after.each.test parameter
+
+If screenshot should be made after each test. Default is `false`.
+E.g. `-Dtake.screenshot.after.each.test=true`
+
 ## Modules
 
 ### common

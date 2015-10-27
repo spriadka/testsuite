@@ -34,6 +34,7 @@
     <as.managementAddress>127.0.0.1</as.managementAddress>
     <as.managementPort>9990</as.managementPort>
     <arq.managementPort>${as.managementPort}</arq.managementPort>
+    <take.screenshot.after.each.test>false</take.screenshot.after.each.test>
   </properties>
 
   <dependencyManagement>
