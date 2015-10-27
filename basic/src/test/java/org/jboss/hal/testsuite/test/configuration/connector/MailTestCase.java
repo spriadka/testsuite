@@ -179,7 +179,7 @@ public class MailTestCase {
     }
 
     private void invokeOperationOnMailSession(String operationName) {
-        navi.addAddress(MAIL_SESSION_LABEL, MAIL_SESSION_NAME).selectRow().invoke(operationName);
+        navi.addAddress(MAIL_SESSION_LABEL, MAIL_NAME).selectRow().invoke(operationName);
     }
 
     private void invokeOperationAddMailSession() {
