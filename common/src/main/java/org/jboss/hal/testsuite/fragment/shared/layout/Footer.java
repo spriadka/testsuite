@@ -5,6 +5,8 @@ import org.jboss.hal.testsuite.fragment.BaseFragment;
 import org.jboss.hal.testsuite.fragment.PopUpFragment;
 import org.jboss.hal.testsuite.fragment.WindowFragment;
 import org.jboss.hal.testsuite.fragment.shared.modal.SettingsWindow;
+import org.jboss.hal.testsuite.fragment.shared.modal.VersionInfoWindow;
+import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.hal.testsuite.util.Workaround;
 import org.openqa.selenium.TakesScreenshot;
@@ -20,26 +22,8 @@ public class Footer extends BaseFragment {
     private TakesScreenshot screenshot;
 
     public String getDisplayedVersion() {
-        String label = PropUtils.get("footer.version.label");
-        ByJQuery selector = ByJQuery.selector(".footer-link[title='" + label + "']");
-        WebElement version = root.findElement(selector);
-        return version.getText();
+        return getVersionInfoLink().getText();
     }
-
-    /**
-     *  Returns footer link based on its text label.
-     *
-     *
-     * @param label
-     * @return
-     */
-    public WebElement getLink(String label) {
-        ByJQuery selector = ByJQuery.selector(".footer-link:contains('" + label + "')");
-        WebElement link = root.findElement(selector);
-
-        return link;
-    }
-
 
     /**
      * Open tools popup menu.
@@ -72,6 +56,36 @@ public class Footer extends BaseFragment {
         SettingsWindow window = console.openedWindow(SettingsWindow.class);
 
         return window;
+    }
+
+    /**
+     * Opens Version Information modal window
+     * @return
+     */
+    public VersionInfoWindow openVersionInfo() {
+        getVersionInfoLink().click();
+        Graphene.waitGui().until().element(WindowFragment.ROOT_SELECTOR).is().visible();
+        return Console.withBrowser(browser).openedWindow(VersionInfoWindow.class);
+    }
+
+    private WebElement getVersionInfoLink() {
+        String label = PropUtils.get("footer.version.label");
+        ByJQuery selector = ByJQuery.selector(".footer-link[title='" + label + "']");
+        WebElement version = root.findElement(selector);
+        return version;
+    }
+
+    /**
+     *  Returns footer link based on its text label.
+     *
+     * @param label
+     * @return
+     */
+    private WebElement getLink(String label) {
+        ByJQuery selector = ByJQuery.selector(".footer-link:contains('" + label + "')");
+        WebElement link = root.findElement(selector);
+
+        return link;
     }
 
 }
