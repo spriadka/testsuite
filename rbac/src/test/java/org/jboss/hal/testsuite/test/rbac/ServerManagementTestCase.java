@@ -12,6 +12,8 @@ import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.page.runtime.DomainRuntimeEntryPoint;
 import org.jboss.hal.testsuite.util.Authentication;
 import org.jboss.hal.testsuite.util.RbacRole;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
@@ -30,8 +32,19 @@ public class ServerManagementTestCase {
     private FinderNavigation navigation;
 
     private ResourceAddress address;
-    Dispatcher dispatcher = new Dispatcher();
-    ResourceVerifier verifier = new ResourceVerifier(dispatcher);
+    static Dispatcher dispatcher;
+    static ResourceVerifier verifier;
+
+    @BeforeClass
+    public static void beforeClass() {
+        dispatcher = new Dispatcher();
+        verifier  = new ResourceVerifier(dispatcher);
+    }
+
+    @AfterClass
+    public static void afterClass() {
+        dispatcher.close();
+    }
 
     @Drone
     private WebDriver browser;

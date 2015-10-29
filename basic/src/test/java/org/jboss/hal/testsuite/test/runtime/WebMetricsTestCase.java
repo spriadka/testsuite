@@ -23,7 +23,9 @@ import org.jboss.hal.testsuite.page.runtime.WebMetricsPage;
 import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.jboss.hal.testsuite.util.Console;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
@@ -52,7 +54,7 @@ public class WebMetricsTestCase {
     private CliClient cliClient = CliClientFactory.getClient();
     private FinderNavigation navigation;
     private DefaultContext statementContext;
-    private Dispatcher dispatcher;
+    private static Dispatcher dispatcher;
 
     @Drone
     private WebDriver browser;
@@ -64,9 +66,18 @@ public class WebMetricsTestCase {
     @Page
     private DomainRuntimeEntryPoint domainPage;
 
+    @BeforeClass
+    public static void setUp() {
+        dispatcher = new Dispatcher();
+    }
+
+    @AfterClass
+    public static void tearDown() {
+        dispatcher.close();
+    }
+
     @Before
     public void before() throws IOException, TimeoutException, InterruptedException {
-        dispatcher = new Dispatcher();
         statementContext = new DefaultContext();
         ResourceAddress addressStats = ADDRESS_TEMPLATE_STATISTICS.resolve(statementContext);
         dispatcher.execute(new Operation.Builder(ModelDescriptionConstants.WRITE_ATTRIBUTE_OPERATION, addressStats).param("name", "statistics-enabled").param("value", "true").build());

@@ -23,7 +23,9 @@ import org.jboss.hal.testsuite.util.Authentication;
 import org.jboss.hal.testsuite.util.PropUtils;
 import org.jboss.hal.testsuite.util.RbacRole;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
@@ -46,10 +48,21 @@ public class DomainElementaryAccessControlTestCase {
 
     private String addressName = "ds_" + RandomStringUtils.randomAlphanumeric(5);
     private DefaultContext statementContext = new DefaultContext();
-    private Dispatcher dispatcher = new Dispatcher();
     private FinderNavigation navigation;
     private ResourceAddress address = ADDRESS_TEMPLATE.resolve(statementContext, addressName);
-    private ResourceVerifier verifier = new ResourceVerifier(dispatcher);
+    private static Dispatcher dispatcher;
+    private static ResourceVerifier verifier;
+
+    @BeforeClass
+    public static void beforeClass() {
+        dispatcher = new Dispatcher();
+        verifier  = new ResourceVerifier(dispatcher);
+    }
+
+    @AfterClass
+    public static void afterClass() {
+        dispatcher.close();
+    }
 
     @Drone
     public WebDriver browser;

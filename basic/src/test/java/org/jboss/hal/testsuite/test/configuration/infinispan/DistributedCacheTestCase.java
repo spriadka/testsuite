@@ -21,7 +21,7 @@ public class DistributedCacheTestCase extends AbstractCacheTestCase {
     }
 
     @Before
-    public void setUp() {
+    public void before_() {
         page.distributed();
     }
 

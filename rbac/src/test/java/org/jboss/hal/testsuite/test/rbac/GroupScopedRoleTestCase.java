@@ -18,7 +18,9 @@ import org.jboss.hal.testsuite.page.admin.RoleAssignmentPage;
 import org.jboss.hal.testsuite.util.Authentication;
 import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.RbacRole;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
@@ -35,8 +37,19 @@ public class GroupScopedRoleTestCase {
     String command = "/core-service=management/access=authorization/server-group-scoped-role=";
 
     private ResourceAddress address;
-    Dispatcher dispatcher = new Dispatcher();
-    ResourceVerifier verifier = new ResourceVerifier(dispatcher);
+    private static Dispatcher dispatcher;
+    private static ResourceVerifier verifier;
+
+    @BeforeClass
+    public static void beforeClass() {
+        dispatcher = new Dispatcher();
+        verifier  = new ResourceVerifier(dispatcher);
+    }
+
+    @AfterClass
+    public static void afterClass() {
+        dispatcher.close();
+    }
 
     @Drone
     private WebDriver browser;

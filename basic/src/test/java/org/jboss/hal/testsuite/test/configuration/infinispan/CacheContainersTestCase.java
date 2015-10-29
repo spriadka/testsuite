@@ -57,7 +57,7 @@ public class CacheContainersTestCase {
     public CacheContainersPage page;
 
     @Before
-    public void before() {
+    public void before_() {
         addCacheContainer();
         page.navigate();
     }

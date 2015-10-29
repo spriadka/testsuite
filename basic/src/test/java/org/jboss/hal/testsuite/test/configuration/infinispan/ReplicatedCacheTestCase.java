@@ -21,7 +21,7 @@ public class ReplicatedCacheTestCase extends AbstractCacheTestCase {
     }
 
     @Before
-    public void setUp() {
+    public void before_() {
         page.replicated();
     }
 

@@ -49,17 +49,14 @@ public class ResourceAdaptersPolicyTestCase {
     private ModelNode path = new ModelNode("/subsystem=resource-adapters/resource-adapter=" + NAME_NO_TRANSACTION +
                                                 "/connection-definitions=" + NAME);
     private ResourceAddress address = new ResourceAddress(path);
-    Dispatcher dispatcher = new Dispatcher();
-    ResourceVerifier verifier = new ResourceVerifier(dispatcher);
+    private static Dispatcher dispatcher;
+    private static ResourceVerifier verifier;
     private static CliClient cliClient = CliClientFactory.getClient();
-
-    @Drone
-    private WebDriver browser;
-    @Page
-    private JCAPage jcaPage;
 
     @BeforeClass
     public static void setUp() {
+        dispatcher = new Dispatcher();
+        verifier  = new ResourceVerifier(dispatcher);
         String command = "/subsystem=resource-adapters/resource-adapter=" + NAME_NO_TRANSACTION +
                 ":add" +
                 "(archive=" + ARCHIVE +
@@ -76,7 +73,13 @@ public class ResourceAdaptersPolicyTestCase {
     public static void tearDown() {
         String command = "/subsystem=resource-adapters/resource-adapter=" + NAME_NO_TRANSACTION + ":remove";
         cliClient.executeCommand(command);
+        dispatcher.close();
     }
+
+    @Drone
+    private WebDriver browser;
+    @Page
+    private JCAPage jcaPage;
 
     @Before
     public void before() {

@@ -38,7 +38,7 @@ public class LocalCacheTestCase extends AbstractCacheTestCase {
     }
 
     @Before
-    public void setUp() {
+    public void before_() {
         page.local();
     }
 
