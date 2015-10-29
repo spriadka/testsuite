@@ -8,7 +8,7 @@ import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
  */
 public class HostPropertiesWizard extends WizardWindow {
 
-    private static final String NAME = "name";
+    private static final String NAME = "key";
     private static final String VALUE = "value";
     private static final String BOOT_TIME = "bootTime";
 

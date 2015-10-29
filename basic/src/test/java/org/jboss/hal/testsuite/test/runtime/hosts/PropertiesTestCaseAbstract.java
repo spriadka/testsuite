@@ -3,7 +3,10 @@ package org.jboss.hal.testsuite.test.runtime.hosts;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.InSequence;
+import org.jboss.hal.testsuite.dmr.DefaultContext;
 import org.jboss.hal.testsuite.dmr.Dispatcher;
+import org.jboss.hal.testsuite.dmr.ResourceVerifier;
+import org.jboss.hal.testsuite.dmr.StatementContext;
 import org.jboss.hal.testsuite.fragment.runtime.HostPropertiesWizard;
 import org.jboss.hal.testsuite.page.runtime.HostsPage;
 import org.junit.AfterClass;
@@ -26,10 +29,13 @@ public abstract class PropertiesTestCaseAbstract {
     protected HostsPage page;
 
     private static Dispatcher dispatcher;
+    protected static ResourceVerifier verifier;
+    protected StatementContext context = new DefaultContext();
 
     @BeforeClass
     public static void setUp() {
         dispatcher = new Dispatcher();
+        verifier = new ResourceVerifier(dispatcher);
     }
 
     @Before
@@ -46,6 +52,7 @@ public abstract class PropertiesTestCaseAbstract {
                 .bootTime(true);
         wizard.finish();
         Assert.assertTrue("Property should be present in table", page.isRowPresent("test"));
+        verifyOnServer("test", true);
     }
 
     @InSequence(1)
@@ -53,6 +60,7 @@ public abstract class PropertiesTestCaseAbstract {
     public void removeServerProperty() {
         page.getResourceManager().removeResource("test").confirm();
         Assert.assertFalse("Property should not be present in table", page.isRowPresent("test"));
+        verifyOnServer("test", false);
     }
 
     @Test
@@ -85,6 +93,7 @@ public abstract class PropertiesTestCaseAbstract {
                 .bootTime(false);
         wizard.finish();
         Assert.assertTrue("Property should be present in table", page.isRowPresent("test"));
+        verifyOnServer("falseBootTime", true);
     }
 
     @AfterClass
@@ -93,4 +102,6 @@ public abstract class PropertiesTestCaseAbstract {
     }
 
     protected abstract void navigate();
+
+    protected abstract void verifyOnServer(String propertyName, boolean shouldExist);
 }
