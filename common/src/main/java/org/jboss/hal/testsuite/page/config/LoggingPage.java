@@ -90,6 +90,12 @@ public class LoggingPage extends ConfigPage {
         getWindowFragment().getEditor().clickButton("Finish");
     }
 
+    public void addSyslogHandler(String name) {
+        clickButton("Add");
+        getWindowFragment().getEditor().text("name", name);
+        getWindowFragment().getEditor().clickButton("Save");
+    }
+
     public void addConsoleHandler(String name, String namedFormatter) {
         clickButton("Add");
         getWindowFragment().getEditor().text("name", name);
