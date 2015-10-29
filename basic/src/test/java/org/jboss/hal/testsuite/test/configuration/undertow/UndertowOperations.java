@@ -32,7 +32,7 @@ public class UndertowOperations {
     private AddressTemplate undertowAddressTemplate = AddressTemplate.of("{default.profile}/subsystem=undertow");
     private AddressTemplate ioWorkerAddressTemplate = AddressTemplate.of("{default.profile}/subsystem=io/worker=*");
     private AddressTemplate ioBufferPoolAddressTemplate = AddressTemplate.of("{default.profile}/subsystem=io/buffer-pool=*");
-    private AddressTemplate socketBindingAddressTemplate = AddressTemplate.of("/socket-binding-group=full-sockets/socket-binding=*");
+    private AddressTemplate socketBindingAddressTemplate;
     private AddressTemplate httpServerTemplate = undertowAddressTemplate.append("/server=*");
     private AddressTemplate servletContainerTemplate = undertowAddressTemplate.append("/servlet-container=*");
     private AddressTemplate ajpListenerTemplate = httpServerTemplate.append("/ajp-listener=*");
@@ -42,6 +42,8 @@ public class UndertowOperations {
 
     public UndertowOperations(Dispatcher dispatcher) {
         this.dispatcher = dispatcher;
+        String socketBindingGroup = ConfigUtils.isDomain() ? "full-sockets" : "standard-sockets";
+        this.socketBindingAddressTemplate = AddressTemplate.of("/socket-binding-group=" + socketBindingGroup + "/socket-binding=*");
     }
 
     public static void reloadIfRequiredAndWaitForRunning() {
