@@ -137,15 +137,6 @@ public class SecurityPage extends ConfigurationPage implements Navigatable {
         return isElementVisible(selector);
     }
 
-    private Boolean isElementVisible(By selector) {
-        try {
-            Graphene.waitAjax().until().element(selector).is().visible();
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
     public void removeSecurityDomain(String name) {
         try {
             navigation.resetNavigation().addAddress(SECURITY_DOMAIN, name).selectRow().invoke("Remove");
