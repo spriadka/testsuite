@@ -73,7 +73,7 @@ public class RemoteConnectorTestCase {
         page.selectView("Connections");
         page.switchToConnector();
         //same fields in connector adding
-        page.addBroadcastGroup(NAME, BINDING);
+        page.addDiscoveryGroup(NAME, BINDING);
 
 
         verifier.verifyResource(address, true);
