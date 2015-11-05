@@ -9,6 +9,8 @@ import org.jboss.hal.testsuite.category.Domain;
 import org.jboss.hal.testsuite.cli.CliClient;
 import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.cli.Library;
+import org.jboss.hal.testsuite.finder.FinderNames;
+import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.fragment.runtime.DeploymentContentRepositoryArea;
 import org.jboss.hal.testsuite.fragment.runtime.DeploymentWizard;
 import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
@@ -43,6 +45,7 @@ public class DomainUnmanagedDeploymentsTestCase {
 
     private static CliClient client = CliClientFactory.getDomainClient("full-ha");
     private static DeploymentsOperations ops = new DeploymentsOperations(client);
+    private FinderNavigation navigation;
 
     @Drone
     WebDriver browser;
@@ -52,7 +55,7 @@ public class DomainUnmanagedDeploymentsTestCase {
 
     @Before
     public void before() {
-        Console.withBrowser(browser).refreshAndNavigate(DomainDeploymentPage.class);
+        navigation = new FinderNavigation(browser, DomainDeploymentPage.class);
     }
 
     @AfterClass
@@ -63,9 +66,10 @@ public class DomainUnmanagedDeploymentsTestCase {
     @Test
     @InSequence(0)
     public void createDeployment() throws InterruptedException {
+        navigation.addAddress(FinderNames.BROWSE_BY, "Content Repository");
+        navigation.selectRow();
         DeploymentContentRepositoryArea content = page.getDeploymentContent();
         File deployment = new File(FILE_PATH + FILE_NAME);
-        page.selectMenu("Content Repository");
         DeploymentWizard wizard = content.add();
 
         wizard.switchToUnmanaged()
@@ -85,9 +89,12 @@ public class DomainUnmanagedDeploymentsTestCase {
     @Test
     @InSequence(1)
     public void assignDeploymentToServerGroup() {
-        Console.withBrowser(browser).waitUntilLoaded();
+        navigation.resetNavigation();
+        navigation.addAddress(FinderNames.BROWSE_BY, "Server Groups")
+                .addAddress(FinderNames.SERVER_GROUP, "main-server-group")
+                .addAddress(FinderNames.DEPLOYMENT);
+        navigation.selectColumn();
         DeploymentContentRepositoryArea content = page.getDeploymentContent();
-        page.selectMenu("Server Groups").selectMenu("main-server-group");
 
         DeploymentWizard wizard = content.add();
 
@@ -104,7 +111,11 @@ public class DomainUnmanagedDeploymentsTestCase {
     @InSequence(2)
     public void enableDeployment() {
 
-        page.selectMenu("Server Groups").selectMenu(MAIN_SERVER_GROUP).selectMenu(NAME).clickButton("(En/Dis)able");
+        navigation.resetNavigation();
+        navigation.addAddress(FinderNames.BROWSE_BY, "Server Groups")
+                .addAddress(FinderNames.SERVER_GROUP, "main-server-group")
+                .addAddress(FinderNames.DEPLOYMENT, NAME);
+        navigation.selectRow().invoke("Enable");
 
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
         Library.letsSleep(10000);
@@ -116,7 +127,11 @@ public class DomainUnmanagedDeploymentsTestCase {
     @InSequence(3)
     public void disableDeployment() {
 
-        page.selectMenu("Server Groups").selectMenu(MAIN_SERVER_GROUP).selectMenu(NAME).clickButton("(En/Dis)able");
+        navigation.resetNavigation();
+        navigation.addAddress(FinderNames.BROWSE_BY, "Server Groups")
+                .addAddress(FinderNames.SERVER_GROUP, "main-server-group")
+                .addAddress(FinderNames.DEPLOYMENT, NAME);
+        navigation.selectRow().invoke("Disable");
 
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
         Library.letsSleep(10000);
@@ -126,11 +141,21 @@ public class DomainUnmanagedDeploymentsTestCase {
     @Test
     @InSequence(4)
     public void removeDeployment() {
-        Console.withBrowser(browser).waitUntilLoaded();
-        Library.letsSleep(10000);
-        page.selectMenu("Server Groups").selectMenu(MAIN_SERVER_GROUP).selectMenu(NAME);
-        page.unassign();
-        page.selectMenu("Unassigned Content").selectMenu(NAME).remove();
+        navigation.resetNavigation();
+        navigation.addAddress(FinderNames.BROWSE_BY, "Server Groups")
+                .addAddress(FinderNames.SERVER_GROUP, "main-server-group")
+                .addAddress(FinderNames.DEPLOYMENT, NAME);
+        navigation.selectRow().invoke("Unassign");
+
+        Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
+        Library.letsSleep(1000);
+
+        navigation.resetNavigation();
+        navigation.addAddress(FinderNames.BROWSE_BY, "Unassigned Content")
+                .addAddress("Unassigned", NAME);
+        navigation.selectRow().invoke("Remove");
+        Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
+        Library.letsSleep(1000);
 
         assertFalse("Deployment should not exist", ops.exists(NAME));
     }

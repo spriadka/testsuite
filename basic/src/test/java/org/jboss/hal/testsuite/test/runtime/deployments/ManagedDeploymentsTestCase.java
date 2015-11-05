@@ -9,6 +9,8 @@ import org.jboss.hal.testsuite.category.Standalone;
 import org.jboss.hal.testsuite.cli.CliClient;
 import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.cli.Library;
+import org.jboss.hal.testsuite.finder.FinderNames;
+import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.fragment.runtime.DeploymentWizard;
 import org.jboss.hal.testsuite.fragment.runtime.StandaloneDeploymentsArea;
 import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
@@ -42,6 +44,7 @@ public class ManagedDeploymentsTestCase {
 
     private static CliClient client = CliClientFactory.getClient();
     private static DeploymentsOperations ops = new DeploymentsOperations(client);
+    private FinderNavigation navigation;
 
     @Drone
     private WebDriver browser;
@@ -51,7 +54,7 @@ public class ManagedDeploymentsTestCase {
 
     @Before
     public void before() {
-        Console.withBrowser(browser).refreshAndNavigate(DeploymentPage.class);
+        navigation = new FinderNavigation(browser, DeploymentPage.class);
     }
 
     @BeforeClass
@@ -66,6 +69,7 @@ public class ManagedDeploymentsTestCase {
     @Test
     @InSequence(0)
     public void basicDeployment() throws InterruptedException {
+        navigation.addAddress(FinderNames.DEPLOYMENT).selectColumn();
         StandaloneDeploymentsArea content = page.getDeploymentContent();
         File deployment = new File(FILE_PATH + FILE_NAME);
 
@@ -87,7 +91,8 @@ public class ManagedDeploymentsTestCase {
     @Test
     @InSequence(1)
     public void disableDeployment() {
-        page.selectMenu(NAME).clickButton("Disable");
+
+        navigation.addAddress(FinderNames.DEPLOYMENT, NAME).selectRow().invoke("Disable");
 
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
         Library.letsSleep(10000);
@@ -97,7 +102,8 @@ public class ManagedDeploymentsTestCase {
     @Test
     @InSequence(2)
     public void enableDeployment() {
-        page.selectMenu(NAME).clickButton("Enable");
+
+        navigation.addAddress(FinderNames.DEPLOYMENT, NAME).selectRow().invoke("Enable");
 
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
         Library.letsSleep(10000);
@@ -105,15 +111,15 @@ public class ManagedDeploymentsTestCase {
     }
 
 
-
-
     @Test
     @InSequence(3)
     public void removeDeployment() {
         Console.withBrowser(browser).waitUntilLoaded();
-        Library.letsSleep(10000);
-        page.selectMenu(NAME).remove();
+        Library.letsSleep(1000);
+        navigation.addAddress(FinderNames.DEPLOYMENT, NAME).selectRow().invoke("Remove");
 
+        Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
+        Library.letsSleep(1000);
         assertFalse("Deployment should not exist", ops.exists(NAME));
     }
 
