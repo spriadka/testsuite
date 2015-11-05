@@ -239,7 +239,7 @@ public class SizeHandlerTestCase {
         editPanelFragment.getEditor().text("encoding", "");
         editPanelFragment.getEditor().text("filter-spec", "");
         editPanelFragment.getEditor().text("formatter", "%d{HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n");
-        editPanelFragment.getEditor().text("max-backup-index", "0");
+        editPanelFragment.getEditor().text("max-backup-index", "1");
         editPanelFragment.getEditor().text("suffix", "");
         editPanelFragment.getEditor().checkbox("append", true);
         editPanelFragment.getEditor().checkbox("autoflush", true);
