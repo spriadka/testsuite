@@ -78,7 +78,7 @@ public abstract class PropertiesTestCaseAbstract {
     public void invalidPropertyValue() {
         HostPropertiesWizard wizard = page.addProperty();
         wizard.name("test")
-                .value("example *+<")
+                .value("examplečřž")
                 .bootTime(true);
         wizard.finish();
         Assert.assertTrue("Error should be shown", page.isErrorShown());
