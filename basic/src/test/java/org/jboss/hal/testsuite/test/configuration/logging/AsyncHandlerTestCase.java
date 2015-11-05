@@ -8,6 +8,7 @@ import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.cli.CliClient;
 import org.jboss.hal.testsuite.cli.CliClientFactory;
+import org.jboss.hal.testsuite.cli.Library;
 import org.jboss.hal.testsuite.dmr.Dispatcher;
 import org.jboss.hal.testsuite.dmr.ResourceAddress;
 import org.jboss.hal.testsuite.dmr.ResourceVerifier;
@@ -176,7 +177,7 @@ public class AsyncHandlerTestCase {
     @InSequence(7)
     public void removeAsyncHandler() {
         page.remove();
-
+        Library.letsSleep(500);
         verifier.verifyResource(address, false);
     }
 }
