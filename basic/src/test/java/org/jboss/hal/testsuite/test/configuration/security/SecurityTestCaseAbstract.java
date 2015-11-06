@@ -88,7 +88,8 @@ public abstract class SecurityTestCaseAbstract {
             }
             properties.add("(" + String.join(" => ", pair) + ")");
         }
-        String response = "[" + String.join(",", properties) + "]";
+        String inner = String.join(",", properties);
+        String response = (ConfigUtils.isDomain()) ? "[" + inner + "]" : "{" + inner + "}" ;
         UndertowOperations.reloadIfRequiredAndWaitForRunning();
         verifier.verifyAttribute(address, attributeName, response);
     }
