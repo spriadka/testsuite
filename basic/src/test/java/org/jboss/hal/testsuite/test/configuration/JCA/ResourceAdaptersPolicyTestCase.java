@@ -187,7 +187,7 @@ public class ResourceAdaptersPolicyTestCase {
     @InSequence(7)
     public void unsetIncrementerClass() {
         ConfigFragment editPanelFragment = jcaPage.getConfigFragment();
-        editPanelFragment.getEditor().select("capacit-incrementer-class", "");
+        editPanelFragment.getEditor().select("capacity-incrementer-class", "");
 
         boolean finished = editPanelFragment.save();
         assertTrue("Config should be saved and closed.", finished);
