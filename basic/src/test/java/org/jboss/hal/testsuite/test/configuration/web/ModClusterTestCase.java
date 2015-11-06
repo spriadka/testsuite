@@ -84,7 +84,7 @@ public class ModClusterTestCase {
 
     @Before
     public void before() {
-        Console.withBrowser(browser).refreshAndNavigate(ModClusterPage.class);
+        page.navigate();
     }
 
     @After
