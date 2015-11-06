@@ -7,9 +7,12 @@ import org.jboss.hal.testsuite.category.Standalone;
 import org.jboss.hal.testsuite.cli.CliClient;
 import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.cli.CliConstants;
+import org.jboss.hal.testsuite.finder.Application;
+import org.jboss.hal.testsuite.finder.FinderNames;
+import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.page.config.JPAPage;
+import org.jboss.hal.testsuite.page.config.StandaloneConfigEntryPoint;
 import org.jboss.hal.testsuite.test.util.ConfigAreaChecker;
-import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.ResourceVerifier;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,6 +31,8 @@ public class JPATestCase {
     private ResourceVerifier verifier = new ResourceVerifier(CliConstants.JPA_SUBSYSTEM_ADDRESS, client);
     private ConfigAreaChecker checker = new ConfigAreaChecker(verifier);
 
+    private FinderNavigation navigation;
+
     @Drone
     public WebDriver browser;
 
@@ -36,7 +41,12 @@ public class JPATestCase {
 
     @Before
     public void before() {
-        Console.withBrowser(browser).refreshAndNavigate(JPAPage.class);
+        navigation = new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
+                .addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
+                .addAddress(FinderNames.SUBSYSTEM, "JPA");
+
+        navigation.selectRow().invoke("View");
+        Application.waitUntilVisible();
     }
 
     @Test
@@ -46,6 +56,7 @@ public class JPATestCase {
 
     @Test
     public void editPersistenceInheritance() {
+        checker.editSelectAndAssert(page, "inheritance", "SHALLOW").dmrAttribute("default-extended-persistence-inheritance").invoke();
         checker.editSelectAndAssert(page, "inheritance", "DEEP").dmrAttribute("default-extended-persistence-inheritance").invoke();
     }
 
