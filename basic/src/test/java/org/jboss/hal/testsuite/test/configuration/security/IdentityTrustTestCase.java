@@ -61,6 +61,7 @@ public class IdentityTrustTestCase extends SecurityTestCaseAbstract {
                 .param("code", RandomStringUtils.randomAlphanumeric(8))
                 .param("flag", "optional")
                 .build());
+        reloadIfRequiredAndWaitForRunning();
         return name;
     }
 

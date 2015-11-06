@@ -61,6 +61,7 @@ public class AuditTestCase extends SecurityTestCaseAbstract {
         dispatcher.execute(new Operation.Builder("add", AUDIT_TEMPLATE.resolve(context, JBOSS_EJB_POLICY, name))
                 .param("code", RandomStringUtils.randomAlphanumeric(8))
                 .build());
+        reloadIfRequiredAndWaitForRunning();
         return name;
     }
 
@@ -69,7 +70,6 @@ public class AuditTestCase extends SecurityTestCaseAbstract {
                 .append("audit=classic")
                 .resolve(context, JBOSS_EJB_POLICY))
             .build());
-        reloadIfRequiredAndWaitForRunning();
     }
 
 
