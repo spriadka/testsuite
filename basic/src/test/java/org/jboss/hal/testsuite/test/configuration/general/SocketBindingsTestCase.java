@@ -15,7 +15,6 @@ import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
 import org.jboss.hal.testsuite.page.config.StandardSocketBindingsPage;
 import org.jboss.hal.testsuite.test.util.ConfigAreaChecker;
-import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.ResourceVerifier;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -63,7 +62,7 @@ public class SocketBindingsTestCase {
 
     @Before
     public void before() {
-        Console.withBrowser(browser).refreshAndNavigate(StandardSocketBindingsPage.class);
+        page.navigate();
     }
 
     @After
