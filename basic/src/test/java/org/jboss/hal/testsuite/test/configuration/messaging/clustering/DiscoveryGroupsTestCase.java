@@ -84,7 +84,7 @@ public class DiscoveryGroupsTestCase {
         page.selectView("Clustering");
         page.switchToDiscovery();
 
-        page.addBroadcastGroup(NAME, BINDING);
+        page.addDiscoveryGroup(NAME, BINDING);
 
         verifier.verifyResource(address, true);
 

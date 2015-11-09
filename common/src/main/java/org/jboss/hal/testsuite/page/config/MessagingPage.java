@@ -183,6 +183,13 @@ public class MessagingPage extends ConfigPage {
     public void addBroadcastGroup(String name, String binding) {
         clickButton("Add");
         getWindowFragment().getEditor().text("name", name);
+        getWindowFragment().getEditor().text("socket-binding", binding);
+        getWindowFragment().clickButton("Save");
+    }
+
+    public void addDiscoveryGroup(String name, String binding) {
+        clickButton("Add");
+        getWindowFragment().getEditor().text("name", name);
         getWindowFragment().getEditor().text("socketBinding", binding);
         getWindowFragment().clickButton("Save");
     }

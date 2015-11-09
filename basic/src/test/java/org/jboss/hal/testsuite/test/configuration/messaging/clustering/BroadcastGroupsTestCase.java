@@ -101,7 +101,7 @@ public class BroadcastGroupsTestCase {
 
         ConfigFragment editPanelFragment = page.getConfigFragment();
 
-        editPanelFragment.getEditor().text("broadcastPeriod", "1000");
+        editPanelFragment.getEditor().text("broadcast-period", "1000");
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
@@ -120,7 +120,7 @@ public class BroadcastGroupsTestCase {
 
         ConfigFragment editPanelFragment = page.getConfigFragment();
 
-        editPanelFragment.getEditor().text("broadcastPeriod", "-1");
+        editPanelFragment.getEditor().text("broadcast-period", "-1");
         boolean finished = editPanelFragment.save();
 
         assertFalse("Config should not be saved and closed.Negative value.", finished);

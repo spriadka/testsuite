@@ -136,7 +136,7 @@ public class JournalTestCase {
         verifier.verifyAttribute(address, "journal-sync-transactional", false);
     }
 
-    @Test //https://issues.jboss.org/browse/HAL-839 https://issues.jboss.org/browse/HAL-840
+    @Test
     public void updateJournalMinFiles() {
         page.selectProvider(NAME);
         page.InvokeProviderSettings();
@@ -146,7 +146,7 @@ public class JournalTestCase {
         page.getWindowFragment().getEditor().text("journal-min-files", "0");
         boolean finished =  page.getWindowFragment().save();
 
-        assertTrue("Config should be saved and closed.", finished);
+        assertFalse("Config should not be saved and closed. 0 is invalid value.", finished);
         verifier.verifyAttribute(address, "journal-min-files", "2");
     }
 
@@ -164,7 +164,7 @@ public class JournalTestCase {
         verifier.verifyAttribute(address, "journal-max-io", "undefined");
     }
 
-    @Test //https://issues.jboss.org/browse/HAL-839
+    @Test
     public void updateJournalBufferSize() {
         page.selectProvider(NAME);
         page.InvokeProviderSettings();

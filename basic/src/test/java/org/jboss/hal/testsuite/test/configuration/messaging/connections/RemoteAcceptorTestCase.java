@@ -85,7 +85,7 @@ public class RemoteAcceptorTestCase {
         page.navigateToMessaging();
         page.selectView("Connections");
         //same fields in acceptor adding
-        page.addBroadcastGroup(NAME, BINDING);
+        page.addDiscoveryGroup(NAME, BINDING);
 
 
         verifier.verifyResource(address, true);
