@@ -12,10 +12,10 @@ import org.jboss.hal.testsuite.cli.CliUtils;
 import org.jboss.hal.testsuite.fragment.config.infinispan.CacheContainerWizard;
 import org.jboss.hal.testsuite.page.config.CacheContainersPage;
 import org.jboss.hal.testsuite.test.util.ConfigAreaChecker;
+import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.jboss.hal.testsuite.util.ResourceVerifier;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
@@ -41,7 +41,8 @@ public class CacheContainersTestCase {
     private static final String ALIASES_VALUE = "this\nthat";
 
     private final String cacheContainerName = "container_" + RandomStringUtils.randomAlphanumeric(5);
-    private final String cacheContainerDmr = CACHE_CONTAINER_ADDRESS + "=" + cacheContainerName;
+    private final String profile = ConfigUtils.isDomain() ? "/profile=" + ConfigUtils.getDefaultProfile() : "";
+    private final String cacheContainerDmr = profile + CACHE_CONTAINER_ADDRESS + "=" + cacheContainerName;
     private final String transportDmr = cacheContainerDmr + "/transport=TRANSPORT";
 
     private CliClient client = CliClientFactory.getClient();
@@ -87,13 +88,6 @@ public class CacheContainersTestCase {
 
     }
 
-    @Ignore("This setting is not present anymore.")
-    @Test
-    public void editStartMode() {
-        page.invokeContainerSettings(cacheContainerName);
-        attrChecker.editSelectAndAssert(page, "start", START).invoke();
-    }
-
     @Test
     public void editJndiName() {
         page.invokeContainerSettings(cacheContainerName);
@@ -128,43 +122,6 @@ public class CacheContainersTestCase {
     public void editAliases() {
         page.invokeContainerSettings(cacheContainerName);
         attrChecker.editTextAndAssert(page, "aliases", ALIASES_VALUE).invoke();
-    }
-
-    @Ignore("This setting is not present anymore.")
-    @Test
-    public void editEvictionExecutor() {
-        page.invokeContainerSettings(cacheContainerName);
-        attrChecker.editTextAndAssert(page, "eviction-executor", EVICTION_EXECUTOR).invoke();
-    }
-
-    @Ignore("This setting is not present anymore.")
-    @Test
-    public void editListenerExecutor() {
-        page.invokeContainerSettings(cacheContainerName);
-        attrChecker.editTextAndAssert(page, "listener-executor", LISTENER_EXECUTOR).invoke();
-    }
-
-    @Ignore("This setting is not present anymore.")
-    @Test
-    public void editReplicationQueueExecutor() {
-        page.invokeContainerSettings(cacheContainerName);
-        attrChecker.editTextAndAssert(page, "replication-queue-executor", REPLICATION_QUEUE_EXECUTOR).invoke();
-    }
-
-    @Ignore("This setting is not present anymore.")
-    @Test
-    public void editStack() {
-        page.invokeTransportSettings(cacheContainerName);
-        transportChecker.editTextAndAssert(page, "stack", TRANSPORT_VALUE)
-                .invoke();
-    }
-
-    @Ignore("This setting is not present anymore.")
-    @Test
-    public void editExecutor() {
-        page.invokeTransportSettings(cacheContainerName);
-        transportChecker.editTextAndAssert(page, "executor", TRANSPORT_VALUE)
-                .invoke();
     }
 
     @Test

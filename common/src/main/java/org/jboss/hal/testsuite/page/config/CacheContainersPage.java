@@ -21,13 +21,13 @@ import org.openqa.selenium.TimeoutException;
 public class CacheContainersPage extends ConfigurationPage implements Navigatable {
 
     private static final By CONTENT = By.id(PropUtils.get("page.content.id"));
-    private FinderNavigation navigation;
 
     public CacheContainersFragment content() {
         return Graphene.createPageFragment(CacheContainersFragment.class, getContentRoot().findElement(CONTENT));
     }
 
-    public void navigate() {
+    private FinderNavigation createBaseNavigation() {
+        FinderNavigation navigation;
         if (ConfigUtils.isDomain()) {
             navigation = new FinderNavigation(browser, DomainConfigEntryPoint.class)
                     .addAddress(FinderNames.CONFIGURATION, FinderNames.PROFILES)
@@ -37,12 +37,15 @@ public class CacheContainersPage extends ConfigurationPage implements Navigatabl
                     .addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS);
         }
         navigation.addAddress(FinderNames.SUBSYSTEM, "Infinispan");
-        navigation.selectColumn();
+        return navigation;
+    }
+
+    public void navigate() {
+        createBaseNavigation().selectColumn();
     }
 
     public FinderNavigation getNavigationToCacheContainer(String cacheContainer) {
-        navigation.resetNavigation().addAddress("Cache Container", cacheContainer);
-        return navigation;
+        return createBaseNavigation().addAddress("Cache Container", cacheContainer);
     }
 
     public void invokeTransportSettings(String cacheContainer) {
@@ -54,7 +57,7 @@ public class CacheContainersPage extends ConfigurationPage implements Navigatabl
     }
 
     public CacheContainerWizard invokeAddCacheContainer() {
-        navigation.resetNavigation().addAddress("Cache Container").selectColumn();
+        createBaseNavigation().addAddress("Cache Container").selectColumn();
         return getResourceManager().addResource(CacheContainerWizard.class);
     }
 
