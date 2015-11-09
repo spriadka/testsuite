@@ -11,7 +11,6 @@ import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
 import org.jboss.hal.testsuite.page.config.SystemPropertiesPage;
-import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.ResourceVerifier;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -53,7 +52,7 @@ public class SystemPropertiesTestCase {
 
     @Before
     public void before() {
-        Console.withBrowser(browser).refreshAndNavigate(SystemPropertiesPage.class);
+        page.navigate();
     }
 
     @AfterClass
