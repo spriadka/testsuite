@@ -9,7 +9,6 @@ import org.jboss.hal.testsuite.cli.CliClient;
 import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.page.config.ModClusterPage;
 import org.jboss.hal.testsuite.test.util.ConfigAreaChecker;
-import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.ResourceVerifier;
 import org.junit.After;
 import org.junit.Before;
@@ -84,7 +83,7 @@ public class ModClusterTestCase {
 
     @Before
     public void before() {
-        Console.withBrowser(browser).refreshAndNavigate(ModClusterPage.class);
+        page.navigate();
     }
 
     @After
