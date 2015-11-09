@@ -39,7 +39,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
-import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 
 import static org.junit.Assert.assertFalse;
@@ -69,7 +69,7 @@ public class ServerOperationsTestCase {
                 .addAddress(FinderNames.SERVER_GROUP, "main-server-group");
     }
 
-    @Test(expected = NoSuchElementException.class)
+    @Test(expected = TimeoutException.class)  //NoSuchElementException.class - wainting until element is visible, so different exception
     public void wrongSelection() {
         new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
                 .addAddress(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
