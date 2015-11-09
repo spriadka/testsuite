@@ -119,6 +119,8 @@ public class Dispatcher {
                 }
             }
             log.info("Operation {} finished with {}", operation, response.isSuccessful() ? "success" : "failure");
+            if (!response.isSuccessful())
+                log.warn("Operation '{}' failed because of '{}'.", operation, response.getFailureDescription().asString());
             return response;
 
         } catch (IOException e) {

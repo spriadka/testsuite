@@ -49,4 +49,8 @@ public class DmrResponse {
     public ModelNode payload() {
         return response.get(RESULT);
     }
+
+    public ModelNode getFailureDescription() {
+        return response.get(FAILURE_DESCRIPTION);
+    }
 }
