@@ -49,9 +49,10 @@ public class ACLTestCase extends SecurityTestCaseAbstract {
         String name = "acl_" + RandomStringUtils.randomAlphanumeric(6);
         String code = "code_" + RandomStringUtils.randomAlphanumeric(6) + "-" + name;
         dispatcher.execute(new Operation.Builder("add", ACL_TEMPLATE.resolve(context, JBOSS_WEB_POLICY, name))
-            .param("code", code)
-            .param("flag", "optional")
-            .build());
+                .param("code", code)
+                .param("flag", "optional")
+                .build());
+        reloadIfRequiredAndWaitForRunning();
         return name;
     }
 
@@ -59,6 +60,5 @@ public class ACLTestCase extends SecurityTestCaseAbstract {
         dispatcher.execute(new Operation.Builder("add", SECURITY_DOMAIN_TEMPLATE.append("acl=classic")
                 .resolve(context, JBOSS_WEB_POLICY))
                 .build());
-        reloadIfRequiredAndWaitForRunning();
     }
 }

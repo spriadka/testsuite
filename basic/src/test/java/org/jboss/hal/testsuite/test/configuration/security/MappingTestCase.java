@@ -62,6 +62,7 @@ public class MappingTestCase extends SecurityTestCaseAbstract {
                 .param("code", RandomStringUtils.randomAlphanumeric(8))
                 .param("type", RandomStringUtils.randomAlphanumeric(8))
                 .build());
+        reloadIfRequiredAndWaitForRunning();
         return name;
     }
 
@@ -70,6 +71,5 @@ public class MappingTestCase extends SecurityTestCaseAbstract {
                 .append("mapping=classic")
                 .resolve(context, OTHER))
                 .build());
-        reloadIfRequiredAndWaitForRunning();
     }
 }

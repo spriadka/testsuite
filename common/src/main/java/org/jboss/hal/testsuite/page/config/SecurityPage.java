@@ -33,7 +33,7 @@ public class SecurityPage extends ConfigurationPage implements Navigatable {
                     .addAddress(FinderNames.PROFILE, ConfigUtils.getDefaultProfile());
         } else {
             navigation = new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
-                    .addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEM);
+                    .addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS);
         }
         navigation.addAddress(FinderNames.SUBSYSTEM, "Security")
                 .addAddress(SECURITY_DOMAIN);
