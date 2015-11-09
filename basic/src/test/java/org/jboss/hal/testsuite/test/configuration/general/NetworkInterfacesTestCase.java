@@ -12,7 +12,6 @@ import org.jboss.hal.testsuite.fragment.config.interfaces.NetworkInterfaceConten
 import org.jboss.hal.testsuite.fragment.config.interfaces.NetworkInterfaceWizard;
 import org.jboss.hal.testsuite.page.config.NetworkInterfacesPage;
 import org.jboss.hal.testsuite.test.util.ConfigAreaChecker;
-import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.ResourceVerifier;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -65,7 +64,7 @@ public class NetworkInterfacesTestCase {
 
     @Before
     public void before() {
-        Console.withBrowser(browser).refreshAndNavigate(NetworkInterfacesPage.class);
+        page.navigate();
     }
 
     @After
