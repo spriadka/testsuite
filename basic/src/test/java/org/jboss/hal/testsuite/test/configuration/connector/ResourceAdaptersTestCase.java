@@ -115,10 +115,9 @@ public class ResourceAdaptersTestCase {
         ConfigPropertiesFragment fragment = area.switchToProperty();
         ConfigPropertyWizard wizard = fragment.addProperty();
         Console.withBrowser(browser).waitUntilLoaded();
-
+        wizard.getEditor().text("name", PROPERTY_KEY);
         boolean result =
-                wizard.name(PROPERTY_KEY)
-                .value(PROPERTY_VALUE)
+                wizard.value(PROPERTY_VALUE)
                 .finish();
 
         Library.letsSleep(1000);
