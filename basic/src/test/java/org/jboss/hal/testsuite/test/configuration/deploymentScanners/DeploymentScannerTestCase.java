@@ -96,7 +96,7 @@ public class DeploymentScannerTestCase {
         page.getMainConfigFragment().edit().text("path", "../standalone");
         page.clickButton("Save");
 
-        verifier.verifyAttribute(address, "path", "../standalone", 100);
+        verifier.verifyAttribute(address, "path", "../standalone", 500);
         cliClient.executeCommand("/subsystem=deployment-scanner/scanner=" + NAME + ":remove");
         verifier.verifyResource(address, false);
     }
@@ -110,7 +110,7 @@ public class DeploymentScannerTestCase {
         page.getMainConfigFragment().edit().text("relative-to", "jboss");
         page.clickButton("Save");
 
-        verifier.verifyAttribute(address, "relative-to", "jboss", 100);
+        verifier.verifyAttribute(address, "relative-to", "jboss", 500);
         cliClient.executeCommand("/subsystem=deployment-scanner/scanner=" + NAME + ":remove");
         verifier.verifyResource(address, false);
     }
@@ -124,7 +124,7 @@ public class DeploymentScannerTestCase {
         page.getMainConfigFragment().edit().checkbox("runtime-failure-causes-rollback", true);
         page.clickButton("Save");
 
-        verifier.verifyAttribute(address, "runtime-failure-causes-rollback", true, 100);
+        verifier.verifyAttribute(address, "runtime-failure-causes-rollback", true, 500);
         cliClient.executeCommand("/subsystem=deployment-scanner/scanner=" + NAME + ":remove");
         verifier.verifyResource(address, false);
     }
@@ -138,7 +138,7 @@ public class DeploymentScannerTestCase {
         page.getMainConfigFragment().edit().checkbox("auto-deploy-exploded", true);
         page.clickButton("Save");
 
-        verifier.verifyAttribute(address, "auto-deploy-exploded", true, 100);
+        verifier.verifyAttribute(address, "auto-deploy-exploded", true, 500);
         cliClient.executeCommand("/subsystem=deployment-scanner/scanner=" + NAME + ":remove");
         verifier.verifyResource(address, false);
     }
@@ -152,7 +152,7 @@ public class DeploymentScannerTestCase {
         page.getMainConfigFragment().edit().checkbox("auto-deploy-xml", false);
         page.clickButton("Save");
 
-        verifier.verifyAttribute(address, "auto-deploy-xml", false, 100);
+        verifier.verifyAttribute(address, "auto-deploy-xml", false, 500);
         cliClient.executeCommand("/subsystem=deployment-scanner/scanner=" + NAME + ":remove");
         verifier.verifyResource(address, false);
     }
@@ -166,7 +166,7 @@ public class DeploymentScannerTestCase {
         page.getMainConfigFragment().edit().checkbox("auto-deploy-zipped", false);
         page.clickButton("Save");
 
-        verifier.verifyAttribute(address, "auto-deploy-zipped", false, 100);
+        verifier.verifyAttribute(address, "auto-deploy-zipped", false, 500);
         cliClient.executeCommand("/subsystem=deployment-scanner/scanner=" + NAME + ":remove");
         verifier.verifyResource(address, false);
     }
@@ -180,7 +180,7 @@ public class DeploymentScannerTestCase {
         page.getMainConfigFragment().edit().checkbox("scan-enabled", false);
         page.clickButton("Save");
 
-        verifier.verifyAttribute(address, "scan-enabled", false, 100);
+        verifier.verifyAttribute(address, "scan-enabled", false, 500);
         cliClient.executeCommand("/subsystem=deployment-scanner/scanner=" + NAME + ":remove");
         verifier.verifyResource(address, false);
     }
@@ -194,7 +194,7 @@ public class DeploymentScannerTestCase {
         page.getMainConfigFragment().edit().text("deployment-timeout", "10");
         page.clickButton("Save");
 
-        verifier.verifyAttribute(address, "deployment-timeout", "10", 100);
+        verifier.verifyAttribute(address, "deployment-timeout", "10", 500);
         cliClient.executeCommand("/subsystem=deployment-scanner/scanner=" + NAME + ":remove");
         verifier.verifyResource(address, false);
     }
@@ -208,7 +208,7 @@ public class DeploymentScannerTestCase {
         page.getMainConfigFragment().edit().text("scan-interval", "1");
         page.clickButton("Save");
 
-        verifier.verifyAttribute(address, "scan-interval", "1", 100);
+        verifier.verifyAttribute(address, "scan-interval", "1", 500);
         cliClient.executeCommand("/subsystem=deployment-scanner/scanner=" + NAME + ":remove");
         verifier.verifyResource(address, false);
     }
@@ -223,7 +223,7 @@ public class DeploymentScannerTestCase {
         boolean finished = page.getMainConfigFragment().save();
 
         assertFalse("Config should not be saved.", finished);
-        verifier.verifyAttribute(address, "scan-interval", "0", 100);
+        verifier.verifyAttribute(address, "scan-interval", "0", 500);
         cliClient.executeCommand("/subsystem=deployment-scanner/scanner=" + NAME + ":remove");
         verifier.verifyResource(address, false);
     }
