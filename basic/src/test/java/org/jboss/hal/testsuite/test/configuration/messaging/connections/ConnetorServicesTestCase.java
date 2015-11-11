@@ -109,7 +109,7 @@ public class ConnetorServicesTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "factory-class", "fc");
+        verifier.verifyAttribute(address, "factory-class", "fc", 500);
 
         cliClient.executeCommand(remove);
     }
@@ -128,7 +128,7 @@ public class ConnetorServicesTestCase {
 
         assertTrue("Property should be added and wizard closed.", result);
 
-        verifier.verifyAttribute(address, "params", "{\"prop\" => \"test\"}");
+        verifier.verifyAttribute(address, "params", "{\"prop\" => \"test\"}", 500);
 
         cliClient.executeCommand(remove);
     }
@@ -145,7 +145,7 @@ public class ConnetorServicesTestCase {
         ConfigPropertiesFragment properties = page.getConfig().propertiesConfig();
         properties.removeProperty("prop");
 
-        verifier.verifyAttribute(address, "params", "undefined");
+        verifier.verifyAttribute(address, "params", "undefined", 500);
 
         cliClient.executeCommand(remove);
     }

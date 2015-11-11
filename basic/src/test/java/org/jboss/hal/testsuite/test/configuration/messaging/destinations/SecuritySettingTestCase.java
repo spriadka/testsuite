@@ -111,7 +111,7 @@ public class SecuritySettingTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "send", true);
+        verifier.verifyAttribute(address, "send", true, 500);
 
         cliClient.executeCommand(remove);
    }
@@ -133,7 +133,7 @@ public class SecuritySettingTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "consume", true);
+        verifier.verifyAttribute(address, "consume", true, 500);
 
         cliClient.executeCommand(remove);
     }
@@ -155,7 +155,7 @@ public class SecuritySettingTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "manage", true);
+        verifier.verifyAttribute(address, "manage", true, 500);
 
         cliClient.executeCommand(remove);
     }
@@ -179,7 +179,7 @@ public class SecuritySettingTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "create-durable-queue", true);
+        verifier.verifyAttribute(address, "create-durable-queue", true, 500);
 
         cliClient.executeCommand(remove);
     }
@@ -203,7 +203,7 @@ public class SecuritySettingTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "delete-durable-queue", true);
+        verifier.verifyAttribute(address, "delete-durable-queue", true, 500);
 
         cliClient.executeCommand(remove);
     }
@@ -227,7 +227,7 @@ public class SecuritySettingTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "create-non-durable-queue", true);
+        verifier.verifyAttribute(address, "create-non-durable-queue", true, 500);
 
         cliClient.executeCommand(remove);
     }
@@ -251,7 +251,7 @@ public class SecuritySettingTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "delete-non-durable-queue", true);
+        verifier.verifyAttribute(address, "delete-non-durable-queue", true, 500);
 
         cliClient.executeCommand(remove);
     }

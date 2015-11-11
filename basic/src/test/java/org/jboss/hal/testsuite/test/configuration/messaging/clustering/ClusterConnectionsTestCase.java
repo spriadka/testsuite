@@ -109,7 +109,7 @@ public class ClusterConnectionsTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "call-timeout", "200");
+        verifier.verifyAttribute(address, "call-timeout", "200", 500);
 
         cliClient.executeCommand(remove);
     }
@@ -130,7 +130,7 @@ public class ClusterConnectionsTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "check-period", "1");
+        verifier.verifyAttribute(address, "check-period", "1", 500);
 
         cliClient.executeCommand(remove);
     }
@@ -151,7 +151,7 @@ public class ClusterConnectionsTestCase {
         boolean finished = editPanelFragment.save();
 
         assertFalse("Config should not be saved and closed.Negative value.", finished);
-        verifier.verifyAttribute(address, "connection-ttl", "60000");
+        verifier.verifyAttribute(address, "connection-ttl", "60000", 500);
 
         cliClient.executeCommand(remove);
     }
@@ -172,7 +172,7 @@ public class ClusterConnectionsTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "retry-interval", "500");
+        verifier.verifyAttribute(address, "retry-interval", "500", 500);
 
         cliClient.executeCommand(remove);
     }
@@ -193,7 +193,7 @@ public class ClusterConnectionsTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "reconnect-attempts", "0");
+        verifier.verifyAttribute(address, "reconnect-attempts", "0", 500);
 
         cliClient.executeCommand(remove);
     }

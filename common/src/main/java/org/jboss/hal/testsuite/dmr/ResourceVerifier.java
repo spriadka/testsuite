@@ -23,6 +23,7 @@ package org.jboss.hal.testsuite.dmr;
 
 import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
 import org.jboss.dmr.ModelNode;
+import org.jboss.hal.testsuite.cli.Library;
 
 import java.util.Arrays;
 
@@ -97,6 +98,7 @@ public class ResourceVerifier {
 
         while (System.currentTimeMillis() <= start + timeout && expected != response.payload().asBoolean()) {
             response = dispatcher.execute(readAttributeOperation(address, attribute));
+            Library.letsSleep(50);
         }
 
         assertTrue(response.isSuccessful());
@@ -122,6 +124,7 @@ public class ResourceVerifier {
         while (System.currentTimeMillis() <= start + timeout && !Arrays.equals(expected, values)) {
             response = dispatcher.execute(readAttributeOperation(address, attribute));
             values = response.payload().asList().stream().map(ModelNode::asString).toArray(String[]::new);
+            Library.letsSleep(50);
         }
 
         assertTrue(response.isSuccessful());
@@ -146,6 +149,7 @@ public class ResourceVerifier {
 
         while (System.currentTimeMillis() <= start + timeout && !expected.equals(response.payload().asString())) {
             response = dispatcher.execute(readAttributeOperation(address, attribute));
+            Library.letsSleep(50);
         }
 
         assertTrue(response.isSuccessful());

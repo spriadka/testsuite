@@ -90,7 +90,7 @@ public class SecurityTestCase {
         boolean finished =  page.getWindowFragment().save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "cluster-user", "TESTER");
+        verifier.verifyAttribute(address, "cluster-user", "TESTER", 500);
     }
 
     @Test
@@ -104,7 +104,7 @@ public class SecurityTestCase {
         boolean finished =  page.getWindowFragment().save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "cluster-password", "TESTER.PASSWORD");
+        verifier.verifyAttribute(address, "cluster-password", "TESTER.PASSWORD", 500);
     }
 
     @Test
@@ -118,7 +118,7 @@ public class SecurityTestCase {
         boolean finished =  page.getWindowFragment().save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "security-enabled", false);
+        verifier.verifyAttribute(address, "security-enabled", false, 500);
     }
 
     @Test
@@ -132,7 +132,7 @@ public class SecurityTestCase {
         boolean finished =  page.getWindowFragment().save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "security-invalidation-interval", "10");
+        verifier.verifyAttribute(address, "security-invalidation-interval", "10", 500);
     }
 
     @Test
@@ -146,6 +146,6 @@ public class SecurityTestCase {
         boolean finished =  page.getWindowFragment().save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "security-domain", "jboss-web-policy");
+        verifier.verifyAttribute(address, "security-domain", "jboss-web-policy", 500);
     }
 }

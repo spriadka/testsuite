@@ -113,7 +113,7 @@ public class BridgesTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "filter", "filter");
+        verifier.verifyAttribute(address, "filter", "filter", 500);
 
         cliClient.executeCommand(remove);
     }
@@ -133,7 +133,7 @@ public class BridgesTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "queue-name", "q");
+        verifier.verifyAttribute(address, "queue-name", "q", 500);
 
         cliClient.executeCommand(remove);
     }
@@ -153,7 +153,7 @@ public class BridgesTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "forwarding-address", "address");
+        verifier.verifyAttribute(address, "forwarding-address", "address", 500);
 
         cliClient.executeCommand(remove);
     }
@@ -173,7 +173,7 @@ public class BridgesTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "transformer-class-name", "transClass");
+        verifier.verifyAttribute(address, "transformer-class-name", "transClass", 500);
 
         cliClient.executeCommand(remove);
     }
@@ -194,7 +194,7 @@ public class BridgesTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "discovery-group", "dg-group1");
+        verifier.verifyAttribute(address, "discovery-group", "dg-group1", 500);
 
         cliClient.executeCommand(remove);
     }
@@ -215,7 +215,7 @@ public class BridgesTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "password", "pwd1");
+        verifier.verifyAttribute(address, "password", "pwd1", 500);
 
         cliClient.executeCommand(remove);
     }
@@ -236,7 +236,7 @@ public class BridgesTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "retry-interval", "1");
+        verifier.verifyAttribute(address, "retry-interval", "1", 500);
 
         cliClient.executeCommand(remove);
     }
@@ -257,7 +257,7 @@ public class BridgesTestCase {
         boolean finished = editPanelFragment.save();
 
         assertFalse("Config should not be saved and closed. Wrong value.", finished);
-        verifier.verifyAttribute(address, "retry-interval", "2000");
+        verifier.verifyAttribute(address, "retry-interval", "2000", 500);
 
         cliClient.executeCommand(remove);
     }
@@ -278,7 +278,7 @@ public class BridgesTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "reconnect-attempts", "-1");
+        verifier.verifyAttribute(address, "reconnect-attempts", "-1", 500);
 
         cliClient.executeCommand(remove);
     }

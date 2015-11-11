@@ -105,7 +105,7 @@ public class BroadcastGroupsTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "broadcast-period", "1000");
+        verifier.verifyAttribute(address, "broadcast-period", "1000", 500);
 
         cliClient.executeCommand(remove);
     }
@@ -124,7 +124,7 @@ public class BroadcastGroupsTestCase {
         boolean finished = editPanelFragment.save();
 
         assertFalse("Config should not be saved and closed.Negative value.", finished);
-        verifier.verifyAttribute(address, "broadcast-period", "2000");
+        verifier.verifyAttribute(address, "broadcast-period", "2000", 500);
 
         cliClient.executeCommand(remove);
     }
@@ -143,7 +143,7 @@ public class BroadcastGroupsTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "connectors", "[\"in-vm\"]");
+        verifier.verifyAttribute(address, "connectors", "[\"in-vm\"]", 500);
 
         cliClient.executeCommand(remove);
     }

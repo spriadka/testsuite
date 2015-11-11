@@ -90,7 +90,7 @@ public class AttributesTestCase {
         boolean finished =  page.getWindowFragment().save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "management-address", "management");
+        verifier.verifyAttribute(address, "management-address", "management", 500);
     }
 
     @Test
@@ -103,7 +103,7 @@ public class AttributesTestCase {
         boolean finished =  page.getWindowFragment().save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "management-notification-address", "a.n");
+        verifier.verifyAttribute(address, "management-notification-address", "a.n", 500);
     }
 
     @Test //https://issues.jboss.org/browse/HAL-837
@@ -116,7 +116,7 @@ public class AttributesTestCase {
         boolean finished =  page.getWindowFragment().save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "thread-pool-max-size", "-1");
+        verifier.verifyAttribute(address, "thread-pool-max-size", "-1", 500);
     }
 
     @Test
@@ -129,7 +129,7 @@ public class AttributesTestCase {
         boolean finished =  page.getWindowFragment().save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "scheduled-thread-pool-max-size", "10");
+        verifier.verifyAttribute(address, "scheduled-thread-pool-max-size", "10", 500);
     }
 
     @Test
@@ -142,7 +142,7 @@ public class AttributesTestCase {
         boolean finished =  page.getWindowFragment().save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "transaction-timeout", "1");
+        verifier.verifyAttribute(address, "transaction-timeout", "1", 500);
     }
 
     @Test
@@ -155,7 +155,7 @@ public class AttributesTestCase {
         boolean finished =  page.getWindowFragment().save();
 
         assertFalse("Config should not be saved and closed.Invalid value.", finished);
-        verifier.verifyAttribute(address, "transaction-timeout", "300000");
+        verifier.verifyAttribute(address, "transaction-timeout", "300000", 500);
     }
 
     @Test
@@ -168,7 +168,7 @@ public class AttributesTestCase {
         boolean finished =  page.getWindowFragment().save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "transaction-timeout-scan-period", "100000");
+        verifier.verifyAttribute(address, "transaction-timeout-scan-period", "100000", 500);
     }
 
     @Test
@@ -181,7 +181,7 @@ public class AttributesTestCase {
         boolean finished =  page.getWindowFragment().save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "statistics-enabled", true);
+        verifier.verifyAttribute(address, "statistics-enabled", true, 500);
     }
 
     @Test
@@ -194,7 +194,7 @@ public class AttributesTestCase {
         boolean finished =  page.getWindowFragment().save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "wild-card-routing-enabled", false);
+        verifier.verifyAttribute(address, "wild-card-routing-enabled", false, 500);
     }
 
     @Test
@@ -207,7 +207,7 @@ public class AttributesTestCase {
         boolean finished =  page.getWindowFragment().save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "persistence-enabled", false);
+        verifier.verifyAttribute(address, "persistence-enabled", false, 500);
     }
 
     @Test
@@ -220,6 +220,6 @@ public class AttributesTestCase {
         boolean finished =  page.getWindowFragment().save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "persist-id-cache", false);
+        verifier.verifyAttribute(address, "persist-id-cache", false, 500);
     }
 }

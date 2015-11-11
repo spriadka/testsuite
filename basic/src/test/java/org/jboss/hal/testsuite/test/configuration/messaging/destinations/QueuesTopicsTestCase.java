@@ -147,7 +147,7 @@ public class QueuesTopicsTestCase {
         cliClient.reload();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(topicsAddress, "entries", "[\"java:/jndi-name\"]");
+        verifier.verifyAttribute(topicsAddress, "entries", "[\"java:/jndi-name\"]", 500);
 
         cliClient.executeCommand(removeTopics);
         //reload is required because of update JNDInames

@@ -91,7 +91,7 @@ public class JournalTestCase {
         boolean finished =  page.getWindowFragment().save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "journal-type", "NIO");
+        verifier.verifyAttribute(address, "journal-type", "NIO", 500);
     }
 
     @Test
@@ -105,7 +105,7 @@ public class JournalTestCase {
         boolean finished =  page.getWindowFragment().save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "create-journal-dir", false);
+        verifier.verifyAttribute(address, "create-journal-dir", false, 500);
     }
 
     @Test
@@ -119,7 +119,7 @@ public class JournalTestCase {
         boolean finished =  page.getWindowFragment().save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "journal-sync-non-transactional", false);
+        verifier.verifyAttribute(address, "journal-sync-non-transactional", false, 500);
     }
 
     @Test
@@ -133,7 +133,7 @@ public class JournalTestCase {
         boolean finished =  page.getWindowFragment().save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "journal-sync-transactional", false);
+        verifier.verifyAttribute(address, "journal-sync-transactional", false, 500);
     }
 
     @Test
@@ -147,7 +147,7 @@ public class JournalTestCase {
         boolean finished =  page.getWindowFragment().save();
 
         assertFalse("Config should not be saved and closed. 0 is invalid value.", finished);
-        verifier.verifyAttribute(address, "journal-min-files", "2");
+        verifier.verifyAttribute(address, "journal-min-files", "2", 500);
     }
 
     @Test
@@ -161,7 +161,7 @@ public class JournalTestCase {
         boolean finished =  page.getWindowFragment().save();
 
         assertFalse("Config should not be saved and closed.Invalid value.", finished);
-        verifier.verifyAttribute(address, "journal-max-io", "undefined");
+        verifier.verifyAttribute(address, "journal-max-io", "undefined", 500);
     }
 
     @Test
@@ -175,14 +175,14 @@ public class JournalTestCase {
         boolean finished =  page.getWindowFragment().save();
 
         assertTrue("Config should not be saved and closed.", finished);
-        verifier.verifyAttribute(address, "journal-buffer-size", "1024");
+        verifier.verifyAttribute(address, "journal-buffer-size", "1024", 500);
 
         page.getWindowFragment().edit();
         page.getWindowFragment().getEditor().text("journal-buffer-size", "");
         finished =  page.getWindowFragment().save();
 
         assertTrue("Config should not be saved and closed.", finished);
-        verifier.verifyAttribute(address, "journal-buffer-size", "undefined");
+        verifier.verifyAttribute(address, "journal-buffer-size", "undefined", 500);
     }
 
     @Test
@@ -196,7 +196,7 @@ public class JournalTestCase {
         boolean finished =  page.getWindowFragment().save();
 
         assertTrue("Config should not be saved and closed.", finished);
-        verifier.verifyAttribute(address, "journal-buffer-timeout", "1");
+        verifier.verifyAttribute(address, "journal-buffer-timeout", "1", 500);
     }
 
     @Test
@@ -210,7 +210,7 @@ public class JournalTestCase {
         boolean finished =  page.getWindowFragment().save();
 
         assertTrue("Config should not be saved and closed.", finished);
-        verifier.verifyAttribute(address, "journal-compact-min-files", "1");
+        verifier.verifyAttribute(address, "journal-compact-min-files", "1", 500);
     }
 
     @Test
@@ -224,7 +224,7 @@ public class JournalTestCase {
         boolean finished =  page.getWindowFragment().save();
 
         assertTrue("Config should not be saved and closed.", finished);
-        verifier.verifyAttribute(address, "journal-compact-percentage", "110");
+        verifier.verifyAttribute(address, "journal-compact-percentage", "110", 500);
     }
 
     @Test
@@ -238,6 +238,6 @@ public class JournalTestCase {
         boolean finished =  page.getWindowFragment().save();
 
         assertTrue("Config should not be saved and closed.", finished);
-        verifier.verifyAttribute(address, "journal-file-size", "110");
+        verifier.verifyAttribute(address, "journal-file-size", "110", 500);
     }
 }

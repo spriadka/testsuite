@@ -109,7 +109,7 @@ public class InVMAcceptorTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "server-id", "0");
+        verifier.verifyAttribute(address, "server-id", "0", 500);
 
         cliClient.executeCommand(remove);
     }
@@ -127,7 +127,7 @@ public class InVMAcceptorTestCase {
         boolean result = wizard.name("prop").value("test").finish();
 
         assertTrue("Property should be added and wizard closed.", result);
-        verifier.verifyAttribute(address, "params", "{\"prop\" => \"test\"}");
+        verifier.verifyAttribute(address, "params", "{\"prop\" => \"test\"}", 500);
 
         cliClient.executeCommand(remove);
     }
@@ -143,7 +143,7 @@ public class InVMAcceptorTestCase {
         ConfigPropertiesFragment properties = page.getConfig().propertiesConfig();
         properties.removeProperty("prop");
 
-        verifier.verifyAttribute(address, "params", "undefined");
+        verifier.verifyAttribute(address, "params", "undefined", 500);
 
         cliClient.executeCommand(remove);
     }
