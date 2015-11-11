@@ -12,7 +12,6 @@ import org.jboss.hal.testsuite.cli.Library;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.fragment.runtime.DeploymentWizard;
-import org.jboss.hal.testsuite.fragment.runtime.StandaloneDeploymentsArea;
 import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
 import org.jboss.hal.testsuite.page.runtime.DeploymentPage;
 import org.jboss.hal.testsuite.util.Console;
@@ -63,11 +62,10 @@ public class UnmanagedDeploymentsTestCase {
     @Test
     @InSequence(0)
     public void createDeployment() {
-        navigation.addAddress(FinderNames.DEPLOYMENT).selectColumn();
-        StandaloneDeploymentsArea content = page.getDeploymentContent();
+        navigation.addAddress(FinderNames.DEPLOYMENT).selectColumn().invoke("Add");
         File deployment = new File(FILE_PATH + FILE_NAME);
 
-        DeploymentWizard wizard = content.add();
+        DeploymentWizard wizard = Console.withBrowser(browser).openedWizard(DeploymentWizard.class);
 
         wizard.switchToUnmanaged()
                 .nextFluent()

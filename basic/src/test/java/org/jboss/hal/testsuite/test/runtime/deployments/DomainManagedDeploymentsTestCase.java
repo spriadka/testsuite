@@ -11,7 +11,6 @@ import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.cli.Library;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
-import org.jboss.hal.testsuite.fragment.runtime.DeploymentContentRepositoryArea;
 import org.jboss.hal.testsuite.fragment.runtime.DeploymentWizard;
 import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
 import org.jboss.hal.testsuite.page.runtime.DomainDeploymentPage;
@@ -67,11 +66,11 @@ public class DomainManagedDeploymentsTestCase {
     @InSequence(0)
     public void createDeployment() throws InterruptedException {
 
-        navigation.addAddress(FinderNames.BROWSE_BY, "Content Repository");
-        navigation.selectRow();
-        DeploymentContentRepositoryArea content = page.getDeploymentContent();
+        navigation.addAddress(FinderNames.BROWSE_BY, "Content Repository").addAddress("All Content");
+        navigation.selectColumn().invoke("Add");
         File deployment = new File(FILE_PATH + FILE_NAME);
-        DeploymentWizard wizard = content.add();
+
+        DeploymentWizard wizard = Console.withBrowser(browser).openedWizard(DeploymentWizard.class);
 
         boolean result = wizard.switchToManaged()
                 .nextFluent()
@@ -92,10 +91,9 @@ public class DomainManagedDeploymentsTestCase {
         navigation.addAddress(FinderNames.BROWSE_BY, "Server Groups")
                 .addAddress(FinderNames.SERVER_GROUP, "main-server-group")
                 .addAddress(FinderNames.DEPLOYMENT);
-        navigation.selectColumn();
-        DeploymentContentRepositoryArea content = page.getDeploymentContent();
+        navigation.selectColumn().invoke("Add");
 
-        DeploymentWizard wizard = content.add();
+        DeploymentWizard wizard = Console.withBrowser(browser).openedWizard(DeploymentWizard.class);
 
         boolean result = wizard.switchToRepository()
                 .nextFluent()
@@ -166,11 +164,10 @@ public class DomainManagedDeploymentsTestCase {
     public void checkAssingDeploymentName() {
         //create
         navigation.resetNavigation();
-        navigation.addAddress(FinderNames.BROWSE_BY, "Content Repository");
-        navigation.selectRow();
-        DeploymentContentRepositoryArea content = page.getDeploymentContent();
+        navigation.addAddress(FinderNames.BROWSE_BY, "Content Repository").addAddress("All Content");
+        navigation.selectColumn().invoke("Add");
         File deployment = new File(FILE_PATH + FILE_NAME);
-        DeploymentWizard wizard = content.add();
+        DeploymentWizard wizard = Console.withBrowser(browser).openedWizard(DeploymentWizard.class);
 
         boolean result = wizard.switchToManaged()
                 .nextFluent()
@@ -180,13 +177,11 @@ public class DomainManagedDeploymentsTestCase {
                 .runtimeName(RUNTIME_NAME)
                 .finish();
         //assing
-        content = page.getDeploymentContent();
         navigation.resetNavigation();
         navigation.addAddress(FinderNames.BROWSE_BY, "Server Groups")
                 .addAddress(FinderNames.SERVER_GROUP, "main-server-group")
                 .addAddress(FinderNames.DEPLOYMENT);
-        navigation.selectRow();
-        wizard = content.add();
+        navigation.selectColumn().invoke("Add");
 
         result = wizard.switchToRepository()
                 .nextFluent()
@@ -211,12 +206,9 @@ public class DomainManagedDeploymentsTestCase {
         Library.letsSleep(1000);
         //create 2nd
         navigation.resetNavigation();
-        navigation.addAddress(FinderNames.BROWSE_BY, "Content Repository");
-        navigation.selectRow();
-        content = page.getDeploymentContent();
+        navigation.addAddress(FinderNames.BROWSE_BY, "Content Repository").addAddress("All Content");
+        navigation.selectColumn().invoke("Add");
         deployment = new File(FILE_PATH + FILE_NAME);
-
-        wizard = content.add();
 
         result = wizard.switchToManaged()
                 .nextFluent()
@@ -227,7 +219,6 @@ public class DomainManagedDeploymentsTestCase {
                 .finish();
         //assing 2nd
         Console.withBrowser(browser).refreshAndNavigate(DomainDeploymentPage.class);
-        content = page.getDeploymentContent();
         navigation.resetNavigation();
         navigation.addAddress(FinderNames.BROWSE_BY, "Unassigned Content")
                 .addAddress("Unassigned", "testNew");

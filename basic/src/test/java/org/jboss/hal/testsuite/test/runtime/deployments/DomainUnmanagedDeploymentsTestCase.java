@@ -11,7 +11,6 @@ import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.cli.Library;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
-import org.jboss.hal.testsuite.fragment.runtime.DeploymentContentRepositoryArea;
 import org.jboss.hal.testsuite.fragment.runtime.DeploymentWizard;
 import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
 import org.jboss.hal.testsuite.page.runtime.DomainDeploymentPage;
@@ -66,11 +65,11 @@ public class DomainUnmanagedDeploymentsTestCase {
     @Test
     @InSequence(0)
     public void createDeployment() throws InterruptedException {
-        navigation.addAddress(FinderNames.BROWSE_BY, "Content Repository");
-        navigation.selectRow();
-        DeploymentContentRepositoryArea content = page.getDeploymentContent();
+        navigation.addAddress(FinderNames.BROWSE_BY, "Content Repository").addAddress("All Content");
+        navigation.selectColumn().invoke("Add");
         File deployment = new File(FILE_PATH + FILE_NAME);
-        DeploymentWizard wizard = content.add();
+
+        DeploymentWizard wizard = Console.withBrowser(browser).openedWizard(DeploymentWizard.class);
 
         wizard.switchToUnmanaged()
                 .nextFluent()
@@ -93,10 +92,8 @@ public class DomainUnmanagedDeploymentsTestCase {
         navigation.addAddress(FinderNames.BROWSE_BY, "Server Groups")
                 .addAddress(FinderNames.SERVER_GROUP, "main-server-group")
                 .addAddress(FinderNames.DEPLOYMENT);
-        navigation.selectColumn();
-        DeploymentContentRepositoryArea content = page.getDeploymentContent();
-
-        DeploymentWizard wizard = content.add();
+        navigation.selectColumn().invoke("Add");
+        DeploymentWizard wizard = Console.withBrowser(browser).openedWizard(DeploymentWizard.class);
 
         boolean result = wizard.switchToRepository()
                 .nextFluent()
