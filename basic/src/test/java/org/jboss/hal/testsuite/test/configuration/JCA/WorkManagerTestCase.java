@@ -66,12 +66,12 @@ public class WorkManagerTestCase {
     public void updateKeepAliveTimeOut() {
         page.edit().text("keepaliveTime", "1");
         page.clickButton("Save");
-        verifier.verifyAttribute(address, "keepalive-time.time", "1");
+        verifier.verifyAttribute(address, "keepalive-time.time", "1", 500);
 
         page.edit().text("keepaliveTime", "10");
         page.clickButton("Save");
 
-        verifier.verifyAttribute(address, "keepalive-time.time", "10");
+        verifier.verifyAttribute(address, "keepalive-time.time", "10", 500);
     }
 
     @Test
@@ -79,12 +79,12 @@ public class WorkManagerTestCase {
         page.edit().select("keepaliveTimeUnit", "MILLISECONDS");
         page.clickButton("Save");
 
-        verifier.verifyAttribute(address, "keepalive-time.unit", "MILLISECONDS");
+        verifier.verifyAttribute(address, "keepalive-time.unit", "MILLISECONDS", 500);
 
         page.edit().select("keepaliveTimeUnit", "SECONDS");
         page.clickButton("Save");
 
-        verifier.verifyAttribute(address, "keepalive-time.unit", "SECONDS");
+        verifier.verifyAttribute(address, "keepalive-time.unit", "SECONDS", 500);
     }
 
     @Test
@@ -92,12 +92,12 @@ public class WorkManagerTestCase {
         page.edit().checkbox("allowCoreTimeout", true);
         page.clickButton("Save");
 
-        verifier.verifyAttribute(address, "allow-core-timeout", true);
+        verifier.verifyAttribute(address, "allow-core-timeout", true, 500);
 
         page.edit().checkbox("allowCoreTimeout", false);
         page.clickButton("Save");
 
-        verifier.verifyAttribute(address, "allow-core-timeout", false);
+        verifier.verifyAttribute(address, "allow-core-timeout", false, 500);
     }
 
     @Test
@@ -105,12 +105,12 @@ public class WorkManagerTestCase {
         page.edit().text("threadFactory", "tf");
         page.clickButton("Save");
 
-        verifier.verifyAttribute(address, "thread-factory", "tf");
+        verifier.verifyAttribute(address, "thread-factory", "tf", 500);
 
         page.edit().text("threadFactory", "");
         page.clickButton("Save");
 
-        verifier.verifyAttribute(address, "thread-factory", "undefined");
+        verifier.verifyAttribute(address, "thread-factory", "undefined", 500);
     }
 
     @Test
@@ -120,12 +120,12 @@ public class WorkManagerTestCase {
         page.edit().text("maxThreads", "1");
         page.clickButton("Save");
 
-        verifier.verifyAttribute(address, "max-threads", "1");
+        verifier.verifyAttribute(address, "max-threads", "1", 500);
 
         page.edit().text("maxThreads", "50");
         page.clickButton("Save");
 
-        verifier.verifyAttribute(address, "max-threads", "50");
+        verifier.verifyAttribute(address, "max-threads", "50", 500);
     }
 
     @Test
@@ -135,12 +135,12 @@ public class WorkManagerTestCase {
         page.edit().text("coreThreads", "100");
         page.clickButton("Save");
 
-        verifier.verifyAttribute(address, "core-threads", "100");
+        verifier.verifyAttribute(address, "core-threads", "100", 500);
 
         page.edit().text("coreThreads", "50");
         page.clickButton("Save");
 
-        verifier.verifyAttribute(address, "core-threads", "50");
+        verifier.verifyAttribute(address, "core-threads", "50", 500);
     }
 
     @Test
@@ -150,12 +150,12 @@ public class WorkManagerTestCase {
         page.edit().text("queueLength", "1000");
         page.clickButton("Save");
 
-        verifier.verifyAttribute(address, "queue-length", "1000");
+        verifier.verifyAttribute(address, "queue-length", "1000", 500);
 
         page.edit().text("queueLength", "50");
         page.clickButton("Save");
 
-        verifier.verifyAttribute(address, "queue-length", "50");
+        verifier.verifyAttribute(address, "queue-length", "50", 500);
     }
 
 }

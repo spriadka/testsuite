@@ -107,7 +107,7 @@ public class ResourceAdaptersPolicyTestCase {
         boolean finished = editPanelFragment.save();
         assertTrue("Config should be saved and closed.", finished);
 
-        verifier.verifyAttribute(address, "capacity-decrementer-class", "org.jboss.jca.core.connectionmanager.pool.capacity.WatermarkDecrementer");
+        verifier.verifyAttribute(address, "capacity-decrementer-class", "org.jboss.jca.core.connectionmanager.pool.capacity.WatermarkDecrementer", 500);
     }
 
     @Test //property is not saved for next test .. https://issues.jboss.org/browse/HAL-809
@@ -119,7 +119,7 @@ public class ResourceAdaptersPolicyTestCase {
         boolean finished = editPanelFragment.save();
         assertTrue("Config should be saved and closed.", finished);
 
-        verifier.verifyAttribute(address, "capacity-decrementer-properties", "[(\"Watermark\" => \"9\")]");
+        verifier.verifyAttribute(address, "capacity-decrementer-properties", "[(\"Watermark\" => \"9\")]", 500);
 
     }
 
@@ -132,7 +132,7 @@ public class ResourceAdaptersPolicyTestCase {
         boolean finished = editPanelFragment.save();
         assertTrue("Config should be saved and closed.", finished);
 
-        verifier.verifyAttribute(address, "capacity-decrementer-properties", "undefined");
+        verifier.verifyAttribute(address, "capacity-decrementer-properties", "undefined", 500);
     }
 
     @Test
@@ -144,7 +144,7 @@ public class ResourceAdaptersPolicyTestCase {
         boolean finished = editPanelFragment.save();
         assertTrue("Config should be saved and closed.", finished);
 
-        verifier.verifyAttribute(address, "capacity-decrementer-class", "undefined");
+        verifier.verifyAttribute(address, "capacity-decrementer-class", "undefined", 500);
     }
 
     @Test
@@ -156,7 +156,7 @@ public class ResourceAdaptersPolicyTestCase {
         boolean finished = editPanelFragment.save();
         assertTrue("Config should be saved and closed.", finished);
 
-        verifier.verifyAttribute(address, "capacity-incrementer-class", "org.jboss.jca.core.connectionmanager.pool.capacity.SizeIncrementer");
+        verifier.verifyAttribute(address, "capacity-incrementer-class", "org.jboss.jca.core.connectionmanager.pool.capacity.SizeIncrementer", 500);
     }
 
     @Test //property is not saved for next test .. https://issues.jboss.org/browse/HAL-809
@@ -168,7 +168,7 @@ public class ResourceAdaptersPolicyTestCase {
         boolean finished = editPanelFragment.save();
         assertTrue("Config should be saved and closed.", finished);
 
-        verifier.verifyAttribute(address, "capacity-incrementer-properties", "[(\"Size\" => \"7\")]");
+        verifier.verifyAttribute(address, "capacity-incrementer-properties", "[(\"Size\" => \"7\")]", 500);
     }
 
     @Test
@@ -180,7 +180,7 @@ public class ResourceAdaptersPolicyTestCase {
         boolean finished = editPanelFragment.save();
         assertTrue("Config should be saved and closed.", finished);
 
-        verifier.verifyAttribute(address, "capacity-incrementer-properties", "undefined");
+        verifier.verifyAttribute(address, "capacity-incrementer-properties", "undefined", 500);
     }
 
     @Test
@@ -192,6 +192,6 @@ public class ResourceAdaptersPolicyTestCase {
         boolean finished = editPanelFragment.save();
         assertTrue("Config should be saved and closed.", finished);
 
-        verifier.verifyAttribute(address, "capacity-incrementer-class", "undefined");
+        verifier.verifyAttribute(address, "capacity-incrementer-class", "undefined", 500);
     }
 }

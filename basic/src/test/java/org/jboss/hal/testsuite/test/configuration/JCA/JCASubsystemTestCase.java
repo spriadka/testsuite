@@ -69,12 +69,12 @@ public class JCASubsystemTestCase {
         page.edit().checkbox("debug", true);
         page.clickButton("Save");
 
-        verifier.verifyAttribute(address, "debug", true);
+        verifier.verifyAttribute(address, "debug", true, 500);
 
         page.edit().checkbox("debug", false);
         page.clickButton("Save");
 
-        verifier.verifyAttribute(address, "debug", false);
+        verifier.verifyAttribute(address, "debug", false, 500);
     }
 
     @Test
@@ -82,12 +82,12 @@ public class JCASubsystemTestCase {
         page.edit().checkbox("error", true);
         page.clickButton("Save");
 
-        verifier.verifyAttribute(address, "error", true);
+        verifier.verifyAttribute(address, "error", true, 500);
 
         page.edit().checkbox("error", false);
         page.clickButton("Save");
 
-        verifier.verifyAttribute(address, "error", false);
+        verifier.verifyAttribute(address, "error", false, 500);
     }
 
     @Test
@@ -95,12 +95,12 @@ public class JCASubsystemTestCase {
         page.edit().checkbox("ignore-unknown-connections", true);
         page.clickButton("Save");
 
-        verifier.verifyAttribute(address, "ignore-unknown-connections", true);
+        verifier.verifyAttribute(address, "ignore-unknown-connections", true, 500);
 
         page.edit().checkbox("ignore-unknown-connections", false);
         page.clickButton("Save");
 
-        verifier.verifyAttribute(address, "ignore-unknown-connections", false);
+        verifier.verifyAttribute(address, "ignore-unknown-connections", false, 500);
     }
 
     @Test
@@ -111,12 +111,12 @@ public class JCASubsystemTestCase {
         page.edit().checkbox("enabled", false);
         page.clickButton("Save");
 
-        verifier.verifyAttribute(address, "enabled", false);
+        verifier.verifyAttribute(address, "enabled", false, 500);
 
         page.edit().checkbox("enabled", true);
         page.clickButton("Save");
 
-        verifier.verifyAttribute(address, "enabled", true);
+        verifier.verifyAttribute(address, "enabled", true, 500);
     }
 
     @Test
@@ -127,12 +127,12 @@ public class JCASubsystemTestCase {
         page.edit().checkbox("fail-on-error", false);
         page.clickButton("Save");
 
-        verifier.verifyAttribute(address, "fail-on-error", false);
+        verifier.verifyAttribute(address, "fail-on-error", false, 500);
 
         page.edit().checkbox("fail-on-error", true);
         page.clickButton("Save");
 
-        verifier.verifyAttribute(address, "fail-on-error", true);
+        verifier.verifyAttribute(address, "fail-on-error", true, 500);
     }
 
     @Test
@@ -143,12 +143,12 @@ public class JCASubsystemTestCase {
         page.edit().checkbox("fail-on-warn", true);
         page.clickButton("Save");
 
-        verifier.verifyAttribute(address, "fail-on-warn", true);
+        verifier.verifyAttribute(address, "fail-on-warn", true, 500);
 
         page.edit().checkbox("fail-on-warn", false);
         page.clickButton("Save");
 
-        verifier.verifyAttribute(address, "fail-on-warn", false);
+        verifier.verifyAttribute(address, "fail-on-warn", false, 500);
     }
 
     @Test
@@ -159,11 +159,11 @@ public class JCASubsystemTestCase {
         page.edit().checkbox("enabled", false);
         page.clickButton("Save");
 
-        verifier.verifyAttribute(address, "enabled", false);
+        verifier.verifyAttribute(address, "enabled", false, 500);
 
         page.edit().checkbox("enabled", true);
         page.clickButton("Save");
 
-        verifier.verifyAttribute(address, "enabled", true);
+        verifier.verifyAttribute(address, "enabled", true, 500);
     }
 }
