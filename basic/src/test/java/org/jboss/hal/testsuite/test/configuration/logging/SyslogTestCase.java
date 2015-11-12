@@ -88,7 +88,7 @@ public class SyslogTestCase {
         boolean finished = editPanelFragment.save();
 
         assertFalse("Config should not be saved and closed. -1 is invalid value", finished);
-        verifier.verifyAttribute(address, "port", "514");
+        verifier.verifyAttribute(address, "port", "514", 500);
     }
 
     @Test
@@ -101,7 +101,7 @@ public class SyslogTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should not be saved and closed.", finished);
-        verifier.verifyAttribute(address, "port", "0");
+        verifier.verifyAttribute(address, "port", "0", 500);
     }
 
     @Test
@@ -114,7 +114,7 @@ public class SyslogTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "facility", "local-use-1");
+        verifier.verifyAttribute(address, "facility", "local-use-1", 500);
     }
 
 
@@ -128,7 +128,7 @@ public class SyslogTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "syslog-format", "RFC3164");
+        verifier.verifyAttribute(address, "syslog-format", "RFC3164", 500);
     }
 
     @Test

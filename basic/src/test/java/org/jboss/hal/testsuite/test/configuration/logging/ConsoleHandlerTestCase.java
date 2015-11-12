@@ -99,7 +99,7 @@ public class ConsoleHandlerTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "level", "DEBUG");
+        verifier.verifyAttribute(address, "level", "DEBUG", 500);
     }
 
     @Test
@@ -113,7 +113,7 @@ public class ConsoleHandlerTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "named-formatter" , "undefined");
+        verifier.verifyAttribute(address, "named-formatter" , "undefined", 500);
     }
 
     @Test
@@ -127,7 +127,7 @@ public class ConsoleHandlerTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "target" , "console");
+        verifier.verifyAttribute(address, "target" , "console", 500);
     }
 
     @Test
@@ -141,7 +141,7 @@ public class ConsoleHandlerTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "autoflush" , false);
+        verifier.verifyAttribute(address, "autoflush" , false, 500);
     }
 
     @Test
@@ -155,7 +155,7 @@ public class ConsoleHandlerTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "formatter" , "%d{HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n");
+        verifier.verifyAttribute(address, "formatter" , "%d{HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n", 500);
     }
 
     @Test

@@ -77,8 +77,8 @@ public class RootLoggerTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "handlers", "undefined");
-        verifier.verifyAttribute(address, "level", "WARN");
+        verifier.verifyAttribute(address, "handlers", "undefined", 500);
+        verifier.verifyAttribute(address, "level", "WARN", 500);
     }
 
     @Test
@@ -92,7 +92,7 @@ public class RootLoggerTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "handlers", "[\"CONSOLE\",\"FILE\"]");
-        verifier.verifyAttribute(address, "level", "INFO");
+        verifier.verifyAttribute(address, "handlers", "[\"CONSOLE\",\"FILE\"]", 500);
+        verifier.verifyAttribute(address, "level", "INFO", 500);
     }
 }

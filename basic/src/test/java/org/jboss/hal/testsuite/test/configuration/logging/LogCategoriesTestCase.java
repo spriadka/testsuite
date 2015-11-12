@@ -86,7 +86,7 @@ public class LogCategoriesTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "level", "WARN");
+        verifier.verifyAttribute(address, "level", "WARN", 500);
     }
 
     @Test
@@ -100,7 +100,7 @@ public class LogCategoriesTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "use-parent-handlers", false);
+        verifier.verifyAttribute(address, "use-parent-handlers", false, 500);
     }
 
     @Test
@@ -114,7 +114,7 @@ public class LogCategoriesTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "handlers", "[\"CONSOLE\",\"FILE\"]");
+        verifier.verifyAttribute(address, "handlers", "[\"CONSOLE\",\"FILE\"]", 500);
     }
 
     @Test

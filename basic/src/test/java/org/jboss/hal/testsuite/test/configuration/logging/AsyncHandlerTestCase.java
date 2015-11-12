@@ -103,7 +103,7 @@ public class AsyncHandlerTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "level", "WARN");
+        verifier.verifyAttribute(address, "level", "WARN", 500);
     }
 
     @Test // https://issues.jboss.org/browse/HAL-811
@@ -116,7 +116,7 @@ public class AsyncHandlerTestCase {
         boolean finished = editPanelFragment.save();
 
         assertFalse("Config should not be saved and closed,because 0 is illegal value.", finished);
-        verifier.verifyAttribute(address, "queue-length", "230");
+        verifier.verifyAttribute(address, "queue-length", "230", 500);
     }
 
     @Test
@@ -129,7 +129,7 @@ public class AsyncHandlerTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "queue-length", "240");
+        verifier.verifyAttribute(address, "queue-length", "240", 500);
     }
 
     @Test
@@ -142,7 +142,7 @@ public class AsyncHandlerTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "enabled" , false);
+        verifier.verifyAttribute(address, "enabled" , false, 500);
     }
 
 
@@ -156,7 +156,7 @@ public class AsyncHandlerTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "subhandlers", "[\"CONSOLE\",\"FILE\"]");
+        verifier.verifyAttribute(address, "subhandlers", "[\"CONSOLE\",\"FILE\"]", 500);
     }
 
     @Test
@@ -169,7 +169,7 @@ public class AsyncHandlerTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed. But handlers are not really saved.", finished);
-        verifier.verifyAttribute(address, "subhandlers", "[\"CONSOLE\",\"FILE\"]");
+        verifier.verifyAttribute(address, "subhandlers", "[\"CONSOLE\",\"FILE\"]", 500);
         cliClient.reload();
     }
 
