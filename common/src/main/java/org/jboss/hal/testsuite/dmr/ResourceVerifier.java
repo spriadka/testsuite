@@ -97,8 +97,7 @@ public class ResourceVerifier {
         long start = System.currentTimeMillis();
 
         while (System.currentTimeMillis() <= start + timeout && expected != response.payload().asBoolean()) {
-            response = dispatcher.execute(readAttributeOperation(address, attribute));
-            Library.letsSleep(50);
+            response = getResponseAndWait(address, attribute);
         }
 
         assertTrue(response.isSuccessful());
@@ -121,10 +120,10 @@ public class ResourceVerifier {
         DmrResponse response = dispatcher.execute(readAttributeOperation(address, attribute));
         long start = System.currentTimeMillis();
         String[] values = response.payload().asList().stream().map(ModelNode::asString).toArray(String[]::new);
+
         while (System.currentTimeMillis() <= start + timeout && !Arrays.equals(expected, values)) {
-            response = dispatcher.execute(readAttributeOperation(address, attribute));
+            response = getResponseAndWait(address, attribute);
             values = response.payload().asList().stream().map(ModelNode::asString).toArray(String[]::new);
-            Library.letsSleep(50);
         }
 
         assertTrue(response.isSuccessful());
@@ -148,8 +147,7 @@ public class ResourceVerifier {
         long start = System.currentTimeMillis();
 
         while (System.currentTimeMillis() <= start + timeout && !expected.equals(response.payload().asString())) {
-            response = dispatcher.execute(readAttributeOperation(address, attribute));
-            Library.letsSleep(50);
+            response = getResponseAndWait(address, attribute);
         }
 
         assertTrue(response.isSuccessful());
@@ -159,5 +157,11 @@ public class ResourceVerifier {
     private Operation readAttributeOperation(ResourceAddress address, String attribute) {
             return new Operation.Builder(READ_ATTRIBUTE_OPERATION, address)
                     .param(ModelDescriptionConstants.NAME, attribute).build();
+    }
+
+    private DmrResponse getResponseAndWait(ResourceAddress address, String attribute) {
+        Library.letsSleep(50);
+        DmrResponse response = dispatcher.execute(readAttributeOperation(address, attribute));
+        return response;
     }
 }
