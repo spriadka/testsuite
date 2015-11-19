@@ -8,6 +8,8 @@ import org.jboss.arquillian.junit.InSequence;
 import org.jboss.hal.testsuite.category.Standalone;
 import org.jboss.hal.testsuite.cli.CliClient;
 import org.jboss.hal.testsuite.cli.CliClientFactory;
+import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
+import org.jboss.hal.testsuite.creaper.command.AddSocketBinding;
 import org.jboss.hal.testsuite.finder.Application;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
@@ -24,6 +26,11 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
+import org.wildfly.extras.creaper.core.CommandFailedException;
+import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
+
+import java.io.IOException;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static org.jboss.hal.testsuite.cli.CliConstants.MAIL_SESSION_SUBSYSTEM_ADDRESS;
 import static org.junit.Assert.assertFalse;
@@ -144,6 +151,14 @@ public class MailTestCase {
         Application.waitUntilVisible();
         MailServerFragment fragment = page.getSesionsServers();
         MailServerWizard wizard = fragment.addMailServer();
+
+        try (OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient()) {
+            client.apply(new AddSocketBinding.Builder(SOCKET_BINDING)
+                    .port(ThreadLocalRandom.current().nextInt(10000, 19999))
+                    .build());
+        } catch (IOException | CommandFailedException e) {
+            e.printStackTrace();
+        }
 
         boolean result =
                 wizard.socketBinding(SOCKET_BINDING)

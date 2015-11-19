@@ -7,6 +7,8 @@ import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.cli.CliClient;
 import org.jboss.hal.testsuite.cli.CliClientFactory;
+import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
+import org.jboss.hal.testsuite.creaper.command.AddSocketBinding;
 import org.jboss.hal.testsuite.dmr.Dispatcher;
 import org.jboss.hal.testsuite.dmr.ResourceAddress;
 import org.jboss.hal.testsuite.dmr.ResourceVerifier;
@@ -23,6 +25,11 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
+import org.wildfly.extras.creaper.core.CommandFailedException;
+import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
+
+import java.io.IOException;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static org.junit.Assert.assertTrue;
 
@@ -105,13 +112,23 @@ public class GenericAcceptorTestCase {
         page.selectInTable(NAME, 0);
         page.edit();
 
+        String socketBindingName = "DiscGroupSocketBinding";
+
+        try (OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient()) {
+            client.apply(new AddSocketBinding.Builder(socketBindingName)
+                    .port(ThreadLocalRandom.current().nextInt(10000, 19999))
+                    .build());
+        } catch (IOException | CommandFailedException e) {
+            e.printStackTrace();
+        }
+
         ConfigFragment editPanelFragment = page.getConfigFragment();
 
-        editPanelFragment.getEditor().text("socketBinding", "sb");
+        editPanelFragment.getEditor().text("socketBinding", socketBindingName);
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "socket-binding", "sb", 500);
+        verifier.verifyAttribute(address, "socket-binding", socketBindingName, 500);
 
         cliClient.executeCommand(remove);
     }

@@ -7,16 +7,24 @@ import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Standalone;
 import org.jboss.hal.testsuite.cli.CliClient;
 import org.jboss.hal.testsuite.cli.CliClientFactory;
+import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
+import org.jboss.hal.testsuite.creaper.command.AddSocketBinding;
 import org.jboss.hal.testsuite.page.config.ModClusterPage;
 import org.jboss.hal.testsuite.test.util.ConfigAreaChecker;
 import org.jboss.hal.testsuite.util.ResourceVerifier;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
+import org.wildfly.extras.creaper.core.CommandFailedException;
+import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
+
+import java.io.IOException;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static org.jboss.hal.testsuite.cli.CliConstants.MOD_CLUSTER_CONFIG_ADDRESS;
 
@@ -80,6 +88,18 @@ public class ModClusterTestCase {
 
     @Page
     public ModClusterPage page;
+
+    @BeforeClass
+    public static void beforeClass() {
+        try(OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient()) {
+            client.apply(new AddSocketBinding.Builder(ADVERTISE_SOCKET_VALUE)
+                    .port(ThreadLocalRandom.current().nextInt(10000, 19999))
+                    .multicastAddress("224.0.0.1")
+                    .build());
+        } catch (IOException | CommandFailedException e) {
+            e.printStackTrace();
+        }
+    }
 
     @Before
     public void before() {

@@ -4,6 +4,8 @@ import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.cli.DomainManager;
+import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
+import org.jboss.hal.testsuite.creaper.command.AddSocketBinding;
 import org.jboss.hal.testsuite.dmr.AddressTemplate;
 import org.jboss.hal.testsuite.dmr.DefaultContext;
 import org.jboss.hal.testsuite.dmr.Dispatcher;
@@ -12,7 +14,10 @@ import org.jboss.hal.testsuite.dmr.Operation;
 import org.jboss.hal.testsuite.dmr.ResourceAddress;
 import org.jboss.hal.testsuite.dmr.StatementContext;
 import org.jboss.hal.testsuite.util.ConfigUtils;
+import org.wildfly.extras.creaper.core.CommandFailedException;
+import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
@@ -34,9 +39,13 @@ public class TransactionsOperations {
 
     public String createSocketBinding() {
         String name = "TransactionsOpsSB_" + RandomStringUtils.randomAlphanumeric(6);
-        ResourceAddress address = socketBindingAddressTemplate.resolve(context, name);
-        Map<String, String> params = ImmutableMap.of("port", String.valueOf(ThreadLocalRandom.current().nextInt(1000, 9999)));
-        executeAddAction(address, params);
+        try (OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient()) {
+            client.apply(new AddSocketBinding.Builder(name)
+                    .port(ThreadLocalRandom.current().nextInt(10000, 19999))
+                    .build());
+        } catch (IOException | CommandFailedException e) {
+            e.printStackTrace();
+        }
         return  name;
     }
 
