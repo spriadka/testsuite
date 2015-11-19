@@ -59,4 +59,13 @@ public class ConfigurationPage extends ConfigPage {
         WebElement root = browser.findElement(selector);
         return Graphene.createPageFragment(ConfigAreaFragment.class, root);
     }
+
+    public boolean isElementVisible(By selector) {
+        try {
+            Graphene.waitAjax().until().element(selector).is().visible();
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
 }

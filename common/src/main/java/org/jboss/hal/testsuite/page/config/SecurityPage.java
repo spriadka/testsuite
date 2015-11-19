@@ -1,6 +1,5 @@
 package org.jboss.hal.testsuite.page.config;
 
-import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.hal.testsuite.finder.Application;
 import org.jboss.hal.testsuite.finder.FinderNames;
@@ -135,15 +134,6 @@ public class SecurityPage extends ConfigurationPage implements Navigatable {
     public Boolean isErrorShownInForm() {
         By selector = ByJQuery.selector("div.form-item-error-desc:visible");
         return isElementVisible(selector);
-    }
-
-    private Boolean isElementVisible(By selector) {
-        try {
-            Graphene.waitAjax().until().element(selector).is().visible();
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
     }
 
     public void removeSecurityDomain(String name) {
