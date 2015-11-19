@@ -101,7 +101,7 @@ public abstract class SecurityTestCaseAbstract {
     }
 
     protected void editTextAndVerify(ResourceAddress address, String identifier, String attributeName) throws IOException, InterruptedException {
-        editTextAndVerify(address, identifier, attributeName, attributeName + RandomStringUtils.randomAlphabetic(4));
+        editTextAndVerify(address, identifier, attributeName, "sec_" + attributeName + RandomStringUtils.randomAlphabetic(4));
     }
 
     protected void editCheckboxAndVerify(ResourceAddress address, String identifier, String attributeName, Boolean value) throws IOException, InterruptedException {

@@ -51,7 +51,7 @@ public abstract class TransactionsTestCaseAbstract {
     }
 
     protected void editTextAndVerify(ResourceAddress address, String identifier, String attributeName) throws IOException, InterruptedException {
-        editTextAndVerify(address, identifier, attributeName, "transactions" + RandomStringUtils.randomAlphabetic(6));
+        editTextAndVerify(address, identifier, attributeName, "transactions" + attributeName + RandomStringUtils.randomAlphabetic(6));
     }
 
     protected void editCheckboxAndVerify(ResourceAddress address, String identifier, String attributeName, Boolean value) throws IOException, InterruptedException {

@@ -85,7 +85,7 @@ public class EJB3ThreadPoolTestCase {
 
     @Test
     public void createThreadPool() {
-        String name = "threadPool2" + RandomStringUtils.randomAlphanumeric(8);
+        String name = "EJB3ThreadPoolThreadPool_" + RandomStringUtils.randomAlphanumeric(8);
         ResourceAddress address = ADDRESS_TEMPLATE.resolve(statementContext, name);
         dispatcher.execute(new Operation.Builder(ModelDescriptionConstants.ADD, address).param("max-threads", 99).build());
 
@@ -110,7 +110,7 @@ public class EJB3ThreadPoolTestCase {
 
     @Test
     public void editMaxThreads() {
-        String name = "maxThreads_" + RandomStringUtils.randomAlphanumeric(8);
+        String name = "EJB3ThreadPoolMaxThreads_" + RandomStringUtils.randomAlphanumeric(8);
         ResourceAddress address = ADDRESS_TEMPLATE.resolve(statementContext, name);
         dispatcher.execute(new Operation.Builder("add", address).param("max-threads", 99).build());
 
@@ -131,7 +131,7 @@ public class EJB3ThreadPoolTestCase {
 
     @Test
     public void removeBeanPool() {
-        String name = "beanPool_" + RandomStringUtils.randomAlphanumeric(8);
+        String name = "EJB3ThreadPoolBeanPool_" + RandomStringUtils.randomAlphanumeric(8);
         ResourceAddress address = ADDRESS_TEMPLATE.resolve(statementContext, name);
         dispatcher.execute(new Operation.Builder("add", address).param("max-threads", 99).build());
 
@@ -150,7 +150,7 @@ public class EJB3ThreadPoolTestCase {
 
     @Test
     public void createThreadPoolWithoutMaxThreads() {
-        String name = "ThreadPool_" + RandomStringUtils.randomAlphanumeric(20);
+        String name = "EJB3ThreadPoolThreadPool2_" + RandomStringUtils.randomAlphanumeric(20);
         ResourceAddress address = ADDRESS_TEMPLATE.resolve(statementContext, name);
 
         finderNavigation.selectRow().invoke(FinderNames.VIEW);

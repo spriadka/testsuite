@@ -92,7 +92,7 @@ public class ServerOperationsTestCase {
 
     @Test
     public void addServer() {
-        String serverName = "srv_" + RandomStringUtils.randomAlphanumeric(8);
+        String serverName = "ServerOperationsSrv_" + RandomStringUtils.randomAlphanumeric(8);
 
         try {
             navigationByServerGroup.addAddress(FinderNames.SERVER).selectColumn().invoke("Add");
@@ -114,7 +114,7 @@ public class ServerOperationsTestCase {
 
     @Test
     public void removeServer() {
-        String serverName = "srv_" + RandomStringUtils.randomAlphanumeric(8);
+        String serverName = "ServerOperationsSrv_" + RandomStringUtils.randomAlphanumeric(8);
         cli.executeCommand(CliUtils.buildCommand("/host=master/server-config=" + serverName, ":add",
                 new String[]{"group=main-server-group", "socket-binding-port-offset=999"}));
 
