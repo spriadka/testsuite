@@ -92,7 +92,7 @@ public class JGroupAbstractTestCase {
 
     @Test(expected = AssertionError.class)
     public void socketBindingEditInvalid() {
-        String name = RandomStringUtils.randomAlphabetic(6);
+        String name = "invalidSocket_" + RandomStringUtils.randomAlphabetic(6);
         checker.editTextAndAssert(page, "socketBinding", name).dmrAttribute("socket-binding").invoke();
     }
 
@@ -112,7 +112,7 @@ public class JGroupAbstractTestCase {
 
     @Test
     public void machineEdit() {
-        String name = RandomStringUtils.randomAlphabetic(6);
+        String name = "machine_" + RandomStringUtils.randomAlphabetic(6);
         checker.editTextAndAssert(page, "machine", name).dmrAttribute("machine").invoke();
     }
 
@@ -123,13 +123,13 @@ public class JGroupAbstractTestCase {
 
     @Test
     public void siteEdit() {
-        String name = RandomStringUtils.randomAlphabetic(6);
+        String name = "site_" + RandomStringUtils.randomAlphabetic(6);
         checker.editTextAndAssert(page, "site", name).invoke();
     }
 
     @Test
     public void rackEdit() {
-        String name = RandomStringUtils.randomAlphabetic(6);
+        String name = "rack_" + RandomStringUtils.randomAlphabetic(6);
         checker.editTextAndAssert(page, "rack", name).invoke();
     }
 

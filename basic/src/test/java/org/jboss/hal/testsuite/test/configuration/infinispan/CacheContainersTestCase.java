@@ -97,13 +97,13 @@ public class CacheContainersTestCase {
     @Test
     public void editDefaultCache() {
         page.invokeContainerSettings(cacheContainerName);
-        attrChecker.editTextAndAssert(page, "default-cache", RandomStringUtils.randomAlphanumeric(5)).invoke();
+        attrChecker.editTextAndAssert(page, "default-cache", "infDefCache_" + RandomStringUtils.randomAlphanumeric(5)).invoke();
     }
 
     @Test
     public void editModule() {
         page.invokeContainerSettings(cacheContainerName);
-        attrChecker.editTextAndAssert(page, "module", RandomStringUtils.randomAlphanumeric(5)).invoke();
+        attrChecker.editTextAndAssert(page, "module", "infModule" + RandomStringUtils.randomAlphanumeric(5)).invoke();
     }
 
     @Test

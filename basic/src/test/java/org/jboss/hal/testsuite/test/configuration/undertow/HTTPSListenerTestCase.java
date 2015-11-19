@@ -449,7 +449,7 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
 
     @Test
     public void addHTTPSListenerInGUI() {
-        String name = RandomStringUtils.randomAlphanumeric(6);
+        String name = "HTTPSListener_" + RandomStringUtils.randomAlphanumeric(6);
         String socketBinding = operations.createSocketBinding();
         ConfigFragment config = page.getConfigFragment();
         WizardWindow wizard = config.getResourceManager().addResource();

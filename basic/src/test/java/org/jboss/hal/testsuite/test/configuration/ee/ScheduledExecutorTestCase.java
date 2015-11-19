@@ -53,7 +53,7 @@ public class ScheduledExecutorTestCase extends EETestCaseAbstract {
     private final String NUMERIC_INVALID = "7f";
     private final String JNDI_INVALID = "test";
     private final String JNDI_DEFAULT = "java:/";
-    private final String JNDI_VALID = JNDI_DEFAULT + RandomStringUtils.randomAlphanumeric(6);
+    private final String JNDI_VALID = JNDI_DEFAULT + "ScheduledExecutor_" +  RandomStringUtils.randomAlphanumeric(6);
     private final String REJECT_POLICY_VALID = "RETRY_ABORT";
 
     private final String EE_CHILD = "managed-scheduled-executor-service";
@@ -144,7 +144,7 @@ public class ScheduledExecutorTestCase extends EETestCaseAbstract {
 
     @Test
     public void addExecutorInGUI() {
-        String name = RandomStringUtils.randomAlphanumeric(6);
+        String name = "ScheduledExecutorGUI" + RandomStringUtils.randomAlphanumeric(6);
         ConfigFragment config = page.getConfigFragment();
         WizardWindow wizard = config.getResourceManager().addResource();
 
@@ -169,7 +169,7 @@ public class ScheduledExecutorTestCase extends EETestCaseAbstract {
     }
 
     private String createScheduledExecutorService() {
-        String name = RandomStringUtils.randomAlphanumeric(6);
+        String name = "ScheduledExecutor" + RandomStringUtils.randomAlphanumeric(6);
         ResourceAddress address = new ResourceAddress(eeAddress).add(EE_CHILD, name);
         dispatcher.execute(new Operation.Builder("add", address)
                 .param(JNDI_NAME, JNDI_DEFAULT + name)

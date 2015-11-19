@@ -43,7 +43,7 @@ public class ThreadFactoryTestCase extends EETestCaseAbstract {
     private final String NUMERIC_INVALID = "7f";
     private final String JNDI_INVALID = "test";
     private final String JNDI_DEFAULT = "java:/";
-    private final String JNDI_VALID = JNDI_DEFAULT + RandomStringUtils.randomAlphanumeric(6);
+    private final String JNDI_VALID = JNDI_DEFAULT + "threadFactory" +  RandomStringUtils.randomAlphanumeric(6);
 
     private final String EE_CHILD = "managed-thread-factory";
 
@@ -93,7 +93,7 @@ public class ThreadFactoryTestCase extends EETestCaseAbstract {
 
     @Test
     public void addThreadFactoryInGUI() {
-        String name = RandomStringUtils.randomAlphanumeric(6);
+        String name = "ThreadFactoryGUI" + RandomStringUtils.randomAlphanumeric(6);
         ConfigFragment config = page.getConfigFragment();
         WizardWindow wizard = config.getResourceManager().addResource();
 
@@ -118,7 +118,7 @@ public class ThreadFactoryTestCase extends EETestCaseAbstract {
     }
 
     private String createThreadFactory() {
-        String name = RandomStringUtils.randomAlphanumeric(6);
+        String name = "ThreadFactory" + RandomStringUtils.randomAlphanumeric(6);
         ResourceAddress address = new ResourceAddress(eeAddress).add(EE_CHILD, name);
         dispatcher.execute(new Operation.Builder("add", address)
                 .param(JNDI_NAME, JNDI_DEFAULT + name)

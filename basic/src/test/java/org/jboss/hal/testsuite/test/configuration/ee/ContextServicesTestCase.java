@@ -39,7 +39,7 @@ public class ContextServicesTestCase extends EETestCaseAbstract {
     //values
     private final String JNDI_INVALID = "test";
     private final String JNDI_DEFAULT = "java:/";
-    private final String JNDI_VALID = JNDI_DEFAULT + RandomStringUtils.randomAlphanumeric(6);
+    private final String JNDI_VALID = JNDI_DEFAULT + "eeTestAbstract_" + RandomStringUtils.randomAlphanumeric(6);
 
     private final String EE_CHILD = "context-service";
 
@@ -84,7 +84,7 @@ public class ContextServicesTestCase extends EETestCaseAbstract {
 
     @Test
     public void addContextServiceInGUI() {
-        String name = RandomStringUtils.randomAlphanumeric(6);
+        String name = "EEContextService_" + RandomStringUtils.randomAlphanumeric(6);
         ConfigFragment config = page.getConfigFragment();
         WizardWindow wizard = config.getResourceManager().addResource();
 

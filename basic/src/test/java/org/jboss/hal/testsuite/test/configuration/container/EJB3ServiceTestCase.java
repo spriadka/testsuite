@@ -92,7 +92,7 @@ public class EJB3ServiceTestCase {
     }
 
     private String createThreadPool() {
-        String name = RandomStringUtils.randomAlphanumeric(5);
+        String name = "threadPool" + RandomStringUtils.randomAlphanumeric(5);
         client.executeCommand(CliUtils.buildCommand(CliConstants.EJB3_THREAD_POOL_ADDRESS + "=" + name, ":add", new String[]{"max-threads=30", "keepalive-time={time=30, unit=MINUTES}"}));
         return name;
     }

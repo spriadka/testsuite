@@ -98,8 +98,8 @@ public class HostTestCase extends UndertowTestCaseAbstract {
 
     @Test
     public void addHTTPServerHostInGUI() {
-        String name = RandomStringUtils.randomAlphanumeric(6);
-        String webModule = RandomStringUtils.randomAlphanumeric(6);
+        String name = "httpServer_" + RandomStringUtils.randomAlphanumeric(6);
+        String webModule = "webModule_" + RandomStringUtils.randomAlphanumeric(6);
         ConfigFragment config = page.getConfigFragment();
         WizardWindow wizard = config.getResourceManager().addResource();
 

@@ -47,7 +47,7 @@ public class DataSourcesOperations {
     }
 
     public String createDataSource(String url) {
-        String name = RandomStringUtils.randomAlphanumeric(5);
+        String name = "dsOps_" + RandomStringUtils.randomAlphanumeric(5);
         return createDataSource(name, url);
     }
 
@@ -64,7 +64,7 @@ public class DataSourcesOperations {
     }
 
     public String createXADataSource(String url) {
-        String name = RandomStringUtils.randomAlphanumeric(5);
+        String name = "XAdsOps_" + RandomStringUtils.randomAlphanumeric(5);
         return createXADataSource(name, url);
     }
 

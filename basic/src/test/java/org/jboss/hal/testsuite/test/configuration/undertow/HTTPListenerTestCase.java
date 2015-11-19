@@ -416,7 +416,7 @@ public class HTTPListenerTestCase extends UndertowTestCaseAbstract {
 
     @Test
     public void addHTTPListenerInGUI() {
-        String name = RandomStringUtils.randomAlphanumeric(6);
+        String name = "httpListener_" + RandomStringUtils.randomAlphanumeric(6);
         ConfigFragment config = page.getConfigFragment();
         WizardWindow wizard = config.getResourceManager().addResource();
 

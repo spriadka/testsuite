@@ -38,7 +38,7 @@ public class SecurityDomainTestCase extends SecurityTestCaseAbstract {
     }
 
     private String createSecurityDomain() {
-        String name = RandomStringUtils.randomAlphanumeric(6);
+        String name = "secDomain_" + RandomStringUtils.randomAlphanumeric(6);
         dispatcher.execute(new Operation.Builder("add", SECURITY_DOMAIN_TEMPLATE.resolve(context, name)).build());
         return name;
     }

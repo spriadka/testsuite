@@ -67,8 +67,8 @@ import static org.junit.Assert.assertTrue;
 public class IIOPTestCase {
 
     private static final Logger log = LoggerFactory.getLogger(IIOPTestCase.class);
-    private static final String KEY_VALUE = RandomStringUtils.randomAlphanumeric(5);
-    private static final String VALUE = RandomStringUtils.randomAlphanumeric(5);
+    private static final String KEY_VALUE = "IIOPKey_" +  RandomStringUtils.randomAlphanumeric(5);
+    private static final String VALUE = "IIOPValue_" + RandomStringUtils.randomAlphanumeric(5);
 
     @Drone WebDriver browser;
     private FinderNavigation navigation;
