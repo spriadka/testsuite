@@ -6,7 +6,6 @@ import org.jboss.hal.testsuite.dmr.Composite;
 import org.jboss.hal.testsuite.dmr.Operation;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
-import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -49,11 +48,6 @@ public class ProcessIDTestCase extends TransactionsTestCaseAbstract {
         TransactionsOperations.reloadIfRequiredAndWaitForRunning();
         page.navigate();
         page.getConfig().switchTo("Process ID");
-    }
-
-    @AfterClass
-    public static void tearDown() {
-        operations.removeSocketBinding(socketBinding);
     }
 
     @Test
