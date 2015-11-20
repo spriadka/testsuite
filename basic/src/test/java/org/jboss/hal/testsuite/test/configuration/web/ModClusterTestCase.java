@@ -95,6 +95,7 @@ public class ModClusterTestCase {
             client.apply(new AddSocketBinding.Builder(ADVERTISE_SOCKET_VALUE)
                     .port(ThreadLocalRandom.current().nextInt(10000, 19999))
                     .multicastAddress("224.0.0.1")
+                    .multicastPort(ThreadLocalRandom.current().nextInt(10000, 19999))
                     .build());
         } catch (IOException | CommandFailedException e) {
             e.printStackTrace();
