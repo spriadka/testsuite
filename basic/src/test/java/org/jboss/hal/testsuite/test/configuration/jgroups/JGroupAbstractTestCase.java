@@ -6,6 +6,8 @@ import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.InSequence;
 import org.jboss.hal.testsuite.cli.CliClient;
 import org.jboss.hal.testsuite.cli.CliClientFactory;
+import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
+import org.jboss.hal.testsuite.creaper.command.AddSocketBinding;
 import org.jboss.hal.testsuite.finder.Application;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
@@ -26,6 +28,11 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.WebDriver;
+import org.wildfly.extras.creaper.core.CommandFailedException;
+import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
+
+import java.io.IOException;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -86,7 +93,14 @@ public class JGroupAbstractTestCase {
 
     @Test
     public void socketBindingEdit() {
-        String name = "jgroups-udp";
+        String name = "JGroupsSocketBinding_";
+        try (OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient()) {
+            client.apply(new AddSocketBinding.Builder(name)
+                    .port(ThreadLocalRandom.current().nextInt(10000, 19999))
+                    .build());
+        } catch (IOException | CommandFailedException e) {
+            e.printStackTrace();
+        }
         checker.editTextAndAssert(page, "socketBinding", name).dmrAttribute("socket-binding").invoke();
     }
 

@@ -91,7 +91,7 @@ public class ModClusterTestCase {
 
     @BeforeClass
     public static void beforeClass() {
-        try(OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient()) {
+        try (OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient()) {
             client.apply(new AddSocketBinding.Builder(ADVERTISE_SOCKET_VALUE)
                     .port(ThreadLocalRandom.current().nextInt(10000, 19999))
                     .multicastAddress("224.0.0.1")

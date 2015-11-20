@@ -1,6 +1,5 @@
 package org.jboss.hal.testsuite.test.configuration.transactions;
 
-import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.cli.DomainManager;
