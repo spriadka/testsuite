@@ -17,6 +17,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
+import org.wildfly.extras.creaper.core.CommandFailedException;
 
 import java.io.IOException;
 
@@ -108,7 +109,7 @@ public class HTTPListenerTestCase extends UndertowTestCaseAbstract {
     private static ResourceAddress address;
 
     @BeforeClass
-    public static void setUp() {
+    public static void setUp() throws IOException, CommandFailedException {
         httpServer = operations.createHTTPServer();
         httpListener = operations.createHTTPListener(httpServer);
         httpListenerToBeRemoved = operations.createHTTPListener(httpServer);

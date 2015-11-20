@@ -15,6 +15,7 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.openqa.selenium.WebDriver;
+import org.wildfly.extras.creaper.core.CommandFailedException;
 
 import java.io.IOException;
 
@@ -47,7 +48,7 @@ public abstract class UndertowTestCaseAbstract {
     protected UndertowPage page;
 
     @BeforeClass
-    public static void mainSetUp() {
+    public static void mainSetUp() throws IOException, CommandFailedException {
         dispatcher = new Dispatcher();
         verifier = new ResourceVerifier(dispatcher);
         operations = new UndertowOperations(dispatcher);

@@ -19,6 +19,7 @@ import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wildfly.extras.creaper.core.CommandFailedException;
 
 import java.io.IOException;
 
@@ -108,7 +109,7 @@ public class AJPListenerTestCase extends UndertowTestCaseAbstract {
     private static final Logger log = LoggerFactory.getLogger(AJPListenerTestCase.class);
 
     @BeforeClass
-    public static void setUp() {
+    public static void setUp() throws IOException, CommandFailedException {
         httpServer = operations.createHTTPServer();
         ajpListener = operations.createAJPListener(httpServer);
         ajpListenerToBeRemoved = operations.createAJPListener(httpServer);
@@ -390,7 +391,7 @@ public class AJPListenerTestCase extends UndertowTestCaseAbstract {
     }
 
     @Test
-    public void addAJPListenerInGUI() {
+    public void addAJPListenerInGUI() throws IOException, CommandFailedException {
         String name = "ajpGUI_" + RandomStringUtils.randomAlphanumeric(6);
         String socketBinding = operations.createSocketBinding();
         ConfigFragment config = page.getConfigFragment();

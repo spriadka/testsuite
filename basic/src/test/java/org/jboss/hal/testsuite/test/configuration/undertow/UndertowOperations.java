@@ -69,7 +69,7 @@ public class UndertowOperations {
         }
     }
 
-    public String createAJPListener(String httpServer) {
+    public String createAJPListener(String httpServer) throws IOException, CommandFailedException {
         String name = RandomStringUtils.randomAlphanumeric(6);
         log.info("Creating AJP listener " + name);
         Map<String, String> params = ImmutableMap.of("socket-binding", createSocketBinding());
@@ -81,7 +81,7 @@ public class UndertowOperations {
         executeRemoveAction(ajpListenerTemplate.resolve(context, httpServer, listenerName));
     }
 
-    public String createHTTPListener(String httpServer) {
+    public String createHTTPListener(String httpServer) throws IOException, CommandFailedException {
         String name = RandomStringUtils.randomAlphanumeric(6);
         Map<String, String> params = ImmutableMap.of("socket-binding", createSocketBinding());
         executeAddAction(httpListenerTemplate.resolve(context, httpServer, name), params);
@@ -92,7 +92,7 @@ public class UndertowOperations {
         executeRemoveAction(httpListenerTemplate.resolve(context, httpServer, listenerName));
     }
 
-    public String createHTTPSListener(String httpServer) {
+    public String createHTTPSListener(String httpServer) throws IOException, CommandFailedException {
         String name = RandomStringUtils.randomAlphanumeric(6);
         ResourceAddress address = httpsListenerTemplate.resolve(context, httpServer, name);
         Map <String, String> properties = ImmutableMap.of("socket-binding", createSocketBinding(), "security-realm", "ManagementRealm");
@@ -197,16 +197,12 @@ public class UndertowOperations {
         executeRemoveAction(address);
     }
 
-    public String createSocketBinding() {
+    public String createSocketBinding() throws CommandFailedException, IOException {
         String name = "UndertowSocketBinding_" + RandomStringUtils.randomAlphanumeric(6);
         try (OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient()) {
             client.apply(new AddSocketBinding.Builder(name)
                     .port(ThreadLocalRandom.current().nextInt(1000, 9999))
                     .build());
-        } catch (CommandFailedException e) {
-            e.getStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
         }
         return  name;
     }
