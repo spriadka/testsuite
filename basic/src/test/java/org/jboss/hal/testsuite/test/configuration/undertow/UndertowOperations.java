@@ -2,6 +2,7 @@ package org.jboss.hal.testsuite.test.configuration.undertow;
 
 import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang.RandomStringUtils;
+import org.apache.mina.util.AvailablePortFinder;
 import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.cli.DomainManager;
 import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
@@ -22,7 +23,6 @@ import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
-import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * @author Jan Kasik <jkasik@redhat.com>
@@ -200,8 +200,10 @@ public class UndertowOperations {
     public String createSocketBinding() throws CommandFailedException, IOException {
         String name = "UndertowSocketBinding_" + RandomStringUtils.randomAlphanumeric(6);
         try (OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient()) {
+            int port = AvailablePortFinder.getNextAvailable(1024);
+            log.info("Obtained port for socket binding '" + name + "' is " + port);
             client.apply(new AddSocketBinding.Builder(name)
-                    .port(ThreadLocalRandom.current().nextInt(10000, 19999))
+                    .port(port)
                     .build());
         }
         return  name;
