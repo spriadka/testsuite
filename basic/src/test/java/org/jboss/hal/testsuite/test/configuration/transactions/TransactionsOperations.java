@@ -33,7 +33,7 @@ public class TransactionsOperations {
     }
 
     public String createSocketBinding() {
-        String name = "sb_" + RandomStringUtils.randomAlphanumeric(6);
+        String name = "TransactionsOpsSB_" + RandomStringUtils.randomAlphanumeric(6);
         ResourceAddress address = socketBindingAddressTemplate.resolve(context, name);
         Map<String, String> params = ImmutableMap.of("port", String.valueOf(ThreadLocalRandom.current().nextInt(1000, 9999)));
         executeAddAction(address, params);

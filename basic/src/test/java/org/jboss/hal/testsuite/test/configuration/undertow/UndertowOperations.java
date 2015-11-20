@@ -66,6 +66,7 @@ public class UndertowOperations {
 
     public String createAJPListener(String httpServer) {
         String name = RandomStringUtils.randomAlphanumeric(6);
+        log.info("Creating AJP listener " + name);
         Map<String, String> params = ImmutableMap.of("socket-binding", createSocketBinding());
         executeAddAction(ajpListenerTemplate.resolve(context, httpServer, name), params);
         return name;
@@ -168,7 +169,7 @@ public class UndertowOperations {
     }
 
     public String createWorker() {
-        String name = RandomStringUtils.randomAlphanumeric(6);
+        String name = "UndertowWorker_" + RandomStringUtils.randomAlphanumeric(6);
         ResourceAddress address = ioWorkerAddressTemplate.resolve(context, name);
         executeAddAction(address);
         return name;
@@ -180,7 +181,7 @@ public class UndertowOperations {
     }
 
     public String createBufferPool() {
-        String name = RandomStringUtils.randomAlphanumeric(6);
+        String name = "UndertowBufferPool_" + RandomStringUtils.randomAlphanumeric(6);
         ResourceAddress address = ioBufferPoolAddressTemplate.resolve(context, name);
         executeAddAction(address);
         return name;
@@ -192,7 +193,7 @@ public class UndertowOperations {
     }
 
     public String createSocketBinding() {
-        String name = RandomStringUtils.randomAlphanumeric(6);
+        String name = "UndertowSocketBinding_" + RandomStringUtils.randomAlphanumeric(6);
         ResourceAddress address = socketBindingAddressTemplate.resolve(context, name);
         Map<String, String> params = ImmutableMap.of("port", String.valueOf(ThreadLocalRandom.current().nextInt(1000, 9999)));
         executeAddAction(address, params);

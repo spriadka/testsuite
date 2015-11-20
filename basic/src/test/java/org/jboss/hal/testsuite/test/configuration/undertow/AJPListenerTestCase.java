@@ -391,7 +391,7 @@ public class AJPListenerTestCase extends UndertowTestCaseAbstract {
 
     @Test
     public void addAJPListenerInGUI() {
-        String name = RandomStringUtils.randomAlphanumeric(6);
+        String name = "ajpGUI_" + RandomStringUtils.randomAlphanumeric(6);
         String socketBinding = operations.createSocketBinding();
         ConfigFragment config = page.getConfigFragment();
         WizardWindow wizard = config.getResourceManager().addResource();

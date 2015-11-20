@@ -25,10 +25,10 @@ import org.junit.runner.RunWith;
 @Category(Shared.class)
 public class TestConnectionTestCase extends AbstractTestConnectionTestCase {
 
-    private static String dsNameValid = RandomStringUtils.randomAlphanumeric(5);
-    private static String xaDsNameValid = RandomStringUtils.randomAlphanumeric(5);
-    private static String dsNameInvalid = RandomStringUtils.randomAlphanumeric(5);
-    private static String xaDsNameInvalid = RandomStringUtils.randomAlphanumeric(5);
+    private static String dsNameValid = "TestConnectionDSNameValid" + RandomStringUtils.randomAlphanumeric(5);
+    private static String xaDsNameValid = "TestConnectionXADsNameValid" + RandomStringUtils.randomAlphanumeric(5);
+    private static String dsNameInvalid = "TestConnectionDSNameInvalid" + RandomStringUtils.randomAlphanumeric(5);
+    private static String xaDsNameInvalid = "TestConnectionXADsNameInvalid" + RandomStringUtils.randomAlphanumeric(5);
 
     private static final String VALID_URL = "jdbc:h2:mem:test2;DB_CLOSE_DELAY=-1";
     private static final String INVALID_URL = "invalidUrl";
@@ -85,13 +85,13 @@ public class TestConnectionTestCase extends AbstractTestConnectionTestCase {
 
     @Test
     public void validInWizard() {
-        String name = RandomStringUtils.randomAlphabetic(6);
+        String name = "TestConnectionValidInWizard_" + RandomStringUtils.randomAlphabetic(6);
         testConnectionInWizard(dsOps, name, VALID_URL, true);
     }
 
     @Test
     public void invalidInWizard() {
-        String name = RandomStringUtils.randomAlphabetic(6);
+        String name = "TestConnectionInvalidInWizard_" + RandomStringUtils.randomAlphabetic(6);
         testConnectionInWizard(dsOps, name, INVALID_URL, false);
     }
 
@@ -115,7 +115,7 @@ public class TestConnectionTestCase extends AbstractTestConnectionTestCase {
     public void validXAInWizard() {
         datasourcesPage.switchToXA();
 
-        String name = RandomStringUtils.randomAlphabetic(6);
+        String name = "TestConnectionValidXAInWizard_" + RandomStringUtils.randomAlphabetic(6);
         testXAConnectionInWizard(dsOps, name, VALID_URL, true);
     }
 
@@ -123,7 +123,7 @@ public class TestConnectionTestCase extends AbstractTestConnectionTestCase {
     public void invalidXAInWizard() {
         datasourcesPage.switchToXA();
 
-        String name = RandomStringUtils.randomAlphabetic(6);
+        String name = "TestConnectionInvalidXAInWizard_" + RandomStringUtils.randomAlphabetic(6);
         testXAConnectionInWizard(dsOps, name, "invalidUrl", false);
     }
 }
