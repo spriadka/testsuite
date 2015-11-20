@@ -146,7 +146,7 @@ public class MailTestCase {
 
     @Test
     @InSequence(4)
-    public void createMailServer() {
+    public void createMailServer() throws IOException, CommandFailedException {
         invokeOperationOnMailSession(FinderNames.VIEW);
         Application.waitUntilVisible();
         MailServerFragment fragment = page.getSesionsServers();
@@ -156,8 +156,6 @@ public class MailTestCase {
             client.apply(new AddSocketBinding.Builder(SOCKET_BINDING)
                     .port(ThreadLocalRandom.current().nextInt(10000, 19999))
                     .build());
-        } catch (IOException | CommandFailedException e) {
-            e.printStackTrace();
         }
 
         boolean result =

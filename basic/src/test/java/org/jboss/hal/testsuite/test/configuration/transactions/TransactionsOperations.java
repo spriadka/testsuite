@@ -36,14 +36,12 @@ public class TransactionsOperations {
         this.dispatcher = dispatcher;
     }
 
-    public String createSocketBinding() {
+    public String createSocketBinding() throws CommandFailedException, IOException {
         String name = "TransactionsOpsSB_" + RandomStringUtils.randomAlphanumeric(6);
         try (OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient()) {
             client.apply(new AddSocketBinding.Builder(name)
                     .port(ThreadLocalRandom.current().nextInt(10000, 19999))
                     .build());
-        } catch (IOException | CommandFailedException e) {
-            e.printStackTrace();
         }
         return  name;
     }

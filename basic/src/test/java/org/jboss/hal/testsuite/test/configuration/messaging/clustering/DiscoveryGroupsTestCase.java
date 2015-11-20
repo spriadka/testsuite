@@ -101,7 +101,7 @@ public class DiscoveryGroupsTestCase {
     }
 
     @Test
-    public void updateDiscoveryGroupSocketBinding() {
+    public void updateDiscoveryGroupSocketBinding() throws IOException, CommandFailedException {
         cliClient.executeCommand(command);
         page.navigateToMessaging();
         page.selectView("Clustering");
@@ -115,8 +115,6 @@ public class DiscoveryGroupsTestCase {
             client.apply(new AddSocketBinding.Builder(socketBindingName)
                     .port(ThreadLocalRandom.current().nextInt(10000, 19999))
                     .build());
-        } catch (IOException | CommandFailedException e) {
-            e.printStackTrace();
         }
 
         ConfigFragment editPanelFragment = page.getConfigFragment();

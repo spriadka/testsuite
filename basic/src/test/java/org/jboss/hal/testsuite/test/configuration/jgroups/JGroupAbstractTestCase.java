@@ -92,14 +92,12 @@ public class JGroupAbstractTestCase {
     }
 
     @Test
-    public void socketBindingEdit() {
+    public void socketBindingEdit() throws IOException, CommandFailedException {
         String name = "JGroupsSocketBinding_";
         try (OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient()) {
             client.apply(new AddSocketBinding.Builder(name)
                     .port(ThreadLocalRandom.current().nextInt(10000, 19999))
                     .build());
-        } catch (IOException | CommandFailedException e) {
-            e.printStackTrace();
         }
         checker.editTextAndAssert(page, "socketBinding", name).dmrAttribute("socket-binding").invoke();
     }

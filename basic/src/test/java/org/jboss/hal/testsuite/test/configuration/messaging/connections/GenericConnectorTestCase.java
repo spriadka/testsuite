@@ -105,7 +105,7 @@ public class GenericConnectorTestCase {
     }
 
     @Test
-    public void updateConnectorSocketBinding() {
+    public void updateConnectorSocketBinding() throws IOException, CommandFailedException {
         cliClient.executeCommand(command);
         page.navigateToMessaging();
         page.selectView("Connections");
@@ -120,8 +120,6 @@ public class GenericConnectorTestCase {
             client.apply(new AddSocketBinding.Builder(socketBindingName)
                     .port(ThreadLocalRandom.current().nextInt(10000, 19999))
                     .build());
-        } catch (IOException | CommandFailedException e) {
-            e.printStackTrace();
         }
 
         ConfigFragment editPanelFragment = page.getConfigFragment();

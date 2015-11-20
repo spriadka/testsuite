@@ -104,7 +104,7 @@ public class RemoteAcceptorTestCase {
 
     @Test
 
-    public void updateAcceptorSocketBinding() {
+    public void updateAcceptorSocketBinding() throws IOException, CommandFailedException {
         cliClient.executeCommand(command);
         page.navigateToMessaging();
         page.selectView("Connections");
@@ -117,8 +117,6 @@ public class RemoteAcceptorTestCase {
             client.apply(new AddSocketBinding.Builder(socketBindingName)
                     .port(ThreadLocalRandom.current().nextInt(10000, 19999))
                     .build());
-        } catch (IOException | CommandFailedException e) {
-            e.printStackTrace();
         }
 
         ConfigFragment editPanelFragment = page.getConfigFragment();
