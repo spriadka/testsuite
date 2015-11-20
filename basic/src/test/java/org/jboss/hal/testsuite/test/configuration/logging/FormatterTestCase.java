@@ -88,7 +88,7 @@ public class FormatterTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "pattern", "%d{HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n");
+        verifier.verifyAttribute(address, "pattern", "%d{HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n", 500);
     }
 
     @Test
@@ -102,7 +102,7 @@ public class FormatterTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "color-map", "fatal:black");
+        verifier.verifyAttribute(address, "color-map", "fatal:black", 500);
     }
 
     @Test

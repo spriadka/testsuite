@@ -110,7 +110,7 @@ public class DivertsTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "divert-address", "divAdd");
+        verifier.verifyAttribute(address, "divert-address", "divAdd", 500);
 
         cliClient.executeCommand(remove);
     }
@@ -131,7 +131,7 @@ public class DivertsTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "forwarding-address", "fowAdd");
+        verifier.verifyAttribute(address, "forwarding-address", "fowAdd", 500);
 
         cliClient.executeCommand(remove);
     }
@@ -151,7 +151,7 @@ public class DivertsTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "exclusive", true);
+        verifier.verifyAttribute(address, "exclusive", true, 500);
 
         cliClient.executeCommand(remove);
     }
@@ -172,7 +172,7 @@ public class DivertsTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "filter", "myFilter");
+        verifier.verifyAttribute(address, "filter", "myFilter", 500);
 
         cliClient.executeCommand(remove);
     }
@@ -193,7 +193,7 @@ public class DivertsTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "transformer-class-name", "clazz");
+        verifier.verifyAttribute(address, "transformer-class-name", "clazz", 500);
 
         cliClient.executeCommand(remove);
     }

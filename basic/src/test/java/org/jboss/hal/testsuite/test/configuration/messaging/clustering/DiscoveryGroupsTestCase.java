@@ -108,7 +108,7 @@ public class DiscoveryGroupsTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "socket-binding", "sb");
+        verifier.verifyAttribute(address, "socket-binding", "sb", 500);
 
         cliClient.executeCommand(remove);
     }
@@ -128,7 +128,7 @@ public class DiscoveryGroupsTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "refresh-timeout", "2000");
+        verifier.verifyAttribute(address, "refresh-timeout", "2000", 500);
 
         cliClient.executeCommand(remove);
     }
@@ -148,7 +148,7 @@ public class DiscoveryGroupsTestCase {
         boolean finished = editPanelFragment.save();
 
         assertFalse("Config should not be saved and closed.Negative value.", finished);
-        verifier.verifyAttribute(address, "refresh-timeout", "10000");
+        verifier.verifyAttribute(address, "refresh-timeout", "10000", 500);
 
         cliClient.executeCommand(remove);
     }
@@ -168,7 +168,7 @@ public class DiscoveryGroupsTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "initial-wait-timeout", "200");
+        verifier.verifyAttribute(address, "initial-wait-timeout", "200", 500);
 
         cliClient.executeCommand(remove);
     }
@@ -188,7 +188,7 @@ public class DiscoveryGroupsTestCase {
         boolean finished = editPanelFragment.save();
 
         assertFalse("Config should not be saved and closed.Negative value.", finished);
-        verifier.verifyAttribute(address, "initial-wait-timeout", "10000");
+        verifier.verifyAttribute(address, "initial-wait-timeout", "10000", 500);
 
         cliClient.executeCommand(remove);
     }

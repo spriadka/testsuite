@@ -87,7 +87,7 @@ public class SizeHandlerTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "named-formatter", "PATTERN");
+        verifier.verifyAttribute(address, "named-formatter", "PATTERN", 500);
 
     }
 
@@ -101,7 +101,7 @@ public class SizeHandlerTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "encoding", "UTF-8");
+        verifier.verifyAttribute(address, "encoding", "UTF-8", 500);
 
     }
 
@@ -115,7 +115,7 @@ public class SizeHandlerTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "append", false);
+        verifier.verifyAttribute(address, "append", false, 500);
 
     }
 
@@ -129,7 +129,7 @@ public class SizeHandlerTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "autoflush", false);
+        verifier.verifyAttribute(address, "autoflush", false, 500);
 
     }
 
@@ -143,7 +143,7 @@ public class SizeHandlerTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "enabled", false);
+        verifier.verifyAttribute(address, "enabled", false, 500);
 
     }
 
@@ -157,7 +157,7 @@ public class SizeHandlerTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "level" , "CONFIG");
+        verifier.verifyAttribute(address, "level" , "CONFIG", 500);
     }
 
     @Test
@@ -170,7 +170,7 @@ public class SizeHandlerTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "filter-spec", "match(\"JBEAP.*\")");
+        verifier.verifyAttribute(address, "filter-spec", "match(\"JBEAP.*\")", 500);
 
     }
 
@@ -184,7 +184,7 @@ public class SizeHandlerTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "formatter", "%d{HH:mm:ss,SSS}");
+        verifier.verifyAttribute(address, "formatter", "%d{HH:mm:ss,SSS}", 500);
 
     }
 
@@ -198,7 +198,7 @@ public class SizeHandlerTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "rotate-on-boot", true);
+        verifier.verifyAttribute(address, "rotate-on-boot", true, 500);
 
     }
 
@@ -212,7 +212,7 @@ public class SizeHandlerTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "max-backup-index", "3");
+        verifier.verifyAttribute(address, "max-backup-index", "3", 500);
     }
 
     @Test
@@ -225,7 +225,7 @@ public class SizeHandlerTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "suffix", ".yyyy-MM-dd,HH:mm");
+        verifier.verifyAttribute(address, "suffix", ".yyyy-MM-dd,HH:mm", 500);
 
     }
 
@@ -249,17 +249,17 @@ public class SizeHandlerTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "named-formatter", "undefined");
-        verifier.verifyAttribute(address, "encoding", "undefined");
-        verifier.verifyAttribute(address, "filter-spec", "undefined");
-        verifier.verifyAttribute(address, "formatter", "%d{HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n");
-        verifier.verifyAttribute(address, "suffix", "undefined");
-        verifier.verifyAttribute(address, "max-backup-index", "1");
-        verifier.verifyAttribute(address, "append", true);
-        verifier.verifyAttribute(address, "autoflush", true);
-        verifier.verifyAttribute(address, "enabled", true);
-        verifier.verifyAttribute(address, "rotate-on-boot", false);
-        verifier.verifyAttribute(address, "level", "ALL");
+        verifier.verifyAttribute(address, "named-formatter", "undefined", 500);
+        verifier.verifyAttribute(address, "encoding", "undefined", 500);
+        verifier.verifyAttribute(address, "filter-spec", "undefined", 500);
+        verifier.verifyAttribute(address, "formatter", "%d{HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n", 500);
+        verifier.verifyAttribute(address, "suffix", "undefined", 500);
+        verifier.verifyAttribute(address, "max-backup-index", "1", 500);
+        verifier.verifyAttribute(address, "append", true, 500);
+        verifier.verifyAttribute(address, "autoflush", true, 500);
+        verifier.verifyAttribute(address, "enabled", true, 500);
+        verifier.verifyAttribute(address, "rotate-on-boot", false, 500);
+        verifier.verifyAttribute(address, "level", "ALL", 500);
     }
 
     @Test

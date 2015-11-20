@@ -79,7 +79,7 @@ public class PeriodicTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "named-formatter", "undefined");
+        verifier.verifyAttribute(address, "named-formatter", "undefined", 500);
 
     }
 
@@ -92,7 +92,7 @@ public class PeriodicTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "suffix", ".yyyy-MM-dd,HH:mm");
+        verifier.verifyAttribute(address, "suffix", ".yyyy-MM-dd,HH:mm", 500);
 
     }
 
@@ -105,7 +105,7 @@ public class PeriodicTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "append", false);
+        verifier.verifyAttribute(address, "append", false, 500);
 
     }
 
@@ -118,7 +118,7 @@ public class PeriodicTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "autoflush", false);
+        verifier.verifyAttribute(address, "autoflush", false, 500);
 
     }
 
@@ -131,7 +131,7 @@ public class PeriodicTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "enabled", false);
+        verifier.verifyAttribute(address, "enabled", false, 500);
 
     }
 
@@ -144,7 +144,7 @@ public class PeriodicTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "level" , "CONFIG");
+        verifier.verifyAttribute(address, "level" , "CONFIG", 500);
     }
 
     @Test
@@ -161,11 +161,11 @@ public class PeriodicTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "named-formatter", "PATTERN");
-        verifier.verifyAttribute(address, "suffix", ".yyyy-MM-dd");
-        verifier.verifyAttribute(address, "append", true);
-        verifier.verifyAttribute(address, "autoflush", true);
-        verifier.verifyAttribute(address, "enabled", true);
-        verifier.verifyAttribute(address, "level", "ALL");
+        verifier.verifyAttribute(address, "named-formatter", "PATTERN", 500);
+        verifier.verifyAttribute(address, "suffix", ".yyyy-MM-dd", 500);
+        verifier.verifyAttribute(address, "append", true, 500);
+        verifier.verifyAttribute(address, "autoflush", true, 500);
+        verifier.verifyAttribute(address, "enabled", true, 500);
+        verifier.verifyAttribute(address, "level", "ALL", 500);
     }
 }

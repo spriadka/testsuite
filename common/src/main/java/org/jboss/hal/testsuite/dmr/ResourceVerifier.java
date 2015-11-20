@@ -23,6 +23,9 @@ package org.jboss.hal.testsuite.dmr;
 
 import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
 import org.jboss.dmr.ModelNode;
+import org.jboss.hal.testsuite.cli.Library;
+
+import java.util.Arrays;
 
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.READ_ATTRIBUTE_OPERATION;
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.READ_RESOURCE_OPERATION;
@@ -86,9 +89,17 @@ public class ResourceVerifier {
 
     /**
      * Verifies the attribute against the {@code expected} parameter using the specified timeout.
+     * Trying to get response with expected value until specified timeout expires
+     * RECOMMENDATION : It is not good to set timeout bigger than 5000 miliseconds
      */
     public void verifyAttribute(ResourceAddress address, String attribute, boolean expected, int timeout) {
-        DmrResponse response = dispatcher.execute(readAttributeOperation(address, attribute, timeout));
+        DmrResponse response = dispatcher.execute(readAttributeOperation(address, attribute));
+        long start = System.currentTimeMillis();
+
+        while (System.currentTimeMillis() <= start + timeout && expected != response.payload().asBoolean()) {
+            response = getResponseAndWait(address, attribute);
+        }
+
         assertTrue(response.isSuccessful());
         assertEquals(expected, response.payload().asBoolean());
     }
@@ -102,11 +113,20 @@ public class ResourceVerifier {
 
     /**
      * Verifies the attribute against the {@code expected} parameter using the specified timeout.
+     * Trying to get response with expected value until specified timeout expires
+     * RECOMMENDATION : It is not good to set timeout bigger than 5000 miliseconds
      */
     public void verifyAttribute(ResourceAddress address, String attribute, String[] expected, int timeout) {
-        DmrResponse response = dispatcher.execute(readAttributeOperation(address, attribute, timeout));
-        assertTrue(response.isSuccessful());
+        DmrResponse response = dispatcher.execute(readAttributeOperation(address, attribute));
+        long start = System.currentTimeMillis();
         String[] values = response.payload().asList().stream().map(ModelNode::asString).toArray(String[]::new);
+
+        while (System.currentTimeMillis() <= start + timeout && !Arrays.equals(expected, values)) {
+            response = getResponseAndWait(address, attribute);
+            values = response.payload().asList().stream().map(ModelNode::asString).toArray(String[]::new);
+        }
+
+        assertTrue(response.isSuccessful());
         assertArrayEquals(expected, values);
     }
 
@@ -119,16 +139,29 @@ public class ResourceVerifier {
 
     /**
      * Verifies the attribute against the {@code expected} parameter using the specified timeout.
+     * Trying to get response with expected value until specified timeout expires
+     * RECOMMENDATION : It is not good to set timeout bigger than 5000 miliseconds
      */
     public void verifyAttribute(ResourceAddress address, String attribute, String expected, int timeout) {
-        DmrResponse response = dispatcher.execute(readAttributeOperation(address, attribute, timeout));
+        DmrResponse response = dispatcher.execute(readAttributeOperation(address, attribute));
+        long start = System.currentTimeMillis();
+
+        while (System.currentTimeMillis() <= start + timeout && !expected.equals(response.payload().asString())) {
+            response = getResponseAndWait(address, attribute);
+        }
+
         assertTrue(response.isSuccessful());
         assertEquals(expected, response.payload().asString());
     }
 
-    private Operation readAttributeOperation(ResourceAddress address, String attribute, int timeout) {
-        return new Operation.Builder(READ_ATTRIBUTE_OPERATION, address)
-                .param(ModelDescriptionConstants.NAME, attribute)
-                .withTimeout(timeout).build();
+    private Operation readAttributeOperation(ResourceAddress address, String attribute) {
+            return new Operation.Builder(READ_ATTRIBUTE_OPERATION, address)
+                    .param(ModelDescriptionConstants.NAME, attribute).build();
+    }
+
+    private DmrResponse getResponseAndWait(ResourceAddress address, String attribute) {
+        Library.letsSleep(50);
+        DmrResponse response = dispatcher.execute(readAttributeOperation(address, attribute));
+        return response;
     }
 }

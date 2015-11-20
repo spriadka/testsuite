@@ -99,16 +99,16 @@ public class CustomFormatterTestCase {
         finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "class", "org.jboss.logmanager.formatters.PatternFormatter");
+        verifier.verifyAttribute(address, "class", "org.jboss.logmanager.formatters.PatternFormatter", 500);
 
-        verifier.verifyAttribute(address, "module", "org.jboss.logmanager");
+        verifier.verifyAttribute(address, "module", "org.jboss.logmanager", 500);
 
         page.edit();
         editPanelFragment.getEditor().text("properties", "pattern=%s%E%n");
         finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "properties", "[(\"pattern\" => \"%s%E%n\")]");
+        verifier.verifyAttribute(address, "properties", "[(\"pattern\" => \"%s%E%n\")]", 500);
 
         cliClient.executeCommand(remove);
     }

@@ -111,7 +111,7 @@ public class GenericAcceptorTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "socket-binding", "sb");
+        verifier.verifyAttribute(address, "socket-binding", "sb", 500);
 
         cliClient.executeCommand(remove);
     }
@@ -131,7 +131,7 @@ public class GenericAcceptorTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "factory-class", "fc");
+        verifier.verifyAttribute(address, "factory-class", "fc", 500);
 
         cliClient.executeCommand(remove);
     }
@@ -149,7 +149,7 @@ public class GenericAcceptorTestCase {
         boolean result = wizard.name("prop").value("test").finish();
 
         assertTrue("Property should be added and wizard closed.", result);
-        verifier.verifyAttribute(address, "params", "{\"prop\" => \"test\"}");
+        verifier.verifyAttribute(address, "params", "{\"prop\" => \"test\"}", 500);
 
         cliClient.executeCommand(remove);
     }
@@ -165,7 +165,7 @@ public class GenericAcceptorTestCase {
         ConfigPropertiesFragment properties = page.getConfig().propertiesConfig();
         properties.removeProperty("prop");
 
-        verifier.verifyAttribute(address, "params", "undefined");
+        verifier.verifyAttribute(address, "params", "undefined", 500);
 
         cliClient.executeCommand(remove);
     }

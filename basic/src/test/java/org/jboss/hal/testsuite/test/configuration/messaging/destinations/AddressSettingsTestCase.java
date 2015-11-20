@@ -108,7 +108,7 @@ public class AddressSettingsTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "dead-letter-address", "jms.queue.ExpiryQueue");
+        verifier.verifyAttribute(address, "dead-letter-address", "jms.queue.ExpiryQueue", 500);
 
         cliClient.executeCommand(remove);
     }
@@ -129,7 +129,7 @@ public class AddressSettingsTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "expiry-address", "jms.queue.DLQ");
+        verifier.verifyAttribute(address, "expiry-address", "jms.queue.DLQ", 500);
 
         cliClient.executeCommand(remove);
     }
@@ -150,7 +150,7 @@ public class AddressSettingsTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "redelivery-delay", "10");
+        verifier.verifyAttribute(address, "redelivery-delay", "10", 500);
 
         cliClient.executeCommand(remove);
     }
@@ -171,7 +171,7 @@ public class AddressSettingsTestCase {
         boolean finished = editPanelFragment.save();
 
         assertFalse("Config should not be saved and closed.Value was invalid.", finished);
-        verifier.verifyAttribute(address, "redelivery-delay", "0");
+        verifier.verifyAttribute(address, "redelivery-delay", "0", 500);
 
         cliClient.executeCommand(remove);
     }
@@ -192,7 +192,7 @@ public class AddressSettingsTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "max-delivery-attempts", "0");
+        verifier.verifyAttribute(address, "max-delivery-attempts", "0", 500);
 
         cliClient.executeCommand(remove);
     }
