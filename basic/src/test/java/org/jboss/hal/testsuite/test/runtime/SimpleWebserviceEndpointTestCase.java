@@ -2,11 +2,9 @@ package org.jboss.hal.testsuite.test.runtime;
 
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.drone.api.annotation.Drone;
-import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Shared;
-import org.jboss.hal.testsuite.cli.Library;
 import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.creaper.command.DeployCommand;
@@ -16,6 +14,7 @@ import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.fragment.MetricsAreaFragment;
 import org.jboss.hal.testsuite.fragment.MetricsFragment;
+import org.jboss.hal.testsuite.mbui.MbuiNavigation;
 import org.jboss.hal.testsuite.page.runtime.DomainRuntimeEntryPoint;
 import org.jboss.hal.testsuite.page.runtime.StandaloneRuntimeEntryPoint;
 import org.jboss.hal.testsuite.page.runtime.WebServiceEndpointsPage;
@@ -28,12 +27,9 @@ import org.junit.After;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
 import org.wildfly.extras.creaper.core.online.operations.Address;
-import org.wildfly.extras.creaper.core.online.operations.OperationException;
 import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
 
 import javax.xml.namespace.QName;
@@ -41,7 +37,6 @@ import javax.xml.ws.Service;
 import javax.xml.ws.WebServiceException;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 
 
@@ -60,6 +55,7 @@ public class SimpleWebserviceEndpointTestCase {
     public static final int DELTA = 3;
 
     private FinderNavigation navigation;
+    private MbuiNavigation mbuiNavigation;
 
     private static OnlineManagementClient managementClient = ManagementClientProvider.createOnlineManagementClient();
     private ResourceVerifier verifier;
@@ -73,6 +69,7 @@ public class SimpleWebserviceEndpointTestCase {
 
     @Before
     public void before() throws Exception {
+        mbuiNavigation = new MbuiNavigation(browser);
         File war = new File("src/test/resources/test.war");
         createDeployment().as(ZipExporter.class).exportTo((war), true);
         if (ConfigUtils.isDomain()) {
@@ -148,14 +145,14 @@ public class SimpleWebserviceEndpointTestCase {
 
         wsePage.navigateInDeploymentsMenu();
 
-        displayMBuiSubTree("subsystem");
-        displayMBuiSubTree("webservices");
-        displayMBuiSubTree("endpoint");
-        selectItemInMBuiTree("test%3ATestService");
+        mbuiNavigation.displayMBuiSubTree("subsystem");
+        mbuiNavigation.displayMBuiSubTree("webservices");
+        mbuiNavigation.displayMBuiSubTree("endpoint");
+        mbuiNavigation.selectItemInMBuiTree("test%3ATestService");
 
-        checkAndAssertMBuiValueOf("Request count", "3");
-        checkAndAssertMBuiValueOf("Response count", "3");
-        checkAndAssertMBuiValueOf("Fault count", "0");
+        mbuiNavigation.checkAndAssertMBuiValueOf("Request count", "3");
+        mbuiNavigation.checkAndAssertMBuiValueOf("Response count", "3");
+        mbuiNavigation.checkAndAssertMBuiValueOf("Fault count", "0");
     }
 
     @Test
@@ -184,18 +181,18 @@ public class SimpleWebserviceEndpointTestCase {
 
         wsePage.navigateInDeploymentsMenu();
 
-        displayMBuiSubTree("subsystem");
-        displayMBuiSubTree("webservices");
-        displayMBuiSubTree("endpoint");
-        selectItemInMBuiTree("test%3ATestService");
+        mbuiNavigation.displayMBuiSubTree("subsystem");
+        mbuiNavigation.displayMBuiSubTree("webservices");
+        mbuiNavigation.displayMBuiSubTree("endpoint");
+        mbuiNavigation.selectItemInMBuiTree("test%3ATestService");
 
-        checkAndAssertMBuiValueOf("Request count", "1");
-        checkAndAssertMBuiValueOf("Response count", "0");
-        checkAndAssertMBuiValueOf("Fault count", "1");
+        mbuiNavigation.checkAndAssertMBuiValueOf("Request count", "1");
+        mbuiNavigation.checkAndAssertMBuiValueOf("Response count", "0");
+        mbuiNavigation.checkAndAssertMBuiValueOf("Fault count", "1");
     }
 
     @Test
-    public void webServiceRequestsMetrics() throws IOException, OperationException {
+    public void webServiceRequestsMetrics() throws Exception {
         verifier.verifyExists();
 
         MetricsAreaFragment wsrMetricsArea = wsePage.getWebServiceRequestMetricsArea();
@@ -235,26 +232,6 @@ public class SimpleWebserviceEndpointTestCase {
     }
 
 
-
-    //Mbui utils
-    private void displayMBuiSubTree(String label) {
-        WebElement leftMenu = browser.findElement(By.className("split-west"));
-        // (ByJQuery.selector("(tr td:contains(subsystem)).siblings(td:has(img))"));
-        WebElement tree =  leftMenu.findElement(By.className("gwt-Tree"));
-        tree.findElement(By.xpath("//tr[.//td/div[contains(text(),'" + label + "')]]/td/img")).click();
-        Library.letsSleep(1000);
-    }
-
-    private void selectItemInMBuiTree(String name) {
-        browser.findElement(ByJQuery.selector("div.gwt-TreeItem:contains(" + name + ")")).click();
-    }
-
-    private void checkAndAssertMBuiValueOf(String label, String expectedValue) {
-        WebElement table = browser.findElement(By.className("fill-layout-width"));
-        String value = table.findElement(By.xpath("//tr[.//td/div/div[contains(text(), '" + label + "')]]/td/div/span")).getText();
-        assertEquals("Value of " + label + "is differrent in CLI and deployment MBUI table.", expectedValue, value);
-        Library.letsSleep(1000);
-    }
 }
 
 
