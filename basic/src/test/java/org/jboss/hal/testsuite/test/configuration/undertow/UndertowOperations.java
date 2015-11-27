@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.cli.DomainManager;
+import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.dmr.AddressTemplate;
 import org.jboss.hal.testsuite.dmr.DefaultContext;
 import org.jboss.hal.testsuite.dmr.Dispatcher;
@@ -11,10 +12,14 @@ import org.jboss.hal.testsuite.dmr.DmrResponse;
 import org.jboss.hal.testsuite.dmr.Operation;
 import org.jboss.hal.testsuite.dmr.ResourceAddress;
 import org.jboss.hal.testsuite.dmr.StatementContext;
+import org.jboss.hal.testsuite.creaper.command.AddSocketBinding;
 import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wildfly.extras.creaper.core.CommandFailedException;
+import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ThreadLocalRandom;
@@ -64,7 +69,7 @@ public class UndertowOperations {
         }
     }
 
-    public String createAJPListener(String httpServer) {
+    public String createAJPListener(String httpServer) throws IOException, CommandFailedException {
         String name = RandomStringUtils.randomAlphanumeric(6);
         log.info("Creating AJP listener " + name);
         Map<String, String> params = ImmutableMap.of("socket-binding", createSocketBinding());
@@ -76,7 +81,7 @@ public class UndertowOperations {
         executeRemoveAction(ajpListenerTemplate.resolve(context, httpServer, listenerName));
     }
 
-    public String createHTTPListener(String httpServer) {
+    public String createHTTPListener(String httpServer) throws IOException, CommandFailedException {
         String name = RandomStringUtils.randomAlphanumeric(6);
         Map<String, String> params = ImmutableMap.of("socket-binding", createSocketBinding());
         executeAddAction(httpListenerTemplate.resolve(context, httpServer, name), params);
@@ -87,7 +92,7 @@ public class UndertowOperations {
         executeRemoveAction(httpListenerTemplate.resolve(context, httpServer, listenerName));
     }
 
-    public String createHTTPSListener(String httpServer) {
+    public String createHTTPSListener(String httpServer) throws IOException, CommandFailedException {
         String name = RandomStringUtils.randomAlphanumeric(6);
         ResourceAddress address = httpsListenerTemplate.resolve(context, httpServer, name);
         Map <String, String> properties = ImmutableMap.of("socket-binding", createSocketBinding(), "security-realm", "ManagementRealm");
@@ -192,11 +197,13 @@ public class UndertowOperations {
         executeRemoveAction(address);
     }
 
-    public String createSocketBinding() {
+    public String createSocketBinding() throws CommandFailedException, IOException {
         String name = "UndertowSocketBinding_" + RandomStringUtils.randomAlphanumeric(6);
-        ResourceAddress address = socketBindingAddressTemplate.resolve(context, name);
-        Map<String, String> params = ImmutableMap.of("port", String.valueOf(ThreadLocalRandom.current().nextInt(1000, 9999)));
-        executeAddAction(address, params);
+        try (OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient()) {
+            client.apply(new AddSocketBinding.Builder(name)
+                    .port(ThreadLocalRandom.current().nextInt(10000, 19999))
+                    .build());
+        }
         return  name;
     }
 
