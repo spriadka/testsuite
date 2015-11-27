@@ -10,6 +10,7 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
+import org.wildfly.extras.creaper.core.CommandFailedException;
 
 import java.io.IOException;
 /**
@@ -104,14 +105,14 @@ public class TransactionsTestCase extends TransactionsTestCaseAbstract {
 
 
     @Test
-    public void editSocketBinding() throws IOException, InterruptedException {
+    public void editSocketBinding() throws IOException, InterruptedException, CommandFailedException {
         String socketBinding = operations.createSocketBinding();
         page.getConfig().switchTo("Recovery");
         editTextAndVerify(address, SOCKET_BINDING, SOCKET_BINDING_ATTR, socketBinding);
     }
 
     @Test
-    public void editStatusSocketBinding() throws IOException, InterruptedException {
+    public void editStatusSocketBinding() throws IOException, InterruptedException, CommandFailedException {
         String socketBinding = operations.createSocketBinding();
         page.getConfig().switchTo("Recovery");
         editTextAndVerify(address, STATUS_SOCKET_BINDING, STATUS_SOCKET_BINDING_ATTR, socketBinding);

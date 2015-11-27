@@ -1,9 +1,11 @@
 package org.jboss.hal.testsuite.test.configuration.transactions;
 
-import com.google.common.collect.ImmutableMap;
 import org.apache.commons.lang.RandomStringUtils;
+import org.apache.mina.util.AvailablePortFinder;
 import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.cli.DomainManager;
+import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
+import org.jboss.hal.testsuite.creaper.command.AddSocketBinding;
 import org.jboss.hal.testsuite.dmr.AddressTemplate;
 import org.jboss.hal.testsuite.dmr.DefaultContext;
 import org.jboss.hal.testsuite.dmr.Dispatcher;
@@ -12,16 +14,22 @@ import org.jboss.hal.testsuite.dmr.Operation;
 import org.jboss.hal.testsuite.dmr.ResourceAddress;
 import org.jboss.hal.testsuite.dmr.StatementContext;
 import org.jboss.hal.testsuite.util.ConfigUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.wildfly.extras.creaper.core.CommandFailedException;
+import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
-import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * @author Jan Kasik <jkasik@redhat.com>
  *         Created on 15.10.15.
  */
 public class TransactionsOperations {
+
+    private static final Logger log = LoggerFactory.getLogger(TransactionsOperations.class);
 
     private Dispatcher dispatcher;
     private StatementContext context = new DefaultContext();
@@ -32,11 +40,15 @@ public class TransactionsOperations {
         this.dispatcher = dispatcher;
     }
 
-    public String createSocketBinding() {
+    public String createSocketBinding() throws CommandFailedException, IOException {
         String name = "TransactionsOpsSB_" + RandomStringUtils.randomAlphanumeric(6);
-        ResourceAddress address = socketBindingAddressTemplate.resolve(context, name);
-        Map<String, String> params = ImmutableMap.of("port", String.valueOf(ThreadLocalRandom.current().nextInt(1000, 9999)));
-        executeAddAction(address, params);
+        try (OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient()) {
+            int port = AvailablePortFinder.getNextAvailable(1024);
+            log.info("Obtained port for socket binding '" + name + "' is " + port);
+            client.apply(new AddSocketBinding.Builder(name)
+                    .port(port)
+                    .build());
+        }
         return  name;
     }
 

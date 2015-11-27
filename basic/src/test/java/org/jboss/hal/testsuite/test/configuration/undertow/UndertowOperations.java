@@ -206,7 +206,7 @@ public class UndertowOperations {
                     .port(port)
                     .build());
         }
-        return  name;
+        return name;
     }
 
     public void removeSocketBinding(String name) {

@@ -407,7 +407,6 @@ public class AJPListenerTestCase extends UndertowTestCaseAbstract {
         ResourceAddress address = ajpListenerTemplate.resolve(context, httpServer, name);
         verifier.verifyResource(address, true);
         verifier.verifyAttribute(address, SOCKET_BINDING, socketBinding);
-        operations.removeSocketBinding(socketBinding);
     }
 
     @Test

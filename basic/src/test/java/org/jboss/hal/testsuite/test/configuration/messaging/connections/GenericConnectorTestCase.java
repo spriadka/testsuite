@@ -1,5 +1,7 @@
 package org.jboss.hal.testsuite.test.configuration.messaging.connections;
 
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.mina.util.AvailablePortFinder;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
@@ -7,6 +9,8 @@ import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.cli.CliClient;
 import org.jboss.hal.testsuite.cli.CliClientFactory;
+import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
+import org.jboss.hal.testsuite.creaper.command.AddSocketBinding;
 import org.jboss.hal.testsuite.dmr.Dispatcher;
 import org.jboss.hal.testsuite.dmr.ResourceAddress;
 import org.jboss.hal.testsuite.dmr.ResourceVerifier;
@@ -23,6 +27,12 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.wildfly.extras.creaper.core.CommandFailedException;
+import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
+
+import java.io.IOException;
 
 import static org.junit.Assert.assertTrue;
 
@@ -32,6 +42,9 @@ import static org.junit.Assert.assertTrue;
 @RunWith(Arquillian.class)
 @Category(Shared.class)
 public class GenericConnectorTestCase {
+
+    private static final Logger log = LoggerFactory.getLogger(GenericConnectorTestCase.class);
+
     private static final String NAME = "generic-text-connector";
     private static final String BINDING = "socket-binding";
     private static final String FACTORYCLASS = "factoryClass";
@@ -98,7 +111,7 @@ public class GenericConnectorTestCase {
     }
 
     @Test
-    public void updateConnectorSocketBinding() {
+    public void updateConnectorSocketBinding() throws IOException, CommandFailedException {
         cliClient.executeCommand(command);
         page.navigateToMessaging();
         page.selectView("Connections");
@@ -107,13 +120,25 @@ public class GenericConnectorTestCase {
         page.selectInTable(NAME, 0);
         page.edit();
 
+        String socketBindingName = "genericConnectorSocketBinding" + RandomStringUtils.randomAlphanumeric(5);
+
+        try (OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient()) {
+            int port = AvailablePortFinder.getNextAvailable(1024);
+            log.info("Obtained port for socket binding '" + socketBindingName + "' is " + port);
+            client.apply(new AddSocketBinding.Builder(socketBindingName)
+                    .port(port)
+                    .build());
+        }
+
         ConfigFragment editPanelFragment = page.getConfigFragment();
 
-        editPanelFragment.getEditor().text("socketBinding", "sb");
+        editPanelFragment.getEditor().text("socketBinding", socketBindingName);
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
+
         verifier.verifyAttribute(address, "socket-binding", "sb", 500);
+        verifier.verifyAttribute(address, "socket-binding", socketBindingName, 500);
 
         cliClient.executeCommand(remove);
     }
