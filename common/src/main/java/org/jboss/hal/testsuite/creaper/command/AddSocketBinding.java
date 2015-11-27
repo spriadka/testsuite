@@ -13,12 +13,15 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
+ * <p>A command for creating socket binding under default socket binding group if not specified else.</p>
+ * <p>This command <b>does not check</b> whether the port or multicast port are available!</p>
+ *
  * @author Jan Kasik <jkasik@redhat.com>
- *         Created on 19.11.15.
  */
 public class AddSocketBinding implements OnlineCommand {
 
     private final String socketBindingName;
+    private final String socketBindingGroup;
 
     private final List<String> clientMappings;
     private final Boolean fixedPort;
@@ -30,6 +33,7 @@ public class AddSocketBinding implements OnlineCommand {
 
     private AddSocketBinding(Builder builder) {
         this.socketBindingName = builder.socketBindingName;
+        this.socketBindingGroup = builder.socketBindingGroup;
         this.clientMappings = builder.clientMappings;
         this.fixedPort = builder.fixedPort;
         this.interfaceName = builder.interfaceName;
@@ -42,9 +46,15 @@ public class AddSocketBinding implements OnlineCommand {
     @Override
     public void apply(OnlineCommandContext ctx) throws IOException {
         Operations ops = new Operations(ctx.client);
+        String contextSocketBindingGroup;
 
-        String socketBindingGroup = ctx.client.options().isDomain ? "full-sockets" : "standard-sockets";
-        Address socketBindingAddress = Address.of("socket-binding-group", socketBindingGroup)
+        if (socketBindingGroup == null) {
+            contextSocketBindingGroup = ctx.client.options().isDomain ? "full-sockets" : "standard-sockets";
+        } else {
+            contextSocketBindingGroup = socketBindingGroup;
+        }
+
+        Address socketBindingAddress = Address.of("socket-binding-group", contextSocketBindingGroup)
                 .and("socket-binding", socketBindingName);
 
         if (replaceExisting) {
@@ -67,6 +77,7 @@ public class AddSocketBinding implements OnlineCommand {
     public static final class Builder {
 
         private final String socketBindingName;
+        private final String socketBindingGroup;
 
         private List<String> clientMappings;
         private Boolean fixedPort;
@@ -77,8 +88,14 @@ public class AddSocketBinding implements OnlineCommand {
         private boolean replaceExisting;
 
         public Builder(String socketBindingName) {
-            this.socketBindingName = socketBindingName;
+            this(socketBindingName, null);
         }
+
+        public Builder(String socketBindingName, String socketBindingGroup) {
+            this.socketBindingName = socketBindingName;
+            this.socketBindingGroup = socketBindingGroup;
+        }
+
 
         /**
          * Specifies zero or more client mappings for this socket binding. A client connecting to this socket should use
