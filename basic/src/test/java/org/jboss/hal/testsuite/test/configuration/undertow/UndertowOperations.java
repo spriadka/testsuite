@@ -201,7 +201,7 @@ public class UndertowOperations {
         String name = "UndertowSocketBinding_" + RandomStringUtils.randomAlphanumeric(6);
         try (OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient()) {
             client.apply(new AddSocketBinding.Builder(name)
-                    .port(ThreadLocalRandom.current().nextInt(1000, 9999))
+                    .port(ThreadLocalRandom.current().nextInt(10000, 19999))
                     .build());
         }
         return  name;
