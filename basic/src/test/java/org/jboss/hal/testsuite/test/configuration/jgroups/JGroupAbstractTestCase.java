@@ -1,6 +1,7 @@
 package org.jboss.hal.testsuite.test.configuration.jgroups;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.mina.util.AvailablePortFinder;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.InSequence;
@@ -28,11 +29,12 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.WebDriver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wildfly.extras.creaper.core.CommandFailedException;
 import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
 
 import java.io.IOException;
-import java.util.concurrent.ThreadLocalRandom;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -41,6 +43,8 @@ import static org.junit.Assert.assertTrue;
  * Created by jkasik <jkasik@redhat.com>
  */
 public class JGroupAbstractTestCase {
+
+    private static final Logger log = LoggerFactory.getLogger(JGroupAbstractTestCase.class);
 
     protected static final String PROPERTY_NAME = "URL";
     protected static final String PROPERTY_VALUE = "url";
@@ -95,8 +99,10 @@ public class JGroupAbstractTestCase {
     public void socketBindingEdit() throws IOException, CommandFailedException {
         String name = "JGroupsSocketBinding_";
         try (OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient()) {
+            int port = AvailablePortFinder.getNextAvailable(1024);
+            log.info("Obtained port for socket binding '" + name + "' is " + port);
             client.apply(new AddSocketBinding.Builder(name)
-                    .port(ThreadLocalRandom.current().nextInt(10000, 19999))
+                    .port(port)
                     .build());
         }
         checker.editTextAndAssert(page, "socketBinding", name).dmrAttribute("socket-binding").invoke();

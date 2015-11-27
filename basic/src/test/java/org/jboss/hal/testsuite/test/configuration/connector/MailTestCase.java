@@ -1,6 +1,7 @@
 package org.jboss.hal.testsuite.test.configuration.connector;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.mina.util.AvailablePortFinder;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
@@ -26,11 +27,12 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wildfly.extras.creaper.core.CommandFailedException;
 import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
 
 import java.io.IOException;
-import java.util.concurrent.ThreadLocalRandom;
 
 import static org.jboss.hal.testsuite.cli.CliConstants.MAIL_SESSION_SUBSYSTEM_ADDRESS;
 import static org.junit.Assert.assertFalse;
@@ -42,6 +44,8 @@ import static org.junit.Assert.assertTrue;
 @RunWith(Arquillian.class)
 @Category(Standalone.class)
 public class MailTestCase {
+
+    private static final Logger log = LoggerFactory.getLogger(MailTestCase.class);
 
     private static final String ATTRIBUTES = "Attributes";
     private static final String MAIL_SESSION_LABEL = "Mail Session";
@@ -153,8 +157,10 @@ public class MailTestCase {
         MailServerWizard wizard = fragment.addMailServer();
 
         try (OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient()) {
+            int port = AvailablePortFinder.getNextAvailable(1024);
+            log.info("Obtained port for socket binding '" + SOCKET_BINDING + "' is " + port);
             client.apply(new AddSocketBinding.Builder(SOCKET_BINDING)
-                    .port(ThreadLocalRandom.current().nextInt(10000, 19999))
+                    .port(port)
                     .build());
         }
 

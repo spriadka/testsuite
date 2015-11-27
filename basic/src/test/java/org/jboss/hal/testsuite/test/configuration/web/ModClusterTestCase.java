@@ -1,6 +1,7 @@
 package org.jboss.hal.testsuite.test.configuration.web;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.mina.util.AvailablePortFinder;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
@@ -20,11 +21,12 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wildfly.extras.creaper.core.CommandFailedException;
 import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
 
 import java.io.IOException;
-import java.util.concurrent.ThreadLocalRandom;
 
 import static org.jboss.hal.testsuite.cli.CliConstants.MOD_CLUSTER_CONFIG_ADDRESS;
 
@@ -34,6 +36,8 @@ import static org.jboss.hal.testsuite.cli.CliConstants.MOD_CLUSTER_CONFIG_ADDRES
 @RunWith(Arquillian.class)
 @Category(Standalone.class)
 public class ModClusterTestCase {
+
+    private static final Logger log = LoggerFactory.getLogger(ModClusterTestCase.class);
 
     private static final String SESSIONS = "Sessions";
     private static final String WEB_CONTEXTS = "Web Contexts";
@@ -92,10 +96,14 @@ public class ModClusterTestCase {
     @BeforeClass
     public static void beforeClass() throws IOException, CommandFailedException {
         try (OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient()) {
+            int port = AvailablePortFinder.getNextAvailable(1024);
+            int multicastPort = AvailablePortFinder.getNextAvailable(1024);
+            log.info("Obtained port for socket binding '" + ADVERTISE_SOCKET_VALUE + "' is " + port +
+                    ", multicast port is " + multicastPort);
             client.apply(new AddSocketBinding.Builder(ADVERTISE_SOCKET_VALUE)
-                    .port(ThreadLocalRandom.current().nextInt(10000, 19999))
+                    .port(port)
                     .multicastAddress("224.0.0.1")
-                    .multicastPort(ThreadLocalRandom.current().nextInt(10000, 19999))
+                    .multicastPort(multicastPort)
                     .build());
         }
     }

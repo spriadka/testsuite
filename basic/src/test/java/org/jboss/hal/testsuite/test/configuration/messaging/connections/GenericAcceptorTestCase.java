@@ -1,5 +1,7 @@
 package org.jboss.hal.testsuite.test.configuration.messaging.connections;
 
+import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.mina.util.AvailablePortFinder;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
@@ -25,11 +27,12 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wildfly.extras.creaper.core.CommandFailedException;
 import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
 
 import java.io.IOException;
-import java.util.concurrent.ThreadLocalRandom;
 
 import static org.junit.Assert.assertTrue;
 
@@ -39,6 +42,9 @@ import static org.junit.Assert.assertTrue;
 @RunWith(Arquillian.class)
 @Category(Shared.class)
 public class GenericAcceptorTestCase {
+
+    private static final Logger log = LoggerFactory.getLogger(GenericAcceptorTestCase.class);
+
     private static final String NAME = "generic-text-acceptor";
     private static final String BINDING = "socket-binding";
     private static final String FACTORYCLASS = "factoryClass";
@@ -112,11 +118,13 @@ public class GenericAcceptorTestCase {
         page.selectInTable(NAME, 0);
         page.edit();
 
-        String socketBindingName = "DiscGroupSocketBinding";
+        String socketBindingName = "genericAcceptorSocketBinding" + RandomStringUtils.randomAlphanumeric(5);
 
         try (OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient()) {
+            int port = AvailablePortFinder.getNextAvailable(1024);
+            log.info("Obtained port for socket binding '" + socketBindingName + "' is " + port);
             client.apply(new AddSocketBinding.Builder(socketBindingName)
-                    .port(ThreadLocalRandom.current().nextInt(10000, 19999))
+                    .port(port)
                     .build());
         }
 
