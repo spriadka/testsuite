@@ -2,16 +2,21 @@ package org.jboss.hal.testsuite.test.configuration.transactions;
 
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Shared;
+import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
+import org.jboss.hal.testsuite.creaper.command.BackupAndRestoreAttributes;
 import org.jboss.hal.testsuite.dmr.Composite;
 import org.jboss.hal.testsuite.dmr.Operation;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.wildfly.extras.creaper.core.CommandFailedException;
+import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
+import org.wildfly.extras.creaper.core.online.operations.Address;
 
 import java.io.IOException;
 
@@ -32,14 +37,20 @@ public class ProcessIDTestCase extends TransactionsTestCaseAbstract {
     private final String PROCESS_ID_SOCKET_BINDING = "process-id-socket-binding";
     private final String PROCESS_ID_SOCKET_MAX_PORTS = "process-id-socket-max-ports";
 
-    private final String PROCESS_ID_UUID_ATTR = "process-id-uuid";
-    private final String PROCESS_ID_SOCKET_BINDING_ATTR = "process-id-socket-binding";
-    private final String PROCESS_ID_SOCKET_MAX_PORTS_ATTR = "process-id-socket-max-ports";
+    private static final String PROCESS_ID_UUID_ATTR = "process-id-uuid";
+    private static final String PROCESS_ID_SOCKET_BINDING_ATTR = "process-id-socket-binding";
+    private static final String PROCESS_ID_SOCKET_MAX_PORTS_ATTR = "process-id-socket-max-ports";
 
     private static String socketBinding;
 
+    private static BackupAndRestoreAttributes backup;
+    private static OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
+
     @BeforeClass
-    public static void setUp() throws IOException, CommandFailedException {
+    public static void setUp() throws CommandFailedException, IOException {
+        backup = new BackupAndRestoreAttributes.Builder(Address.of("subsystem", "transactions"))
+                .excluded(PROCESS_ID_SOCKET_BINDING_ATTR).build();
+        client.apply(backup.backup());
         socketBinding = operations.createSocketBinding();
     }
 
@@ -49,6 +60,11 @@ public class ProcessIDTestCase extends TransactionsTestCaseAbstract {
         TransactionsOperations.reloadIfRequiredAndWaitForRunning();
         page.navigate();
         page.getConfig().switchTo("Process ID");
+    }
+
+    @AfterClass
+    public static void afterClass() throws CommandFailedException {
+        client.apply(backup.restore());
     }
 
     @Test
