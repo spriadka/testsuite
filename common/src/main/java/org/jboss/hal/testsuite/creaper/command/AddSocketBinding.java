@@ -1,5 +1,6 @@
 package org.jboss.hal.testsuite.creaper.command;
 
+import org.wildfly.extras.creaper.core.CommandFailedException;
 import org.wildfly.extras.creaper.core.online.OnlineCommand;
 import org.wildfly.extras.creaper.core.online.OnlineCommandContext;
 import org.wildfly.extras.creaper.core.online.operations.Address;
@@ -44,7 +45,7 @@ public class AddSocketBinding implements OnlineCommand {
     }
 
     @Override
-    public void apply(OnlineCommandContext ctx) throws IOException {
+    public void apply(OnlineCommandContext ctx) throws CommandFailedException, IOException {
         Operations ops = new Operations(ctx.client);
         String contextSocketBindingGroup;
 
@@ -61,7 +62,7 @@ public class AddSocketBinding implements OnlineCommand {
             try {
                 ops.removeIfExists(socketBindingAddress);
             } catch (OperationException e) {
-                throw new IOException("Failed to remove existing socket binding " + socketBindingName, e);
+                throw new CommandFailedException("Failed to remove existing socket binding " + socketBindingName, e);
             }
         }
 
