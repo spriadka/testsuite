@@ -11,7 +11,6 @@ import org.wildfly.extras.creaper.core.online.operations.Operations;
 import org.wildfly.extras.creaper.core.online.operations.ReadResourceOption;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -44,6 +43,7 @@ public class BackupAndRestoreAttributes {
             }
             Operations ops = new Operations(ctx.client);
 
+            //TODO put ATTRIBUTES_ONLY option to Creaper
             BackupAndRestoreAttributes.this.backup = ops.readResource(address, ReadResourceOption.INCLUDE_DEFAULTS, ReadResourceOption.ATTRIBUTES_ONLY).value();
         }
     };
@@ -76,7 +76,7 @@ public class BackupAndRestoreAttributes {
 
         private void addAllWaitingDependenciesToBatch(Property dependency) {
             String dependencyName = dependency.getName();
-            if (waitingForDependency.containsKey(dependencyName)) {//attribute which was written is dependency to something
+            if (waitingForDependency.containsKey(dependencyName)) { //attribute which was added to batch is dependency to something
                 addAllToBatch(waitingForDependency.get(dependencyName)); //add dependent attributes to batch
                 waitingForDependency.remove(dependencyName);
             }
@@ -87,13 +87,13 @@ public class BackupAndRestoreAttributes {
             if (BackupAndRestoreAttributes.this.backup == null) {
                 throw new CommandFailedException("There is no backup to be restored!");
             }
-            Operations ops = new Operations(ctx.client);
 
             for (Property processingAttribute : BackupAndRestoreAttributes.this.backup.asPropertyList()) {
                 String name = processingAttribute.getName();
-                if (excluded == null || !excluded.contains(name)) {//attribute is not excluded
-                    if (dependencies != null && dependencies.containsKey(name)) {//processed element depends on something
-                        if (processedAttributes.contains(dependencies.get(name))) {//dependency is already processed in batch
+
+                if (excluded == null || !excluded.contains(name)) { //attribute is not excluded
+                    if (dependencies != null && dependencies.containsKey(name)) { //processed element depends on something
+                        if (processedAttributes.contains(dependencies.get(name))) { //dependency is already processed in batch
                             addToBatch(processingAttribute);
                         } else {
                             putToWaitingQueue(dependencies.get(name), processingAttribute);
@@ -104,6 +104,8 @@ public class BackupAndRestoreAttributes {
                     }
                 }
             }
+
+            Operations ops = new Operations(ctx.client);
             ops.batch(batch);
         }
 
