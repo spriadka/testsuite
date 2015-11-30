@@ -2,6 +2,8 @@ package org.jboss.hal.testsuite.page;
 
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.ByJQuery;
+import org.jboss.hal.testsuite.finder.FinderNames;
+import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.fragment.ConfigAreaFragment;
 import org.jboss.hal.testsuite.fragment.WindowFragment;
 import org.jboss.hal.testsuite.fragment.shared.modal.AdvancedSelectBox;
@@ -10,6 +12,8 @@ import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
 import org.jboss.hal.testsuite.fragment.shared.table.ResourceTableFragment;
 import org.jboss.hal.testsuite.fragment.shared.table.ResourceTableRowFragment;
 import org.jboss.hal.testsuite.page.config.DomainConfigEntryPoint;
+import org.jboss.hal.testsuite.page.config.StandaloneConfigEntryPoint;
+import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.PropUtils;
 import org.openqa.selenium.By;
@@ -179,5 +183,18 @@ public class ConfigPage extends BasePage {
         Console.withBrowser(browser).waitUntilLoaded();
         pickProfile(profile);
         navigate();
+    }
+
+    protected FinderNavigation getSubsystemNavigation(String subsystemName) {
+        FinderNavigation navigation;
+        if (ConfigUtils.isDomain()) {
+            navigation = new FinderNavigation(browser, DomainConfigEntryPoint.class)
+                    .addAddress(FinderNames.CONFIGURATION, FinderNames.PROFILES)
+                    .addAddress(FinderNames.PROFILE, ConfigUtils.getDefaultProfile());
+        } else {
+            navigation = new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
+                    .addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS);
+        }
+        return navigation.addAddress(FinderNames.SUBSYSTEM, subsystemName);
     }
 }
