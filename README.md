@@ -47,6 +47,12 @@ E.g. `-Darq.extension.webdriver.firefox_binary=/home/user/apps/firefox-31.2.0esr
 If screenshot should be made after each test. Default is `false`.
 E.g. `-Dtake.screenshot.after.each.test=true`
 
+### Optional federation.already.enabled parameter
+
+If PicketLink federation subsystem should be enabled  for related tests 
+(otherwise it is assumed the subsystem is already configured and should not be added before tests and removed after them)
+E.g. `-Dfederation.already.enabled=true`
+
 ## Modules
 
 ### common
