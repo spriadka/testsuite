@@ -25,6 +25,7 @@ package org.jboss.hal.testsuite.creaper;
 import java.io.IOException;
 
 import org.jboss.dmr.ModelNode;
+import org.jboss.hal.testsuite.cli.Library;
 import org.junit.Assert;
 import org.wildfly.extras.creaper.core.online.ModelNodeResult;
 import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
@@ -61,6 +62,29 @@ public class ResourceVerifier {
      */
     public ResourceVerifier verifyExists() throws IOException, OperationException {
         return verifyExists("");
+    }
+
+    /**
+     * Verifies resource exists in model.
+     * @param errorMessageSuffix is intended to be used for e.g. passing related tracked issue.
+     * @param timeout - how long to wait for resource presence in milis
+     */
+    public ResourceVerifier verifyExists(String errorMessageSuffix, int timeout) throws IOException, OperationException {
+        long start = System.currentTimeMillis();
+        boolean exists = ops.exists(resourceAddress);
+        while (!exists && System.currentTimeMillis() <= start + timeout) {
+            Library.letsSleep(50);
+            exists = ops.exists(resourceAddress);
+        }
+        return verifyExists(errorMessageSuffix);
+    }
+
+    /**
+     * Verifies resource exists in model.
+     * @param timeout - how long to wait for resource presence in milis
+     */
+    public ResourceVerifier verifyExists(int timeout) throws IOException, OperationException {
+        return verifyExists("", timeout);
     }
 
     /**
