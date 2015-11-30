@@ -3,6 +3,7 @@ package org.jboss.hal.testsuite.test.configuration.undertow;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
+import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.dmr.AddressTemplate;
 import org.jboss.hal.testsuite.dmr.DefaultContext;
 import org.jboss.hal.testsuite.dmr.Dispatcher;
@@ -18,6 +19,7 @@ import org.openqa.selenium.WebDriver;
 import org.wildfly.extras.creaper.core.CommandFailedException;
 
 import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
 /**
  * @author Jan Kasik <jkasik@redhat.com>
@@ -48,47 +50,47 @@ public abstract class UndertowTestCaseAbstract {
     protected UndertowPage page;
 
     @BeforeClass
-    public static void mainSetUp() throws IOException, CommandFailedException {
+    public static void mainSetUp() throws IOException, CommandFailedException, TimeoutException, InterruptedException {
         dispatcher = new Dispatcher();
         verifier = new ResourceVerifier(dispatcher);
-        operations = new UndertowOperations(dispatcher);
+        operations = new UndertowOperations(ManagementClientProvider.createOnlineManagementClient());
         WORKER_VALUE_VALID = operations.createWorker();
         BUFFER_POOL_VALUE_VALID = operations.createBufferPool();
         SOCKET_BINDING_VALUE_VALID = operations.createSocketBinding();
     }
 
     @AfterClass
-    public static void mainTearDown() {
+    public static void mainTearDown() throws InterruptedException, IOException, TimeoutException {
         operations.removeWorker(WORKER_VALUE_VALID);
         operations.removeBufferPool(BUFFER_POOL_VALUE_VALID);
         dispatcher.close();
     }
 
-    protected void editTextAndVerify(ResourceAddress address, String identifier, String attributeName, String value) throws IOException, InterruptedException {
+    protected void editTextAndVerify(ResourceAddress address, String identifier, String attributeName, String value) throws IOException, InterruptedException, TimeoutException {
         page.getConfigFragment().editTextAndSave(identifier, value);
-        UndertowOperations.reloadIfRequiredAndWaitForRunning();
+        operations.reloadIfRequiredAndWaitForRunning();
         verifier.verifyAttribute(address, attributeName, value);
     }
 
-    protected void editTextAndVerify(ResourceAddress address, String identifier, String attributeName) throws IOException, InterruptedException {
+    protected void editTextAndVerify(ResourceAddress address, String identifier, String attributeName) throws IOException, InterruptedException, TimeoutException {
         editTextAndVerify(address, identifier, attributeName, "undertow_" + attributeName + RandomStringUtils.randomAlphabetic(4));
     }
 
-    protected void editCheckboxAndVerify(ResourceAddress address, String identifier, String attributeName, Boolean value) throws IOException, InterruptedException {
+    protected void editCheckboxAndVerify(ResourceAddress address, String identifier, String attributeName, Boolean value) throws IOException, InterruptedException, TimeoutException {
         page.getConfigFragment().editCheckboxAndSave(identifier, value);
-        UndertowOperations.reloadIfRequiredAndWaitForRunning();
+        operations.reloadIfRequiredAndWaitForRunning();
         verifier.verifyAttribute(address, attributeName, value.toString());
     }
 
-    public void selectOptionAndVerify(ResourceAddress address, String identifier, String attributeName, String value) throws IOException, InterruptedException {
+    public void selectOptionAndVerify(ResourceAddress address, String identifier, String attributeName, String value) throws IOException, InterruptedException, TimeoutException {
         page.getConfigFragment().selectOptionAndSave(identifier, value);
-        UndertowOperations.reloadIfRequiredAndWaitForRunning();
+        operations.reloadIfRequiredAndWaitForRunning();
         verifier.verifyAttribute(address, attributeName, value);
     }
 
-    public void editTextAreaAndVerify(ResourceAddress address, String identifier, String attributeName, String[] values) throws IOException, InterruptedException {
+    public void editTextAreaAndVerify(ResourceAddress address, String identifier, String attributeName, String[] values) throws IOException, InterruptedException, TimeoutException {
         page.getConfigFragment().editTextAndSave(identifier, String.join("\n", values));
-        UndertowOperations.reloadIfRequiredAndWaitForRunning();
+        operations.reloadIfRequiredAndWaitForRunning();
         verifier.verifyAttribute(address, attributeName, values);
     }
 

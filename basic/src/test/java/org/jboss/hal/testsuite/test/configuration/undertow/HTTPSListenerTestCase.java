@@ -18,8 +18,10 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.wildfly.extras.creaper.core.CommandFailedException;
+import org.wildfly.extras.creaper.core.online.operations.OperationException;
 
 import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
 /**
  * @author Jan Kasik <jkasik@redhat.com>
@@ -119,7 +121,7 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
     private static ResourceAddress address;
 
     @BeforeClass
-    public static void setUp() throws IOException, CommandFailedException {
+    public static void setUp() throws IOException, CommandFailedException, TimeoutException, InterruptedException, OperationException {
         httpServer = operations.createHTTPServer();
         httpsListener = operations.createHTTPSListener(httpServer);
         httpsListenerToBeRemoved = operations.createHTTPSListener(httpServer);
@@ -133,108 +135,108 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
     }
 
     @AfterClass
-    public static void tearDown() {
+    public static void tearDown() throws InterruptedException, CommandFailedException, TimeoutException, IOException {
         operations.removeHTTPSListener(httpServer, httpsListener);
         operations.removeHTTPServer(httpServer);
     }
 
     @Test
-    public void setAllowEncodedSlashToTrue() throws IOException, InterruptedException {
+    public void setAllowEncodedSlashToTrue() throws IOException, InterruptedException, TimeoutException {
         editCheckboxAndVerify(address, ALLOW_ENCODED_SLASH, ALLOW_ENCODED_SLASH_ATTR, true);
     }
 
     @Test
-    public void setAllowEncodedSlashToFalse() throws IOException, InterruptedException {
+    public void setAllowEncodedSlashToFalse() throws IOException, InterruptedException, TimeoutException {
         editCheckboxAndVerify(address, ALLOW_ENCODED_SLASH, ALLOW_ENCODED_SLASH_ATTR, false);
     }
 
     @Test
-    public void setAllowEqualsInCookieValueToTrue() throws IOException, InterruptedException {
+    public void setAllowEqualsInCookieValueToTrue() throws IOException, InterruptedException, TimeoutException {
         editCheckboxAndVerify(address, ALLOW_EQUALS_IN_COOKIE_VALUE, ALLOW_EQUALS_IN_COOKIE_VALUE_ATTR, true);
     }
 
     @Test
-    public void setAllowEqualsInCookieValueToFalse() throws IOException, InterruptedException {
+    public void setAllowEqualsInCookieValueToFalse() throws IOException, InterruptedException, TimeoutException {
         editCheckboxAndVerify(address, ALLOW_EQUALS_IN_COOKIE_VALUE, ALLOW_EQUALS_IN_COOKIE_VALUE_ATTR, false);
     }
 
     @Test
-    public void setAlwaysSetKeepAliveToTrue() throws IOException, InterruptedException {
+    public void setAlwaysSetKeepAliveToTrue() throws IOException, InterruptedException, TimeoutException {
         editCheckboxAndVerify(address, ALWAYS_SET_KEEP_ALIVE, ALWAYS_SET_KEEP_ALIVE_ATTR, true);
     }
 
     @Test
-    public void setAlwaysSetKeepAliveToFalse() throws IOException, InterruptedException {
+    public void setAlwaysSetKeepAliveToFalse() throws IOException, InterruptedException, TimeoutException {
         editCheckboxAndVerify(address, ALWAYS_SET_KEEP_ALIVE, ALWAYS_SET_KEEP_ALIVE_ATTR, false);
     }
 
     @Test
-    public void setBufferPipelinedDataToTrue() throws IOException, InterruptedException {
+    public void setBufferPipelinedDataToTrue() throws IOException, InterruptedException, TimeoutException {
         editCheckboxAndVerify(address, BUFFER_PIPELINED_DATA, BUFFER_PIPELINED_DATA_ATTR, true);
     }
 
     @Test
-    public void setBufferPipelinedDataToFalse() throws IOException, InterruptedException {
+    public void setBufferPipelinedDataToFalse() throws IOException, InterruptedException, TimeoutException {
         editCheckboxAndVerify(address, BUFFER_PIPELINED_DATA, BUFFER_PIPELINED_DATA_ATTR, false);
     }
 
     @Test
-    public void editBufferPool() throws IOException, InterruptedException {
+    public void editBufferPool() throws IOException, InterruptedException, TimeoutException {
         editTextAndVerify(address, BUFFER_POOL, BUFFER_POOL_ATTR, BUFFER_POOL_VALUE_VALID);
     }
 
     @Test
-    public void setDecodeURLToTrue() throws IOException, InterruptedException {
+    public void setDecodeURLToTrue() throws IOException, InterruptedException, TimeoutException {
         editCheckboxAndVerify(address, DECODE_URL, DECODE_URL_ATTR, true);
     }
 
     @Test
-    public void setDecodeURLToFalse() throws IOException, InterruptedException {
+    public void setDecodeURLToFalse() throws IOException, InterruptedException, TimeoutException {
         editCheckboxAndVerify(address, DECODE_URL, DECODE_URL_ATTR, false);
     }
 
     @Test
-    public void setEnableHTTP2ToTrue() throws IOException, InterruptedException {
+    public void setEnableHTTP2ToTrue() throws IOException, InterruptedException, TimeoutException {
         editCheckboxAndVerify(address, ENABLE_HTTP2, ENABLE_HTTP2_ATTR, true);
     }
 
     @Test
-    public void setEnableHTTP2ToFalse() throws IOException, InterruptedException {
+    public void setEnableHTTP2ToFalse() throws IOException, InterruptedException, TimeoutException {
         editCheckboxAndVerify(address, ENABLE_HTTP2, ENABLE_HTTP2_ATTR, false);
     }
 
     @Test
-    public void setEnableSPDYToTrue() throws IOException, InterruptedException {
+    public void setEnableSPDYToTrue() throws IOException, InterruptedException, TimeoutException {
         editCheckboxAndVerify(address, ENABLE_SPDY, ENABLE_SPDY_ATTR, true);
     }
 
     @Test
-    public void setEnableSPDYToFalse() throws IOException, InterruptedException {
+    public void setEnableSPDYToFalse() throws IOException, InterruptedException, TimeoutException {
         editCheckboxAndVerify(address, ENABLE_SPDY, ENABLE_SPDY_ATTR, false);
     }
 
     @Test
-    public void setEnabledToTrue() throws IOException, InterruptedException {
+    public void setEnabledToTrue() throws IOException, InterruptedException, TimeoutException {
         editCheckboxAndVerify(address, ENABLED, ENABLED_ATTR, true);
     }
 
     @Test
-    public void setEnabledToFalse() throws IOException, InterruptedException {
+    public void setEnabledToFalse() throws IOException, InterruptedException, TimeoutException {
         editCheckboxAndVerify(address, ENABLED, ENABLED_ATTR, false);
     }
 
     @Test
-    public void editEnabledCipherSuits() throws IOException, InterruptedException {
+    public void editEnabledCipherSuits() throws IOException, InterruptedException, TimeoutException {
         editTextAndVerify(address, ENABLED_CIPHER_SUITES, ENABLED_CIPHER_SUITES_ATTR);
     }
 
     @Test
-    public void editEnabledProtocols() throws IOException, InterruptedException {
+    public void editEnabledProtocols() throws IOException, InterruptedException, TimeoutException {
         editTextAndVerify(address, ENABLED_PROTOCOLS, ENABLED_PROTOCOLS_ATTR);
     }
 
     @Test
-    public void editMaxBufferedRequestSize() throws IOException, InterruptedException {
+    public void editMaxBufferedRequestSize() throws IOException, InterruptedException, TimeoutException {
         editTextAndVerify(address, MAX_BUFFERED_REQUEST_SIZE, MAX_BUFFERED_REQUEST_SIZE_ATTR, NUMERIC_VALID);
     }
 
@@ -244,7 +246,7 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
     }
 
     @Test
-    public void editMaxConnections() throws IOException, InterruptedException {
+    public void editMaxConnections() throws IOException, InterruptedException, TimeoutException {
         editTextAndVerify(address, MAX_CONNECTIONS, MAX_CONNECTIONS_ATTR, NUMERIC_VALID);
     }
 
@@ -254,7 +256,7 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
     }
 
     @Test
-    public void editMaxCookies() throws IOException, InterruptedException {
+    public void editMaxCookies() throws IOException, InterruptedException, TimeoutException {
         editTextAndVerify(address, MAX_COOKIES, MAX_COOKIES_ATTR, NUMERIC_VALID);
     }
 
@@ -264,7 +266,7 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
     }
 
     @Test
-    public void editMaxHeaderSize() throws IOException, InterruptedException {
+    public void editMaxHeaderSize() throws IOException, InterruptedException, TimeoutException {
         editTextAndVerify(address, MAX_HEADER_SIZE, MAX_HEADER_SIZE_ATTR, NUMERIC_VALID);
     }
 
@@ -274,7 +276,7 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
     }
 
     @Test
-    public void editMaxHeaders() throws IOException, InterruptedException {
+    public void editMaxHeaders() throws IOException, InterruptedException, TimeoutException {
         editTextAndVerify(address, MAX_HEADERS, MAX_HEADERS_ATTR, NUMERIC_VALID);
     }
 
@@ -284,7 +286,7 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
     }
 
     @Test
-    public void editMaxParameters() throws IOException, InterruptedException {
+    public void editMaxParameters() throws IOException, InterruptedException, TimeoutException {
         editTextAndVerify(address, MAX_PARAMETERS, MAX_PARAMETERS_ATTR, NUMERIC_VALID);
     }
 
@@ -294,7 +296,7 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
     }
 
     @Test
-    public void editMaxPostSize() throws IOException, InterruptedException {
+    public void editMaxPostSize() throws IOException, InterruptedException, TimeoutException {
         editTextAndVerify(address, MAX_POST_SIZE, MAX_POST_SIZE_ATTR, NUMERIC_VALID);
     }
 
@@ -304,7 +306,7 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
     }
 
     @Test
-    public void editNoRequestTimeout() throws IOException, InterruptedException {
+    public void editNoRequestTimeout() throws IOException, InterruptedException, TimeoutException {
         editTextAndVerify(address, NO_REQUEST_TIMEOUT, NO_REQUEST_TIMEOUT_ATTR, NUMERIC_VALID);
     }
 
@@ -314,17 +316,17 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
     }
 
     @Test
-    public void editReadTimeout() throws IOException, InterruptedException {
+    public void editReadTimeout() throws IOException, InterruptedException, TimeoutException {
         editTextAndVerify(address, READ_TIMEOUT, READ_TIMEOUT_ATTR, NUMERIC_VALID);
     }
 
     @Test
-    public void editReadTimeoutInvalid() throws IOException, InterruptedException {
+    public void editReadTimeoutInvalid() throws IOException, InterruptedException, TimeoutException {
         verifyIfErrorAppears(READ_TIMEOUT, NUMERIC_INVALID);
     }
 
     @Test
-    public void editReceiveBuffer() throws IOException, InterruptedException {
+    public void editReceiveBuffer() throws IOException, InterruptedException, TimeoutException {
         editTextAndVerify(address, RECEIVE_BUFFER, RECEIVE_BUFFER_ATTR, NUMERIC_VALID);
     }
 
@@ -334,77 +336,77 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
     }
 
     @Test
-    public void setRecordRequestStartTimeToTrue() throws IOException, InterruptedException {
+    public void setRecordRequestStartTimeToTrue() throws IOException, InterruptedException, TimeoutException {
         editCheckboxAndVerify(address, RECORD_REQUEST_START_TIME, RECORD_REQUEST_START_TIME_ATTR, true);
     }
 
     @Test
-    public void setRecordRequestStartTimeToFalse() throws IOException, InterruptedException {
+    public void setRecordRequestStartTimeToFalse() throws IOException, InterruptedException, TimeoutException {
         editCheckboxAndVerify(address, RECORD_REQUEST_START_TIME, RECORD_REQUEST_START_TIME_ATTR, false);
     }
 
     @Test
-    public void editRequestParseTimeout() throws IOException, InterruptedException {
+    public void editRequestParseTimeout() throws IOException, InterruptedException, TimeoutException {
         editTextAndVerify(address, REQUEST_PARSE_TIMEOUT, REQUEST_PARSE_TIMEOUT_ATTR, NUMERIC_VALID);
     }
 
     @Test
-    public void editRequestParseTimeoutInvalid() throws IOException, InterruptedException {
+    public void editRequestParseTimeoutInvalid() throws IOException, InterruptedException, TimeoutException {
         verifyIfErrorAppears(REQUEST_PARSE_TIMEOUT, NUMERIC_INVALID);
     }
 
     @Test
-    public void setResolvePeerAddressToTrue() throws IOException, InterruptedException {
+    public void setResolvePeerAddressToTrue() throws IOException, InterruptedException, TimeoutException {
         editCheckboxAndVerify(address, RESOLVE_PEER_ADDRESS, RESOLVE_PEER_ADDRESS_ATTR, true);
     }
 
     @Test
-    public void setResolvePeerAddressToFalse() throws IOException, InterruptedException {
+    public void setResolvePeerAddressToFalse() throws IOException, InterruptedException, TimeoutException {
         editCheckboxAndVerify(address, RESOLVE_PEER_ADDRESS, RESOLVE_PEER_ADDRESS_ATTR, false);
     }
 
     @Test
-    public void editSecurityRealm() throws IOException, InterruptedException {
+    public void editSecurityRealm() throws IOException, InterruptedException, TimeoutException {
         editTextAndVerify(address, SECURITY_REALM, SECURITY_REALM_ATTR, SECURITY_REALM_VALUE);
     }
 
     @Test
-    public void editSendBuffer() throws IOException, InterruptedException {
+    public void editSendBuffer() throws IOException, InterruptedException, TimeoutException {
         editTextAndVerify(address, SEND_BUFFER, SEND_BUFFER_ATTR, NUMERIC_VALID);
     }
 
     @Test
-    public void editSendBufferInvalid() throws IOException, InterruptedException {
+    public void editSendBufferInvalid() throws IOException, InterruptedException, TimeoutException {
         verifyIfErrorAppears(SEND_BUFFER, NUMERIC_INVALID);
     }
 
     @Test
-    public void editSocketBinding() throws IOException, InterruptedException {
+    public void editSocketBinding() throws IOException, InterruptedException, TimeoutException {
         editTextAndVerify(address, SOCKET_BINDING, SOCKET_BINDING_ATTR, SOCKET_BINDING_VALUE_VALID);
     }
 
     @Test
-    public void editSSLSessionCacheSize() throws IOException, InterruptedException {
+    public void editSSLSessionCacheSize() throws IOException, InterruptedException, TimeoutException {
         editTextAndVerify(address, SSL_SESSION_CACHE_SIZE, SSL_SESSION_CACHE_SIZE_ATTR, NUMERIC_VALID);
     }
 
     @Test
-    public void editSSLSessionCacheSizeInvalid() throws IOException, InterruptedException {
+    public void editSSLSessionCacheSizeInvalid() throws IOException, InterruptedException, TimeoutException {
         verifyIfErrorAppears(SSL_SESSION_CACHE_SIZE, NUMERIC_INVALID);
     }
 
     @Test
-    public void editSSLSessionTimeout() throws IOException, InterruptedException {
+    public void editSSLSessionTimeout() throws IOException, InterruptedException, TimeoutException {
         editTextAndVerify(address, SSL_SESSION_TIMEOUT, SSL_SESSION_TIMEOUT_ATTR, NUMERIC_VALID);
     }
 
     @Test
-    public void editSSLSessionTimeoutInvalid() throws IOException, InterruptedException {
+    public void editSSLSessionTimeoutInvalid() throws IOException, InterruptedException, TimeoutException {
         verifyIfErrorAppears(SSL_SESSION_TIMEOUT, NUMERIC_INVALID);
     }
 
     @Test
-    public void editTCPBacklog() throws IOException, InterruptedException {
+    public void editTCPBacklog() throws IOException, InterruptedException, TimeoutException {
         editTextAndVerify(address, TCP_BACKLOG, TCP_BACKLOG_ATTR, NUMERIC_VALID);
     }
 
@@ -414,37 +416,37 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
     }
 
     @Test
-    public void setTCPKeepAliveToTrue() throws IOException, InterruptedException {
+    public void setTCPKeepAliveToTrue() throws IOException, InterruptedException, TimeoutException {
         editCheckboxAndVerify(address, TCP_KEEP_ALIVE, TCP_KEEP_ALIVE_ATTR, true);
     }
 
     @Test
-    public void setTCPKeepAliveToFalse() throws IOException, InterruptedException {
+    public void setTCPKeepAliveToFalse() throws IOException, InterruptedException, TimeoutException {
         editCheckboxAndVerify(address, TCP_KEEP_ALIVE, TCP_KEEP_ALIVE_ATTR, false);
     }
 
     @Test
-    public void selectVerifyClient() throws IOException, InterruptedException {
+    public void selectVerifyClient() throws IOException, InterruptedException, TimeoutException {
         selectOptionAndVerify(address, VERIFY_CLIENT, VERIFY_CLIENT_ATTR, VERIFY_CLIENT_VALUE);
     }
 
     @Test
-    public void editURLCharset() throws IOException, InterruptedException {
+    public void editURLCharset() throws IOException, InterruptedException, TimeoutException {
         editTextAndVerify(address, URL_CHARSET, URL_CHARSET_ATTR);
     }
 
     @Test
-    public void editWorker() throws IOException, InterruptedException {
+    public void editWorker() throws IOException, InterruptedException, TimeoutException {
         editTextAndVerify(address, WORKER, WORKER_ATTR, WORKER_VALUE_VALID);
     }
 
     @Test
-    public void editWriteTimeout() throws IOException, InterruptedException {
+    public void editWriteTimeout() throws IOException, InterruptedException, TimeoutException {
         editTextAndVerify(address, WRITE_TIMEOUT, WRITE_TIMEOUT_ATTR, NUMERIC_VALID);
     }
 
     @Test
-    public void editWriteTimeoutInvalid() throws IOException, InterruptedException {
+    public void editWriteTimeoutInvalid() throws IOException, InterruptedException, TimeoutException {
         verifyIfErrorAppears(WRITE_TIMEOUT, NUMERIC_INVALID);
     }
 

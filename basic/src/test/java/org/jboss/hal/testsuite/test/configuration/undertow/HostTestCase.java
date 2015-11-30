@@ -19,6 +19,7 @@ import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
 /**
  * @author Jan Kasik <jkasik@redhat.com>
@@ -52,7 +53,7 @@ public class HostTestCase extends UndertowTestCaseAbstract {
     private static ResourceAddress address;
 
     @BeforeClass
-    public static void setUp() {
+    public static void setUp() throws InterruptedException, TimeoutException, IOException {
         httpServer = operations.createHTTPServer();
         httpServerHost = operations.createHTTPServerHost(httpServer);
         httpServerHostToBeRemoved = operations.createHTTPServerHost(httpServer);
@@ -66,33 +67,33 @@ public class HostTestCase extends UndertowTestCaseAbstract {
     }
 
     @AfterClass
-    public static void tearDown() {
+    public static void tearDown() throws InterruptedException, IOException, TimeoutException {
         operations.removeHTTPServerHostIfExists(httpServer, httpServerHost);
         operations.removeHTTPServer(httpServer);
     }
 
     @Test
-    public void editAliases() throws IOException, InterruptedException {
+    public void editAliases() throws IOException, InterruptedException, TimeoutException {
         editTextAreaAndVerify(address, ALIAS, ALIAS_ATTR, ALIAS_VALUES);
     }
 
     @Test
-    public void editDefaultResponseCode() throws IOException, InterruptedException {
+    public void editDefaultResponseCode() throws IOException, InterruptedException, TimeoutException {
         editTextAndVerify(address, DEFAULT_RESPONSE_CODE, DEFAULT_RESPONSE_CODE_ATTR, DEFAULT_RESPONSE_CODE_VALUE);
     }
 
     @Test
-    public void editDefaultWebModule() throws IOException, InterruptedException {
+    public void editDefaultWebModule() throws IOException, InterruptedException, TimeoutException {
         editTextAndVerify(address, DEFAULT_WEB_MODULE, DEFAULT_WEB_MODULE_ATTR);
     }
 
     @Test
-    public void setDisableConsoleRedirectToTrue() throws IOException, InterruptedException {
+    public void setDisableConsoleRedirectToTrue() throws IOException, InterruptedException, TimeoutException {
         editCheckboxAndVerify(address, DISABLE_CONSOLE_REDIRECT, DISABLE_CONSOLE_REDIRECT_ATTR, true);
     }
 
     @Test
-    public void setDisableConsoleRedirectToFalse() throws IOException, InterruptedException {
+    public void setDisableConsoleRedirectToFalse() throws IOException, InterruptedException, TimeoutException {
         editCheckboxAndVerify(address, DISABLE_CONSOLE_REDIRECT, DISABLE_CONSOLE_REDIRECT_ATTR, false);
     }
 
