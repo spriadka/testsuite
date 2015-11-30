@@ -15,6 +15,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wildfly.extras.creaper.commands.undertow.AddUndertowListener;
 import org.wildfly.extras.creaper.commands.undertow.RemoveUndertowListener;
+import org.wildfly.extras.creaper.commands.undertow.SslVerifyClient;
 import org.wildfly.extras.creaper.commands.undertow.UndertowListenerType;
 import org.wildfly.extras.creaper.core.CommandFailedException;
 import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
@@ -100,18 +101,19 @@ public class UndertowOperations {
         String name = RandomStringUtils.randomAlphanumeric(6);
         String securityRealm = "SecurityRealm_ssl-test";
         Address realmAddress = Address.coreService("management").and("security-realm", securityRealm);
-        if (!operations.exists(realmAddress)) {
-            Batch batch = new Batch();
-            Values sslParams = Values.empty();
-            sslParams = sslParams.and("keystore-password", "\"random\"");
-            batch.add(realmAddress);
-            batch.add(realmAddress.and("server-identity", "ssl"), sslParams);
-            batch.add(realmAddress.and("authentication", "truststore"), sslParams);
-            operations.batch(batch);
-            administration.reload();
-        }
+        Batch batch = new Batch();
+        Values sslParams = Values.empty();
+        sslParams = sslParams.and("keystore-password", "random")
+            .and("keystore-path", getClass().getClassLoader().getResource("clientkeystore").getPath())
+            .and("key-password", "random");
+        batch.add(realmAddress);
+        batch.add(realmAddress.and("server-identity", "ssl"), sslParams);
+        batch.add(realmAddress.and("authentication", "truststore"), sslParams);
+        operations.batch(batch);
         client.apply(new AddUndertowListener.HttpsBuilder(name, httpServer, createSocketBinding())
                 .securityRealm(securityRealm)
+                .verifyClient(SslVerifyClient.NOT_REQUESTED)
+                .enabled(true)
                 .build());
         administration.reloadIfRequired();
         return name;
