@@ -8,6 +8,7 @@ import org.jboss.hal.testsuite.util.Workaround;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,6 +80,12 @@ public class WindowFragment extends BaseFragment {
         closed = true;
     }
 
+    public WindowState clickSave() {
+        String label = PropUtils.get("modals.window.save.label");
+        clickButtonAndLogIfFails(label);
+        return new WindowState(this);
+    }
+
     public void cancel() {
         String label = PropUtils.get("modals.window.cancel.label");
         clickButton(label);
@@ -108,6 +115,15 @@ public class WindowFragment extends BaseFragment {
         WebElement title = root.findElement(selector);
 
         return title.getText();
+    }
+
+    protected void clickButtonAndLogIfFails(String label) {
+        try {
+            clickButton(label);
+        } catch (WebDriverException e) {
+            log.debug("Button with label \"" + label + "\" not found");
+            throw e;
+        }
     }
 
 }
