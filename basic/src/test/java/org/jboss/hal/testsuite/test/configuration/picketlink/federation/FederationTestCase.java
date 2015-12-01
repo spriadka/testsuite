@@ -68,7 +68,7 @@ public class FederationTestCase extends AbstractFederationTestCase {
         editor.text(URL, idpUrl);
 
         window.clickSave().assertClosed();
-        new ResourceVerifier(federationAddress, client).verifyExists(500);
+        new ResourceVerifier(federationAddress, client).verifyExists();
         new ResourceVerifier(idpAddress, client).verifyExists()
             .verifyAttribute(SECURITY_DOMAIN, SD_OTHER)
             .verifyAttribute(URL, idpUrl);

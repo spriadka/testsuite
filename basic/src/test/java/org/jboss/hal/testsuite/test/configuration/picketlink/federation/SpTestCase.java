@@ -76,7 +76,7 @@ public class SpTestCase extends AbstractFederationTestCase {
         editor.text(URL, url);
         wizard.assertFinish(true); // all fields have to be nonempty
 
-        resourceVerifier.verifyExists(500)
+        resourceVerifier.verifyExists()
             .verifyAttribute(URL, url)
             .verifyAttribute(SECURITY_DOMAIN, securityDomain);
     }

@@ -53,6 +53,13 @@ If PicketLink federation subsystem should be enabled  for related tests
 (otherwise it is assumed the subsystem is already configured and should not be added before tests and removed after them)
 E.g. `-Dfederation.already.enabled=true`
 
+### Optional propagate.to.model.timeout
+
+Sometimes the model resource change is not yet propagated fast enough
+even if in GUI the change seems to be already persisted.
+This parameter means how long to wait for GUI change to be propagated to model in milis.
+Default value is 500.
+
 ## Modules
 
 ### common

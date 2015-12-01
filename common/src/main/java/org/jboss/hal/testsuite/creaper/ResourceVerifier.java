@@ -26,7 +26,11 @@ import java.io.IOException;
 
 import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.cli.Library;
+import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.junit.Assert;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.wildfly.extras.creaper.core.online.Constants;
 import org.wildfly.extras.creaper.core.online.ModelNodeResult;
 import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
 import org.wildfly.extras.creaper.core.online.operations.Address;
@@ -39,19 +43,32 @@ import org.wildfly.extras.creaper.core.online.operations.Operations;
  */
 public class ResourceVerifier {
 
+    private static final Logger log = LoggerFactory.getLogger(ResourceVerifier.class);
+
     private Address resourceAddress;
     private Operations ops;
+    private int timeout;
 
     public ResourceVerifier(Address resourceAddress, OnlineManagementClient client) {
+        this(resourceAddress, client, Integer.valueOf(ConfigUtils.get("propagate.to.model.timeout", "500")));
+    }
+
+    /**
+     * @param timeout - how long to wait for GUI change to be propagated to model in milis
+     */
+    public ResourceVerifier(Address resourceAddress, OnlineManagementClient client, int timeout) {
         this.resourceAddress = resourceAddress;
         this.ops = new Operations(client);
+        this.timeout = timeout;
     }
 
     /**
      * Verifies resource exists in model.
      * @param errorMessageSuffix is intended to be used for e.g. passing related tracked issue.
      */
-    public ResourceVerifier verifyExists(String errorMessageSuffix) throws IOException, OperationException {
+    public ResourceVerifier verifyExists(String errorMessageSuffix) throws Exception {
+        waitFor(()-> ops.exists(resourceAddress));
+
         Assert.assertTrue("Resource '" + resourceAddress + "' should exist!" + errorMessageSuffix,
                 ops.exists(resourceAddress));
         return this;
@@ -60,38 +77,17 @@ public class ResourceVerifier {
     /**
      * Verifies resource exists in model.
      */
-    public ResourceVerifier verifyExists() throws IOException, OperationException {
+    public ResourceVerifier verifyExists() throws Exception {
         return verifyExists("");
-    }
-
-    /**
-     * Verifies resource exists in model.
-     * @param errorMessageSuffix is intended to be used for e.g. passing related tracked issue.
-     * @param timeout - how long to wait for resource presence in milis
-     */
-    public ResourceVerifier verifyExists(String errorMessageSuffix, int timeout) throws IOException, OperationException {
-        long start = System.currentTimeMillis();
-        boolean exists = ops.exists(resourceAddress);
-        while (!exists && System.currentTimeMillis() <= start + timeout) {
-            Library.letsSleep(50);
-            exists = ops.exists(resourceAddress);
-        }
-        return verifyExists(errorMessageSuffix);
-    }
-
-    /**
-     * Verifies resource exists in model.
-     * @param timeout - how long to wait for resource presence in milis
-     */
-    public ResourceVerifier verifyExists(int timeout) throws IOException, OperationException {
-        return verifyExists("", timeout);
     }
 
     /**
      * Verifies resource doesn't exist in model.
      * @param errorMessageSuffix is intended to be used for e.g. passing related tracked issue.
      */
-    public ResourceVerifier verifyDoesNotExist(String errorMessageSuffix) throws IOException, OperationException {
+    public ResourceVerifier verifyDoesNotExist(String errorMessageSuffix) throws Exception {
+        waitFor(()-> !ops.exists(resourceAddress));
+
         Assert.assertFalse("Resource '" + resourceAddress + "' should NOT exist! " + errorMessageSuffix,
                 ops.exists(resourceAddress));
         return this;
@@ -100,16 +96,23 @@ public class ResourceVerifier {
     /**
      * Verifies resource doesn't exist in model.
      */
-    public ResourceVerifier verifyDoesNotExist() throws IOException, OperationException {
+    public ResourceVerifier verifyDoesNotExist() throws Exception {
         return verifyDoesNotExist("");
     }
 
     /**
      * Verifies the value of attribute in model.
      * @param errorMessageSuffix is intended to be used for e.g. passing related tracked issue.
+     * @throws OperationException
      */
-    public ResourceVerifier verifyAttribute(
-            String attributeName, final ModelNode expectedValue, String errorMessageSuffix) throws IOException {
+    public ResourceVerifier verifyAttribute(String attributeName, final ModelNode expectedValue,
+            String errorMessageSuffix) throws Exception {
+        waitFor(()-> {
+            ModelNodeResult actualResult = ops.readAttribute(resourceAddress, attributeName);
+            return actualResult.isSuccess() && actualResult.hasDefinedValue()
+                    && expectedValue.equals(actualResult.value());
+        });
+
         ModelNodeResult actualResult = ops.readAttribute(resourceAddress, attributeName);
         actualResult.assertDefinedValue();
         Assert.assertEquals("Attribute value is different in model!" + errorMessageSuffix,
@@ -120,7 +123,7 @@ public class ResourceVerifier {
     /**
      * Verifies the value of attribute in model.
      */
-    public ResourceVerifier verifyAttribute(String attributeName, final ModelNode expectedValue) throws IOException {
+    public ResourceVerifier verifyAttribute(String attributeName, final ModelNode expectedValue) throws Exception {
         return verifyAttribute(attributeName, expectedValue, "");
     }
 
@@ -128,15 +131,15 @@ public class ResourceVerifier {
      * Verifies the value of attribute in model.
      * @param errorMessageSuffix is intended to be used for e.g. passing related tracked issue.
      */
-    public ResourceVerifier verifyAttribute(
-            String attributeName, String expectedValue, String errorMessageSuffix) throws IOException {
+    public ResourceVerifier verifyAttribute(String attributeName, String expectedValue, String errorMessageSuffix)
+            throws Exception {
         return verifyAttribute(attributeName, new ModelNode(expectedValue), errorMessageSuffix);
     }
 
     /**
      * Verifies the value of attribute in model.
      */
-    public ResourceVerifier verifyAttribute(String attributeName, String expectedValue) throws IOException {
+    public ResourceVerifier verifyAttribute(String attributeName, String expectedValue) throws Exception {
         return verifyAttribute(attributeName, new ModelNode(expectedValue));
     }
 
@@ -144,15 +147,15 @@ public class ResourceVerifier {
      * Verifies the value of attribute in model.
      * @param errorMessageSuffix is intended to be used for e.g. passing related tracked issue.
      */
-    public ResourceVerifier verifyAttribute(
-            String attributeName, boolean expectedValue, String errorMessageSuffix) throws IOException {
+    public ResourceVerifier verifyAttribute(String attributeName, boolean expectedValue, String errorMessageSuffix)
+            throws Exception {
         return verifyAttribute(attributeName, new ModelNode(expectedValue), errorMessageSuffix);
     }
 
     /**
      * Verifies the value of attribute in model.
      */
-    public ResourceVerifier verifyAttribute(String attributeName, boolean expectedValue) throws IOException {
+    public ResourceVerifier verifyAttribute(String attributeName, boolean expectedValue) throws Exception {
         return verifyAttribute(attributeName, new ModelNode(expectedValue));
     }
 
@@ -160,15 +163,15 @@ public class ResourceVerifier {
      * Verifies the value of attribute in model.
      * @param errorMessageSuffix is intended to be used for e.g. passing related tracked issue.
      */
-    public ResourceVerifier verifyAttribute(
-            String attributeName, int expectedValue, String errorMessageSuffix) throws IOException {
+    public ResourceVerifier verifyAttribute(String attributeName, int expectedValue, String errorMessageSuffix)
+            throws Exception {
         return verifyAttribute(attributeName, new ModelNode(expectedValue), errorMessageSuffix);
     }
 
     /**
      * Verifies the value of attribute in model.
      */
-    public ResourceVerifier verifyAttribute(String attributeName, int expectedValue) throws IOException {
+    public ResourceVerifier verifyAttribute(String attributeName, int expectedValue) throws Exception {
         return verifyAttribute(attributeName, new ModelNode(expectedValue));
     }
 
@@ -176,39 +179,61 @@ public class ResourceVerifier {
      * Verifies the value of attribute in model.
      * @param errorMessageSuffix is intended to be used for e.g. passing related tracked issue.
      */
-    public ResourceVerifier verifyAttribute(
-            String attributeName, long expectedValue, String errorMessageSuffix) throws IOException {
+    public ResourceVerifier verifyAttribute(String attributeName, long expectedValue, String errorMessageSuffix)
+            throws Exception {
         return verifyAttribute(attributeName, new ModelNode(expectedValue), errorMessageSuffix);
     }
 
     /**
      * Verifies the value of attribute in model.
      */
-    public ResourceVerifier verifyAttribute(String attributeName, long expectedValue) throws IOException {
+    public ResourceVerifier verifyAttribute(String attributeName, long expectedValue) throws Exception {
         return verifyAttribute(attributeName, new ModelNode(expectedValue));
     }
 
     /**
+     * @throws Exception
      * @throws AssertionError if resource exists and has attribute with attributeName
      * with value equal to notExpectedValue.
      */
     public ResourceVerifier verifyAttributeNotEqual(String attributeName, ModelNode notExpectedValue)
-            throws IOException {
-        ModelNodeResult actualResult = ops.readAttribute(resourceAddress, attributeName);
+            throws Exception {
+        waitFor(()-> !attributeEquals(attributeName, notExpectedValue));
+
         Assert.assertFalse(attributeName + " should not have value " + notExpectedValue,
-                actualResult.isSuccess()
-                && actualResult.hasDefinedValue()
-                && actualResult.value().equals(notExpectedValue));
+                attributeEquals(attributeName, notExpectedValue));
         return this;
+    }
+
+    private boolean attributeEquals(String attributeName, ModelNode expectedValue) throws IOException {
+        ModelNodeResult actualResult = ops.readAttribute(resourceAddress, attributeName);
+        return actualResult.isSuccess() && actualResult.hasDefinedValue() && actualResult.value().equals(expectedValue);
     }
 
     /**
      * Verifies the value of attribute in model is undefined.
      */
-    public ResourceVerifier verifyAttributeIsUndefined(String attributeName) throws IOException {
-        ModelNodeResult actualResult = ops.readAttribute(resourceAddress, attributeName);
-        actualResult.assertNotDefinedValue();
+    public ResourceVerifier verifyAttributeIsUndefined(String attributeName) throws Exception {
+        waitFor(()-> {
+            ModelNodeResult actualResult = ops.readAttribute(resourceAddress, attributeName);
+            return actualResult.isSuccess() && !actualResult.hasDefined(Constants.RESULT);
+        });
+
+        ops.readAttribute(resourceAddress, attributeName).assertNotDefinedValue();
         return this;
+    }
+
+    private void waitFor(PropagationChecker checker) throws Exception {
+        long start = System.currentTimeMillis();
+        while (! checker.finallyPropagated() && System.currentTimeMillis() <= start + timeout) {
+            log.debug("Not yet propagated therefore waiting.");
+            Library.letsSleep(100);
+        }
+    }
+
+    @FunctionalInterface
+    private interface PropagationChecker {
+        boolean finallyPropagated() throws Exception;
     }
 
 }

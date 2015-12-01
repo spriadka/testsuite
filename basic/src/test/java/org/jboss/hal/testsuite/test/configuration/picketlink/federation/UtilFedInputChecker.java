@@ -77,12 +77,12 @@ public final class UtilFedInputChecker {
         adminOps.reloadIfRequired();
     }
 
-    void andVerifySuccess() throws IOException {
+    void andVerifySuccess() throws Exception {
         Assert.assertTrue("Configuration should switch into read-only mode.", saved);
         new ResourceVerifier(resourceAddress, client).verifyAttribute(dmrAttrName, attrValue);
     }
 
-    void andVerifyFailure() throws IOException {
+    void andVerifyFailure() throws Exception {
         Assert.assertFalse("Configuration should NOT switch into read-only mode.", saved);
         new ResourceVerifier(resourceAddress, client).verifyAttributeNotEqual(dmrAttrName, attrValue);
     }
