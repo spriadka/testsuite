@@ -13,6 +13,7 @@ import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
 /**
  * @author Jan Kasik <jkasik@redhat.com>
@@ -39,7 +40,7 @@ public class ServletWebSocketsTestCase extends UndertowTestCaseAbstract {
     private static ResourceAddress address;
 
     @BeforeClass
-    public static void setUp() {
+    public static void setUp() throws InterruptedException, IOException, TimeoutException {
         servletContainer = operations.createServletContainer();
         address = servletContainerTemplate.append("/setting=websockets").resolve(context, servletContainer);
     }
@@ -51,27 +52,27 @@ public class ServletWebSocketsTestCase extends UndertowTestCaseAbstract {
     }
 
     @AfterClass
-    public static void tearDown() {
+    public static void tearDown() throws InterruptedException, IOException, TimeoutException {
         operations.removeServletContainer(servletContainer);
     }
 
     @Test
-    public void editBufferPool() throws IOException, InterruptedException {
+    public void editBufferPool() throws IOException, InterruptedException, TimeoutException {
         editTextAndVerify(address, BUFFER_POOL, BUFFER_POOL_ATTR, BUFFER_POOL_VALUE_VALID);
     }
 
     @Test
-    public void setDispatchToWorkerToTrue() throws IOException, InterruptedException {
+    public void setDispatchToWorkerToTrue() throws IOException, InterruptedException, TimeoutException {
         editCheckboxAndVerify(address, DISPATCH_TO_WORKER, DISPATCH_TO_WORKER_ATTR, true);
     }
 
     @Test
-    public void setDispatchToWorkerToFalse() throws IOException, InterruptedException {
+    public void setDispatchToWorkerToFalse() throws IOException, InterruptedException, TimeoutException {
         editCheckboxAndVerify(address, DISPATCH_TO_WORKER, DISPATCH_TO_WORKER_ATTR, false);
     }
 
     @Test
-    public void editWorker() throws IOException, InterruptedException {
+    public void editWorker() throws IOException, InterruptedException, TimeoutException {
         editTextAndVerify(address, WORKER, WORKER_ATTR, WORKER_VALUE_VALID);
     }
 }

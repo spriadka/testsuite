@@ -13,6 +13,7 @@ import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
 /**
  * @author Jan Kasik <jkasik@redhat.com>
@@ -45,7 +46,7 @@ public class ServletCookiesTestCase extends UndertowTestCaseAbstract {
     private static ResourceAddress address;
 
     @BeforeClass
-    public static void setUp() {
+    public static void setUp() throws InterruptedException, IOException, TimeoutException {
         servletContainer = operations.createServletContainer();
         address = servletContainerTemplate.append("/setting=session-cookie").resolve(context, servletContainer);
     }
@@ -57,52 +58,52 @@ public class ServletCookiesTestCase extends UndertowTestCaseAbstract {
     }
 
     @AfterClass
-    public static void tearDown() {
+    public static void tearDown() throws InterruptedException, IOException, TimeoutException {
         operations.removeServletContainer(servletContainer);
     }
 
     @Test
-    public void editComment() throws IOException, InterruptedException {
+    public void editComment() throws IOException, InterruptedException, TimeoutException {
         editTextAndVerify(address, COMMENT, COMMENT_ATTR);
     }
 
     @Test
-    public void editDomain() throws IOException, InterruptedException {
+    public void editDomain() throws IOException, InterruptedException, TimeoutException {
         editTextAndVerify(address, DOMAIN, DOMAIN_ATTR);
     }
 
     @Test
-    public void setHTTPOnlyToTrue() throws IOException, InterruptedException {
+    public void setHTTPOnlyToTrue() throws IOException, InterruptedException, TimeoutException {
         editCheckboxAndVerify(address, HTTP_ONLY, HTTP_ONLY_ATTR, true);
     }
 
     @Test
-    public void setHTTPOnlyToFalse() throws IOException, InterruptedException {
+    public void setHTTPOnlyToFalse() throws IOException, InterruptedException, TimeoutException {
         editCheckboxAndVerify(address, HTTP_ONLY, HTTP_ONLY_ATTR, false);
     }
 
     @Test
-    public void editMaxAge() throws IOException, InterruptedException {
+    public void editMaxAge() throws IOException, InterruptedException, TimeoutException {
         editTextAndVerify(address, MAX_AGE, MAX_AGE_ATTR, NUMERIC_VALID);
     }
 
     @Test
-    public void editMaxAgeInvalid() throws IOException, InterruptedException {
+    public void editMaxAgeInvalid() throws IOException, InterruptedException, TimeoutException {
         verifyIfErrorAppears(MAX_AGE, NUMERIC_INVALID);
     }
 
     @Test
-    public void editName() throws IOException, InterruptedException {
+    public void editName() throws IOException, InterruptedException, TimeoutException {
         editTextAndVerify(address, NAME, NAME_ATTR);
     }
 
     @Test
-    public void setSecureToTrue() throws IOException, InterruptedException {
+    public void setSecureToTrue() throws IOException, InterruptedException, TimeoutException {
         editCheckboxAndVerify(address, SECURE, SECURE_ATTR, true);
     }
 
     @Test
-    public void setSecureToFalse() throws IOException, InterruptedException {
+    public void setSecureToFalse() throws IOException, InterruptedException, TimeoutException {
         editCheckboxAndVerify(address, SECURE, SECURE_ATTR, false);
     }
 }

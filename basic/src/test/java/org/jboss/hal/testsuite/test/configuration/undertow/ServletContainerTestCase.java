@@ -13,6 +13,7 @@ import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
 /**
  * @author Jan Kasik <jkasik@redhat.com>
@@ -56,7 +57,7 @@ public class ServletContainerTestCase extends UndertowTestCaseAbstract {
     private static ResourceAddress address;
 
     @BeforeClass
-    public static void setUp() {
+    public static void setUp() throws InterruptedException, IOException, TimeoutException {
         servletContainer = operations.createServletContainer();
         address = servletContainerTemplate.resolve(context, servletContainer);
     }
@@ -68,87 +69,87 @@ public class ServletContainerTestCase extends UndertowTestCaseAbstract {
     }
 
     @AfterClass
-    public static void tearDown() {
+    public static void tearDown() throws InterruptedException, IOException, TimeoutException {
         operations.removeServletContainer(servletContainer);
     }
 
     @Test
-    public void setAllowNonStandardWrappersToTrue() throws IOException, InterruptedException {
+    public void setAllowNonStandardWrappersToTrue() throws IOException, InterruptedException, TimeoutException {
         editCheckboxAndVerify(address, ALLOW_NON_STANDARD_WRAPPERS, ALLOW_NON_STANDARD_WRAPPERS_ATTR, true);
     }
 
     @Test
-    public void setAllowNonStandardWrappersToFalse() throws IOException, InterruptedException {
+    public void setAllowNonStandardWrappersToFalse() throws IOException, InterruptedException, TimeoutException {
         editCheckboxAndVerify(address, ALLOW_NON_STANDARD_WRAPPERS, ALLOW_NON_STANDARD_WRAPPERS_ATTR, false);
     }
 
     @Test
-    public void editDefaultBufferCache() throws IOException, InterruptedException {
+    public void editDefaultBufferCache() throws IOException, InterruptedException, TimeoutException {
         editTextAndVerify(address, DEFAULT_BUFFER_CACHE, DEFAULT_BUFFER_CACHE_ATTR, BUFFER_CACHE_VALUE_VALID);
     }
 
     @Test
-    public void editDefaultEncoding() throws IOException, InterruptedException {
+    public void editDefaultEncoding() throws IOException, InterruptedException, TimeoutException {
         editTextAndVerify(address, DEFAULT_ENCODING, DEFAULT_ENCODING_ATTR);
     }
 
     @Test
-    public void editDefaultSessionTimeout() throws IOException, InterruptedException {
+    public void editDefaultSessionTimeout() throws IOException, InterruptedException, TimeoutException {
         editTextAndVerify(address, DEFAULT_SESSION_TIMEOUT, DEFAULT_SESSION_TIMEOUT_ATTR);
     }
 
     @Test
-    public void setDirectoryListingToTrue() throws IOException, InterruptedException {
+    public void setDirectoryListingToTrue() throws IOException, InterruptedException, TimeoutException {
         editCheckboxAndVerify(address, DIRECTORY_LISTING, DIRECTORY_LISTING_ATTR, true);
     }
 
     @Test
-    public void setDirectoryListingToFalse() throws IOException, InterruptedException {
+    public void setDirectoryListingToFalse() throws IOException, InterruptedException, TimeoutException {
         editCheckboxAndVerify(address, DIRECTORY_LISTING, DIRECTORY_LISTING_ATTR, false);
     }
 
     @Test
-    public void setDisableCachingForSecuredPagesToTrue() throws IOException, InterruptedException {
+    public void setDisableCachingForSecuredPagesToTrue() throws IOException, InterruptedException, TimeoutException {
         editCheckboxAndVerify(address, DISABLE_CACHING_FOR_SECURED_PAGES, DISABLE_CACHING_FOR_SECURED_PAGES_ATTR, true);
     }
 
     @Test
-    public void setDisableCachingForSecuredPagesToFalse() throws IOException, InterruptedException {
+    public void setDisableCachingForSecuredPagesToFalse() throws IOException, InterruptedException, TimeoutException {
         editCheckboxAndVerify(address, DISABLE_CACHING_FOR_SECURED_PAGES, DISABLE_CACHING_FOR_SECURED_PAGES_ATTR, false);
     }
 
     @Test
-    public void setIgnoreFlushToTrue() throws IOException, InterruptedException {
+    public void setIgnoreFlushToTrue() throws IOException, InterruptedException, TimeoutException {
         editCheckboxAndVerify(address, IGNORE_FLUSH, IGNORE_FLUSH_ATTR, true);
     }
 
     @Test
-    public void setIgnoreFlushToFalse() throws IOException, InterruptedException {
+    public void setIgnoreFlushToFalse() throws IOException, InterruptedException, TimeoutException {
         editCheckboxAndVerify(address, IGNORE_FLUSH, IGNORE_FLUSH_ATTR, false);
     }
 
     @Test
-    public void setEagerFilterInitializationToTrue() throws IOException, InterruptedException {
+    public void setEagerFilterInitializationToTrue() throws IOException, InterruptedException, TimeoutException {
         editCheckboxAndVerify(address, EAGER_FILTER_INITIALIZATION, EAGER_FILTER_INITIALIZATION_ATTR, true);
     }
 
     @Test
-    public void setEagerFilterInitializationToFalse() throws IOException, InterruptedException {
+    public void setEagerFilterInitializationToFalse() throws IOException, InterruptedException, TimeoutException {
         editCheckboxAndVerify(address, EAGER_FILTER_INITIALIZATION, EAGER_FILTER_INITIALIZATION_ATTR, false);
     }
 
     @Test
-    public void selectStackTraceOnError() throws IOException, InterruptedException {
+    public void selectStackTraceOnError() throws IOException, InterruptedException, TimeoutException {
         selectOptionAndVerify(address, STACK_TRACE_ON_ERROR, STACK_TRACE_ON_ERROR_ATTR, STACK_TRACE_ON_ERROR_VALUE);
     }
 
     @Test
-    public void setUseListenerEncodingToTrue() throws IOException, InterruptedException {
+    public void setUseListenerEncodingToTrue() throws IOException, InterruptedException, TimeoutException {
         editCheckboxAndVerify(address, USE_LISTENER_ENCODING, USE_LISTENER_ENCODING_ATTR, true);
     }
 
     @Test
-    public void setUseListenerEncodingToFalse() throws IOException, InterruptedException {
+    public void setUseListenerEncodingToFalse() throws IOException, InterruptedException, TimeoutException {
         editCheckboxAndVerify(address, USE_LISTENER_ENCODING, USE_LISTENER_ENCODING_ATTR, false);
     }
 }

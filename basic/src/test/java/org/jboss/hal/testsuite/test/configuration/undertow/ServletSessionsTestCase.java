@@ -13,6 +13,7 @@ import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 
 import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
 /**
  * @author Jan Kasik <jkasik@redhat.com>
@@ -38,7 +39,7 @@ public class ServletSessionsTestCase extends UndertowTestCaseAbstract {
     private static ResourceAddress address;
 
     @BeforeClass
-    public static void setUp() {
+    public static void setUp() throws InterruptedException, IOException, TimeoutException {
         servletContainer = operations.createServletContainer();
         address = servletContainerTemplate.append("/setting=persistent-sessions").resolve(context, servletContainer);
     }
@@ -50,17 +51,17 @@ public class ServletSessionsTestCase extends UndertowTestCaseAbstract {
     }
 
     @AfterClass
-    public static void tearDown() {
+    public static void tearDown() throws InterruptedException, IOException, TimeoutException {
         operations.removeServletContainer(servletContainer);
     }
 
     @Test
-    public void editPath() throws IOException, InterruptedException {
+    public void editPath() throws IOException, InterruptedException, TimeoutException {
         editTextAndVerify(address, PATH, PATH_ATTR);
     }
 
     @Test
-    public void editRelativeTo() throws IOException, InterruptedException {
+    public void editRelativeTo() throws IOException, InterruptedException, TimeoutException {
         editTextAndVerify(address, RELATIVE_TO, RELATIVE_TO_ATTR);
     }
 
