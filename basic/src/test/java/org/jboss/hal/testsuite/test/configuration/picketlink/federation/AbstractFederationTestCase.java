@@ -49,7 +49,7 @@ import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
 public abstract class AbstractFederationTestCase {
 
     protected static final OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
-    protected static final UtilFedOperations federationOps = new UtilFedOperations(client);
+    protected static final FederationOperations federationOps = new FederationOperations(client);
     protected static final Administration adminOps = new Administration(client);
     protected UtilFedName name = new UtilFedName(this);
 
@@ -88,11 +88,10 @@ public abstract class AbstractFederationTestCase {
         federationOps.removeFederation(name.getFederation());
     }
 
-    protected final UtilFedInputChecker edit(
-            InputType inputType, Address resourceAddress, String dmrAttrName, ModelNode attrValue)
-            throws IOException, InterruptedException, TimeoutException {
-        return new UtilFedInputChecker(
-                client, page.getConfigFragment(), inputType, resourceAddress, dmrAttrName, attrValue);
+    protected final UtilFedInputChecker edit(InputType inputType, Address resourceAddress, String dmrAttrName,
+            ModelNode attrValue) throws IOException, InterruptedException, TimeoutException {
+        return new UtilFedInputChecker(client, page.getConfigFragment(), inputType, resourceAddress, dmrAttrName,
+                attrValue);
     }
 
     /**

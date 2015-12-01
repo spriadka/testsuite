@@ -47,8 +47,7 @@ public final class UtilFedInputChecker {
     private ModelNode attrValue;
     private boolean saved;
 
-    UtilFedInputChecker(
-            OnlineManagementClient client, ConfigFragment config, InputType inputType,
+    UtilFedInputChecker(OnlineManagementClient client, ConfigFragment config, InputType inputType,
             Address resourceAddress, String dmrAttrName, ModelNode attrValue)
             throws IOException, InterruptedException, TimeoutException {
         this.client = client;

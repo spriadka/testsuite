@@ -37,9 +37,9 @@ import org.wildfly.extras.creaper.core.online.operations.Values;
 import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
 
 /**
- * Created by pjelinek on Nov 16, 2015
+ * Abstraction for CLI operations related to PicketLink Federation subsystem.
  */
-public final class UtilFedOperations {
+public final class FederationOperations {
 
     private static final Address SUBSYSTEM_ADDRESS = Address.subsystem("picketlink-federation");
 
@@ -49,21 +49,22 @@ public final class UtilFedOperations {
 
     private Administration adminOps;
 
-    public UtilFedOperations(OnlineManagementClient client) {
+    public FederationOperations(OnlineManagementClient client) {
         this.ops = new Operations(client);
         this.picketlinkOps = new PicketlinkOperations(client);
         this.adminOps = new Administration(client);
     }
 
     public void addSubsystem() throws IOException, InterruptedException, TimeoutException {
-        picketlinkOps.enableExtension(false);
+        picketlinkOps.enableExtension();
         ops.add(SUBSYSTEM_ADDRESS);
         adminOps.reloadIfRequired();
     }
 
     public void removeSubsystem() throws IOException, InterruptedException, TimeoutException {
         ops.remove(SUBSYSTEM_ADDRESS);
-        picketlinkOps.disableExtension(true);
+        picketlinkOps.disableExtension();
+        adminOps.reloadIfRequired();
     }
 
     public void addFederation(String federationName) throws IOException, OperationException {
@@ -92,8 +93,8 @@ public final class UtilFedOperations {
                 .assertSuccess();
     }
 
-    public void addKeyStore(
-            String federationName, String file, String pass, String keyAlias, String keyPass) throws IOException {
+    public void addKeyStore(String federationName, String file, String pass, String keyAlias, String keyPass)
+            throws IOException {
         ops.add(getKeyStoreAddress(federationName),
                 Values.of(KS_FILE, file).and(KS_PASS, pass).and(KS_KEY_ALIAS, keyAlias).and(KS_KEY_PASS, keyPass))
                 .assertSuccess();

@@ -58,12 +58,12 @@ public class WizardWindow extends WindowFragment {
 
     private void clickDoneButton() {
         String label = PropUtils.get("modals.wizard.done.label");
-        clickButtonAndLogIfFails(label);
+        clickButton(label);
     }
 
     private void clickFinishButton() {
         String label = PropUtils.get("modals.wizard.finish.label");
-        clickButtonAndLogIfFails(label);
+        clickButton(label);
     }
 
     /**

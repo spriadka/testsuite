@@ -37,6 +37,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
+import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.OperationException;
 
 /**
@@ -51,8 +52,8 @@ public class SpSAMLHandlerTestCase extends AbstractFederationTestCase {
         spName = name.getSp(),
         handlerName = name.get(Key.HANDLER),
         className = name.get(Key.CLASS_NAME);
-    private ResourceVerifier resourceVerifier = new ResourceVerifier(
-            federationOps.getSpSAMLHandlerAddress(federationName, spName, handlerName), client);
+    private Address handlerAddress = federationOps.getSpSAMLHandlerAddress(federationName, spName, handlerName);
+    private ResourceVerifier resourceVerifier = new ResourceVerifier(handlerAddress, client);
 
     @Before
     public void before() throws IOException, OperationException {

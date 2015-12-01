@@ -23,6 +23,7 @@
 package org.jboss.hal.testsuite.test.configuration.picketlink.federation;
 
 import static org.jboss.hal.testsuite.test.configuration.picketlink.federation.UtilFedName.*;
+
 import java.io.IOException;
 
 import org.jboss.arquillian.junit.Arquillian;
@@ -35,6 +36,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
+import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.OperationException;
 
 /**
@@ -49,8 +51,8 @@ public class IdpSAMLHandlerTestCase extends AbstractFederationTestCase {
         idpName = name.getIdp(),
         handlerName = name.get(Key.HANDLER),
         className = name.get(Key.CLASS_NAME);
-    private ResourceVerifier resourceVerifier = new ResourceVerifier(
-            federationOps.getIdpSAMLHandlerAddress(federationName, idpName, handlerName), client);
+    private Address handlerAddress = federationOps.getIdpSAMLHandlerAddress(federationName, idpName, handlerName);
+    private ResourceVerifier resourceVerifier = new ResourceVerifier(handlerAddress, client);
 
     @Before
     public void before() throws IOException, OperationException {

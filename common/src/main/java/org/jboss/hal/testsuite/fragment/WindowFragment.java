@@ -82,7 +82,7 @@ public class WindowFragment extends BaseFragment {
 
     public WindowState clickSave() {
         String label = PropUtils.get("modals.window.save.label");
-        clickButtonAndLogIfFails(label);
+        clickButton(label);
         return new WindowState(this);
     }
 
@@ -97,10 +97,14 @@ public class WindowFragment extends BaseFragment {
     public void clickButton(String label) {
         log.debug("Trying to click \"" + label + "\" button in current window");
         By selector = ByJQuery.selector("button:contains(" + label + "):visible");
-        Graphene.waitGui().until().element(selector).is().visible();
-        WebElement button = root.findElement(selector);
-
-        button.click();
+        try {
+            Graphene.waitGui().until().element(selector).is().visible();
+            WebElement button = root.findElement(selector);
+            button.click();
+        } catch (WebDriverException e) {
+            log.debug("Button with label \"" + label + "\" not found");
+            throw e;
+        }
     }
 
     public String getHeadTitle() {
@@ -115,15 +119,6 @@ public class WindowFragment extends BaseFragment {
         WebElement title = root.findElement(selector);
 
         return title.getText();
-    }
-
-    protected void clickButtonAndLogIfFails(String label) {
-        try {
-            clickButton(label);
-        } catch (WebDriverException e) {
-            log.debug("Button with label \"" + label + "\" not found");
-            throw e;
-        }
     }
 
 }
