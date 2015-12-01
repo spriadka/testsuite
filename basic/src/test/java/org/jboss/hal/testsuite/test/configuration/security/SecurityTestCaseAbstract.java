@@ -13,7 +13,6 @@ import org.jboss.hal.testsuite.dmr.ResourceVerifier;
 import org.jboss.hal.testsuite.dmr.StatementContext;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.page.config.SecurityPage;
-import org.jboss.hal.testsuite.test.configuration.undertow.UndertowOperations;
 import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -90,7 +89,7 @@ public abstract class SecurityTestCaseAbstract {
         }
         String inner = String.join(",", properties);
         String response = (ConfigUtils.isDomain()) ? "[" + inner + "]" : "{" + inner + "}" ;
-        UndertowOperations.reloadIfRequiredAndWaitForRunning();
+        reloadIfRequiredAndWaitForRunning();
         verifier.verifyAttribute(address, attributeName, response);
     }
 
