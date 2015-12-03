@@ -37,6 +37,7 @@ public interface FinderNames {
     String MONITOR = "Monitor";
     String PROFILE = "Profile";
     String PROFILES = "Profiles";
+    String REMOVE = "Remove";
     String SERVER = "Server";
     String SERVER_GROUP = "Server Group";
     String SERVER_GROUPS = "Server Groups";

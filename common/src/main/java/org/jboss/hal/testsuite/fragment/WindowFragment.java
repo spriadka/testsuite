@@ -8,6 +8,7 @@ import org.jboss.hal.testsuite.util.Workaround;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,6 +80,12 @@ public class WindowFragment extends BaseFragment {
         closed = true;
     }
 
+    public WindowState clickSave() {
+        String label = PropUtils.get("modals.window.save.label");
+        clickButton(label);
+        return new WindowState(this);
+    }
+
     public void cancel() {
         String label = PropUtils.get("modals.window.cancel.label");
         clickButton(label);
@@ -90,10 +97,14 @@ public class WindowFragment extends BaseFragment {
     public void clickButton(String label) {
         log.debug("Trying to click \"" + label + "\" button in current window");
         By selector = ByJQuery.selector("button:contains(" + label + "):visible");
-        Graphene.waitGui().until().element(selector).is().visible();
-        WebElement button = root.findElement(selector);
-
-        button.click();
+        try {
+            Graphene.waitGui().until().element(selector).is().visible();
+            WebElement button = root.findElement(selector);
+            button.click();
+        } catch (WebDriverException e) {
+            log.debug("Button with label \"" + label + "\" not found");
+            throw e;
+        }
     }
 
     public String getHeadTitle() {

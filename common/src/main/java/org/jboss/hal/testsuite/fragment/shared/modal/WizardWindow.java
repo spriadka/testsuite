@@ -40,7 +40,7 @@ public class WizardWindow extends WindowFragment {
                 clickDoneButton();
             }
             catch (WebDriverException ex) {
-                clickSaveButton();
+                clickSave();
             }
         }
 
@@ -58,26 +58,12 @@ public class WizardWindow extends WindowFragment {
 
     private void clickDoneButton() {
         String label = PropUtils.get("modals.wizard.done.label");
-        clickButtonAndLogIfFails(label);
+        clickButton(label);
     }
 
     private void clickFinishButton() {
         String label = PropUtils.get("modals.wizard.finish.label");
-        clickButtonAndLogIfFails(label);
-    }
-
-    private void clickSaveButton() {
-        String label = PropUtils.get("modals.window.save.label");
-        clickButtonAndLogIfFails(label);
-    }
-
-    private void clickButtonAndLogIfFails(String label) {
-        try {
-            clickButton(label);
-        } catch (WebDriverException e) {
-            log.debug("Button with label \"" + label + "\" not found");
-            throw e;
-        }
+        clickButton(label);
     }
 
     /**

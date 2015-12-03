@@ -112,6 +112,7 @@ public abstract class BasePage {
         WebElement subTab = getSubTab(identifier);
         subTab.click();
         Graphene.waitGui().until().element(subTab).attribute("class").contains("link-bar-active");
+        Console.withBrowser(browser).waitUntilLoaded();
     }
 
     private WebElement getSubTab(String identifier) {

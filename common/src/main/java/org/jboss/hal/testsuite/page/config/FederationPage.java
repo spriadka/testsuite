@@ -1,47 +1,63 @@
 package org.jboss.hal.testsuite.page.config;
 
-import org.jboss.arquillian.graphene.page.Location;
-import org.jboss.hal.testsuite.fragment.config.federation.FederationConfigArea;
-import org.jboss.hal.testsuite.fragment.config.federation.IdentityProviderConfigArea;
-import org.jboss.hal.testsuite.fragment.config.federation.KeyStoreConfigArea;
-import org.jboss.hal.testsuite.fragment.config.federation.ServiceProviderConfigArea;
-import org.jboss.hal.testsuite.page.ConfigPage;
-import org.jboss.hal.testsuite.util.PropUtils;
+import org.jboss.hal.testsuite.finder.Application;
+import org.jboss.hal.testsuite.finder.FinderNames;
+import org.jboss.hal.testsuite.fragment.ConfigAreaFragment;
+import org.jboss.hal.testsuite.fragment.ConfigFragment;
+import org.jboss.hal.testsuite.fragment.WindowState;
+import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
+import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
+import org.jboss.hal.testsuite.util.Console;
 
 /**
  * @author jcechace
  */
-@Location("#picletlink-federation")
-public class FederationPage extends ConfigPage {
-    @Override
-    public FederationConfigArea getConfig() {
-        return getConfig(FederationConfigArea.class);
+public class FederationPage extends ConfigurationPage {
+
+    private static final String
+        PICKETLINK = "PicketLink",
+        FEDERATION = "Federation",
+        SERVICE_PROVIDER = "Service Provider";
+
+    public WizardWindow addFederationWindow() {
+        getSubsystemNavigation(PICKETLINK).addAddress(FEDERATION).selectColumn().invoke(FinderNames.ADD);
+        return Console.withBrowser(browser).openedWizard();
     }
 
-    public IdentityProviderConfigArea getIdpConfig() {
-        return getConfig(IdentityProviderConfigArea.class);
+    public WindowState removeFederation(String federationName) {
+        getSubsystemNavigation(PICKETLINK).addAddress(FEDERATION, federationName).selectRow()
+            .invoke(FinderNames.REMOVE);
+        return Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
     }
 
-    public ServiceProviderConfigArea getSpConfig() {
-        return getConfig(ServiceProviderConfigArea.class);
+    public FederationPage navigateToFederation(String federationName) {
+        getSubsystemNavigation(PICKETLINK).addAddress(FEDERATION, federationName).selectRow()
+            .invoke(FinderNames.VIEW);
+        Application.waitUntilVisible();
+        return this;
     }
 
-    public KeyStoreConfigArea getKsConfig() {
-        return getConfig(KeyStoreConfigArea.class);
+    public WizardWindow addSpWindow(String federationName) {
+        getSubsystemNavigation(PICKETLINK).addAddress(FEDERATION, federationName).addAddress(SERVICE_PROVIDER)
+            .selectColumn().invoke(FinderNames.ADD);
+        return Console.withBrowser(browser).openedWizard();
     }
 
-    public void switchToIdentityProvider() {
-        String label = PropUtils.get("config.federation.idp.view.label");
-        switchView(label);
+    public WindowState removeSp(String federationName, String spName) {
+        getSubsystemNavigation(PICKETLINK).addAddress(FEDERATION, federationName).addAddress(SERVICE_PROVIDER, spName)
+            .selectRow().invoke(FinderNames.REMOVE);
+        return Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
     }
 
-    public void switchToServiceProvider() {
-        String label = PropUtils.get("config.federation.sp.view.label");
-        switchView(label);
+    public FederationPage navigateToServiceProvider(String federationName, String spName) {
+        getSubsystemNavigation(PICKETLINK).addAddress(FEDERATION, federationName).addAddress(SERVICE_PROVIDER, spName)
+            .selectRow().invoke(FinderNames.VIEW);
+        Application.waitUntilVisible();
+        return this;
     }
 
-    public void switchToKeyStore() {
-        String label = PropUtils.get("config.federation.ks.view.label");
-        switchView(label);
+    public ConfigFragment switchConfigAreaTabTo(String tabLabel) {
+        return getConfig(ConfigAreaFragment.class).switchTo(tabLabel);
     }
+
 }
