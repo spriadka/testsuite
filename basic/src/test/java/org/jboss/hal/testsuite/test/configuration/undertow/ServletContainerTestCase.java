@@ -11,6 +11,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
+import org.wildfly.extras.creaper.core.online.operations.OperationException;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
@@ -52,6 +53,7 @@ public class ServletContainerTestCase extends UndertowTestCaseAbstract {
 
     //values
     private final String STACK_TRACE_ON_ERROR_VALUE = "all";
+    protected static String BUFFER_CACHE_VALUE_VALID;
 
     private static String servletContainer;
     private static ResourceAddress address;
@@ -60,6 +62,7 @@ public class ServletContainerTestCase extends UndertowTestCaseAbstract {
     public static void setUp() throws InterruptedException, IOException, TimeoutException {
         servletContainer = operations.createServletContainer();
         address = servletContainerTemplate.resolve(context, servletContainer);
+        BUFFER_CACHE_VALUE_VALID = operations.addBufferCache();
     }
 
     @Before
@@ -69,8 +72,9 @@ public class ServletContainerTestCase extends UndertowTestCaseAbstract {
     }
 
     @AfterClass
-    public static void tearDown() throws InterruptedException, IOException, TimeoutException {
+    public static void tearDown() throws InterruptedException, IOException, TimeoutException, OperationException {
         operations.removeServletContainer(servletContainer);
+        operations.removeBufferCache(BUFFER_CACHE_VALUE_VALID);
     }
 
     @Test
@@ -95,7 +99,12 @@ public class ServletContainerTestCase extends UndertowTestCaseAbstract {
 
     @Test
     public void editDefaultSessionTimeout() throws IOException, InterruptedException, TimeoutException {
-        editTextAndVerify(address, DEFAULT_SESSION_TIMEOUT, DEFAULT_SESSION_TIMEOUT_ATTR);
+        editTextAndVerify(address, DEFAULT_SESSION_TIMEOUT, DEFAULT_SESSION_TIMEOUT_ATTR, "42");
+    }
+
+    @Test
+    public void editDefaultSessionTimeoutInvalid() throws IOException, InterruptedException, TimeoutException {
+        verifyIfErrorAppears(DEFAULT_SESSION_TIMEOUT, "54sdfg");
     }
 
     @Test

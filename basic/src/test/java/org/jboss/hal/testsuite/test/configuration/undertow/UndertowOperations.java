@@ -13,6 +13,7 @@ import org.jboss.hal.testsuite.creaper.command.AddSocketBinding;
 import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wildfly.extras.creaper.commands.undertow.AddHttpsSecurityRealm;
 import org.wildfly.extras.creaper.commands.undertow.AddUndertowListener;
 import org.wildfly.extras.creaper.commands.undertow.RemoveUndertowListener;
 import org.wildfly.extras.creaper.commands.undertow.SslVerifyClient;
@@ -20,10 +21,8 @@ import org.wildfly.extras.creaper.commands.undertow.UndertowListenerType;
 import org.wildfly.extras.creaper.core.CommandFailedException;
 import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
 import org.wildfly.extras.creaper.core.online.operations.Address;
-import org.wildfly.extras.creaper.core.online.operations.Batch;
 import org.wildfly.extras.creaper.core.online.operations.OperationException;
 import org.wildfly.extras.creaper.core.online.operations.Operations;
-import org.wildfly.extras.creaper.core.online.operations.Values;
 import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
 
 import java.io.IOException;
@@ -99,17 +98,14 @@ public class UndertowOperations {
 
     public String createHTTPSListener(String httpServer) throws IOException, CommandFailedException, TimeoutException, InterruptedException, OperationException {
         String name = RandomStringUtils.randomAlphanumeric(6);
-        String securityRealm = "SecurityRealm_ssl-test";
-        Address realmAddress = Address.coreService("management").and("security-realm", securityRealm);
-        Batch batch = new Batch();
-        Values sslParams = Values.empty();
-        sslParams = sslParams.and("keystore-password", "random")
-            .and("keystore-path", getClass().getClassLoader().getResource("clientkeystore").getPath())
-            .and("key-password", "random");
-        batch.add(realmAddress);
-        batch.add(realmAddress.and("server-identity", "ssl"), sslParams);
-        batch.add(realmAddress.and("authentication", "truststore"), sslParams);
-        operations.batch(batch);
+        String securityRealm = "SecurityRealm_" + RandomStringUtils.randomAlphanumeric(6);
+        client.apply(new AddHttpsSecurityRealm.Builder(securityRealm)
+            .keystorePassword("random")
+            .truststorePassword("random")
+            .keyPassword("random")
+            .keystorePath(getClass().getClassLoader().getResource("clientkeystore").getPath())
+            .build());
+        administration.reload();
         client.apply(new AddUndertowListener.HttpsBuilder(name, httpServer, createSocketBinding())
                 .securityRealm(securityRealm)
                 .verifyClient(SslVerifyClient.NOT_REQUESTED)
@@ -148,7 +144,7 @@ public class UndertowOperations {
     }
 
     public String createHTTPServer() throws InterruptedException, IOException, TimeoutException {
-        String name = RandomStringUtils.randomAlphanumeric(6);
+        String name = "HTTPServer_" + RandomStringUtils.randomAlphanumeric(6);
         ResourceAddress address = httpServerTemplate.resolve(context, name);
         executeAddAction(address, true);
         operations.readResource(Address.of("subsystem", "undertow").and("server", name)); //Workaround for situation when server is listed as unavailable dependency
@@ -160,7 +156,7 @@ public class UndertowOperations {
     }
 
     public String createServletContainer() throws InterruptedException, TimeoutException, IOException {
-        String name = RandomStringUtils.randomAlphanumeric(6);
+        String name = "ServletContainer_" + RandomStringUtils.randomAlphanumeric(6);
         ResourceAddress address = servletContainerTemplate.resolve(context, name);
         executeAddAction(address);
         return name;
@@ -234,7 +230,7 @@ public class UndertowOperations {
     public String createSocketBinding() throws CommandFailedException, IOException {
         String name = "UndertowSocketBinding_" + RandomStringUtils.randomAlphanumeric(6);
         try (OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient()) {
-            int port = AvailablePortFinder.getNextAvailable(1024);
+            int port = AvailablePortFinder.getNextAvailable();
             log.info("Obtained port for socket binding '" + name + "' is " + port);
             client.apply(new AddSocketBinding.Builder(name)
                     .port(port)
@@ -246,5 +242,17 @@ public class UndertowOperations {
     public void removeSocketBinding(String name) throws InterruptedException, TimeoutException, IOException {
         ResourceAddress address = socketBindingAddressTemplate.resolve(context, name);
         executeRemoveAction(address);
+    }
+
+    public String addBufferCache() throws IOException {
+        String name = "BufferCache_" + RandomStringUtils.randomAlphanumeric(6);
+        Address address = Address.subsystem("undertow").and("buffer-cache", name);
+        operations.add(address);
+        return name;
+    }
+
+    public void removeBufferCache(String name) throws IOException, OperationException {
+        Address address = Address.subsystem("undertow").and("buffer-cache", name);
+        operations.removeIfExists(address);
     }
 }
