@@ -43,7 +43,6 @@ public class BackupAndRestoreAttributes {
             }
             Operations ops = new Operations(ctx.client);
 
-            //TODO put ATTRIBUTES_ONLY option to Creaper
             BackupAndRestoreAttributes.this.backup = ops.readResource(address, ReadResourceOption.INCLUDE_DEFAULTS, ReadResourceOption.ATTRIBUTES_ONLY).value();
         }
     };
@@ -76,7 +75,7 @@ public class BackupAndRestoreAttributes {
 
         private void addAllWaitingDependenciesToBatch(Property dependency) {
             String dependencyName = dependency.getName();
-            if (waitingForDependency.containsKey(dependencyName)) { //attribute which was added to batch is dependency to something
+            if (waitingForDependency.containsKey(dependencyName)) { //attribute which was added to batch is dependency for some other attribute
                 addAllToBatch(waitingForDependency.get(dependencyName)); //add dependent attributes to batch
                 waitingForDependency.remove(dependencyName);
             }
