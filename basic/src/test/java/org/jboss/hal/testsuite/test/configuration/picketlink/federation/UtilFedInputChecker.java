@@ -25,13 +25,11 @@ package org.jboss.hal.testsuite.test.configuration.picketlink.federation;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
-import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.junit.Assert;
 import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
 import org.wildfly.extras.creaper.core.online.operations.Address;
-import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
 
 /**
  * Utility class to make edits of config fields and following verification easier.
@@ -39,52 +37,63 @@ import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
 public final class UtilFedInputChecker {
 
     private OnlineManagementClient client;
-    private Administration adminOps;
-    private InputType inputType;
-    private ConfigFragment config;
     private Address resourceAddress;
-    private String dmrAttrName;
-    private ModelNode attrValue;
     private boolean saved;
 
     UtilFedInputChecker(OnlineManagementClient client, ConfigFragment config, InputType inputType,
-            Address resourceAddress, String dmrAttrName, ModelNode attrValue)
+            Address resourceAddress, String dmrAttrName, Object attrValue)
             throws IOException, InterruptedException, TimeoutException {
         this.client = client;
-        adminOps = new Administration(client);
-        this.config = config;
-        this.inputType = inputType;
         this.resourceAddress = resourceAddress;
-        this.dmrAttrName = dmrAttrName;
-        this.attrValue = attrValue;
-        edit();
+        attrValue = getAttrValue(attrValue, inputType);
+        edit(inputType, config, dmrAttrName, attrValue);
     }
 
-    private void edit() throws IOException, InterruptedException, TimeoutException {
+    private Object getAttrValue(Object attrValue, InputType inputType) {
+        switch (inputType) {
+            case TEXT: case SELECT:
+                if (attrValue instanceof String) {
+                    return attrValue;
+                } else if (attrValue instanceof Long) {
+                    return String.valueOf((long) attrValue);
+                } else if (attrValue instanceof Integer) {
+                    return String.valueOf((int) attrValue);
+                } else {
+                    throw new IllegalArgumentException(attrValue + " should be String, Integer or Long!");
+                }
+            case CHECKBOX:
+                if (attrValue instanceof Boolean) {
+                    return attrValue;
+                } else {
+                    throw new IllegalArgumentException(attrValue + " should be Boolean!");
+                }
+            default:
+                throw new IllegalArgumentException("Not yet supported inputType: " + inputType);
+        }
+    }
+
+    private void edit(InputType inputType, ConfigFragment config, String dmrAttrName, Object attrValue) throws IOException, InterruptedException, TimeoutException {
         switch (inputType) {
             case TEXT:
-                saved = config.editTextAndSave(dmrAttrName, attrValue.asString()); break;
+                saved = config.editTextAndSave(dmrAttrName, (String) attrValue); break;
             case CHECKBOX:
-                saved = config.editCheckboxAndSave(dmrAttrName, attrValue.asBoolean()); break;
+                saved = config.editCheckboxAndSave(dmrAttrName, (Boolean) attrValue); break;
             case SELECT:
-                saved = config.selectOptionAndSave(dmrAttrName, attrValue.asString()); break;
-            default:
-                throw new IllegalStateException("Not yet implemented input type " + inputType);
+                saved = config.selectOptionAndSave(dmrAttrName, (String) attrValue); break;
         }
         if (!saved) {
             config.cancel(); // cleanup
         }
-        adminOps.reloadIfRequired();
     }
 
-    void andVerifySuccess() throws Exception {
+    ResourceVerifier verifyFormSaved() throws Exception {
         Assert.assertTrue("Configuration should switch into read-only mode.", saved);
-        new ResourceVerifier(resourceAddress, client).verifyAttribute(dmrAttrName, attrValue);
+        return new ResourceVerifier(resourceAddress, client);
     }
 
-    void andVerifyFailure() throws Exception {
+    ResourceVerifier verifyFormNotSaved() throws Exception {
         Assert.assertFalse("Configuration should NOT switch into read-only mode.", saved);
-        new ResourceVerifier(resourceAddress, client).verifyAttributeNotEqual(dmrAttrName, attrValue);
+        return new ResourceVerifier(resourceAddress, client);
     }
 
     enum InputType {

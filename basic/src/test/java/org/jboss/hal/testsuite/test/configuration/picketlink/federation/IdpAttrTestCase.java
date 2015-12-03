@@ -27,7 +27,6 @@ import static org.jboss.hal.testsuite.test.configuration.picketlink.federation.U
 import java.io.IOException;
 
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.test.configuration.picketlink.federation.UtilFedInputChecker.InputType;
 import org.junit.After;
@@ -60,19 +59,34 @@ public class IdpAttrTestCase extends AbstractFederationTestCase {
 
     @Test
     public void secDomain() throws Exception {
-        edit(InputType.TEXT, idpAddress, SECURITY_DOMAIN, new ModelNode(SD_JBOSS_WEB_POLICY)).andVerifySuccess();
+        edit(InputType.TEXT, idpAddress, SECURITY_DOMAIN, SD_JBOSS_WEB_POLICY)
+            .verifyFormSaved()
+            .verifyAttribute(SECURITY_DOMAIN, SD_JBOSS_WEB_POLICY);
     }
 
     @Test
     public void url() throws Exception {
-        edit(InputType.TEXT, idpAddress, URL, new ModelNode("")).andVerifyFailure();
-        edit(InputType.TEXT, idpAddress, URL, new ModelNode("http://example.net/changed-idp/")).andVerifySuccess();
+        String
+            emptyUrl = "",
+            validUrl = "http://example.net/changed-idp/";
+
+        edit(InputType.TEXT, idpAddress, URL, emptyUrl)
+            .verifyFormNotSaved()
+            .verifyAttribute(URL, name.get(Key.URL));
+
+        edit(InputType.TEXT, idpAddress, URL, validUrl)
+            .verifyFormSaved()
+            .verifyAttribute(URL, validUrl);
     }
 
     @Test
     public void external() throws Exception {
-        edit(InputType.CHECKBOX, idpAddress, IDP_EXTERNAL, new ModelNode(true)).andVerifySuccess();
-        edit(InputType.CHECKBOX, idpAddress, IDP_EXTERNAL, new ModelNode(false)).andVerifySuccess();
+        edit(InputType.CHECKBOX, idpAddress, IDP_EXTERNAL, true)
+            .verifyFormSaved()
+            .verifyAttribute(IDP_EXTERNAL, true);
+        edit(InputType.CHECKBOX, idpAddress, IDP_EXTERNAL, false)
+            .verifyFormSaved()
+            .verifyAttribute(IDP_EXTERNAL, false);
     }
 
     @Override

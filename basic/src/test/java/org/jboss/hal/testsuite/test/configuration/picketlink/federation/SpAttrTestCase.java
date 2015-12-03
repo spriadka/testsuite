@@ -27,7 +27,6 @@ import static org.jboss.hal.testsuite.test.configuration.picketlink.federation.U
 import java.io.IOException;
 
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.test.configuration.picketlink.federation.UtilFedInputChecker.InputType;
 import org.junit.After;
@@ -65,30 +64,52 @@ public class SpAttrTestCase extends AbstractFederationTestCase {
 
     @Test
     public void errorPage() throws Exception {
-        edit(InputType.TEXT, spAddress, SP_ERROR_PAGE, new ModelNode("/my_error.jsp")).andVerifySuccess();
+        final String newErrorPage = "/my_error.jsp";
+        edit(InputType.TEXT, spAddress, SP_ERROR_PAGE, newErrorPage)
+            .verifyFormSaved()
+            .verifyAttribute(SP_ERROR_PAGE, newErrorPage);
     }
 
     @Test
     public void logoutPage() throws Exception {
-        edit(InputType.TEXT, spAddress, SP_LOGOUT_PAGE, new ModelNode("/my_logout.jsp")).andVerifySuccess();
+        final String newLogoutPage = "/my_logout.jsp";
+        edit(InputType.TEXT, spAddress, SP_LOGOUT_PAGE, newLogoutPage)
+            .verifyFormSaved()
+            .verifyAttribute(SP_LOGOUT_PAGE, newLogoutPage);
     }
 
+    // see https://issues.jboss.org/browse/JBEAP-2034
     @Test
     public void postBinding() throws Exception {
-        edit(InputType.TEXT, spAddress, SP_POST_BINDING, new ModelNode("false")).andVerifySuccess();
-        edit(InputType.TEXT, spAddress, SP_POST_BINDING, new ModelNode("true")).andVerifySuccess();
+        edit(InputType.TEXT, spAddress, SP_POST_BINDING, "false")
+            .verifyFormSaved()
+            .verifyAttribute(SP_POST_BINDING, "false");
+
+        edit(InputType.TEXT, spAddress, SP_POST_BINDING, "true")
+            .verifyFormSaved()
+            .verifyAttribute(SP_POST_BINDING, "true");
     }
 
     @Test
     public void strictPostBinding() throws Exception {
-        edit(InputType.CHECKBOX, spAddress, SP_STRICT_POST_BINDING, new ModelNode(false)).andVerifySuccess();
-        edit(InputType.CHECKBOX, spAddress, SP_STRICT_POST_BINDING, new ModelNode(true)).andVerifySuccess();
+        edit(InputType.CHECKBOX, spAddress, SP_STRICT_POST_BINDING, false)
+            .verifyFormSaved()
+            .verifyAttribute(SP_STRICT_POST_BINDING, false);
+
+        edit(InputType.CHECKBOX, spAddress, SP_STRICT_POST_BINDING, true)
+            .verifyFormSaved()
+            .verifyAttribute(SP_STRICT_POST_BINDING, true);
     }
 
     @Test
     public void url() throws Exception {
-        edit(InputType.TEXT, spAddress, URL, new ModelNode("")).andVerifyFailure();
-        edit(InputType.TEXT, spAddress, URL, new ModelNode(url)).andVerifySuccess();
+        edit(InputType.TEXT, spAddress, URL, "")
+            .verifyFormNotSaved()
+            .verifyAttribute(URL, name.get(Key.URL));
+
+        edit(InputType.TEXT, spAddress, URL, url)
+            .verifyFormSaved()
+            .verifyAttribute(URL, url);
     }
 
     @Override

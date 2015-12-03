@@ -30,7 +30,6 @@ import java.util.concurrent.TimeoutException;
 import org.apache.commons.io.IOUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
-import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.page.config.FederationPage;
 import org.jboss.hal.testsuite.test.configuration.picketlink.federation.UtilFedInputChecker.InputType;
@@ -88,8 +87,16 @@ public abstract class AbstractFederationTestCase {
         federationOps.removeFederation(name.getFederation());
     }
 
+    /**
+     * Valid {@code inputType} and {@code attrValue} parameter combinations are:
+     * <ul>
+     * <li>{@code InputType.TEXT} or {@code InputType.SELECT}
+     * and {@code attrValue} of type {@code String}, {@code Integer} or {@code Long}</li>
+     * <li>{@code InputType.CHECKBOX} and {@code attrValue} of type {@code Boolean}</li>
+     * </ul>
+     */
     protected final UtilFedInputChecker edit(InputType inputType, Address resourceAddress, String dmrAttrName,
-            ModelNode attrValue) throws IOException, InterruptedException, TimeoutException {
+            Object attrValue) throws IOException, InterruptedException, TimeoutException {
         return new UtilFedInputChecker(client, page.getConfigFragment(), inputType, resourceAddress, dmrAttrName,
                 attrValue);
     }

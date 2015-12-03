@@ -27,7 +27,6 @@ import static org.jboss.hal.testsuite.test.configuration.picketlink.federation.U
 import java.io.IOException;
 
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
@@ -95,7 +94,9 @@ public class KeyStoreTestCase extends AbstractFederationTestCase {
             .verifyAttribute(KS_KEY_ALIAS, keyAliasValue)
             .verifyAttribute(KS_KEY_PASS, keyPassValue);
 
-        edit(InputType.TEXT, keyStoreAddress, KS_PASS, new ModelNode(newPassValue)).andVerifySuccess();
+        edit(InputType.TEXT, keyStoreAddress, KS_PASS, newPassValue)
+            .verifyFormSaved()
+            .verifyAttribute(KS_PASS, newPassValue);
     }
 
     @Test

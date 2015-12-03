@@ -60,15 +60,24 @@ public class SAMLConfigTestCase extends AbstractFederationTestCase {
     @Test
     public void editClockSkew() throws Exception {
         int invalidClockSkew = -6, validClockSkew = 6;
-        edit(TEXT, samlAddress, SAML_CLOCK_SKEW, new ModelNode(invalidClockSkew)).andVerifyFailure();
-        edit(TEXT, samlAddress, SAML_CLOCK_SKEW, new ModelNode(validClockSkew)).andVerifySuccess();
+        edit(TEXT, samlAddress, SAML_CLOCK_SKEW, invalidClockSkew)
+            .verifyFormNotSaved()
+            .verifyAttributeNotEqual(SAML_CLOCK_SKEW, new ModelNode(invalidClockSkew));
+
+        edit(TEXT, samlAddress, SAML_CLOCK_SKEW, validClockSkew)
+            .verifyFormSaved()
+            .verifyAttribute(SAML_CLOCK_SKEW, validClockSkew);
     }
 
     @Test
     public void editTokenTimeout() throws Exception {
         int invalidTokenTimeout = -7, validTokenTimeout = 7;
-        edit(TEXT, samlAddress, SAML_TOKEN_TIMEOUT, new ModelNode(invalidTokenTimeout)).andVerifyFailure();
-        edit(TEXT, samlAddress, SAML_TOKEN_TIMEOUT, new ModelNode(validTokenTimeout)).andVerifySuccess();
+        edit(TEXT, samlAddress, SAML_TOKEN_TIMEOUT, invalidTokenTimeout)
+            .verifyFormNotSaved()
+            .verifyAttributeNotEqual(SAML_TOKEN_TIMEOUT, new ModelNode(invalidTokenTimeout));
+        edit(TEXT, samlAddress, SAML_TOKEN_TIMEOUT, validTokenTimeout)
+            .verifyFormSaved()
+            .verifyAttribute(SAML_TOKEN_TIMEOUT, validTokenTimeout);
     }
 
     @Override
