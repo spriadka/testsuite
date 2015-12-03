@@ -86,7 +86,7 @@ public class AJPListenerTestCase extends UndertowTestCaseAbstract {
     private final String REDIRECT_SOCKET_ATTR = "redirect-socket";
     private final String REQUEST_PARSE_TIMEOUT_ATTR = "request-parse-timeout";
     private final String RESOLVE_PEER_ADDRESS_ATTR = "resolve-peer-address";
-    private final String SCHEME_ATTR = "scheme-attr";
+    private final String SCHEME_ATTR = "scheme";
     private final String SEND_BUFFER_ATTR = "send-buffer";
     private final String SOCKET_BINDING_ATTR = "socket-binding";
     private final String TCP_BACKLOG_ATTR = "tcp-backlog";

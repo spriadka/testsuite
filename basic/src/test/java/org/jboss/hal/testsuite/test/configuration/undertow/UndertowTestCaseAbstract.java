@@ -41,7 +41,6 @@ public abstract class UndertowTestCaseAbstract {
     protected static String SOCKET_BINDING_VALUE_VALID;
     protected String NUMERIC_VALID = "25";
     protected String NUMERIC_INVALID = "25dfs";
-    protected String BUFFER_CACHE_VALUE_VALID = "";
 
     @Drone
     protected WebDriver browser;
