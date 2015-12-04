@@ -85,7 +85,7 @@ public class TransactionsTestCase extends TransactionsTestCaseAbstract {
 
     @Test
     public void editNodeIdentifier() throws IOException, InterruptedException {
-        editTextAndVerify(address, NODE_IDENTIFIER, NODE_IDENTIFIER_ATTR);
+        editTextAndVerify(address, NODE_IDENTIFIER, NODE_IDENTIFIER_ATTR, "TransactionsNodeIdentifier");
     }
 
     @Test
