@@ -92,7 +92,7 @@ public class QueuesTopicsTestCase {
     @Test
     public void addJmsQueue() {
         page.navigateToMessaging();
-        page.selectView("Destinations");
+        page.selectQueuesAndTopics();
         page.addQueue(NAME, JNDINAME);
 
         verifier.verifyResource(address, true);
@@ -107,7 +107,7 @@ public class QueuesTopicsTestCase {
         cliClient.executeCommand(command);
 
         page.navigateToMessaging();
-        page.selectView("Destinations");
+        page.selectQueuesAndTopics();
 
         verifier.verifyResource(address, true);
         page.selectInTable(NAME, 0);
@@ -119,7 +119,7 @@ public class QueuesTopicsTestCase {
     @Test
     public void addJmsTopics() {
         page.navigateToMessaging();
-        page.selectView("Destinations");
+        page.selectQueuesAndTopics();
         page.getConfig().topicsConfig();
         page.addQueue(TOPICSNAME, JNDI_TOPICS_NAME);
 
@@ -135,7 +135,7 @@ public class QueuesTopicsTestCase {
         cliClient.executeCommand(addTopics);
 
         page.navigateToMessaging();
-        page.selectView("Destinations");
+        page.selectQueuesAndTopics();
         page.getConfig().topicsConfig();
         page.selectInTable(TOPICSNAME, 0);
         page.edit();
@@ -159,7 +159,7 @@ public class QueuesTopicsTestCase {
         cliClient.executeCommand(addTopics);
 
         page.navigateToMessaging();
-        page.selectView("Destinations");
+        page.selectQueuesAndTopics();
         page.getConfig().topicsConfig();
 
         verifier.verifyResource(topicsAddress, true);

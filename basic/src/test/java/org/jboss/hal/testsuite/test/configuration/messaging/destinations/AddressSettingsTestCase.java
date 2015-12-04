@@ -80,7 +80,7 @@ public class AddressSettingsTestCase {
     @Test
     public void addAddressSetting() {
         page.navigateToMessaging();
-        page.selectView("Destinations");
+        page.selectQueuesAndTopics();
         page.switchToAddressSettings();
 
         page.addAddressSettings(PATTERN);
@@ -97,7 +97,7 @@ public class AddressSettingsTestCase {
         cliClient.executeCommand(command);
 
         page.navigateToMessaging();
-        page.selectView("Destinations");
+        page.selectQueuesAndTopics();
         page.switchToAddressSettings();
         page.selectInTable(PATTERN, 0);
         page.edit();
@@ -118,7 +118,7 @@ public class AddressSettingsTestCase {
         cliClient.executeCommand(command);
 
         page.navigateToMessaging();
-        page.selectView("Destinations");
+        page.selectQueuesAndTopics();
         page.switchToAddressSettings();
         page.selectInTable(PATTERN, 0);
         page.edit();
@@ -139,7 +139,7 @@ public class AddressSettingsTestCase {
         cliClient.executeCommand(command);
 
         page.navigateToMessaging();
-        page.selectView("Destinations");
+        page.selectQueuesAndTopics();
         page.switchToAddressSettings();
         page.selectInTable(PATTERN, 0);
         page.edit();
@@ -160,7 +160,7 @@ public class AddressSettingsTestCase {
         cliClient.executeCommand(command);
 
         page.navigateToMessaging();
-        page.selectView("Destinations");
+        page.selectQueuesAndTopics();
         page.switchToAddressSettings();
         page.selectInTable(PATTERN, 0);
         page.edit();
@@ -181,7 +181,7 @@ public class AddressSettingsTestCase {
         cliClient.executeCommand(command);
 
         page.navigateToMessaging();
-        page.selectView("Destinations");
+        page.selectQueuesAndTopics();
         page.switchToAddressSettings();
         page.selectInTable(PATTERN, 0);
         page.edit();
@@ -202,7 +202,7 @@ public class AddressSettingsTestCase {
         cliClient.executeCommand(command);
 
         page.navigateToMessaging();
-        page.selectView("Destinations");
+        page.selectQueuesAndTopics();
         page.switchToAddressSettings();
 
         verifier.verifyResource(address, true);

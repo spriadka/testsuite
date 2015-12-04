@@ -82,7 +82,7 @@ public class SecuritySettingTestCase {
     @Test
     public void addSecuritySetting() {
         page.navigateToMessaging();
-        page.selectView("Destinations");
+        page.selectQueuesAndTopics();
         page.switchToSecuritySettings();
 
         page.addSecuritySettings(PATTERN, ROLE);
@@ -100,7 +100,7 @@ public class SecuritySettingTestCase {
         cliClient.executeCommand(addRole);
 
         page.navigateToMessaging();
-        page.selectView("Destinations");
+        page.selectQueuesAndTopics();
         page.switchToSecuritySettings();
 
         page.selectInTable(PATTERN, 0);
@@ -122,7 +122,7 @@ public class SecuritySettingTestCase {
         cliClient.executeCommand(addRole);
 
         page.navigateToMessaging();
-        page.selectView("Destinations");
+        page.selectQueuesAndTopics();
         page.switchToSecuritySettings();
 
         page.selectInTable(PATTERN, 0);
@@ -144,7 +144,7 @@ public class SecuritySettingTestCase {
         cliClient.executeCommand(addRole);
 
         page.navigateToMessaging();
-        page.selectView("Destinations");
+        page.selectQueuesAndTopics();
         page.switchToSecuritySettings();
 
         page.selectInTable(PATTERN, 0);
@@ -166,7 +166,7 @@ public class SecuritySettingTestCase {
         cliClient.executeCommand(addRole);
 
         page.navigateToMessaging();
-        page.selectView("Destinations");
+        page.selectQueuesAndTopics();
         page.switchToSecuritySettings();
 
         page.selectInTable(PATTERN, 0);
@@ -190,7 +190,7 @@ public class SecuritySettingTestCase {
         cliClient.executeCommand(addRole);
 
         page.navigateToMessaging();
-        page.selectView("Destinations");
+        page.selectQueuesAndTopics();
         page.switchToSecuritySettings();
 
         page.selectInTable(PATTERN, 0);
@@ -214,7 +214,7 @@ public class SecuritySettingTestCase {
         cliClient.executeCommand(addRole);
 
         page.navigateToMessaging();
-        page.selectView("Destinations");
+        page.selectQueuesAndTopics();
         page.switchToSecuritySettings();
 
         page.selectInTable(PATTERN, 0);
@@ -238,7 +238,7 @@ public class SecuritySettingTestCase {
         cliClient.executeCommand(addRole);
 
         page.navigateToMessaging();
-        page.selectView("Destinations");
+        page.selectQueuesAndTopics();
         page.switchToSecuritySettings();
 
         page.selectInTable(PATTERN, 0);
@@ -262,7 +262,7 @@ public class SecuritySettingTestCase {
         cliClient.executeCommand(addRole);
 
         page.navigateToMessaging();
-        page.selectView("Destinations");
+        page.selectQueuesAndTopics();
         page.switchToSecuritySettings();
 
         verifier.verifyResource(address, true);

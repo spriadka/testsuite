@@ -79,7 +79,7 @@ public class ConnectionFactoriesTestCase {
     @Test //https://issues.jboss.org/browse/HAL-832
     public void addConnectionFactory() {
         page.navigateToMessaging();
-        page.selectView("Destinations");
+        page.selectQueuesAndTopics();
         page.switchToConnectionFactories();
 
         page.addFactory(NAME, JNDINAME, CONNECTOR);
@@ -96,7 +96,7 @@ public class ConnectionFactoriesTestCase {
         cliClient.executeCommand(command);
 
         page.navigateToMessaging();
-        page.selectView("Destinations");
+        page.selectQueuesAndTopics();
         page.switchToConnectionFactories();
 
         verifier.verifyResource(address, true);
