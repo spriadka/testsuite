@@ -82,7 +82,7 @@ public class DivertsTestCase {
     @Test
     public void addDiverts() {
         page.navigateToMessaging();
-        page.selectView("Destinations");
+        page.selectQueuesAndTopics();
         page.switchToDiverts();
 
         page.addDiverts(NAME, DIVERTADDRESS, FORWATDADDRESS);
@@ -99,7 +99,7 @@ public class DivertsTestCase {
         cliClient.executeCommand(command);
 
         page.navigateToMessaging();
-        page.selectView("Destinations");
+        page.selectQueuesAndTopics();
         page.switchToDiverts();
         page.selectInTable(NAME, 0);
         page.edit();
@@ -120,7 +120,7 @@ public class DivertsTestCase {
         cliClient.executeCommand(command);
 
         page.navigateToMessaging();
-        page.selectView("Destinations");
+        page.selectQueuesAndTopics();
         page.switchToDiverts();
         page.selectInTable(NAME, 0);
         page.edit();
@@ -141,7 +141,7 @@ public class DivertsTestCase {
         cliClient.executeCommand(command);
 
         page.navigateToMessaging();
-        page.selectView("Destinations");
+        page.selectQueuesAndTopics();
         page.switchToDiverts();
         page.selectInTable(NAME, 0);
         page.edit();
@@ -161,7 +161,7 @@ public class DivertsTestCase {
         cliClient.executeCommand(command);
 
         page.navigateToMessaging();
-        page.selectView("Destinations");
+        page.selectQueuesAndTopics();
         page.switchToDiverts();
         page.selectInTable(NAME, 0);
         page.edit();
@@ -182,7 +182,7 @@ public class DivertsTestCase {
         cliClient.executeCommand(command);
 
         page.navigateToMessaging();
-        page.selectView("Destinations");
+        page.selectQueuesAndTopics();
         page.switchToDiverts();
         page.selectInTable(NAME, 0);
         page.edit();
@@ -203,7 +203,7 @@ public class DivertsTestCase {
         cliClient.executeCommand(command);
 
         page.navigateToMessaging();
-        page.selectView("Destinations");
+        page.selectQueuesAndTopics();
         page.switchToDiverts();
 
         verifier.verifyResource(address, true);

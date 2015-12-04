@@ -85,6 +85,10 @@ public class MessagingPage extends ConfigPage {
         Application.waitUntilVisible();
     }
 
+    public void selectQueuesAndTopics() {
+        selectView("Queues/Topics");
+    }
+
     public void makeNavigation() {
         navigation.selectRow();
         Library.letsSleep(1000);
