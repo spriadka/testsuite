@@ -26,7 +26,6 @@ import org.jboss.hal.testsuite.util.ResourceVerifier;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.WebDriver;
 import org.slf4j.Logger;
@@ -99,7 +98,7 @@ public class JGroupAbstractTestCase {
     public void socketBindingEdit() throws IOException, CommandFailedException {
         String name = "JGroupsSocketBinding_";
         try (OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient()) {
-            int port = AvailablePortFinder.getNextAvailable(1024);
+            int port = AvailablePortFinder.getNextAvailable();
             log.info("Obtained port for socket binding '" + name + "' is " + port);
             client.apply(new AddSocketBinding.Builder(name)
                     .port(port)
@@ -149,38 +148,6 @@ public class JGroupAbstractTestCase {
     public void rackEdit() {
         String name = "JGroupsRack_" + RandomStringUtils.randomAlphabetic(6);
         checker.editTextAndAssert(page, "rack", name).invoke();
-    }
-
-    @Ignore("Executor tab removed in DR7")
-    @Test
-    public void threadFactoryEdit() {
-        String name = RandomStringUtils.randomAlphabetic(6);
-        page.openExecutors();
-        checker.editTextAndAssert(page, "threadFactory", name).dmrAttribute("thread-factory").invoke();
-    }
-
-    @Ignore("Executor tab removed in DR7")
-    @Test
-    public void defaultExecutorEdit() {
-        String name = RandomStringUtils.randomAlphabetic(6);
-        page.openExecutors();
-        checker.editTextAndAssert(page, "defaultExecutor", name).dmrAttribute("default-executor").invoke();
-    }
-
-    @Ignore("Executor tab removed in DR7")
-    @Test
-    public void oobExecutorEdit() {
-        String name = RandomStringUtils.randomAlphabetic(6);
-        page.openExecutors();
-        checker.editTextAndAssert(page, "oobExecutor", name).dmrAttribute("oob-executor").invoke();
-    }
-
-    @Ignore("Executor tab removed in DR7")
-    @Test
-    public void timerExecutorEdit() {
-        String name = RandomStringUtils.randomAlphabetic(6);
-        page.openExecutors();
-        checker.editTextAndAssert(page, "timerExecutor", name).dmrAttribute("timer-executor").invoke();
     }
 
     @Test
