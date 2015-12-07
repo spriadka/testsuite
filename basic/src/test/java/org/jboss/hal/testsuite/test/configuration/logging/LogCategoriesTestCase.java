@@ -1,20 +1,13 @@
 package org.jboss.hal.testsuite.test.configuration.logging;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.arquillian.junit.InSequence;
-import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Standalone;
-import org.jboss.hal.testsuite.dmr.Dispatcher;
-import org.jboss.hal.testsuite.dmr.ResourceAddress;
-import org.jboss.hal.testsuite.dmr.ResourceVerifier;
-import org.jboss.hal.testsuite.finder.Application;
-import org.jboss.hal.testsuite.finder.FinderNames;
-import org.jboss.hal.testsuite.finder.FinderNavigation;
-import org.jboss.hal.testsuite.fragment.ConfigFragment;
+import org.jboss.hal.testsuite.creaper.ResourceVerifier;
+import org.jboss.hal.testsuite.creaper.command.logging.AddLogCategory;
 import org.jboss.hal.testsuite.page.config.LoggingPage;
-import org.jboss.hal.testsuite.page.config.StandaloneConfigEntryPoint;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -22,32 +15,39 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
+import org.wildfly.extras.creaper.core.CommandFailedException;
+import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.OperationException;
 
-import static org.junit.Assert.assertTrue;
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Created by pcyprian on 26.8.15.
  */
 @RunWith(Arquillian.class)
 @Category(Standalone.class)
-public class LogCategoriesTestCase {
-    private static String LOGGER = "com.test.logger";
-    private FinderNavigation navigation;
+public class LogCategoriesTestCase extends LoggingAbstractTestCase {
+    private static final String LOGGER = "com.test.logger" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String LOGGER_TO_BE_REMOVED = "com.test.logger.removeMe" + RandomStringUtils.randomAlphanumeric(5);
 
-    private ModelNode path = new ModelNode("/subsystem=logging/logger=" + LOGGER);
-    private ResourceAddress address = new ResourceAddress(path);
-    private static Dispatcher dispatcher;
-    private static ResourceVerifier verifier;
+    private static final Address LOGGER_ADDRESS = LOGGING_SUBSYSTEM.and("logger", LOGGER);
+    private static final Address LOGGER_TO_BE_REMOVED_ADDRESS = LOGGING_SUBSYSTEM.and("logger", LOGGER_TO_BE_REMOVED);
 
     @BeforeClass
-    public static void setUp() {
-        dispatcher = new Dispatcher();
-        verifier  = new ResourceVerifier(dispatcher);
+    public static void beforeClass() throws CommandFailedException, InterruptedException, TimeoutException, IOException {
+        client.apply(new AddLogCategory.Builder(LOGGER).build());
+        administration.reloadIfRequired();
+        client.apply(new AddLogCategory.Builder(LOGGER_TO_BE_REMOVED).build());
+        administration.reloadIfRequired();
     }
 
     @AfterClass
-    public static void tearDown() {
-        dispatcher.close();
+    public static void tearDown() throws IOException, TimeoutException, InterruptedException, OperationException, CommandFailedException {
+        operations.removeIfExists(LOGGER_ADDRESS);
+        administration.reloadIfRequired();
+        operations.removeIfExists(LOGGER_TO_BE_REMOVED_ADDRESS);
+        administration.reloadIfRequired();
     }
 
     @Drone
@@ -57,72 +57,43 @@ public class LogCategoriesTestCase {
 
     @Before
     public void before() {
-        navigation = new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
-                .addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
-                .addAddress(FinderNames.SUBSYSTEM, "Logging");
-
-        navigation.selectRow().invoke(FinderNames.VIEW);
-        Application.waitUntilVisible();
-
+        page.navigate();
         page.switchToCategoriesTab();
     }
 
     @Test
-    @InSequence(0)
-    public void addLoggerHandler() {
-        page.addLogger(LOGGER, LOGGER, "DEBUG");
+    public void addLoggerHandler() throws Exception {
+        String name = "Logger_" + RandomStringUtils.randomAlphanumeric(5);
+        page.addLogger(name, name, "DEBUG");
 
-        verifier.verifyResource(address, true);
+        new ResourceVerifier(LOGGING_SUBSYSTEM.and("logger", name), client).verifyExists();
     }
 
     @Test
-    @InSequence(1)
-    public void updateLoggerLevel() {
-        page.getResourceManager().getResourceTable().selectRowByText(0, LOGGER);
-        page.edit();
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().select("level", "WARN");
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "level", "WARN", 500);
+    public void updateLoggerLevel() throws Exception {
+        page.selectLogger(LOGGER);
+        selectOptionAndVerify(LOGGER_ADDRESS, "level", "WARN");
     }
 
     @Test
-    @InSequence(2)
-    public void updateLoggerUsingParentHandler() {
-        page.getResourceManager().getResourceTable().selectRowByText(0, LOGGER);
-        page.edit();
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().checkbox("use-parent-handlers", false);
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "use-parent-handlers", false, 500);
+    public void updateLoggerUsingParentHandler() throws Exception {
+        page.selectLogger(LOGGER);
+        editCheckboxAndVerify(LOGGER_ADDRESS, "use-parent-handlers", false);
     }
 
     @Test
-    @InSequence(3)
-    public void updateLoggerHandlesr() {
-        page.getResourceManager().getResourceTable().selectRowByText(0, LOGGER);
-        page.edit();
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("handlers", "CONSOLE\nFILE");
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "handlers", "[\"CONSOLE\",\"FILE\"]", 500);
+    public void updateLoggerHandler() throws Exception {
+        page.selectLogger(LOGGER);
+        editTextAreaAndVerify(LOGGER_ADDRESS, "handlers", new String[]{"CONSOLE", "FILE"});
     }
 
     @Test
-    @InSequence(4)
-    public void removeLoggerHandler() {
-        page.getResourceManager().getResourceTable().selectRowByText(0, LOGGER);
+    public void removeLoggerHandler() throws Exception {
+        page.selectLogger(LOGGER_TO_BE_REMOVED);
         page.remove();
 
-        verifier.verifyResource(address, false);
+        administration.reloadIfRequired();
+
+        new ResourceVerifier(LOGGER_TO_BE_REMOVED_ADDRESS, client).verifyDoesNotExist();
     }
 }
