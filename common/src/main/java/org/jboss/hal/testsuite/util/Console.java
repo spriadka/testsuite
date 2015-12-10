@@ -8,6 +8,7 @@ import org.jboss.hal.testsuite.fragment.PopUpFragment;
 import org.jboss.hal.testsuite.fragment.UserFragment;
 import org.jboss.hal.testsuite.fragment.WindowFragment;
 import org.jboss.hal.testsuite.fragment.formeditor.PropertyEditor;
+import org.jboss.hal.testsuite.fragment.shared.modal.ReloadRequiredWindow;
 import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
 import org.jboss.hal.testsuite.fragment.shared.table.ResourceTableFragment;
 import org.jboss.hal.testsuite.page.BasePage;
@@ -300,5 +301,13 @@ public class Console {
 
     public void logout() {
         getUserFragment().openMenu().logout();
+    }
+
+    public void dismissReloadRequiredWindowIfPresent() {
+        try {
+            openedWindow("Message", ReloadRequiredWindow.class).dismiss();
+        } catch (TimeoutException e) {
+            log.debug("Reaload required message window not present e.g. since it was already closed before.");
+        }
     }
 }
