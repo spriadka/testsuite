@@ -1,6 +1,7 @@
 package org.jboss.hal.testsuite.test.configuration.general;
 
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.mina.util.AvailablePortFinder;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
@@ -8,6 +9,9 @@ import org.jboss.arquillian.junit.InSequence;
 import org.jboss.hal.testsuite.category.Standalone;
 import org.jboss.hal.testsuite.cli.CliClient;
 import org.jboss.hal.testsuite.cli.CliClientFactory;
+import org.jboss.hal.testsuite.cli.Library;
+import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
+import org.jboss.hal.testsuite.creaper.command.AddSocketBinding;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.config.socketbindings.InboundSocketBindingFragment;
 import org.jboss.hal.testsuite.fragment.config.socketbindings.InboundSocketBindingWizard;
@@ -23,6 +27,10 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
+import org.wildfly.extras.creaper.core.CommandFailedException;
+import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
+
+import java.io.IOException;
 
 import static org.jboss.hal.testsuite.cli.CliConstants.DEFAULT_SOCKET_BINDING_INBOUND_ADDRESS;
 import static org.jboss.hal.testsuite.cli.CliConstants.DEFAULT_SOCKET_BINDING_OUTBOUND_LOCAL_ADDRESS;
@@ -86,7 +94,6 @@ public class SocketBindingsTestCase {
         boolean result =
                 wizard.name(INBOUND_NAME)
                         .port(PORT)
-                        .group(BINDING_GROUP)
                         .finish();
 
         assertTrue("Window should be closed", result);
@@ -122,13 +129,13 @@ public class SocketBindingsTestCase {
     }
 
     @Test
-    public void createOutboundLocalSocketBinding() {
+    public void createOutboundLocalSocketBinding() throws IOException, CommandFailedException {
         ConfigFragment fragment = page.switchToOutboundLocal();
         WizardWindow wizard = fragment.getResourceManager().addResource();
 
         Editor editor = wizard.getEditor();
         editor.text("name", OUTBOUND_LOCAL_NAME);
-        editor.text("socketBinding", "ajp");
+        editor.text("socketBinding", "https");
         boolean result = wizard.finish();
 
         assertTrue("Window should be closed", result);
