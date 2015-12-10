@@ -37,7 +37,6 @@ public class LogCategoriesTestCase extends LoggingAbstractTestCase {
     @BeforeClass
     public static void beforeClass() throws CommandFailedException, InterruptedException, TimeoutException, IOException {
         client.apply(new AddLogCategory.Builder(LOGGER).build());
-        administration.reloadIfRequired();
         client.apply(new AddLogCategory.Builder(LOGGER_TO_BE_REMOVED).build());
         administration.reloadIfRequired();
     }
@@ -45,7 +44,6 @@ public class LogCategoriesTestCase extends LoggingAbstractTestCase {
     @AfterClass
     public static void tearDown() throws IOException, TimeoutException, InterruptedException, OperationException, CommandFailedException {
         operations.removeIfExists(LOGGER_ADDRESS);
-        administration.reloadIfRequired();
         operations.removeIfExists(LOGGER_TO_BE_REMOVED_ADDRESS);
         administration.reloadIfRequired();
     }

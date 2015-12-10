@@ -38,7 +38,6 @@ public class ConsoleHandlerTestCase extends LoggingAbstractTestCase {
     @BeforeClass
     public static void setUp() throws CommandFailedException, InterruptedException, TimeoutException, IOException {
         operations.add(C_HANDLER_ADDRESS);
-        administration.reloadIfRequired();
         operations.add(C_HANDLER_TB_REMOVED_ADDRESS);
         administration.reloadIfRequired();
     }
@@ -46,7 +45,6 @@ public class ConsoleHandlerTestCase extends LoggingAbstractTestCase {
     @AfterClass
     public static void tearDown() throws InterruptedException, TimeoutException, IOException, OperationException {
         operations.removeIfExists(C_HANDLER_ADDRESS);
-        administration.reloadIfRequired();
         operations.removeIfExists(C_HANDLER_TB_REMOVED_ADDRESS);
         administration.reloadIfRequired();
     }

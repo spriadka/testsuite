@@ -39,7 +39,6 @@ public class FormatterTestCase extends LoggingAbstractTestCase {
     @BeforeClass
     public static void setUp() throws IOException, TimeoutException, InterruptedException {
         operations.add(FORMATTER_ADDRESS, Values.empty().and("pattern", FORMATTER_PATTERN));
-        administration.reloadIfRequired();
         operations.add(FORMATTER_ADDRESS_TO_BE_REMOVED, Values.empty().and("pattern", FORMATTER_PATTERN));
         administration.reloadIfRequired();
     }
@@ -47,7 +46,6 @@ public class FormatterTestCase extends LoggingAbstractTestCase {
     @AfterClass
     public static void afterClass() throws InterruptedException, TimeoutException, IOException, OperationException {
         operations.removeIfExists(FORMATTER_ADDRESS);
-        administration.reloadIfRequired();
         operations.removeIfExists(FORMATTER_ADDRESS_TO_BE_REMOVED);
         administration.reloadIfRequired();
     }

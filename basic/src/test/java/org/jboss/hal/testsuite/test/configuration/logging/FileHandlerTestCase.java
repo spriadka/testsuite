@@ -40,7 +40,6 @@ public class FileHandlerTestCase extends LoggingAbstractTestCase {
     @BeforeClass
     public static void setUp() throws IOException, TimeoutException, InterruptedException {
         createFileHandler(FILE_HANDLER_ADDRESS, "tests_hal1.log");
-        administration.reloadIfRequired();
         createFileHandler(FILE_HANDLER_TB_REMOVED_ADDRESS, "tests_hal2.log");
         administration.reloadIfRequired();
     }
@@ -48,7 +47,6 @@ public class FileHandlerTestCase extends LoggingAbstractTestCase {
     @AfterClass
     public static void tearDown() throws IOException, OperationException, TimeoutException, InterruptedException {
         operations.removeIfExists(FILE_HANDLER_ADDRESS);
-        administration.reloadIfRequired();
         operations.removeIfExists(FILE_HANDLER_TB_REMOVED_ADDRESS);
         administration.reloadIfRequired();
     }
