@@ -2,6 +2,7 @@ package org.jboss.hal.testsuite.page.runtime;
 
 import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.arquillian.graphene.page.Location;
+import org.jboss.hal.testsuite.finder.Application;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.finder.Row;
@@ -30,6 +31,7 @@ public class HostsPage extends ConfigurationPage {
     public void viewServerConfiguration(String serverName) {
         navigation.resetNavigation().addAddress(FinderNames.SERVER, serverName);
         navigation.selectRow().invoke(FinderNames.VIEW);
+        Application.waitUntilVisible();
     }
 
     public void viewDefaultHostProperties() {
