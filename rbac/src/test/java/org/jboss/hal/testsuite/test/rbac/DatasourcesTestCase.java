@@ -1,11 +1,16 @@
 package org.jboss.hal.testsuite.test.rbac;
 
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
+
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Standalone;
+import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.fragment.config.datasource.DatasourceWizard;
@@ -16,6 +21,7 @@ import org.jboss.hal.testsuite.util.Authentication;
 import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.RbacRole;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,6 +30,8 @@ import org.junit.runner.RunWith;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
+import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
+import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
 
 /**
  * @author mkrajcov <mkrajcov@redhat.com>
@@ -34,6 +42,8 @@ public class DatasourcesTestCase {
 
     private String addressName = "ds_" + RandomStringUtils.randomAlphanumeric(5);
     private FinderNavigation navigation;
+    private static final OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
+    private final Administration adminOps = new Administration(client);
 
     @Drone
     public WebDriver browser;
@@ -44,7 +54,13 @@ public class DatasourcesTestCase {
     }
 
     @After
-    public void after() {
+    public void after() throws IOException, InterruptedException, TimeoutException {
+        adminOps.reloadIfRequired();
+    }
+
+    @AfterClass
+    public static void afterClass() {
+        IOUtils.closeQuietly(client);
     }
 
     @Test
@@ -107,8 +123,7 @@ public class DatasourcesTestCase {
     private void removeDatasource() {
         navigation.addAddress("Datasource", addressName).selectRow().invoke("Remove");
         ConfirmationWindow window = Console.withBrowser(browser).openedWindow(ConfirmationWindow.class);
-        window.confirm();
-        Graphene.waitGui().until().element(window.getRoot()).is().not().present();
+        window.confirmAndDismissReloadRequiredMessage().assertClosed();
     }
 
 }

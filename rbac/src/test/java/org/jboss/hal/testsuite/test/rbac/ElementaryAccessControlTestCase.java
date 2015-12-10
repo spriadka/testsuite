@@ -1,5 +1,8 @@
 package org.jboss.hal.testsuite.test.rbac;
 
+import java.io.IOException;
+
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.Graphene;
@@ -8,6 +11,7 @@ import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
 import org.jboss.hal.testsuite.category.Standalone;
 import org.jboss.hal.testsuite.cli.Library;
+import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.dmr.AddressTemplate;
 import org.jboss.hal.testsuite.dmr.DefaultContext;
 import org.jboss.hal.testsuite.dmr.Dispatcher;
@@ -20,6 +24,7 @@ import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.jboss.hal.testsuite.page.config.StandaloneConfigurationPage;
 import org.jboss.hal.testsuite.util.Authentication;
+import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.PropUtils;
 import org.jboss.hal.testsuite.util.RbacRole;
 import org.junit.After;
@@ -34,6 +39,8 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
+import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
+import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
 
 import static org.junit.Assert.assertEquals;
 
@@ -53,6 +60,8 @@ public class ElementaryAccessControlTestCase {
     private FinderNavigation navigation;
     private static ResourceAddress address = ADDRESS_TEMPLATE.resolve(statementContext, addressName);
     private static ResourceVerifier verifier;
+    private static final OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
+    private final Administration adminOps = new Administration(client);
 
     @BeforeClass
     public static void beforeClass() {
@@ -63,6 +72,7 @@ public class ElementaryAccessControlTestCase {
     @AfterClass
     public static void afterClass() {
         dispatcher.close();
+        IOUtils.closeQuietly(client);
     }
 
     @Drone
@@ -77,14 +87,15 @@ public class ElementaryAccessControlTestCase {
     }
 
     @After
-    public void after() {
+    public void after() throws IOException, InterruptedException, java.util.concurrent.TimeoutException {
         ResourceAddress address = ADDRESS_TEMPLATE.resolve(statementContext, addressName);
         dispatcher.execute(new Operation.Builder(ModelDescriptionConstants.REMOVE, address).build());
+        adminOps.reloadIfRequired();
     }
 
 
     @Test
-    public void administrator() {
+    public void administrator() throws IOException, InterruptedException, java.util.concurrent.TimeoutException {
         Authentication.with(browser).authenticate(RbacRole.ADMINISTRATOR);
         goToDatasource();
         checkAttribute(true, true);
@@ -93,7 +104,7 @@ public class ElementaryAccessControlTestCase {
     }
 
     @Test
-    public void monitor() {
+    public void monitor() throws IOException, InterruptedException, java.util.concurrent.TimeoutException {
         Authentication.with(browser).authenticate(RbacRole.MONITOR);
         goToDatasource();
         checkAttribute(true, false);
@@ -102,7 +113,7 @@ public class ElementaryAccessControlTestCase {
     }
 
     @Test
-    public void auditor() {
+    public void auditor() throws IOException, InterruptedException, java.util.concurrent.TimeoutException {
         Authentication.with(browser).authenticate(RbacRole.AUDITOR);
         goToDatasource();
         checkAttribute(true, false);
@@ -127,7 +138,8 @@ public class ElementaryAccessControlTestCase {
         return Graphene.createPageFragment(ConfigFragment.class, browser.findElement(ByJQuery.selector("." + contentClass + ":visible")));
     }
 
-    private void checkAttribute(boolean read, boolean write) {
+    private void checkAttribute(boolean read, boolean write) throws IOException, InterruptedException,
+        java.util.concurrent.TimeoutException {
         ConfigFragment attributes = getConfig("Attributes");
         if (read) {
             WebElement jndi = getElementByLabel("JNDI");
@@ -143,6 +155,8 @@ public class ElementaryAccessControlTestCase {
             editor.text("jndiName", "java:jboss/" + addressName);
             attributes.save();
             verifier.verifyAttribute(address, "jndi-name", "java:jboss/" + addressName);
+            Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
+            adminOps.reloadIfRequired();
         }
         else {
             boolean visibleEditBtn = true;
@@ -155,7 +169,8 @@ public class ElementaryAccessControlTestCase {
         }
     }
 
-    private void checkSensitiveAttribute(boolean read, boolean write) {
+    private void checkSensitiveAttribute(boolean read, boolean write) throws IOException, InterruptedException,
+        java.util.concurrent.TimeoutException {
         ConfigFragment security = getConfig("Security");
         if (read) {
             WebElement username = getElementByLabel("Username");
@@ -172,6 +187,8 @@ public class ElementaryAccessControlTestCase {
             security.save();
             Library.letsSleep(1000);
             verifier.verifyAttribute(address, "user-name", "sa");
+            Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
+            adminOps.reloadIfRequired();
         }
         else {
             boolean visibleEditBtn = true;
