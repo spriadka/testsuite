@@ -4,8 +4,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Shared;
-import org.jboss.hal.testsuite.cli.CliClient;
-import org.jboss.hal.testsuite.cli.CliClientFactory;
+import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.page.config.DatasourcesPage;
 import org.jboss.hal.testsuite.page.home.HomePage;
 import org.jboss.hal.testsuite.util.Console;
@@ -16,6 +15,13 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
+import org.wildfly.extras.creaper.core.CommandFailedException;
+import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
+import org.wildfly.extras.creaper.core.online.operations.OperationException;
+import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
+
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
 
 /**
@@ -33,24 +39,26 @@ public class TestConnectionTestCase extends AbstractTestConnectionTestCase {
     private static final String VALID_URL = "jdbc:h2:mem:test2;DB_CLOSE_DELAY=-1";
     private static final String INVALID_URL = "invalidUrl";
 
-    private static CliClient client;
+    private static OnlineManagementClient client;
+    private static Administration administration;
     private static DataSourcesOperations dsOps;
 
     // Setup
 
     @BeforeClass
-    public static void setup() {  // create needed datasources
-        client = CliClientFactory.getClient();
+    public static void setup() throws CommandFailedException, InterruptedException, TimeoutException, IOException {  // create needed datasources
+        client = ManagementClientProvider.createOnlineManagementClient();
+        administration = new Administration(client);
         dsOps = new DataSourcesOperations(client);
         dsNameValid = dsOps.createDataSource(VALID_URL);
         dsNameInvalid = dsOps.createDataSource(INVALID_URL);
         xaDsNameInvalid = dsOps.createXADataSource(INVALID_URL);
         xaDsNameValid = dsOps.createXADataSource(VALID_URL);
-        client.reload();
+        administration.reloadIfRequired();
     }
 
     @AfterClass
-    public static void tearDown() { // remove datasources when finished
+    public static void tearDown() throws CommandFailedException { // remove datasources when finished
         dsOps.removeDataSource(dsNameValid);
         dsOps.removeDataSource(dsNameInvalid);
         dsOps.removeXADataSource(xaDsNameValid);
@@ -84,13 +92,13 @@ public class TestConnectionTestCase extends AbstractTestConnectionTestCase {
     }
 
     @Test
-    public void validInWizard() {
+    public void validInWizard() throws IOException, OperationException {
         String name = "TestConnectionValidInWizard_" + RandomStringUtils.randomAlphabetic(6);
         testConnectionInWizard(dsOps, name, VALID_URL, true);
     }
 
     @Test
-    public void invalidInWizard() {
+    public void invalidInWizard() throws IOException, OperationException {
         String name = "TestConnectionInvalidInWizard_" + RandomStringUtils.randomAlphabetic(6);
         testConnectionInWizard(dsOps, name, INVALID_URL, false);
     }
@@ -112,7 +120,7 @@ public class TestConnectionTestCase extends AbstractTestConnectionTestCase {
     }
 
     @Test
-    public void validXAInWizard() {
+    public void validXAInWizard() throws IOException, OperationException {
         datasourcesPage.switchToXA();
 
         String name = "TestConnectionValidXAInWizard_" + RandomStringUtils.randomAlphabetic(6);
@@ -120,7 +128,7 @@ public class TestConnectionTestCase extends AbstractTestConnectionTestCase {
     }
 
     @Test
-    public void invalidXAInWizard() {
+    public void invalidXAInWizard() throws IOException, OperationException {
         datasourcesPage.switchToXA();
 
         String name = "TestConnectionInvalidXAInWizard_" + RandomStringUtils.randomAlphabetic(6);
