@@ -1,6 +1,7 @@
 package org.jboss.hal.testsuite.test.configuration.logging;
 
 import org.jboss.arquillian.graphene.page.Page;
+import org.jboss.arquillian.graphene.shaded.net.sf.cglib.transform.impl.InterceptFieldCallback;
 import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
@@ -46,6 +47,13 @@ public abstract class LoggingAbstractTestCase {
 
     protected void editTextAndVerify(Address address, String name, String value) throws Exception {
         boolean finished = page.getConfigFragment().editTextAndSave(name, value);
+        assertTrue("Config should be saved and closed.", finished);
+
+        new ResourceVerifier(address, client, 500).verifyAttribute(name, value);
+    }
+
+    protected void editTextAndVerify(Address address, String name, Integer value) throws Exception {
+        boolean finished = page.getConfigFragment().editTextAndSave(name, value.toString());
         assertTrue("Config should be saved and closed.", finished);
 
         new ResourceVerifier(address, client, 500).verifyAttribute(name, value);
