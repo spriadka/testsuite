@@ -74,9 +74,9 @@ public class MailTestCase {
     private static final Address SERVER_TBR_ADDRESS = MAIL_SESSION_PRE_ADDRESS.and("server", TYPE_TBR);
     private static final Address SERVER_ADDRESS = MAIL_SESSION_PRE_ADDRESS.and("server", TYPE);
 
-    private static OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
-    private static Administration administration = new Administration(client);
-    private static Operations operations = new Operations(client);
+    private static OnlineManagementClient client;
+    private static Administration administration;
+    private static Operations operations;
 
     @Drone
     public WebDriver browser;
@@ -88,6 +88,9 @@ public class MailTestCase {
 
     @BeforeClass
     public static void beforeClass() throws Exception {
+        client = ManagementClientProvider.createOnlineManagementClient();
+        administration = new Administration(client);
+        operations = new Operations(client);
         String socketBinding = createSocketBinding();
         operations.add(MAIL_SESSION_PRE_ADDRESS, Values.of("jndi-name", "java:/" + PRE_NAME));
         new ResourceVerifier(MAIL_SESSION_PRE_ADDRESS, client).verifyExists();
@@ -106,12 +109,16 @@ public class MailTestCase {
 
     @AfterClass
     public static void cleanUp() throws IOException, OperationException {
-        operations.removeIfExists(SERVER_ADDRESS);
-        operations.removeIfExists(SERVER_TBR_ADDRESS);
-        operations.removeIfExists(MAIL_SESSION_PRE_ADDRESS);
-        operations.removeIfExists(MAIL_SESSION_TBR_ADDRESS);
-        operations.removeIfExists(MAIL_SESSION_ADDRESS);
-        operations.removeIfExists(MAIL_SESSION_INV_ADDRESS);
+        try {
+            operations.removeIfExists(SERVER_ADDRESS);
+            operations.removeIfExists(SERVER_TBR_ADDRESS);
+            operations.removeIfExists(MAIL_SESSION_PRE_ADDRESS);
+            operations.removeIfExists(MAIL_SESSION_TBR_ADDRESS);
+            operations.removeIfExists(MAIL_SESSION_ADDRESS);
+            operations.removeIfExists(MAIL_SESSION_INV_ADDRESS);
+        } finally {
+            client.close();
+        }
     }
 
     @Test
