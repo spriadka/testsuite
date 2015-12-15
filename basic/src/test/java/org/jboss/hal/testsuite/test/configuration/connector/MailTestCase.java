@@ -5,15 +5,15 @@ import org.apache.mina.util.AvailablePortFinder;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.arquillian.junit.InSequence;
 import org.jboss.hal.testsuite.category.Standalone;
-import org.jboss.hal.testsuite.cli.CliClient;
-import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
+import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.creaper.command.AddSocketBinding;
 import org.jboss.hal.testsuite.finder.Application;
+import org.jboss.hal.testsuite.finder.Column;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
+import org.jboss.hal.testsuite.finder.Row;
 import org.jboss.hal.testsuite.fragment.config.mail.MailServerFragment;
 import org.jboss.hal.testsuite.fragment.config.mail.MailServerWizard;
 import org.jboss.hal.testsuite.fragment.config.mail.MailSessionWizard;
@@ -21,9 +21,9 @@ import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
 import org.jboss.hal.testsuite.page.config.MailSessionsPage;
 import org.jboss.hal.testsuite.page.config.StandaloneConfigEntryPoint;
 import org.jboss.hal.testsuite.util.Console;
-import org.jboss.hal.testsuite.util.ResourceVerifier;
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
@@ -32,10 +32,15 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wildfly.extras.creaper.core.CommandFailedException;
 import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
+import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.OperationException;
+import org.wildfly.extras.creaper.core.online.operations.Operations;
+import org.wildfly.extras.creaper.core.online.operations.Values;
+import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
 
 import java.io.IOException;
+import java.util.concurrent.ThreadLocalRandom;
 
-import static org.jboss.hal.testsuite.cli.CliConstants.MAIL_SESSION_SUBSYSTEM_ADDRESS;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -53,18 +58,25 @@ public class MailTestCase {
     private static final String MAIL_SESSION_NAME = "java:/mail_" + RandomStringUtils.randomAlphanumeric(5);
     private static final String MAIL_SESSION_NAME_INVALID = "%%%" + RandomStringUtils.randomAlphanumeric(5);
     private static final String MAIL_NAME = "n_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String PRE_NAME = "npre_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String TBR_NAME = "ntbr_" + RandomStringUtils.randomAlphanumeric(5);
     private static final String TYPE = "pop3";
+    private static final String TYPE_TBR = "imap";
     private static final String USERNAME = "un_" + RandomStringUtils.randomAlphanumeric(5);
     private static final String PASSWORD = "pw_" + RandomStringUtils.randomAlphanumeric(5);
-    private static final String SOCKET_BINDING = "sb_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String SOCKET_BINDING = "mailSb_" + RandomStringUtils.randomAlphanumeric(5);
     private static final String FROM = "from_" + RandomStringUtils.randomAlphanumeric(5);
 
-    private static final String DMR_SESSION = MAIL_SESSION_SUBSYSTEM_ADDRESS + "=" + MAIL_NAME + "";
-    private static final String DMR_SESSION_INVALID = MAIL_SESSION_SUBSYSTEM_ADDRESS + "=" + MAIL_SESSION_NAME_INVALID + "";
-    private static final String DMR_SERVER = DMR_SESSION + "/server=" + TYPE;
+    private static final Address MAIL_SESSION_PRE_ADDRESS = Address.subsystem("mail").and("mail-session", PRE_NAME);
+    private static final Address MAIL_SESSION_TBR_ADDRESS = Address.subsystem("mail").and("mail-session", TBR_NAME);
+    private static final Address MAIL_SESSION_ADDRESS = Address.subsystem("mail").and("mail-session", MAIL_NAME);
+    private static final Address MAIL_SESSION_INV_ADDRESS = Address.subsystem("mail").and("mail-session", MAIL_SESSION_NAME_INVALID);
+    private static final Address SERVER_TBR_ADDRESS = MAIL_SESSION_PRE_ADDRESS.and("server", TYPE_TBR);
+    private static final Address SERVER_ADDRESS = MAIL_SESSION_PRE_ADDRESS.and("server", TYPE);
 
-    private static CliClient client = CliClientFactory.getClient();
-    private static ResourceVerifier verifier = new ResourceVerifier(DMR_SESSION, client);
+    private static OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
+    private static Administration administration = new Administration(client);
+    private static Operations operations = new Operations(client);
 
     @Drone
     public WebDriver browser;
@@ -74,6 +86,17 @@ public class MailTestCase {
 
     private FinderNavigation navi;
 
+    @BeforeClass
+    public static void beforeClass() throws Exception {
+        String socketBinding = createSocketBinding();
+        operations.add(MAIL_SESSION_PRE_ADDRESS, Values.of("jndi-name", "java:/" + PRE_NAME));
+        new ResourceVerifier(MAIL_SESSION_PRE_ADDRESS, client).verifyExists();
+        operations.add(MAIL_SESSION_TBR_ADDRESS, Values.of("jndi-name", "java:/" + TBR_NAME));
+        new ResourceVerifier(MAIL_SESSION_TBR_ADDRESS, client).verifyExists();
+        operations.add(SERVER_TBR_ADDRESS, Values.of("outbound-socket-binding-ref", socketBinding));
+        new ResourceVerifier(SERVER_TBR_ADDRESS, client).verifyExists();
+    }
+
     @Before
     public void before() {
         navi = new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
@@ -82,14 +105,17 @@ public class MailTestCase {
     }
 
     @AfterClass
-    public static void cleanUp() {
-        client.removeResource(DMR_SERVER);
-        client.removeResource(DMR_SESSION);
-        client.removeResource(DMR_SESSION_INVALID);
+    public static void cleanUp() throws IOException, OperationException {
+        operations.removeIfExists(SERVER_ADDRESS);
+        operations.removeIfExists(SERVER_TBR_ADDRESS);
+        operations.removeIfExists(MAIL_SESSION_PRE_ADDRESS);
+        operations.removeIfExists(MAIL_SESSION_TBR_ADDRESS);
+        operations.removeIfExists(MAIL_SESSION_ADDRESS);
+        operations.removeIfExists(MAIL_SESSION_INV_ADDRESS);
     }
 
     @Test
-    public void createInvalidMailSession() {
+    public void createInvalidMailSession() throws Exception {
 
         invokeOperationAddMailSession();
         MailSessionWizard wizard = Console.withBrowser(browser).openedWizard(MailSessionWizard.class);
@@ -100,12 +126,12 @@ public class MailTestCase {
                         .finish();
 
         assertFalse("Wizard window should not be closed.", result);
-        verifier.verifyResource(DMR_SESSION_INVALID, false);
+        new ResourceVerifier(MAIL_SESSION_INV_ADDRESS, client).verifyDoesNotExist();
     }
 
     @Test
-    @InSequence(0)
-    public void createMailSession() {
+    public void createMailSession() throws Exception {
+        Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
         invokeOperationAddMailSession();
         MailSessionWizard wizard = Console.withBrowser(browser).openedWizard(MailSessionWizard.class);
 
@@ -116,94 +142,105 @@ public class MailTestCase {
 
         assertTrue("Wizard window should be closed.", result);
 
-        verifier.verifyResource(DMR_SESSION, true);
+        new ResourceVerifier(MAIL_SESSION_ADDRESS, client).verifyExists();
     }
 
     @Test
-    @InSequence(1)
-    public void enableDebugOnMailSession() {
-        invokeOperationOnMailSession(ATTRIBUTES);
+    public void enableDebugOnMailSession() throws Exception {
+        invokeOperationOnMailSession(ATTRIBUTES, PRE_NAME);
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).getEditor().checkbox("debug", true);
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).clickButton("Save");
 
-        verifier.verifyAttribute("debug", "true");
+        new ResourceVerifier(MAIL_SESSION_PRE_ADDRESS, client).verifyAttribute("debug", true);
     }
 
     @Test
-    @InSequence(2)
-    public void disableDebugOnMailSession() {
-        invokeOperationOnMailSession(ATTRIBUTES);
+    public void disableDebugOnMailSession() throws Exception {
+        invokeOperationOnMailSession(ATTRIBUTES, PRE_NAME);
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).getEditor().checkbox("debug", false);
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).clickButton("Save");
 
-        verifier.verifyAttribute("debug", "false");
+        new ResourceVerifier(MAIL_SESSION_PRE_ADDRESS, client).verifyAttribute("debug", false);
     }
 
     @Test
-    @InSequence(3)
-    public void changeDefaultFromOnMailSession() {
-        invokeOperationOnMailSession(ATTRIBUTES);
+    public void changeDefaultFromOnMailSession() throws Exception {
+        invokeOperationOnMailSession(ATTRIBUTES, PRE_NAME);
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).getEditor().text("from", FROM);
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).clickButton("Save");
 
-        verifier.verifyAttribute("from", FROM);
+        new ResourceVerifier(MAIL_SESSION_PRE_ADDRESS, client, 5000).verifyAttribute("from", FROM);
     }
 
     @Test
-    @InSequence(4)
-    public void createMailServer() throws IOException, CommandFailedException {
-        invokeOperationOnMailSession(FinderNames.VIEW);
+    public void createMailServer() throws Exception {
+        invokeOperationOnMailSession(FinderNames.VIEW, PRE_NAME);
         Application.waitUntilVisible();
         MailServerFragment fragment = page.getSesionsServers();
+        Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
         MailServerWizard wizard = fragment.addMailServer();
 
-        try (OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient()) {
-            int port = AvailablePortFinder.getNextAvailable(1024);
-            log.info("Obtained port for socket binding '" + SOCKET_BINDING + "' is " + port);
-            client.apply(new AddSocketBinding.Builder(SOCKET_BINDING)
-                    .port(port)
-                    .build());
-        }
+        createSocketBinding(SOCKET_BINDING);
 
-        boolean result =
-                wizard.socketBinding(SOCKET_BINDING)
-                        .username(USERNAME)
-                        .password(PASSWORD)
-                        .type(TYPE)
-                        .ssl(true)
-                        .finish();
+        wizard.socketBinding(SOCKET_BINDING)
+                .username(USERNAME)
+                .password(PASSWORD)
+                .type(TYPE)
+                .ssl(true)
+                .clickSave();
 
-        assertTrue("Window should be closed", result);
+        Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
+        administration.reloadIfRequired();
+
+        assertTrue("Window should be closed", wizard.isClosed());
         assertTrue("Mail server should be present in table", fragment.resourceIsPresent(TYPE.toUpperCase()));
 
-        verifier.verifyResource(DMR_SERVER, true);
+        new ResourceVerifier(SERVER_ADDRESS, client).verifyExists();
     }
 
     @Test
-    @InSequence(5)
-    public void removeMailServer() {
-        invokeOperationOnMailSession(FinderNames.VIEW);
+    public void removeMailServer() throws Exception {
+        invokeOperationOnMailSession(FinderNames.VIEW, PRE_NAME);
         Application.waitUntilVisible();
         MailServerFragment fragment = page.getSesionsServers();
-        fragment.removeAndConfirm(TYPE);
+        fragment.removeAndConfirm(TYPE_TBR);
 
-        verifier.verifyResource(DMR_SERVER, false);
+        new ResourceVerifier(SERVER_TBR_ADDRESS, client).verifyDoesNotExist();
     }
 
     @Test
-    @InSequence(6)
-    public void removeMailSession() {
-        invokeOperationOnMailSession("Remove");
+    public void removeMailSession() throws Exception {
+        invokeOperationOnMailSession("Remove", TBR_NAME);
 
-        verifier.verifyResource(DMR_SESSION, false);
+        new ResourceVerifier(MAIL_SESSION_TBR_ADDRESS, client).verifyDoesNotExist();
     }
 
-    private void invokeOperationOnMailSession(String operationName) {
-        navi.addAddress(MAIL_SESSION_LABEL, MAIL_NAME).selectRow().invoke(operationName);
+    private void invokeOperationOnMailSession(String operationName, String sessionName) {
+        Row row = navi.addAddress(MAIL_SESSION_LABEL, sessionName).selectRow();
+        Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
+        row.invoke(operationName);
     }
 
     private void invokeOperationAddMailSession() {
-        navi.addAddress(MAIL_SESSION_LABEL).selectColumn().invoke(FinderNames.ADD);
+        Column column = navi.addAddress(MAIL_SESSION_LABEL).selectColumn();
+        Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
+        column.invoke(FinderNames.ADD);
+    }
+
+    private static String createSocketBinding() throws IOException, CommandFailedException {
+        String socketBinding = "mailTestCaseSb_" + RandomStringUtils.randomAlphanumeric(6);
+        return createSocketBinding(socketBinding);
+    }
+
+    private static String createSocketBinding(String name) throws IOException, CommandFailedException {
+        try (OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient()) {
+            int port = AvailablePortFinder.getNextAvailable(ThreadLocalRandom.current().nextInt(1024, 65000));
+            log.info("Obtained port for socket binding '" + name + "' is " + port);
+            client.apply(new AddSocketBinding.Builder(name)
+                    .port(port)
+                    .build());
+        }
+        return name;
     }
 
 }
