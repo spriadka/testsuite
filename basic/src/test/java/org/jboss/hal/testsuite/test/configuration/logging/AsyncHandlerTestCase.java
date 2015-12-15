@@ -1,25 +1,13 @@
 package org.jboss.hal.testsuite.test.configuration.logging;
 
+import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.arquillian.junit.InSequence;
-import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Shared;
-import org.jboss.hal.testsuite.cli.CliClient;
-import org.jboss.hal.testsuite.cli.CliClientFactory;
-import org.jboss.hal.testsuite.cli.Library;
-import org.jboss.hal.testsuite.dmr.Dispatcher;
-import org.jboss.hal.testsuite.dmr.ResourceAddress;
-import org.jboss.hal.testsuite.dmr.ResourceVerifier;
-import org.jboss.hal.testsuite.finder.Application;
-import org.jboss.hal.testsuite.finder.FinderNames;
-import org.jboss.hal.testsuite.finder.FinderNavigation;
+import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
-import org.jboss.hal.testsuite.page.config.DomainConfigEntryPoint;
 import org.jboss.hal.testsuite.page.config.LoggingPage;
-import org.jboss.hal.testsuite.page.config.StandaloneConfigEntryPoint;
-import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -27,8 +15,12 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
+import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.OperationException;
+import org.wildfly.extras.creaper.core.online.operations.Values;
 
-import static org.junit.Assert.assertFalse;
+import java.io.IOException;
+
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -36,23 +28,30 @@ import static org.junit.Assert.assertTrue;
  */
 @RunWith(Arquillian.class)
 @Category(Shared.class)
-public class AsyncHandlerTestCase {
-    private static final String ASYNCHANDLER = "asyncHandler";
+public class AsyncHandlerTestCase extends LoggingAbstractTestCase {
+    private static final String ASYNCHANDLER = "asyncHandler" + RandomStringUtils.randomAlphanumeric(6);
+    private static final String ASYNCHANDLER_TBR = "asyncHandler" + RandomStringUtils.randomAlphanumeric(6);
+    private static final String ASYNCHANDLER_TBA = "asyncHandler" + RandomStringUtils.randomAlphanumeric(6);
 
-    private FinderNavigation navigation;
-
-    private ModelNode path = new ModelNode("/subsystem=logging/async-handler=" + ASYNCHANDLER);
-    private ModelNode domainPath = new ModelNode("/profile=full/subsystem=logging/async-handler=" + ASYNCHANDLER);
-    private ResourceAddress address;
-    private static Dispatcher dispatcher;
-    private static ResourceVerifier verifier;
-    CliClient cliClient = CliClientFactory.getClient();
+    private static final Address ASYNCHANDLER_ADDRESS = LOGGING_SUBSYSTEM.and("async-handler", ASYNCHANDLER);
+    private static final Address ASYNCHANDLER_ADDRESS_TBR = LOGGING_SUBSYSTEM.and("async-handler", ASYNCHANDLER_TBR);
+    private static final Address ASYNCHANDLER_ADDRESS_TBA = LOGGING_SUBSYSTEM.and("async-handler", ASYNCHANDLER_TBA);
 
     @BeforeClass
-    public static void setUp() {
-        dispatcher = new Dispatcher();
-        verifier = new ResourceVerifier(dispatcher);
+    public static void setUp() throws Exception {
+        operations.add(ASYNCHANDLER_ADDRESS, Values.of("queue-length", 120));
+        new ResourceVerifier(ASYNCHANDLER_ADDRESS, client).verifyExists();
+        operations.add(ASYNCHANDLER_ADDRESS_TBR, Values.of("queue-length", 120));
+        new ResourceVerifier(ASYNCHANDLER_ADDRESS_TBR, client).verifyExists();
     }
+
+    @AfterClass
+    public static void tearDown() throws IOException, OperationException {
+        operations.removeIfExists(ASYNCHANDLER_ADDRESS);
+        operations.removeIfExists(ASYNCHANDLER_ADDRESS_TBA);
+        operations.removeIfExists(ASYNCHANDLER_ADDRESS_TBR);
+    }
+
 
     @Drone
     private WebDriver browser;
@@ -61,123 +60,59 @@ public class AsyncHandlerTestCase {
 
     @Before
     public void before() {
-        if (ConfigUtils.isDomain()) {
-            navigation = new FinderNavigation(browser, DomainConfigEntryPoint.class)
-                    .addAddress(FinderNames.CONFIGURATION, FinderNames.PROFILES)
-                    .addAddress(FinderNames.PROFILE, "full")
-                    .addAddress(FinderNames.SUBSYSTEM, "Logging");
-            address = new ResourceAddress(domainPath);
-        } else {
-            navigation = new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
-                    .addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
-                    .addAddress(FinderNames.SUBSYSTEM, "Logging");
-            address = new ResourceAddress(path);
-        }
-        navigation.selectRow().invoke(FinderNames.VIEW);
-        Application.waitUntilVisible();
-
+        page.navigate();
         page.switchToHandlerTab();
         page.switchToAsync();
-    }
-
-    @AfterClass
-    public static void tearDown() {
-        dispatcher.close();
+        page.selectHandler(ASYNCHANDLER);
     }
 
     @Test
-    @InSequence(0)
-    public void addAsyncHandler() {
-        page.addAsyncHandler(ASYNCHANDLER, "230");
-
-        verifier.verifyResource(address, true);
+    public void addAsyncHandler() throws Exception {
+        page.addAsyncHandler(ASYNCHANDLER_TBA, "230");
+        new ResourceVerifier(ASYNCHANDLER_ADDRESS_TBA, client).verifyExists();
     }
 
     @Test
-    @InSequence(1)
-    public void updateAsyncHandlerLevel() {
-        page.edit();
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().select("level", "WARN");
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "level", "WARN", 500);
+    public void updateAsyncHandlerLevel() throws Exception {
+        selectOptionAndVerify(ASYNCHANDLER_ADDRESS, "level", "WARN");
     }
 
-    @Test // https://issues.jboss.org/browse/HAL-811
-    @InSequence(2)
+    @Test
     public void updateAsyncHandlerQueueLenWithWrongValue() {
-        page.edit();
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("queue-length", "0");
-        boolean finished = editPanelFragment.save();
-
-        assertFalse("Config should not be saved and closed,because 0 is illegal value.", finished);
-        verifier.verifyAttribute(address, "queue-length", "230", 500);
+        verifyIfErrorAppears("queue-length", "0");
     }
 
     @Test
-    @InSequence(3)
-    public void updateAsyncHandlerQueueLen() {
-        page.edit();
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("queue-length", "240");
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "queue-length", "240", 500);
+    public void updateAsyncHandlerQueueLen() throws Exception {
+        editTextAndVerify(ASYNCHANDLER_ADDRESS, "queue-length", 90);
     }
 
     @Test
-    @InSequence(4)
-    public void disableAsyncHandler() {
-        page.edit();
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().checkbox("enabled", false);
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "enabled" , false, 500);
+    public void disableAsyncHandler() throws Exception {
+        editCheckboxAndVerify(ASYNCHANDLER_ADDRESS, "enabled", false);
     }
 
 
     @Test
-    @InSequence(5)
-    public void addAsyncHandlerSubhandlers() {
-        page.edit();
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("subhandlers", "CONSOLE\nFILE");
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "subhandlers", "[\"CONSOLE\",\"FILE\"]", 500);
+    public void addAsyncHandlerSubhandlers() throws Exception {
+        editTextAreaAndVerify(ASYNCHANDLER_ADDRESS, "subhandlers", new String[]{"CONSOLE", "FILE"});
     }
 
-    @Test
-    @InSequence(6) //https://issues.jboss.org/browse/HAL-819 - FIXED
-    public void addAsyncHandlerWrongSubhandlers() {
-        page.edit();
+    @Test //https://issues.jboss.org/browse/HAL-819 - FIXED
+    public void addAsyncHandlerWrongSubhandlers() throws Exception {
         ConfigFragment editPanelFragment = page.getConfigFragment();
+        editPanelFragment.edit().text("subhandlers", "BLABLA");
 
-        editPanelFragment.getEditor().text("subhandlers", "BLABLA");
         boolean finished = editPanelFragment.save();
-
         assertTrue("Config should be saved and closed. But handlers are not really saved.", finished);
-        verifier.verifyAttribute(address, "subhandlers", "[\"CONSOLE\",\"FILE\"]", 500);
-        cliClient.reload();
+
+        operations.readAttribute(ASYNCHANDLER_ADDRESS, "subhandlers").assertNotDefinedValue();
     }
 
     @Test
-    @InSequence(7)
-    public void removeAsyncHandler() {
+    public void removeAsyncHandler() throws Exception {
+        page.selectHandler(ASYNCHANDLER_TBR);
         page.remove();
-        Library.letsSleep(500);
-        verifier.verifyResource(address, false);
+        new ResourceVerifier(ASYNCHANDLER_ADDRESS_TBR, client).verifyDoesNotExist();
     }
 }

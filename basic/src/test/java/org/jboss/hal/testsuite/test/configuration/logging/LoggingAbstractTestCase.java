@@ -5,8 +5,11 @@ import org.jboss.arquillian.graphene.shaded.net.sf.cglib.transform.impl.Intercep
 import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
+import org.jboss.hal.testsuite.fragment.ConfigFragment;
+import org.jboss.hal.testsuite.fragment.config.ee.EEConfigFragment;
 import org.jboss.hal.testsuite.page.config.LoggingPage;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
 import org.wildfly.extras.creaper.core.online.operations.Address;
@@ -27,7 +30,7 @@ public abstract class LoggingAbstractTestCase {
     @Page
     private LoggingPage page;
 
-    protected static final Address LOGGING_SUBSYSTEM = Address.subsystem("logging");
+    protected static Address LOGGING_SUBSYSTEM;
 
     protected static OnlineManagementClient client;
     protected static Operations operations;
@@ -38,6 +41,8 @@ public abstract class LoggingAbstractTestCase {
         client = ManagementClientProvider.createOnlineManagementClient();
         operations = new Operations(client);
         administration = new Administration(client);
+        LOGGING_SUBSYSTEM = client.options().isStandalone ? Address.subsystem("logging") :
+                Address.of("profile", client.options().defaultProfile).and("subsystem", "logging");
     }
 
     @AfterClass
@@ -100,5 +105,12 @@ public abstract class LoggingAbstractTestCase {
                         .and("path", path)
                         .and("relative-to", "jboss.server.log.dir"))
                 .and("suffix", "%H%m"));
+    }
+
+    protected void verifyIfErrorAppears(String identifier, String value) {
+        ConfigFragment config = page.getConfigFragment();
+        config.editTextAndSave(identifier, value);
+        Assert.assertTrue(config.isErrorShownInForm());
+        config.cancel();
     }
 }
