@@ -6,6 +6,7 @@ import org.jboss.hal.testsuite.cli.TimeoutException;
 import org.jboss.hal.testsuite.finder.Application;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
+import org.jboss.hal.testsuite.finder.Row;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
 import org.jboss.hal.testsuite.page.Navigatable;
@@ -35,8 +36,9 @@ public class LoggingPage extends ConfigurationPage implements Navigatable {
             navigation = new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
                     .addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
                     .addAddress(FinderNames.SUBSYSTEM, "Logging");
-
-            navigation.selectRow().invoke(FinderNames.VIEW);
+            Row row = navigation.selectRow();
+            Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
+            row.invoke(FinderNames.VIEW);
             Application.waitUntilVisible();
         }
     }

@@ -79,11 +79,18 @@ public abstract class LoggingAbstractTestCase {
         new ResourceVerifier(address, client, 500).verifyAttribute(name, modelNode);
     }
 
-
     protected static void createFileHandler(Address address, String path) throws IOException {
         operations.add(address, Values.empty()
                 .andObject("file", Values.empty()
                         .and("path", path)
                         .and("relative-to", "jboss.server.log.dir")));
+    }
+
+    protected static void createPeriodicFileHandler(Address address, String path) throws IOException {
+        operations.add(address, Values.empty()
+                .andObject("file", Values.empty()
+                        .and("path", path)
+                        .and("relative-to", "jboss.server.log.dir"))
+                .and("suffix", "%H%m"));
     }
 }
