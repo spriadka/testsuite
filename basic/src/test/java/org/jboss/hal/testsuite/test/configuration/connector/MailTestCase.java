@@ -19,6 +19,7 @@ import org.jboss.hal.testsuite.fragment.config.mail.MailServerWizard;
 import org.jboss.hal.testsuite.fragment.config.mail.MailSessionWizard;
 import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
 import org.jboss.hal.testsuite.page.config.MailSessionsPage;
+import org.jboss.hal.testsuite.page.config.StandaloneConfigEntryPoint;
 import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.ResourceVerifier;
 import org.junit.AfterClass;
@@ -75,7 +76,7 @@ public class MailTestCase {
 
     @Before
     public void before() {
-        navi = new FinderNavigation(browser, MailSessionsPage.class)
+        navi = new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
             .addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
             .addAddress(FinderNames.SUBSYSTEM, "Mail");
     }
