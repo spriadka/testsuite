@@ -6,8 +6,6 @@ import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Standalone;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
-import org.jboss.hal.testsuite.fragment.ConfigFragment;
-import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.jboss.hal.testsuite.page.config.LoggingPage;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -20,8 +18,6 @@ import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.OperationException;
 
 import java.io.IOException;
-
-import static org.junit.Assert.assertTrue;
 
 /**
  * Created by pcyprian on 14.10.15.

@@ -1,12 +1,10 @@
 package org.jboss.hal.testsuite.test.configuration.logging;
 
 import org.jboss.arquillian.graphene.page.Page;
-import org.jboss.arquillian.graphene.shaded.net.sf.cglib.transform.impl.InterceptFieldCallback;
 import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
-import org.jboss.hal.testsuite.fragment.config.ee.EEConfigFragment;
 import org.jboss.hal.testsuite.page.config.LoggingPage;
 import org.junit.AfterClass;
 import org.junit.Assert;
