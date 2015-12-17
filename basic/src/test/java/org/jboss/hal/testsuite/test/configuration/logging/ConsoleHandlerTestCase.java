@@ -57,8 +57,8 @@ public class ConsoleHandlerTestCase extends LoggingAbstractTestCase {
     @Before
     public void before() {
         page.navigate();
-
         page.switchToHandlerTab();
+        page.selectHandler(CONSOLE_HANDLER);
     }
 
     @Test
@@ -71,31 +71,26 @@ public class ConsoleHandlerTestCase extends LoggingAbstractTestCase {
 
     @Test
     public void updateConsoleHandlerLevel() throws Exception {
-        page.selectHandler(CONSOLE_HANDLER);
         selectOptionAndVerify(C_HANDLER_ADDRESS, "level", "DEBUG");
     }
 
     @Test
     public void updateConsoleHandlerNamedFormatter() throws Exception {
-        page.selectHandler(CONSOLE_HANDLER);
         editTextAndVerify(C_HANDLER_ADDRESS, "named-formatter", "PATTERN");
     }
 
     @Test
     public void updateConsoleHandlerTarget() throws Exception {
-        page.selectHandler(CONSOLE_HANDLER);
         selectOptionAndVerify(C_HANDLER_ADDRESS, "target", "console");
     }
 
     @Test
     public void updateConsoleHandlerAutoflush() throws Exception {
-        page.selectHandler(CONSOLE_HANDLER);
         editCheckboxAndVerify(C_HANDLER_ADDRESS, "autoflush", false);
     }
 
     @Test
     public void updateConsoleHandlerFormatter() throws Exception {
-        page.selectHandler(CONSOLE_HANDLER);
         editTextAndVerify(C_HANDLER_ADDRESS, "formatter", RandomStringUtils.randomAlphanumeric(6));
     }
 

@@ -60,6 +60,7 @@ public class FormatterTestCase extends LoggingAbstractTestCase {
     public void before() {
         page.navigate();
         page.switchToFormatterTab();
+        page.selectFormatter(FORMATTER_NAME);
     }
 
     @Test
@@ -73,14 +74,11 @@ public class FormatterTestCase extends LoggingAbstractTestCase {
     @Test
     public void updateFormatterPattern() throws Exception {
         String pattern = "%d{HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n";
-        page.selectFormatter(FORMATTER_NAME);
-
         editTextAndVerify(FORMATTER_ADDRESS, "pattern", pattern);
     }
 
     @Test
     public void updateFormatterColorMap() throws Exception {
-        page.selectFormatter(FORMATTER_NAME);
         editTextAndVerify(FORMATTER_ADDRESS, "color-map", "fatal:black");
     }
 

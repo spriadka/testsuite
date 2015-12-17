@@ -61,59 +61,51 @@ public class FileHandlerTestCase extends LoggingAbstractTestCase {
         page.navigate();
         page.switchToHandlerTab();
         page.switchToFile();
+        page.selectHandler(FILE_HANDLER);
     }
 
     @Test
     public void addFileHandler() throws Exception {
-        page.addFileHandler(FILE_HANDLER);
         new ResourceVerifier(FILE_HANDLER_ADDRESS, client).verifyExists();
     }
 
     @Test
     public void updateFileHandlerNamedFormatter() throws Exception {
-        page.selectHandler(FILE_HANDLER);
         editTextAndVerify(FILE_HANDLER_ADDRESS, "named-formatter", "PATTERN");
     }
 
     @Test
     public void updateFileHandlerEncoding() throws Exception {
-        page.selectHandler(FILE_HANDLER);
         editTextAndVerify(FILE_HANDLER_ADDRESS, "encoding", "UTF-8");
     }
 
     @Test
     public void updateFileHandlerAppend() throws Exception {
-        page.selectHandler(FILE_HANDLER);
         editCheckboxAndVerify(FILE_HANDLER_ADDRESS, "append", false);
     }
 
     @Test
     public void updateFileHandlerAutoflush() throws Exception {
-        page.selectHandler(FILE_HANDLER);
         editCheckboxAndVerify(FILE_HANDLER_ADDRESS, "autoflush", false);
     }
 
     @Test
     public void disableFileHandler() throws Exception {
-        page.selectHandler(FILE_HANDLER);
         editCheckboxAndVerify(FILE_HANDLER_ADDRESS, "enabled", false);
     }
 
     @Test
     public void updateFileHandlerLevel() throws Exception {
-        page.selectHandler(FILE_HANDLER);
         selectOptionAndVerify(FILE_HANDLER_ADDRESS, "level", "CONFIG");
     }
 
     @Test
     public void updateFileHandlerFilterSpec() throws Exception {
-        page.selectHandler(FILE_HANDLER);
         editTextAndVerify(FILE_HANDLER_ADDRESS, "filter-spec", "match(\"JBEAP.*\")");
     }
 
     @Test
     public void updateFileHandlerFormatter() throws Exception {
-        page.selectHandler(FILE_HANDLER);
         editTextAndVerify(FILE_HANDLER_ADDRESS, "formatter", "%d{HH:mm:ss,SSS}");
     }
 

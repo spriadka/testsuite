@@ -57,6 +57,7 @@ public class LogCategoriesTestCase extends LoggingAbstractTestCase {
     public void before() {
         page.navigate();
         page.switchToCategoriesTab();
+        page.selectLogger(LOGGER);
     }
 
     @Test
@@ -69,19 +70,16 @@ public class LogCategoriesTestCase extends LoggingAbstractTestCase {
 
     @Test
     public void updateLoggerLevel() throws Exception {
-        page.selectLogger(LOGGER);
         selectOptionAndVerify(LOGGER_ADDRESS, "level", "WARN");
     }
 
     @Test
     public void updateLoggerUsingParentHandler() throws Exception {
-        page.selectLogger(LOGGER);
         editCheckboxAndVerify(LOGGER_ADDRESS, "use-parent-handlers", false);
     }
 
     @Test
     public void updateLoggerHandler() throws Exception {
-        page.selectLogger(LOGGER);
         editTextAreaAndVerify(LOGGER_ADDRESS, "handlers", new String[]{"CONSOLE", "FILE"});
     }
 
