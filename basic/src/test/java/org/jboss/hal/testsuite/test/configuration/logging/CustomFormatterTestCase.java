@@ -1,18 +1,13 @@
 package org.jboss.hal.testsuite.test.configuration.logging;
 
+import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Shared;
-import org.jboss.hal.testsuite.cli.CliClient;
-import org.jboss.hal.testsuite.cli.CliClientFactory;
-import org.jboss.hal.testsuite.dmr.Dispatcher;
-import org.jboss.hal.testsuite.dmr.ResourceAddress;
-import org.jboss.hal.testsuite.dmr.ResourceVerifier;
+import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.page.config.LoggingPage;
-import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -20,40 +15,48 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
+import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.OperationException;
+import org.wildfly.extras.creaper.core.online.operations.Values;
 
-import static org.junit.Assert.assertTrue;
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Created by pcyprian on 1.9.15.
  */
 @RunWith(Arquillian.class)
 @Category(Shared.class)
-public class CustomFormatterTestCase {
-    private static final String NAME = "customFormatter";
+public class CustomFormatterTestCase extends LoggingAbstractTestCase {
+
+    private static final String CUSTOM_FORMATTER = "customFormatter" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String CUSTOM_FORMATTER_TBR = "customFormatterTBR" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String CUSTOM_FORMATTER_TBA = "customFormatterTBR" + RandomStringUtils.randomAlphanumeric(5);
+
     private static final String CLASS = "java.util.logging.XMLFormatter";
     private static final String MODULE = "org.jboss.logmanager";
-    private static final String ADD = "/subsystem=logging/custom-formatter=" + NAME + ":add(class=" + CLASS + ",module=" + MODULE + ")";
-    private static final String DOMAIN = "/profile=default" ;
-
-    private String command;
-    private String remove = "/subsystem=logging/custom-formatter=" + NAME + ":remove";
-
-    private ModelNode path = new ModelNode("/subsystem=logging/custom-formatter=" + NAME);
-    private ModelNode domainPath = new ModelNode("/profile=default/subsystem=logging/custom-formatter=" + NAME);
-    private ResourceAddress address;
-    private static Dispatcher dispatcher;
-    private static ResourceVerifier verifier;
-    CliClient cliClient = CliClientFactory.getClient();
+    private static final Address CUSTOM_FORMATTER_ADDRESS = LOGGING_SUBSYSTEM
+            .and("custom-formatter", CUSTOM_FORMATTER);
+    private static final Address CUSTOM_FORMATTER_TBR_ADDRESS = LOGGING_SUBSYSTEM
+            .and("custom-formatter", CUSTOM_FORMATTER_TBR);
+    private static final Address CUSTOM_FORMATTER_TBA_ADDRESS = LOGGING_SUBSYSTEM
+            .and("custom-formatter", CUSTOM_FORMATTER_TBA);
 
     @BeforeClass
-    public static void setUp() {
-        dispatcher = new Dispatcher();
-        verifier  = new ResourceVerifier(dispatcher);
+    public static void setUp() throws Exception {
+        operations.add(CUSTOM_FORMATTER_ADDRESS, Values.of("class", CLASS).and("module", MODULE));
+        new ResourceVerifier(CUSTOM_FORMATTER_ADDRESS, client).verifyExists();
+        operations.add(CUSTOM_FORMATTER_TBR_ADDRESS, Values.of("class", CLASS).and("module", MODULE));
+        new ResourceVerifier(CUSTOM_FORMATTER_TBR_ADDRESS, client).verifyExists();
+        administration.reloadIfRequired();
     }
 
     @AfterClass
-    public static void tearDown() {
-        dispatcher.close();
+    public static void tearDown() throws IOException, OperationException, TimeoutException, InterruptedException {
+        operations.removeIfExists(CUSTOM_FORMATTER_ADDRESS);
+        operations.removeIfExists(CUSTOM_FORMATTER_TBR_ADDRESS);
+        operations.removeIfExists(CUSTOM_FORMATTER_TBA_ADDRESS);
+        administration.reloadIfRequired();
     }
 
     @Drone
@@ -63,66 +66,42 @@ public class CustomFormatterTestCase {
 
     @Before
     public void before() {
-        if (ConfigUtils.isDomain()) {
-            address = new ResourceAddress(domainPath);
-            command = DOMAIN + ADD;
-            remove = DOMAIN + "/subsystem=logging/custom-formatter=" + NAME + ":remove";
-        } else {
-            address = new ResourceAddress(path);
-            command = ADD;
-        }
+        page.navigate();
+        page.switchToFormatterTab();
+        page.switchToCustomPattern();
+        page.selectFormatter(CUSTOM_FORMATTER);
     }
 
     @Test
-    public void addCustomFormatter() {
-        page.navigateToLogging();
-        page.switchToFormatterTab();
-        page.switchToCustomPattern();
-        page.addCustomFormatter(NAME, CLASS, MODULE);
+    public void addCustomFormatter() throws Exception {
+        page.addCustomFormatter(CUSTOM_FORMATTER_TBA, CLASS, MODULE);
 
-        verifier.verifyResource(address, true);
-        cliClient.executeCommand(remove);
-    }
-
-    @Test // https://issues.jboss.org/browse/HAL-821
-    public void updateCustomFormatterAttributes() {
-        boolean finished = cliClient.executeForSuccess(command);
-        assertTrue("Custom formatter should be added by CLI.", finished);
-
-        page.navigateToLogging();
-        page.switchToFormatterTab();
-        page.switchToCustomPattern();
-        page.edit();
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("class", "org.jboss.logmanager.formatters.PatternFormatter");
-        finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "class", "org.jboss.logmanager.formatters.PatternFormatter", 500);
-
-        verifier.verifyAttribute(address, "module", "org.jboss.logmanager", 500);
-
-        page.edit();
-        editPanelFragment.getEditor().text("properties", "pattern=%s%E%n");
-        finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "properties", "[(\"pattern\" => \"%s%E%n\")]", 500);
-
-        cliClient.executeCommand(remove);
+        new ResourceVerifier(CUSTOM_FORMATTER_TBA_ADDRESS, client).verifyExists();
     }
 
     @Test
-    public void removeCustomFormatter() {
-        boolean finished = cliClient.executeForSuccess(command);
-        assertTrue("Custom formatter should be added by CLI.", finished);
+    public void updateCustomFormatterClass() throws Exception {
+        editTextAndVerify(CUSTOM_FORMATTER_ADDRESS, "class", "org.jboss.logmanager.formatters.PatternFormatter");
+    }
 
-        page.navigateToLogging();
-        page.switchToFormatterTab();
-        page.switchToCustomPattern();
+    @Test
+    public void updateCustomFormatterModule() throws Exception {
+        editTextAndVerify(CUSTOM_FORMATTER_ADDRESS, "module", "org.jboss.logmanager");
+    }
+
+    @Test //https://issues.jboss.org/browse/JBEAP-972
+    public void updateCustomFormatterProperties() throws Exception {
+        ConfigFragment config = page.getConfigFragment();
+        config.editTextAndSave("class", "org.jboss.logmanager.formatters.PatternFormatter"); //need to set formatter class which has needed setter method
+        config.editTextAndSave("properties", "pattern=%s%E%n");
+        new ResourceVerifier(CUSTOM_FORMATTER_ADDRESS, client).verifyAttribute("properties", "[(\"pattern\" => \"%s%E%n\")]");
+    }
+
+    @Test
+    public void removeCustomFormatter() throws Exception {
+        page.selectFormatter(CUSTOM_FORMATTER_TBR);
         page.remove();
 
-        verifier.verifyResource(address, false);
+        new ResourceVerifier(CUSTOM_FORMATTER_TBR_ADDRESS, client).verifyDoesNotExist();
     }
 }

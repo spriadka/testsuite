@@ -234,7 +234,9 @@ public class LoggingPage extends ConfigurationPage implements Navigatable {
                     .addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
                     .addAddress(FinderNames.SUBSYSTEM, "Logging");
         }
-        navigation.selectRow().invoke(FinderNames.VIEW);
+        Row row = navigation.selectRow();
+        Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
+        row.invoke(FinderNames.VIEW);
         Application.waitUntilVisible();
     }
 
