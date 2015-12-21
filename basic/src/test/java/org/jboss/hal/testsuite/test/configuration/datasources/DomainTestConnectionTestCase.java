@@ -4,9 +4,9 @@ import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Domain;
-import org.jboss.hal.testsuite.cli.CliClient;
 import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.cli.DomainManager;
+import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.page.config.DomainConfigurationPage;
 import org.jboss.hal.testsuite.page.home.HomePage;
 import org.jboss.hal.testsuite.util.ConfigUtils;
@@ -18,8 +18,12 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
+import org.wildfly.extras.creaper.core.CommandFailedException;
+import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
+import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
 
 import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
 /**
  * @author jcechace
@@ -39,22 +43,23 @@ public class DomainTestConnectionTestCase extends AbstractTestConnectionTestCase
     private static final String VALID_URL = "jdbc:h2:mem:test2;DB_CLOSE_DELAY=-1";
     private static final String INVALID_URL = "invalidUrl";
 
-    private static CliClient client = CliClientFactory.getDomainClient("full");
-    private static CliClient fullHaClient = CliClientFactory.getDomainClient("full-ha");
+    private static OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
+    private static OnlineManagementClient fullHaClient = ManagementClientProvider.withProfile("full-ha");
+    private static Administration administration = new Administration(client);
     private static DataSourcesOperations dsOps = new DataSourcesOperations(client);
-    private static DomainManager manager = new DomainManager(client);
+    private static DomainManager manager = new DomainManager(CliClientFactory.getClient());
 
     // Setup
     @BeforeClass
-    public static void setup() {  // create needed datasources
+    public static void setup() throws CommandFailedException, InterruptedException, TimeoutException, IOException {  // create needed datasources
         dsNameValid = dsOps.createDataSource(VALID_URL);
         dsSameNameValid = new DataSourcesOperations(fullHaClient, "full-ha").createDataSource(VALID_URL); ///
         dsSameNameInvalid = dsOps.createDataSource(dsSameNameValid, INVALID_URL);
-        client.reload();
+        administration.reload();
     }
 
     @AfterClass
-    public static void tearDown() { // remove datasources when finished
+    public static void tearDown() throws CommandFailedException { // remove datasources when finished
         dsOps.removeDataSource(dsNameValid);
         new DataSourcesOperations(fullHaClient, "full-ha").removeDataSource(dsSameNameValid); ///
         dsOps.removeDataSource(dsSameNameInvalid);

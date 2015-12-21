@@ -12,6 +12,10 @@ import org.jboss.hal.testsuite.page.config.DatasourcesPage;
 import org.jboss.hal.testsuite.util.Console;
 import org.junit.Assert;
 import org.openqa.selenium.WebDriver;
+import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.OperationException;
+
+import java.io.IOException;
 
 /**
  * @author jcechace
@@ -35,7 +39,7 @@ public abstract class AbstractTestConnectionTestCase {
         assertConnectionTest(window, expected);
     }
 
-    protected void testConnectionInWizard(DataSourcesOperations dsOps, String name, String url, boolean expected) {
+    protected void testConnectionInWizard(DataSourcesOperations dsOps, String name, String url, boolean expected) throws IOException, OperationException {
         DatasourceWizard wizard = datasourcesPage.addResource();
         Editor editor = wizard.getEditor();
 
@@ -51,11 +55,11 @@ public abstract class AbstractTestConnectionTestCase {
         editor.text("connectionUrl", url);
 
         assertConnectionTest(wizard.testConnection(), expected);
-        String dsAddress = DataSourcesOperations.getDsAddress(name);
+        Address dsAddress = DataSourcesOperations.getDsAddress(name);
         Assert.assertFalse(dsAddress + " shouldn't exist", dsOps.exists(dsAddress));
     }
 
-    protected void testXAConnectionInWizard(DataSourcesOperations dsOps, String name, String url, boolean expected) {
+    protected void testXAConnectionInWizard(DataSourcesOperations dsOps, String name, String url, boolean expected) throws IOException, OperationException {
         DatasourceWizard wizard = datasourcesPage.addResource();
         Editor editor = wizard.getEditor();
 
@@ -74,7 +78,7 @@ public abstract class AbstractTestConnectionTestCase {
         wizard.next();
 
         assertConnectionTest(wizard.testConnection(), expected);
-        String dsAddress = DataSourcesOperations.getXADsAddress(name);
+        Address dsAddress = DataSourcesOperations.getXADsAddress(name);
         Assert.assertFalse(dsAddress + " shouldn't exist", dsOps.exists(dsAddress));
     }
 

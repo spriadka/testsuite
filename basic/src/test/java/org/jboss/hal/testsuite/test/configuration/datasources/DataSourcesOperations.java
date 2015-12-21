@@ -1,88 +1,85 @@
 package org.jboss.hal.testsuite.test.configuration.datasources;
 
 import org.apache.commons.lang3.RandomStringUtils;
-import org.jboss.hal.testsuite.cli.CliClient;
-import org.jboss.hal.testsuite.cli.CliConstants;
-import org.jboss.hal.testsuite.util.ConfigUtils;
+import org.wildfly.extras.creaper.commands.datasources.AddDataSource;
+import org.wildfly.extras.creaper.commands.datasources.AddXADataSource;
+import org.wildfly.extras.creaper.commands.datasources.RemoveDataSource;
+import org.wildfly.extras.creaper.commands.datasources.RemoveXADataSource;
+import org.wildfly.extras.creaper.core.CommandFailedException;
+import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
+import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.OperationException;
+import org.wildfly.extras.creaper.core.online.operations.Operations;
+
+import java.io.IOException;
 
 /**
  * Created by mkrajcov on 4/13/15.
  */
 public class DataSourcesOperations {
 
-    private CliClient client;
+    private OnlineManagementClient client;
+    private Operations operations;
 
-    private String profile = "";
+    private String profile;
 
-    public DataSourcesOperations(CliClient client) {
+    public DataSourcesOperations(OnlineManagementClient client) {
         this.client = client;
-        if (ConfigUtils.isDomain()) {
-            profile = " --profile=full";
-        }
+        this.operations = new Operations(client);
     }
 
-    public DataSourcesOperations(CliClient client, String profile) {
+    public DataSourcesOperations(OnlineManagementClient client, String profile) {
         this(client);
-        this.profile = " --profile=" + profile;
+        this.profile = profile;
     }
 
-    public static String getDsAddress(String name) {
-        return CliConstants.DATASOURCES_ADDRESS + "=" + name;
+    public static Address getDsAddress(String name) {
+        return Address.subsystem("datasources").and("data-source", name);
     }
 
-    public static String getXADsAddress(String name) {
-        return CliConstants.XA_DATASOURCES_ADDRESS + "=" + name;
+    public static Address getXADsAddress(String name) {
+        return Address.subsystem("datasources").and("xa-data-source", name);
     }
 
-    public String createDataSource(String name, String url) {
-        String command = "data-source add" +
-                profile +
-                " --name=" + name +
-                " --jndi-name=java:/datasources/" + name +
-                " --driver-name=h2" +
-                " --connection-url=\"" + url + "\"" +
-                " --enabled=true";
-        client.executeCommand(command);
+    public String createDataSource(String name, String url) throws CommandFailedException {
+        client.apply(new AddDataSource.Builder(name)
+                .jndiName("java:/datasources/" + name)
+                .enableAfterCreate()
+                .driverName("h2")
+                .connectionUrl(url)
+                .build());
         return name;
     }
 
-    public String createDataSource(String url) {
+    public String createDataSource(String url) throws CommandFailedException {
         String name = "dsOps_" + RandomStringUtils.randomAlphanumeric(5);
         return createDataSource(name, url);
     }
 
-    public String createXADataSource(String name, String url) {
-        String command = "xa-data-source add" +
-                profile +
-                " --name=" + name +
-                " --jndi-name=java:/xa-datasources/" + name +
-                " --driver-name=h2" +
-                " --enabled=true" +
-                " --xa-datasource-properties=URL=\"" + url + "\"";
-        client.executeCommand(command);
+    public String createXADataSource(String name, String url) throws CommandFailedException {
+        client.apply(new AddXADataSource.Builder(name)
+                .jndiName("java:/xa-datasources/" + name)
+                .driverName("h2")
+                .enableAfterCreate()
+                .addXaDatasourceProperty("URL", url)
+                .build());
         return name;
     }
 
-    public String createXADataSource(String url) {
+    public String createXADataSource(String url) throws CommandFailedException {
         String name = "XAdsOps_" + RandomStringUtils.randomAlphanumeric(5);
         return createXADataSource(name, url);
     }
 
-    public void removeXADataSource(String name) {
-        String command = "xa-data-source remove" +
-                profile +
-                " --name=" + name;
-        client.executeCommand(command);
+    public void removeXADataSource(String name) throws CommandFailedException {
+        client.apply(new RemoveXADataSource(name));
     }
 
-    public void removeDataSource(String name) {
-        String command = "data-source remove" +
-                profile +
-                " --name=" + name;
-        client.executeCommand(command);
+    public void removeDataSource(String name) throws CommandFailedException {
+        client.apply(new RemoveDataSource(name));
     }
 
-    public boolean exists(String address) {
-        return client.executeForSuccess(address + ":read-resource");
+    public boolean exists(Address address) throws IOException, OperationException {
+        return operations.exists(address);
     }
 }
