@@ -1,23 +1,14 @@
 package org.jboss.hal.testsuite.test.configuration.messaging.clustering;
 
-import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.mina.util.AvailablePortFinder;
+import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Shared;
-import org.jboss.hal.testsuite.cli.CliClient;
-import org.jboss.hal.testsuite.cli.CliClientFactory;
-import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
-import org.jboss.hal.testsuite.creaper.command.AddSocketBinding;
-import org.jboss.hal.testsuite.dmr.Dispatcher;
-import org.jboss.hal.testsuite.dmr.ResourceAddress;
-import org.jboss.hal.testsuite.dmr.ResourceVerifier;
-import org.jboss.hal.testsuite.fragment.ConfigFragment;
+import org.jboss.hal.testsuite.creaper.ResourceVerifier;
+import org.jboss.hal.testsuite.creaper.command.RemoveSocketBinding;
 import org.jboss.hal.testsuite.page.config.MessagingPage;
-import org.jboss.hal.testsuite.util.ConfigUtils;
-import org.junit.After;
+import org.jboss.hal.testsuite.test.configuration.messaging.AbstractMessagingTestCase;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -28,209 +19,110 @@ import org.openqa.selenium.WebDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wildfly.extras.creaper.core.CommandFailedException;
-import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
+import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.OperationException;
+import org.wildfly.extras.creaper.core.online.operations.Values;
 
 import java.io.IOException;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Created by pcyprian on 3.9.15.
  */
 @RunWith(Arquillian.class)
 @Category(Shared.class)
-public class DiscoveryGroupsTestCase {
+public class DiscoveryGroupsTestCase extends AbstractMessagingTestCase {
 
     private static final Logger log = LoggerFactory.getLogger(DiscoveryGroupsTestCase.class);
 
-    private static final String NAME = "dg-group-test";
-    private static final String BINDING = "socket-binding";
-    private static final String ADD = "/subsystem=messaging-activemq/server=default/discovery-group=" + NAME + ":add(socket-binding=" + BINDING + ")";
-    private static final String DOMAIN = "/profile=full-ha" ;
+    private static final String DG_NAME = "dg-group-test" + RandomStringUtils.randomAlphanumeric(6);
+    private static final String DG_TBR_NAME = "dg-group-test" + RandomStringUtils.randomAlphanumeric(6);
+    private static final String DG_TBA_NAME = "dg-group-test" + RandomStringUtils.randomAlphanumeric(6);
 
-    private String command;
-    private String remove = "/subsystem=messaging-activemq/server=default/discovery-group=" + NAME + ":remove";
+    private static final Address DG_ADDRESS = DEFAULT_MESSAGING_SERVER.and("discovery-group", DG_NAME);
+    private static final Address DG_TBR_ADDRESS = DEFAULT_MESSAGING_SERVER.and("discovery-group", DG_TBR_NAME);
+    private static final Address DG_TBA_ADDRESS = DEFAULT_MESSAGING_SERVER.and("discovery-group", DG_TBA_NAME);
 
-    private ModelNode path = new ModelNode("/subsystem=messaging-activemq/server=default/discovery-group=" + NAME);
-    private ModelNode domainPath = new ModelNode("/profile=full-ha/subsystem=messaging-activemq/server=default/discovery-group=" + NAME);
-    private ResourceAddress address;
-    private static Dispatcher dispatcher;
-    private static ResourceVerifier verifier;
-    CliClient cliClient = CliClientFactory.getClient();
+    private static final List<String> socketBindings = new LinkedList<>();
 
     @BeforeClass
-    public static void setUp() {
-        dispatcher = new Dispatcher();
-        verifier  = new ResourceVerifier(dispatcher);
+    public static void setUp() throws Exception {
+        socketBindings.add(createSocketBinding());
+        socketBindings.add(createSocketBinding());
+        socketBindings.add(createSocketBinding());
+        socketBindings.add(createSocketBinding());
+        operations.add(DG_ADDRESS, Values.of("socket-binding", socketBindings.get(0)));
+        new ResourceVerifier(DG_ADDRESS, client).verifyExists();
+        operations.add(DG_TBR_ADDRESS, Values.of("socket-binding", socketBindings.get(1)));
+        new ResourceVerifier(DG_TBR_ADDRESS, client).verifyExists();
+        administration.reloadIfRequired();
     }
 
     @AfterClass
-    public static void tearDown() {
-        dispatcher.close();
+    public static void tearDown() throws IOException, OperationException, CommandFailedException, TimeoutException, InterruptedException {
+        operations.removeIfExists(DG_ADDRESS);
+        operations.removeIfExists(DG_TBA_ADDRESS);
+        operations.removeIfExists(DG_TBR_ADDRESS);
+        for (String socketBinding : socketBindings) {
+            client.apply(new RemoveSocketBinding(socketBinding));
+        }
+        administration.reloadIfRequired();
     }
 
     @Drone
     private WebDriver browser;
+
     @Page
     private MessagingPage page;
 
     @Before
     public void before() {
-        if (ConfigUtils.isDomain()) {
-            address = new ResourceAddress(domainPath);
-            command = DOMAIN + ADD;
-            remove = DOMAIN + remove;
-        } else {
-            address = new ResourceAddress(path);
-            command = ADD;
-        }
-    }
-    @After
-    public void after() {
-        cliClient.executeCommand(remove);
+        page.navigateToMessaging();
+        page.selectView("Clustering");
+        page.switchToDiscovery();
+        page.selectInTable(DG_NAME, 0);
     }
 
     @Test
     public void addDiscoveryGroup() {
-        page.navigateToMessaging();
-        page.selectView("Clustering");
-        page.switchToDiscovery();
+        page.addDiscoveryGroup(DG_NAME, socketBindings.get(2));
 
-        page.addDiscoveryGroup(NAME, BINDING);
-
-        verifier.verifyResource(address, true);
-
-        cliClient.executeCommand(remove);
-
-        verifier.verifyResource(address, false);
+        new ResourceVerifier(DG_ADDRESS, client);
     }
 
     @Test
-    public void updateDiscoveryGroupSocketBinding() throws IOException, CommandFailedException {
-        cliClient.executeCommand(command);
-        page.navigateToMessaging();
-        page.selectView("Clustering");
-        page.switchToDiscovery();
-        page.selectInTable(NAME, 0);
-        page.edit();
-
-        String socketBindingName = "DiscGroupSocketBinding_" + RandomStringUtils.randomAlphanumeric(5);
-
-        try (OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient()) {
-            int port = AvailablePortFinder.getNextAvailable(1024);
-            log.info("Obtained port for socket binding '" + socketBindingName + "' is " + port);
-            client.apply(new AddSocketBinding.Builder(socketBindingName)
-                    .port(port)
-                    .build());
-        }
-
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("socketBinding", socketBindingName);
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-
-        verifier.verifyAttribute(address, "socket-binding", socketBindingName, 500);
-
-        cliClient.executeCommand(remove);
+    public void updateDiscoveryGroupSocketBinding() throws Exception {
+        editTextAndVerify(DG_ADDRESS, "socketBinding", "socket-binding", socketBindings.get(3));
     }
 
     @Test
-    public void updateDiscoveryGroupRefreshTimeout() {
-        cliClient.executeCommand(command);
-        page.navigateToMessaging();
-        page.selectView("Clustering");
-        page.switchToDiscovery();
-        page.selectInTable(NAME, 0);
-        page.edit();
-
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("refreshTimeout", "2000");
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "refresh-timeout", "2000", 500);
-
-        cliClient.executeCommand(remove);
+    public void updateDiscoveryGroupRefreshTimeout() throws Exception {
+        editTextAndVerify(DG_ADDRESS, "refreshTimeout", "refresh-timeout", 2000L);
     }
 
     @Test
     public void updateBroadcastGroupRefreshTimeoutNegativeValue() {
-        cliClient.executeCommand(command);
-        page.navigateToMessaging();
-        page.selectView("Clustering");
-        page.switchToDiscovery();
-        page.selectInTable(NAME, 0);
-        page.edit();
-
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("refreshTimeout", "-1");
-        boolean finished = editPanelFragment.save();
-
-        assertFalse("Config should not be saved and closed.Negative value.", finished);
-        verifier.verifyAttribute(address, "refresh-timeout", "10000", 500);
-
-        cliClient.executeCommand(remove);
+        verifyIfErrorAppears("refreshTimeout", "-1");
     }
 
     @Test
-    public void updateDiscoveryGroupInitialTimeout() {
-        cliClient.executeCommand(command);
-        page.navigateToMessaging();
-        page.selectView("Clustering");
-        page.switchToDiscovery();
-        page.selectInTable(NAME, 0);
-        page.edit();
-
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("initialWaitTimeout", "200");
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "initial-wait-timeout", "200", 500);
-
-        cliClient.executeCommand(remove);
+    public void updateDiscoveryGroupInitialTimeout() throws Exception {
+        editTextAndVerify(DG_ADDRESS, "initialWaitTimeout", "initial-wait-timeout", 200L);
     }
 
     @Test
     public void updateBroadcastGroupInitialTimeoutNegativeValue() {
-        cliClient.executeCommand(command);
-        page.navigateToMessaging();
-        page.selectView("Clustering");
-        page.switchToDiscovery();
-        page.selectInTable(NAME, 0);
-        page.edit();
-
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("initialWaitTimeout", "-1");
-        boolean finished = editPanelFragment.save();
-
-        assertFalse("Config should not be saved and closed.Negative value.", finished);
-        verifier.verifyAttribute(address, "initial-wait-timeout", "10000", 500);
-
-        cliClient.executeCommand(remove);
+        verifyIfErrorAppears("initialWaitTimeout", "-1");
     }
 
     @Test
-    public void removeDiscoveryGroup() {
-        cliClient.executeCommand(command);
-
-        page.navigateToMessaging();
-        page.selectView("Clustering");
-        page.switchToDiscovery();
-
-        verifier.verifyResource(address, true);
-
-        page.selectInTable(NAME, 0);
+    public void removeDiscoveryGroup() throws Exception {
+        page.selectInTable(DG_TBR_NAME, 0);
         page.remove();
 
-        verifier.verifyResource(address, false);
+        new ResourceVerifier(DG_TBR_ADDRESS, client).verifyDoesNotExist();
     }
 
 }

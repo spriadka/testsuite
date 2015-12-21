@@ -1,18 +1,13 @@
 package org.jboss.hal.testsuite.test.configuration.messaging.clustering;
 
+import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Shared;
-import org.jboss.hal.testsuite.cli.CliClient;
-import org.jboss.hal.testsuite.cli.CliClientFactory;
-import org.jboss.hal.testsuite.dmr.Dispatcher;
-import org.jboss.hal.testsuite.dmr.ResourceAddress;
-import org.jboss.hal.testsuite.dmr.ResourceVerifier;
-import org.jboss.hal.testsuite.fragment.ConfigFragment;
+import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.page.config.MessagingPage;
-import org.jboss.hal.testsuite.util.ConfigUtils;
+import org.jboss.hal.testsuite.test.configuration.messaging.AbstractMessagingTestCase;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -21,29 +16,27 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
+import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.OperationException;
+import org.wildfly.extras.creaper.core.online.operations.Values;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Created by pcyprian on 3.9.15.
  */
 @RunWith(Arquillian.class)
 @Category(Shared.class)
-public class ClusterConnectionsTestCase {
-    private static final String NAME = "test-cluster";
-    private static final String ADD = "/subsystem=messaging-activemq/server=default/cluster-connection=" + NAME + ":add(cluster-connection-address=jms,connector-name=http-connector)";
-    private static final String DOMAIN = "/profile=full-ha" ;
+public class ClusterConnectionsTestCase extends AbstractMessagingTestCase {
 
-    private String command;
-    private String remove = "/subsystem=messaging-activemq/server=default/cluster-connection=" + NAME + ":remove";
+    private static final String CC_NAME = "test-cluster_" + RandomStringUtils.randomAlphanumeric(6);
+    private static final String CC_TBA_NAME = "test-cluster-TBA_" + RandomStringUtils.randomAlphanumeric(6);
+    private static final String CC_TBR_NAME = "test-cluster-TBR_" + RandomStringUtils.randomAlphanumeric(6);
 
-    private ModelNode path = new ModelNode("/subsystem=messaging-activemq/server=default/cluster-connection=" + NAME);
-    private ModelNode domainPath = new ModelNode("/profile=full-ha/subsystem=messaging-activemq/server=default/cluster-connection=" + NAME);
-    private ResourceAddress address;
-    private static Dispatcher dispatcher;
-    private static ResourceVerifier verifier;
-    CliClient cliClient = CliClientFactory.getClient();
+    private static final Address CC_ADDRESS = DEFAULT_MESSAGING_SERVER.and("cluster-connection", CC_NAME);
+    private static final Address CC_TBA_ADDRESS = DEFAULT_MESSAGING_SERVER.and("cluster-connection", CC_NAME);
+    private static final Address CC_TBR_ADDRESS = DEFAULT_MESSAGING_SERVER.and("cluster-connection", CC_NAME);
 
     @Drone
     private WebDriver browser;
@@ -51,166 +44,76 @@ public class ClusterConnectionsTestCase {
     private MessagingPage page;
 
     @BeforeClass
-    public static void setUp() {
-        dispatcher = new Dispatcher();
-        verifier = new ResourceVerifier(dispatcher);
+    public static void setUp() throws Exception {
+        operations.add(CC_ADDRESS, Values.of("cluster-connection-address", "jms")
+                .and("connector-name", "http-connector"));
+        new ResourceVerifier(CC_ADDRESS, client).verifyExists();
+        operations.add(CC_TBR_ADDRESS, Values.of("cluster-connection-address", "jms")
+                .and("connector-name", "http-connector"));
+        new ResourceVerifier(CC_TBR_ADDRESS, client).verifyExists();
+        administration.reloadIfRequired();
     }
 
     @Before
     public void before() {
-        if (ConfigUtils.isDomain()) {
-            address = new ResourceAddress(domainPath);
-            command = DOMAIN + ADD;
-            remove = DOMAIN + remove;
-        } else {
-            address = new ResourceAddress(path);
-            command = ADD;
-        }
+        page.navigateToMessaging();
+        page.selectView("Clustering");
+        page.switchToConnections();
+        page.selectInTable(CC_NAME, 0);
     }
+
     @After
-    public void after() {
-        cliClient.executeCommand(remove);
+    public void after() throws InterruptedException, TimeoutException, IOException {
+        administration.reloadIfRequired();
     }
 
     @AfterClass
-    public static void tearDown() {
-        dispatcher.close();
+    public static void tearDown() throws IOException, OperationException, TimeoutException, InterruptedException {
+        operations.removeIfExists(CC_ADDRESS);
+        operations.removeIfExists(CC_TBR_ADDRESS);
+        operations.removeIfExists(CC_TBA_ADDRESS);
+        administration.reloadIfRequired();
     }
 
     @Test //https://issues.jboss.org/browse/HAL-827
-    public void addClusterConnection() {
-        page.navigateToMessaging();
-        page.selectView("Clustering");
-        page.switchToConnections();
-
-        page.addClusterConnection(NAME, "dg-group1", "http-connector", "jms");
-
-
-        verifier.verifyResource(address, true);
-
-        cliClient.executeCommand(remove);
-
-        verifier.verifyResource(address, false);
+    public void addClusterConnection() throws Exception {
+        page.addClusterConnection(CC_TBA_NAME, "dg-group1", "http-connector", "jms");
+        administration.reloadIfRequired();
+        new ResourceVerifier(CC_TBA_ADDRESS, client).verifyExists();
     }
 
     @Test
-    public void updateClusterConnectionCallTimeout() {
-        cliClient.executeCommand(command);
-
-        page.navigateToMessaging();
-        page.selectView("Clustering");
-        page.switchToConnections();
-        page.selectInTable(NAME, 0);
-        page.edit();
-
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("callTimeout", "200");
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "call-timeout", "200", 500);
-
-        cliClient.executeCommand(remove);
+    public void updateClusterConnectionCallTimeout() throws Exception {
+        editTextAndVerify(CC_ADDRESS, "callTimeout", "call-timeout", 200L);
     }
 
     @Test
-    public void updateClusterConnectionCheckPeriod() {
-        cliClient.executeCommand(command);
-
-        page.navigateToMessaging();
-        page.selectView("Clustering");
-        page.switchToConnections();
-        page.selectInTable(NAME, 0);
-        page.edit();
-
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("checkPeriod", "1");
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "check-period", "1", 500);
-
-        cliClient.executeCommand(remove);
+    public void updateClusterConnectionCheckPeriod() throws Exception {
+        editTextAndVerify(CC_ADDRESS, "checkPeriod", "check-period", 9001L);
     }
 
     @Test
-    public void updateClusterConnectionTTLNegativiValue() {
-        cliClient.executeCommand(command);
-
-        page.navigateToMessaging();
-        page.selectView("Clustering");
-        page.switchToConnections();
-        page.selectInTable(NAME, 0);
-        page.edit();
-
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("connectionTTL", "-1");
-        boolean finished = editPanelFragment.save();
-
-        assertFalse("Config should not be saved and closed.Negative value.", finished);
-        verifier.verifyAttribute(address, "connection-ttl", "60000", 500);
-
-        cliClient.executeCommand(remove);
-    }
-
-    @Test //https://issues.jboss.org/browse/HAL-828
-    public void setClusterConnectionRetryIntervalToNull() {
-        cliClient.executeCommand(command);
-
-        page.navigateToMessaging();
-        page.selectView("Clustering");
-        page.switchToConnections();
-        page.selectInTable(NAME, 0);
-        page.edit();
-
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("retryInterval", "");
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "retry-interval", "500", 500);
-
-        cliClient.executeCommand(remove);
+    public void updateClusterConnectionTTLNegativeValue() throws Exception {
+        verifyIfErrorAppears("connectionTTL", "-1");
     }
 
     @Test
-    public void updateClusterConnectionReconnectAttempts() {
-        cliClient.executeCommand(command);
-
-        page.navigateToMessaging();
-        page.selectView("Clustering");
-        page.switchToConnections();
-        page.selectInTable(NAME, 0);
-        page.edit();
-
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("reconnectAttempts", "0");
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "reconnect-attempts", "0", 500);
-
-        cliClient.executeCommand(remove);
+    public void setClusterConnectionRetryIntervalToNull() throws Exception {
+        //default value will be present if attribute is set to null
+        editTextAndVerify(CC_ADDRESS, "retryInterval", "retry-interval", "", 500L);
     }
+
     @Test
-    public void removeClusterConnection() {
-        cliClient.executeCommand(command);
+    public void updateClusterConnectionReconnectAttempts() throws Exception {
+        editTextAndVerify(CC_ADDRESS, "reconnectAttempts", "reconnect-attempts", 0);
+    }
 
-        page.navigateToMessaging();
-        page.selectView("Clustering");
-        page.switchToConnections();
-
-        verifier.verifyResource(address, true);
-
-        page.selectInTable(NAME, 0);
+    @Test
+    public void removeClusterConnection() throws Exception {
+        page.selectInTable(CC_TBR_NAME, 0);
         page.remove();
 
-        verifier.verifyResource(address, false);
+        new ResourceVerifier(CC_TBR_ADDRESS, client).verifyDoesNotExist();
     }
 
 }

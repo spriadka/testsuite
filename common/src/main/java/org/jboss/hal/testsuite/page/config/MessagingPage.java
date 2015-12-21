@@ -7,11 +7,13 @@ import org.jboss.hal.testsuite.cli.TimeoutException;
 import org.jboss.hal.testsuite.finder.Application;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
+import org.jboss.hal.testsuite.finder.Row;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.config.messaging.MessagingConfigArea;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
 import org.jboss.hal.testsuite.page.ConfigPage;
+import org.jboss.hal.testsuite.page.Navigatable;
 import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.PropUtils;
@@ -23,7 +25,7 @@ import org.openqa.selenium.support.ui.Select;
 /**
  * Created by pcyprian on 2.9.15.
  */
-public class MessagingPage extends ConfigPage {
+public class MessagingPage extends ConfigPage implements Navigatable {
 
     private FinderNavigation navigation;
 
@@ -81,7 +83,9 @@ public class MessagingPage extends ConfigPage {
     }
 
     public void selectView(String view) {
-        navigation.selectRow().invoke(view);
+        Row row = navigation.selectRow();
+        Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
+        row.invoke(view);
         Application.waitUntilVisible();
     }
 
@@ -285,7 +289,7 @@ public class MessagingPage extends ConfigPage {
     public void remove() {
         clickButton("Remove");
         try {
-            Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
+            Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirmAndDismissReloadRequiredMessage();
         } catch (TimeoutException ignored) {
         }
     }
