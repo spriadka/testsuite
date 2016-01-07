@@ -2,6 +2,9 @@ package org.jboss.hal.testsuite.creaper.command;
 
 import org.jboss.dmr.ModelNode;
 import org.jboss.dmr.Property;
+import org.jgrapht.experimental.dag.DirectedAcyclicGraph;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wildfly.extras.creaper.core.CommandFailedException;
 import org.wildfly.extras.creaper.core.online.OnlineCommand;
 import org.wildfly.extras.creaper.core.online.OnlineCommandContext;
@@ -10,9 +13,10 @@ import org.wildfly.extras.creaper.core.online.operations.Batch;
 import org.wildfly.extras.creaper.core.online.operations.Operations;
 import org.wildfly.extras.creaper.core.online.operations.ReadResourceOption;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -23,8 +27,10 @@ import java.util.Set;
 public class BackupAndRestoreAttributes {
 
     private final Address address;
-    private final Map<String, String> dependencies;
+    private final DirectedAcyclicGraph<String, String> dependencies;
     private final Set<String> excluded;
+
+    private final Logger logger = LoggerFactory.getLogger(BackupAndRestoreAttributes.class);
 
     private ModelNode backup;
 
@@ -49,37 +55,17 @@ public class BackupAndRestoreAttributes {
 
     private final OnlineCommand restorePart = new OnlineCommand() {
 
-        //<dependency which needs to be processed before dependent attribute is added to batch, dependent attributes>
-        private final Map<String, Set<Property>> waitingForDependency = new HashMap<>(); //waiting queue
-        private final Set<String> processedAttributes = new HashSet<>(); //attributes already in batch
         private final Batch batch = new Batch();
 
-        private void putToWaitingQueue(String dependency, Property dependentAttribute) {
-            if (waitingForDependency.containsKey(dependency)) {
-                waitingForDependency.get(dependency).add(dependentAttribute);
-            } else {
-                waitingForDependency.put(dependency, new HashSet<>());
+        private Map<String, ModelNode> propertyListToMap(List<Property> propertyList) {
+            Map<String, ModelNode> attributeMap = new HashMap<>();
+            for (Property property : propertyList) {
+                logger.info("Adding '" + property.getName() + "' to map.");
+                attributeMap.put(property.getName(), property.getValue());
             }
+            return attributeMap;
         }
 
-        private void addToBatch(Property node) {
-            batch.writeAttribute(address,
-                    node.getName(),
-                    node.getValue()); //add dependent attribute to batch
-            processedAttributes.add(node.getName()); //add to processed attributes
-        }
-
-        private void addAllToBatch(Collection<Property> nodes) {
-            nodes.forEach(this::addToBatch);
-        }
-
-        private void addAllWaitingDependenciesToBatch(Property dependency) {
-            String dependencyName = dependency.getName();
-            if (waitingForDependency.containsKey(dependencyName)) { //attribute which was added to batch is dependency for some other attribute
-                addAllToBatch(waitingForDependency.get(dependencyName)); //add dependent attributes to batch
-                waitingForDependency.remove(dependencyName);
-            }
-        }
 
         @Override
         public void apply(OnlineCommandContext ctx) throws Exception {
@@ -87,25 +73,34 @@ public class BackupAndRestoreAttributes {
                 throw new CommandFailedException("There is no backup to be restored!");
             }
 
-            for (Property processingAttribute : BackupAndRestoreAttributes.this.backup.asPropertyList()) {
-                String name = processingAttribute.getName();
+            Map<String, ModelNode> attributeValueMap = propertyListToMap(BackupAndRestoreAttributes.this.backup.asPropertyList());
 
-                if (excluded == null || !excluded.contains(name)) { //attribute is not excluded
-                    if (dependencies != null && dependencies.containsKey(name)) { //processed element depends on something
-                        if (processedAttributes.contains(dependencies.get(name))) { //dependency is already processed in batch
-                            addToBatch(processingAttribute);
-                        } else {
-                            putToWaitingQueue(dependencies.get(name), processingAttribute);
-                        }
-                    } else {
-                        addToBatch(processingAttribute);
-                        addAllWaitingDependenciesToBatch(processingAttribute);
-                    }
+            if (dependencies != null) { //process dependencies
+                Iterator<String> dependencyIterator = dependencies.iterator();
+                while (dependencyIterator.hasNext()) {
+                    String attributeName = dependencyIterator.next();
+                    if (!attributeValueMap.containsKey(attributeName))
+                        throw new CommandFailedException("Attribute '" + attributeName + "' is not present or it was previously added and removed!");
+
+                    logger.info("Adding dependency '" + attributeName + "' to batch.");
+                    batch.writeAttribute(address,
+                            attributeName,
+                            attributeValueMap.get(attributeName));
+                    attributeValueMap.remove(attributeName);
+                }
+            }
+
+            for (String attribute : attributeValueMap.keySet()) {
+                if (excluded == null || !excluded.contains(attribute)) { //attribute is not excluded
+                    logger.info("Adding attribute '" + attribute + "' to batch.");
+                    batch.writeAttribute(address, attribute, attributeValueMap.get(attribute));
                 }
             }
 
             Operations ops = new Operations(ctx.client);
             ops.batch(batch);
+
+            BackupAndRestoreAttributes.this.backup = null; //can be reused after restoring attributes
         }
 
     };
@@ -113,7 +108,7 @@ public class BackupAndRestoreAttributes {
     public static final class Builder {
 
         private Address address;
-        private Map<String, String> dependencies;
+        private DirectedAcyclicGraph<String, String> dependencies;
         private Set<String> excluded;
 
         public Builder(Address address) {
@@ -125,10 +120,12 @@ public class BackupAndRestoreAttributes {
          */
         public Builder dependency(String attribute, String dependsOn) {
             if (dependencies == null && dependsOn != null) {
-                dependencies = new HashMap<>();
+                dependencies = new DirectedAcyclicGraph<>(String.class);
             }
             if (dependencies != null) {
-                dependencies.put(attribute, dependsOn);
+                dependencies.addVertex(attribute);
+                dependencies.addVertex(dependsOn);
+                dependencies.addEdge(dependsOn, attribute); //throws and unchecked exception if graph becomes cyclic after adding
             }
             return this;
         }

@@ -60,9 +60,7 @@ public abstract class TransactionsTestCaseAbstract {
     public static void beforeClass() throws CommandFailedException {
         backup = new BackupAndRestoreAttributes.Builder(Address.of("subsystem", "transactions"))
                 .excluded(PROCESS_ID_SOCKET_BINDING_ATTR)
-                .dependency(USE_JDBC_STORE, "jdbc-store-datasource")
-                .dependency(USE_JDBC_STORE_ATTR, JDBC_STORE_DATASOURCE_ATTR)
-                .excluded("process-id-socket-binding")
+                .dependency(USE_JDBC_STORE, JDBC_STORE_DATASOURCE_ATTR)
                 .build();
         client.apply(backup.backup());
     }
