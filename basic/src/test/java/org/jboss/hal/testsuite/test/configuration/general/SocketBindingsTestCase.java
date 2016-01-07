@@ -23,9 +23,6 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
-import org.wildfly.extras.creaper.core.CommandFailedException;
-
-import java.io.IOException;
 
 import static org.jboss.hal.testsuite.cli.CliConstants.DEFAULT_SOCKET_BINDING_INBOUND_ADDRESS;
 import static org.jboss.hal.testsuite.cli.CliConstants.DEFAULT_SOCKET_BINDING_OUTBOUND_LOCAL_ADDRESS;
@@ -124,7 +121,7 @@ public class SocketBindingsTestCase {
     }
 
     @Test
-    public void createOutboundLocalSocketBinding() throws IOException, CommandFailedException {
+    public void createOutboundLocalSocketBinding() {
         ConfigFragment fragment = page.switchToOutboundLocal();
         WizardWindow wizard = fragment.getResourceManager().addResource();
 
