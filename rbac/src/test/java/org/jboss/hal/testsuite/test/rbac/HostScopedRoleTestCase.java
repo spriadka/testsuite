@@ -1,5 +1,8 @@
 package org.jboss.hal.testsuite.test.rbac;
 
+import java.io.IOException;
+
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
@@ -8,6 +11,7 @@ import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Domain;
 import org.jboss.hal.testsuite.cli.Library;
 import org.jboss.hal.testsuite.cli.TimeoutException;
+import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.dmr.Dispatcher;
 import org.jboss.hal.testsuite.dmr.ResourceAddress;
 import org.jboss.hal.testsuite.dmr.ResourceVerifier;
@@ -25,6 +29,7 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
+import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
 
 /**
  * Created by pcyprian on 9.10.15.
@@ -41,6 +46,9 @@ public class HostScopedRoleTestCase {
     private static Dispatcher dispatcher;
     private static ResourceVerifier verifier;
 
+    private static final OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
+    private final RBACDomainAdminOperations adminOps = new RBACDomainAdminOperations(client);
+
     @BeforeClass
     public static void beforeClass() {
         dispatcher = new Dispatcher();
@@ -50,6 +58,7 @@ public class HostScopedRoleTestCase {
     @AfterClass
     public static void afterClass() {
         dispatcher.close();
+        IOUtils.closeQuietly(client);
     }
 
     @Drone
@@ -169,7 +178,7 @@ public class HostScopedRoleTestCase {
     }
 
     @Test
-    public void modifyBaseRole() {
+    public void modifyBaseRole() throws IOException, InterruptedException, java.util.concurrent.TimeoutException {
         address = new ResourceAddress(new ModelNode(command + NAME));
         addRole("Monitor", "master", false);
         verifier.verifyResource(address, true, 300);
@@ -182,6 +191,8 @@ public class HostScopedRoleTestCase {
         page.getWindowFragment().clickButton("Save");
         Library.letsSleep(1000);
         verifier.verifyAttribute(address, "base-role", "Maintainer");
+        Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
+        adminOps.reloadAllHostsIfRequired();
         refresh();
         removeRole();
         Library.letsSleep(1500);
