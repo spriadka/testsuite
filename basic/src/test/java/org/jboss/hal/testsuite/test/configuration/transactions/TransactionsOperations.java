@@ -43,7 +43,7 @@ public class TransactionsOperations {
     public String createSocketBinding() throws CommandFailedException, IOException {
         String name = "TransactionsOpsSB_" + RandomStringUtils.randomAlphanumeric(6);
         try (OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient()) {
-            int port = AvailablePortFinder.getNextAvailable(1024);
+            int port = AvailablePortFinder.getNextAvailable();
             log.info("Obtained port for socket binding '" + name + "' is " + port);
             client.apply(new AddSocketBinding.Builder(name)
                     .port(port)
