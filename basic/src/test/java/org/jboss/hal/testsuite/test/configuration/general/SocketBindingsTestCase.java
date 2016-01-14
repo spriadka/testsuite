@@ -86,7 +86,6 @@ public class SocketBindingsTestCase {
         boolean result =
                 wizard.name(INBOUND_NAME)
                         .port(PORT)
-                        .group(BINDING_GROUP)
                         .finish();
 
         assertTrue("Window should be closed", result);
@@ -128,7 +127,7 @@ public class SocketBindingsTestCase {
 
         Editor editor = wizard.getEditor();
         editor.text("name", OUTBOUND_LOCAL_NAME);
-        editor.text("socketBinding", "ajp");
+        editor.text("socketBinding", "https");
         boolean result = wizard.finish();
 
         assertTrue("Window should be closed", result);

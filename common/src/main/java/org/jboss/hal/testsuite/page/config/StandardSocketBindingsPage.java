@@ -3,6 +3,7 @@ package org.jboss.hal.testsuite.page.config;
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.arquillian.graphene.page.Location;
+import org.jboss.hal.testsuite.finder.Application;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
@@ -47,6 +48,7 @@ public class StandardSocketBindingsPage extends ConfigPage implements Navigatabl
         new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
                 .addAddress(FinderNames.CONFIGURATION, "Socket Binding")
                 .selectRow().invoke(FinderNames.VIEW);
+        Application.waitUntilVisible();
         getResourceManager().viewByName("standard-sockets");
     }
 }
