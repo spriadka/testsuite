@@ -43,7 +43,7 @@ public class MessagingPage extends ConfigPage implements Navigatable {
         if (ConfigUtils.isDomain()) {
             navigation = new FinderNavigation(browser, DomainConfigEntryPoint.class)
                     .addAddress(FinderNames.CONFIGURATION, FinderNames.PROFILES)
-                    .addAddress(FinderNames.PROFILE, "full-ha")
+                    .addAddress(FinderNames.PROFILE, ConfigUtils.getDefaultProfile())
                     .addAddress(FinderNames.SUBSYSTEM, "Messaging")
                     .addAddress("Messaging Provider", "default");
         } else {
