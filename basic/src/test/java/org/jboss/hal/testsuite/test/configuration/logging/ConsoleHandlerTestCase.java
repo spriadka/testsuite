@@ -14,11 +14,15 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
+import org.wildfly.extras.creaper.commands.logging.Logging;
 import org.wildfly.extras.creaper.core.CommandFailedException;
+import org.wildfly.extras.creaper.core.online.OnlineCommand;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.OperationException;
 
 import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 /**
@@ -37,8 +41,10 @@ public class ConsoleHandlerTestCase extends LoggingAbstractTestCase {
 
     @BeforeClass
     public static void setUp() throws CommandFailedException, InterruptedException, TimeoutException, IOException {
-        operations.add(C_HANDLER_ADDRESS);
-        operations.add(C_HANDLER_TB_REMOVED_ADDRESS);
+        List<OnlineCommand> addConsoleHandlers = new LinkedList<>();
+        addConsoleHandlers.add(Logging.handler().console().add(CONSOLE_HANDLER).build());
+        addConsoleHandlers.add(Logging.handler().console().add(CONSOLE_HANDLER_TB_REMOVED).build());
+        client.apply(addConsoleHandlers);
         administration.reloadIfRequired();
     }
 

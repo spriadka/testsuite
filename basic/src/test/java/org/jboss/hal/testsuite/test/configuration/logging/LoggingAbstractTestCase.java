@@ -9,6 +9,9 @@ import org.jboss.hal.testsuite.page.config.LoggingPage;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
+import org.wildfly.extras.creaper.commands.logging.AddPeriodicRotatingFileLogHandler;
+import org.wildfly.extras.creaper.commands.logging.Logging;
+import org.wildfly.extras.creaper.core.CommandFailedException;
 import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.Operations;
@@ -97,12 +100,12 @@ public abstract class LoggingAbstractTestCase {
                         .and("relative-to", "jboss.server.log.dir")));
     }
 
-    protected static void createPeriodicFileHandler(Address address, String path) throws IOException {
-        operations.add(address, Values.empty()
-                .andObject("file", Values.empty()
-                        .and("path", path)
-                        .and("relative-to", "jboss.server.log.dir"))
-                .and("suffix", "%H%m"));
+    protected static void createPeriodicFileHandler(String name, String path) throws CommandFailedException {
+        AddPeriodicRotatingFileLogHandler addPeriodicRotatingFileLogHandler = Logging
+                .handler().periodicRotatingFile()
+                .add(name, path, "%H%m")
+                .build();
+        client.apply(addPeriodicRotatingFileLogHandler);
     }
 
     protected void verifyIfErrorAppears(String identifier, String value) {

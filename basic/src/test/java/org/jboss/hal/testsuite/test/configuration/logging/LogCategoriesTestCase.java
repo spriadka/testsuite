@@ -6,7 +6,6 @@ import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Standalone;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
-import org.jboss.hal.testsuite.creaper.command.logging.AddLogCategory;
 import org.jboss.hal.testsuite.page.config.LoggingPage;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -15,6 +14,8 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
+import org.wildfly.extras.creaper.commands.logging.AddLogger;
+import org.wildfly.extras.creaper.commands.logging.Logging;
 import org.wildfly.extras.creaper.core.CommandFailedException;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.OperationException;
@@ -36,8 +37,10 @@ public class LogCategoriesTestCase extends LoggingAbstractTestCase {
 
     @BeforeClass
     public static void beforeClass() throws CommandFailedException, InterruptedException, TimeoutException, IOException {
-        client.apply(new AddLogCategory.Builder(LOGGER).build());
-        client.apply(new AddLogCategory.Builder(LOGGER_TO_BE_REMOVED).build());
+        AddLogger addLogger = Logging.logger().add(LOGGER).build();
+        client.apply(addLogger);
+        AddLogger addLoggerTbr = Logging.logger().add(LOGGER).build();
+        client.apply(addLoggerTbr);
         administration.reloadIfRequired();
     }
 

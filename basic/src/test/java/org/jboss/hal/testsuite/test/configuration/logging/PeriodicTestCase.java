@@ -35,7 +35,7 @@ public class PeriodicTestCase extends LoggingAbstractTestCase {
 
     @BeforeClass
     public static void setUp() throws Exception {
-        createPeriodicFileHandler(PERIODIC_HANDLER_ADDRESS, "periodic-handler.log");
+        createPeriodicFileHandler(PERIODIC_HANDLER, "periodic-handler.log");
         new ResourceVerifier(PERIODIC_HANDLER_ADDRESS, client).verifyExists();
     }
 

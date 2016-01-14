@@ -40,9 +40,9 @@ public class PeriodicSizeTestCase extends LoggingAbstractTestCase {
 
     @BeforeClass
     public static void setUp() throws Exception {
-        createPeriodicFileHandler(PERIODIC_SIZE_HANDLER_ADDRESS, "periodic-handler.log");
+        createPeriodicFileHandler(PERIODIC_SIZE_HANDLER, "periodic-handler.log");
         new ResourceVerifier(PERIODIC_SIZE_HANDLER_ADDRESS, client).verifyExists();
-        createPeriodicFileHandler(PERIODIC_SIZE_HANDLER_TBR_ADDRESS, "periodic-handler2.log");
+        createPeriodicFileHandler(PERIODIC_SIZE_HANDLER_TBR, "periodic-handler2.log");
         new ResourceVerifier(PERIODIC_SIZE_HANDLER_TBR_ADDRESS, client).verifyExists();
     }
 

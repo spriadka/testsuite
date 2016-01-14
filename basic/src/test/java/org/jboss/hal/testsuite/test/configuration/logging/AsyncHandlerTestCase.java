@@ -30,8 +30,8 @@ import static org.junit.Assert.assertTrue;
 @Category(Shared.class)
 public class AsyncHandlerTestCase extends LoggingAbstractTestCase {
     private static final String ASYNCHANDLER = "asyncHandler" + RandomStringUtils.randomAlphanumeric(6);
-    private static final String ASYNCHANDLER_TBR = "asyncHandler" + RandomStringUtils.randomAlphanumeric(6);
-    private static final String ASYNCHANDLER_TBA = "asyncHandler" + RandomStringUtils.randomAlphanumeric(6);
+    private static final String ASYNCHANDLER_TBR = "asyncHandler-TBR_" + RandomStringUtils.randomAlphanumeric(6);
+    private static final String ASYNCHANDLER_TBA = "asyncHandler-TBA_" + RandomStringUtils.randomAlphanumeric(6);
 
     private static final Address ASYNCHANDLER_ADDRESS = LOGGING_SUBSYSTEM.and("async-handler", ASYNCHANDLER);
     private static final Address ASYNCHANDLER_ADDRESS_TBR = LOGGING_SUBSYSTEM.and("async-handler", ASYNCHANDLER_TBR);
@@ -98,10 +98,11 @@ public class AsyncHandlerTestCase extends LoggingAbstractTestCase {
         editTextAreaAndVerify(ASYNCHANDLER_ADDRESS, "subhandlers", new String[]{"CONSOLE", "FILE"});
     }
 
-    @Test //https://issues.jboss.org/browse/HAL-819 - FIXED
+    @Test
     public void addAsyncHandlerWrongSubhandlers() throws Exception {
         ConfigFragment editPanelFragment = page.getConfigFragment();
-        editPanelFragment.edit().text("subhandlers", "BLABLA");
+
+        editPanelFragment.edit().text("subhandlers", "BLABLA"); //non existing handler
 
         boolean finished = editPanelFragment.save();
         assertTrue("Config should be saved and closed. But handlers are not really saved.", finished);
