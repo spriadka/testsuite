@@ -21,10 +21,10 @@ import java.util.Map;
 import java.util.Set;
 
 /**
- * @author Jan Kasik <jkasik@redhat.com>
- *         Created on 27.11.15.
+ * <p>A command for making backups and restores of attributes at given address.</p>
+ * <p>Backup does not descend to children, it backups attributes only at given address!</p>
  */
-public class BackupAndRestoreAttributes {
+public final class BackupAndRestoreAttributes {
 
     private final Address address;
     private final DirectedAcyclicGraph<String, String> dependencies;
@@ -116,7 +116,7 @@ public class BackupAndRestoreAttributes {
         }
 
         /**
-         * Add dependency
+         * Add dependency. Any dependency and dependent attribute will be restored even if it is present in excluded list.
          */
         public Builder dependency(String attribute, String dependsOn) {
             if (dependencies == null && dependsOn != null) {
@@ -125,7 +125,7 @@ public class BackupAndRestoreAttributes {
             if (dependencies != null) {
                 dependencies.addVertex(attribute);
                 dependencies.addVertex(dependsOn);
-                dependencies.addEdge(dependsOn, attribute); //throws and unchecked exception if graph becomes cyclic after adding
+                dependencies.addEdge(dependsOn, attribute); //throws an unchecked exception if graph becomes cyclic after adding
             }
             return this;
         }

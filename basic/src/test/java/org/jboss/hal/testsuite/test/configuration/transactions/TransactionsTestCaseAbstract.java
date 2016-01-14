@@ -67,8 +67,11 @@ public abstract class TransactionsTestCaseAbstract {
 
     @AfterClass
     public static void afterClass() throws CommandFailedException, IOException {
-        client.apply(backup.restore());
-        client.close();
+        try {
+            client.apply(backup.restore());
+        } finally {
+            client.close();
+        }
     }
 
     //helper methods
