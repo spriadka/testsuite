@@ -111,25 +111,16 @@ public class GenericAcceptorTestCase extends AbstractMessagingTestCase {
 
     @Test
     public void addPropertyToAcceptor() throws Exception {
-        String key = "prop";
-        String value = "test";
-        ConfigPropertiesFragment properties = page.getConfig().propertiesConfig();
-        ConfigPropertyWizard wizard = properties.addProperty();
-        wizard.name(key).value(value).clickSave();
+        boolean isClosed = page.addProperty("prop", "test");
+        assertTrue("Property should be added and wizard closed.", isClosed);
 
-        Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
-
-        assertTrue("Property should be added and wizard closed.", wizard.isClosed());
-        Assert.assertTrue(isPropertyPresentInParams(GENERIC_ACCEPTOR_ADDRESS, key));
+        Assert.assertTrue(PropertiesOps.isPropertyPresentInParams(GENERIC_ACCEPTOR_ADDRESS, "prop"));
     }
 
     @Test
     public void removeAcceptorProperty() throws Exception {
-        ConfigPropertiesFragment config = page.getConfig().propertiesConfig();
-        ResourceManager properties = config.getResourceManager();
-        properties.removeResource(PROPERTY_TBR_KEY).confirmAndDismissReloadRequiredMessage();
-
-        Assert.assertFalse(isPropertyPresentInParams(GENERIC_ACCEPTOR_ADDRESS, PROPERTY_TBR_KEY));
+        page.removeProperty(PROPERTY_TBR_KEY);
+        Assert.assertFalse(PropertiesOps.isPropertyPresentInParams(GENERIC_ACCEPTOR_ADDRESS, PROPERTY_TBR_KEY));
     }
 
     @Test

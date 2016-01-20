@@ -162,10 +162,6 @@ public abstract class AbstractMessagingTestCase {
         return createSocketBinding(name);
     }
 
-    protected boolean isPropertyPresentInParams(Address address, String key) throws IOException {
-        ModelNode result = operations.readAttribute(address, "params").value();
-        return result.isDefined() && result.keys().contains(key);
-    }
 
     private static void addSocketBindingToList(String name) {
         if (socketBindings == null) {

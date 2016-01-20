@@ -97,24 +97,17 @@ public class ConnectorServicesTestCase extends AbstractMessagingTestCase {
     }
 
     @Test
-    public void updateConnectorServicesProperties() throws Exception {
-        ConfigPropertiesFragment properties = page.getConfig().propertiesConfig();
-        ConfigPropertyWizard wizard = properties.addProperty();
+    public void addConnectorServicesProperty() throws Exception {
+        boolean isClosed = page.addProperty("prop", "test");
+        assertTrue("Property should be added and wizard closed.", isClosed);
 
-        wizard.name("prop").value("test").clickSave();
-        Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
-        assertTrue("Property should be added and wizard closed.", wizard.isClosed());
-
-        Assert.assertTrue(isPropertyPresentInParams(CONNECTOR_SERVICE_ADDRESS, "prop"));
+        Assert.assertTrue(PropertiesOps.isPropertyPresentInParams(CONNECTOR_SERVICE_ADDRESS, "prop"));
     }
 
     @Test
     public void removeConnectorServicesProperties() throws Exception {
-        ConfigPropertiesFragment config = page.getConfig().propertiesConfig();
-        ResourceManager properties = config.getResourceManager();
-        properties.removeResource(PROPERTY_TBR_KEY).confirmAndDismissReloadRequiredMessage();
-
-        Assert.assertFalse(isPropertyPresentInParams(CONNECTOR_SERVICE_ADDRESS, PROPERTY_TBR_KEY));
+        page.removeProperty(PROPERTY_TBR_KEY);
+        Assert.assertFalse(PropertiesOps.isPropertyPresentInParams(CONNECTOR_SERVICE_ADDRESS, PROPERTY_TBR_KEY));
     }
 
     @Test
