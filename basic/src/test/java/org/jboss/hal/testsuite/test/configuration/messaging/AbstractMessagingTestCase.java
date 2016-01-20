@@ -8,6 +8,7 @@ import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.creaper.command.AddSocketBinding;
+import org.jboss.hal.testsuite.creaper.command.RemoveSocketBinding;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.page.config.MessagingPage;
 import org.junit.AfterClass;
@@ -21,6 +22,8 @@ import org.wildfly.extras.creaper.core.online.operations.Operations;
 import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
 
 import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
 
 import static org.junit.Assert.assertTrue;
 
@@ -41,6 +44,8 @@ public abstract class AbstractMessagingTestCase {
 
     protected static final Address DEFAULT_MESSAGING_SERVER = MESSAGING_SUBSYSTEM.and("server", "default");
 
+    private static List<String> socketBindings;
+
     @Page
     protected MessagingPage page;
 
@@ -54,8 +59,12 @@ public abstract class AbstractMessagingTestCase {
     }
 
     @AfterClass
-    public static void afterClass_() throws IOException {
-         client.close();
+    public static void afterClass_() throws IOException, CommandFailedException {
+        try {
+            removeAccumulatedSocketBindings();
+        } finally {
+            client.close();
+        }
     }
 
     protected void editTextAndVerify(Address address, String name, String value) throws Exception {
@@ -144,6 +153,7 @@ public abstract class AbstractMessagingTestCase {
         client.apply(new AddSocketBinding.Builder(name)
                 .port(AvailablePortFinder.getNextAvailable())
                 .build());
+        addSocketBindingToList(name);
         return name;
     }
 
@@ -151,6 +161,29 @@ public abstract class AbstractMessagingTestCase {
         String name = "messaging_" + RandomStringUtils.randomAlphanumeric(6);
         return createSocketBinding(name);
     }
+
+    protected boolean isPropertyPresentInParams(Address address, String key) throws IOException {
+        ModelNode result = operations.readAttribute(address, "params").value();
+        return result.isDefined() && result.keys().contains(key);
+    }
+
+    private static void addSocketBindingToList(String name) {
+        if (socketBindings == null) {
+            socketBindings = new LinkedList<>();
+        }
+        socketBindings.add(name);
+    }
+
+    private static void removeAccumulatedSocketBindings() throws CommandFailedException {
+        if (socketBindings == null) {
+            return;
+        }
+        for (String socketBinding : socketBindings) {
+            client.apply(new RemoveSocketBinding(socketBinding));
+        }
+        socketBindings.clear();
+    }
+
 
 
 }

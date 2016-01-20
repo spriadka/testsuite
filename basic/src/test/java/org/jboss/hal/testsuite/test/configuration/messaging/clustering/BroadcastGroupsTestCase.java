@@ -83,11 +83,7 @@ public class BroadcastGroupsTestCase extends AbstractMessagingTestCase {
 
     @Test
     public void addBroadcastGroup() throws Exception {
-        String socketBinding = "sb_bg-group-test" + RandomStringUtils.randomAlphanumeric(6);
-        client.apply(new AddSocketBinding.Builder(socketBinding)
-                .port(AvailablePortFinder.getNextAvailable())
-                .build());
-        page.addBroadcastGroup(BG_TBA_NAME, socketBinding);
+        page.addBroadcastGroup(BG_TBA_NAME, createSocketBinding());
         new ResourceVerifier(BG_TBA_ADDRESS, client).verifyExists();
     }
 

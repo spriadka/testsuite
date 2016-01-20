@@ -7,20 +7,19 @@ import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Shared;
-import org.jboss.hal.testsuite.cli.CliClient;
-import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
+import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.creaper.command.AddSocketBinding;
-import org.jboss.hal.testsuite.dmr.Dispatcher;
-import org.jboss.hal.testsuite.dmr.ResourceAddress;
-import org.jboss.hal.testsuite.dmr.ResourceVerifier;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConfigPropertiesFragment;
 import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConfigPropertyWizard;
+import org.jboss.hal.testsuite.fragment.shared.util.ResourceManager;
 import org.jboss.hal.testsuite.page.config.MessagingPage;
-import org.jboss.hal.testsuite.util.ConfigUtils;
+import org.jboss.hal.testsuite.test.configuration.messaging.AbstractMessagingTestCase;
+import org.jboss.hal.testsuite.util.Console;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -30,46 +29,47 @@ import org.openqa.selenium.WebDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wildfly.extras.creaper.core.CommandFailedException;
+import org.wildfly.extras.creaper.core.online.ModelNodeResult;
 import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
+import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.OperationException;
+import org.wildfly.extras.creaper.core.online.operations.Values;
 
 import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
 import static org.junit.Assert.assertTrue;
 
-/**
- * Created by pcyprian on 7.9.15.
- */
 @RunWith(Arquillian.class)
 @Category(Shared.class)
-public class GenericAcceptorTestCase {
+public class GenericAcceptorTestCase extends AbstractMessagingTestCase {
 
-    private static final Logger log = LoggerFactory.getLogger(GenericAcceptorTestCase.class);
+    private static final String GENERIC_ACCEPTOR = "generic-acceptor_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String GENERIC_ACCEPTOR_TBR = "generic-acceptor-TBR_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String GENERIC_ACCEPTOR_TBA = "generic-acceptor-TBA_" + RandomStringUtils.randomAlphanumeric(5);
 
-    private static final String NAME = "generic-text-acceptor";
-    private static final String BINDING = "socket-binding";
-    private static final String FACTORYCLASS = "factoryClass";
-    private static final String ADD = "/subsystem=messaging-activemq/server=default/acceptor=" + NAME + ":add(socket-binding=" + BINDING + ",factory-class=" + FACTORYCLASS + ")";
-    private static final String DOMAIN = "/profile=full-ha" ;
+    private static final Address GENERIC_ACCEPTOR_ADDRESS = DEFAULT_MESSAGING_SERVER.and("acceptor", GENERIC_ACCEPTOR);
+    private static final Address GENERIC_ACCEPTOR_ADDRESS_TBR = DEFAULT_MESSAGING_SERVER.and("acceptor", GENERIC_ACCEPTOR_TBR);
+    private static final Address GENERIC_ACCEPTOR_ADDRESS_TBA = DEFAULT_MESSAGING_SERVER.and("acceptor", GENERIC_ACCEPTOR_TBA);
 
-    private String command;
-    private String remove = "/subsystem=messaging-activemq/server=default/acceptor=" + NAME + ":remove";
-    private String addProperty = "/subsystem=messaging-activemq/server=default/acceptor=" + NAME + ":write-attribute(name=params.prop,value=test)";
-    private ModelNode path = new ModelNode("/subsystem=messaging-activemq/server=default/acceptor=" + NAME);
-    private ModelNode domainPath = new ModelNode("/profile=full-ha/subsystem=messaging-activemq/server=default/acceptor=" + NAME);
-    private ResourceAddress address;
-    private static Dispatcher dispatcher;
-    private static ResourceVerifier verifier;
-    CliClient cliClient = CliClientFactory.getClient();
+    private static final String PROPERTY_TBR_KEY = "prop42";
+    private static final String FACTORY_CLASS = "factoryClass";
 
     @BeforeClass
-    public static void setUp() {
-        dispatcher = new Dispatcher();
-        verifier  = new ResourceVerifier(dispatcher);
+    public static void setUp() throws IOException, CommandFailedException, TimeoutException, InterruptedException {
+        addGenericAcceptor(GENERIC_ACCEPTOR_ADDRESS);
+        new ResourceVerifier(GENERIC_ACCEPTOR_ADDRESS, client);
+        operations.writeAttribute(GENERIC_ACCEPTOR_ADDRESS, "params." + PROPERTY_TBR_KEY, "marvin");
+        addGenericAcceptor(GENERIC_ACCEPTOR_ADDRESS_TBR);
+        new ResourceVerifier(GENERIC_ACCEPTOR_ADDRESS_TBR, client);
+        administration.reloadIfRequired();
     }
 
     @AfterClass
-    public static void tearDown() {
-        dispatcher.close();
+    public static void tearDown() throws IOException, OperationException {
+        operations.removeIfExists(GENERIC_ACCEPTOR_ADDRESS);
+        operations.removeIfExists(GENERIC_ACCEPTOR_ADDRESS_TBA);
+        operations.removeIfExists(GENERIC_ACCEPTOR_ADDRESS_TBR);
     }
 
     @Drone
@@ -79,134 +79,74 @@ public class GenericAcceptorTestCase {
 
     @Before
     public void before() {
-        if (ConfigUtils.isDomain()) {
-            address = new ResourceAddress(domainPath);
-            command = DOMAIN + ADD;
-            remove = DOMAIN + remove;
-            addProperty = DOMAIN + addProperty;
-        } else {
-            address = new ResourceAddress(path);
-            command = ADD;
-        }
+        page.navigateToMessaging();
+        page.selectView("Connections");
+        page.switchType("Type: Generic");
+        page.selectInTable(GENERIC_ACCEPTOR, 0);
     }
 
     @After
-    public void after() {
-        cliClient.executeCommand(remove);
+    public void after() throws InterruptedException, TimeoutException, IOException {
+        administration.reloadIfRequired();
     }
 
     @Test
-    public void addGenericAcceptor() {
-        page.navigateToMessaging();
-        page.selectView("Connections");
-        page.switchType("Type: Generic");
-        page.addGenericAcceptor(NAME, BINDING, FACTORYCLASS);
-
-        verifier.verifyResource(address, true);
-
-        cliClient.executeCommand(remove);
-
-        verifier.verifyResource(address, false);
+    public void addGenericAcceptor() throws Exception {
+        String socketBinding = createSocketBinding();
+        page.addGenericAcceptor(GENERIC_ACCEPTOR_TBA, socketBinding, FACTORY_CLASS);
+        new ResourceVerifier(GENERIC_ACCEPTOR_ADDRESS_TBA, client).verifyExists();
     }
 
     @Test
-    public void updateAcceptorSocketBinding() throws CommandFailedException, IOException {
-        cliClient.executeCommand(command);
-        page.navigateToMessaging();
-        page.selectView("Connections");
-        page.switchType("Type: Generic");
-        page.selectInTable(NAME, 0);
-        page.edit();
-
-        String socketBindingName = "genericAcceptorSocketBinding" + RandomStringUtils.randomAlphanumeric(5);
-
-        try (OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient()) {
-            int port = AvailablePortFinder.getNextAvailable(1024);
-            log.info("Obtained port for socket binding '" + socketBindingName + "' is " + port);
-            client.apply(new AddSocketBinding.Builder(socketBindingName)
-                    .port(port)
-                    .build());
-        }
-
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("socketBinding", socketBindingName);
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "socket-binding", socketBindingName, 500);
-
-        cliClient.executeCommand(remove);
+    public void editSocketBinding() throws Exception {
+        String socketBindingName = "genericAcceptorSocketBinding_" + RandomStringUtils.randomAlphanumeric(5);
+        createSocketBinding(socketBindingName);
+        editTextAndVerify(GENERIC_ACCEPTOR_ADDRESS, "socketBinding", "socket-binding", socketBindingName);
     }
 
     @Test
-    public void updateGenericAcceptorFacotryClass() {
-        cliClient.executeCommand(command);
-        page.navigateToMessaging();
-        page.selectView("Connections");
-        page.switchType("Type: Generic");
-        page.selectInTable(NAME, 0);
-        page.edit();
-
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("factoryClass", "fc");
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "factory-class", "fc", 500);
-
-        cliClient.executeCommand(remove);
+    public void editFactoryClass() throws Exception {
+        editTextAndVerify(GENERIC_ACCEPTOR_ADDRESS, "factoryClass", "factory-class", "fc");
     }
 
     @Test
-    public void updateAcceptorProperties() {
-        cliClient.executeCommand(command);
-        page.navigateToMessaging();
-        page.selectView("Connections");
-        page.switchType("Type: Generic");
-        page.selectInTable(NAME, 0);
-
+    public void addPropertyToAcceptor() throws Exception {
+        String key = "prop";
+        String value = "test";
         ConfigPropertiesFragment properties = page.getConfig().propertiesConfig();
         ConfigPropertyWizard wizard = properties.addProperty();
-        boolean result = wizard.name("prop").value("test").finish();
+        wizard.name(key).value(value).clickSave();
 
-        assertTrue("Property should be added and wizard closed.", result);
-        verifier.verifyAttribute(address, "params", "{\"prop\" => \"test\"}", 500);
+        Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
 
-        cliClient.executeCommand(remove);
+        assertTrue("Property should be added and wizard closed.", wizard.isClosed());
+        Assert.assertTrue(isPropertyPresentInParams(GENERIC_ACCEPTOR_ADDRESS, key));
     }
 
     @Test
-    public void removeAcceptorProperties() {
-        cliClient.executeCommand(command);
-        cliClient.executeCommand(addProperty);
-        page.navigateToMessaging();
-        page.selectView("Connections");
-        page.switchType("Type: Generic");
-        page.selectInTable(NAME, 0);
-        ConfigPropertiesFragment properties = page.getConfig().propertiesConfig();
-        properties.removeProperty("prop");
+    public void removeAcceptorProperty() throws Exception {
+        ConfigPropertiesFragment config = page.getConfig().propertiesConfig();
+        ResourceManager properties = config.getResourceManager();
+        properties.removeResource(PROPERTY_TBR_KEY).confirmAndDismissReloadRequiredMessage();
 
-        verifier.verifyAttribute(address, "params", "undefined", 500);
-
-        cliClient.executeCommand(remove);
+        Assert.assertFalse(isPropertyPresentInParams(GENERIC_ACCEPTOR_ADDRESS, PROPERTY_TBR_KEY));
     }
 
     @Test
-    public void removeGenericAcceptor() {
-        cliClient.executeCommand(command);
-
-        page.navigateToMessaging();
-        page.selectView("Connections");
-        page.switchType("Type: Generic");
-
-        verifier.verifyResource(address, true);
-
-        page.selectInTable(NAME, 0);
+    public void removeGenericAcceptor() throws Exception {
+        page.selectInTable(GENERIC_ACCEPTOR_TBR, 0);
         page.remove();
 
-        verifier.verifyResource(address, false);
+        new ResourceVerifier(GENERIC_ACCEPTOR_ADDRESS_TBR, client).verifyDoesNotExist();
     }
+
+    private static boolean addGenericAcceptor(Address address) throws IOException, CommandFailedException {
+        String socketBinding = "genericAcceptorSocketBinding_" + RandomStringUtils.randomAlphanumeric(5);
+        createSocketBinding(socketBinding);
+        return operations.add(address, Values
+                .of("socket-binding", socketBinding)
+                .and("factory-class", FACTORY_CLASS)).isSuccess();
+    }
+
 
 }

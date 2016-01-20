@@ -65,9 +65,6 @@ public class DiscoveryGroupsTestCase extends AbstractMessagingTestCase {
         operations.removeIfExists(DG_ADDRESS);
         operations.removeIfExists(DG_TBA_ADDRESS);
         operations.removeIfExists(DG_TBR_ADDRESS);
-        for (String socketBinding : socketBindings) {
-            client.apply(new RemoveSocketBinding(socketBinding));
-        }
         administration.reloadIfRequired();
     }
 

@@ -22,7 +22,6 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
-import org.wildfly.extras.creaper.core.online.ModelNodeResult;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.OperationException;
 import org.wildfly.extras.creaper.core.online.operations.Values;
@@ -106,7 +105,7 @@ public class ConnectorServicesTestCase extends AbstractMessagingTestCase {
         Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
         assertTrue("Property should be added and wizard closed.", wizard.isClosed());
 
-        Assert.assertTrue(isPropertyPresentInParams("prop"));
+        Assert.assertTrue(isPropertyPresentInParams(CONNECTOR_SERVICE_ADDRESS, "prop"));
     }
 
     @Test
@@ -115,7 +114,7 @@ public class ConnectorServicesTestCase extends AbstractMessagingTestCase {
         ResourceManager properties = config.getResourceManager();
         properties.removeResource(PROPERTY_TBR_KEY).confirmAndDismissReloadRequiredMessage();
 
-        Assert.assertFalse(isPropertyPresentInParams(PROPERTY_TBR_KEY));
+        Assert.assertFalse(isPropertyPresentInParams(CONNECTOR_SERVICE_ADDRESS, PROPERTY_TBR_KEY));
     }
 
     @Test
@@ -129,11 +128,6 @@ public class ConnectorServicesTestCase extends AbstractMessagingTestCase {
     private static void addPropertyToConnectorService(String key, String value) throws IOException {
         ModelNode property = new ModelNode().set(key, value).asObject();
         operations.writeAttribute(CONNECTOR_SERVICE_ADDRESS, "params", property);
-    }
-
-    private boolean isPropertyPresentInParams(String key) throws IOException {
-        ModelNodeResult result = operations.readAttribute(CONNECTOR_SERVICE_ADDRESS, "params");
-        return result.value().keys().contains(key);
     }
 
 }
