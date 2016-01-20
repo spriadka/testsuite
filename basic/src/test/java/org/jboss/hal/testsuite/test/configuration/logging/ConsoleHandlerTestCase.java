@@ -1,22 +1,12 @@
 package org.jboss.hal.testsuite.test.configuration.logging;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.arquillian.junit.InSequence;
-import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Shared;
-import org.jboss.hal.testsuite.dmr.Dispatcher;
-import org.jboss.hal.testsuite.dmr.ResourceAddress;
-import org.jboss.hal.testsuite.dmr.ResourceVerifier;
-import org.jboss.hal.testsuite.finder.Application;
-import org.jboss.hal.testsuite.finder.FinderNames;
-import org.jboss.hal.testsuite.finder.FinderNavigation;
-import org.jboss.hal.testsuite.fragment.ConfigFragment;
-import org.jboss.hal.testsuite.page.config.DomainConfigEntryPoint;
+import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.page.config.LoggingPage;
-import org.jboss.hal.testsuite.page.config.StandaloneConfigEntryPoint;
-import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -24,34 +14,45 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
+import org.wildfly.extras.creaper.commands.logging.Logging;
+import org.wildfly.extras.creaper.core.CommandFailedException;
+import org.wildfly.extras.creaper.core.online.OnlineCommand;
+import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.OperationException;
 
-import static org.junit.Assert.assertTrue;
+import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Created by pcyprian on 27.8.15.
  */
 @RunWith(Arquillian.class)
 @Category(Shared.class)
-public class ConsoleHandlerTestCase {
-    private static final String CONSOLEHANDLER = "consoleHandler";
+public class ConsoleHandlerTestCase extends LoggingAbstractTestCase {
 
-    private FinderNavigation navigation;
+    private static final String CONSOLE_HANDLER = "CONSOLE_HANDLER_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String CONSOLE_HANDLER_TB_REMOVED = "C_HANDLER_REMOVE_ME_" + RandomStringUtils.randomAlphanumeric(5);
 
-    private ModelNode path = new ModelNode("/subsystem=logging/console-handler=" + CONSOLEHANDLER);
-    private ModelNode domainPath = new ModelNode("/profile=default/subsystem=logging/console-handler=" + CONSOLEHANDLER);
-    private ResourceAddress address;
-    private static Dispatcher dispatcher;
-    private static ResourceVerifier verifier;
+    private static final Address C_HANDLER_ADDRESS = LOGGING_SUBSYSTEM.and("console-handler", CONSOLE_HANDLER);
+    private static final Address C_HANDLER_TB_REMOVED_ADDRESS = LOGGING_SUBSYSTEM
+            .and("console-handler", CONSOLE_HANDLER_TB_REMOVED);
 
     @BeforeClass
-    public static void setUp() {
-        dispatcher = new Dispatcher();
-        verifier  = new ResourceVerifier(dispatcher);
+    public static void setUp() throws CommandFailedException, InterruptedException, TimeoutException, IOException {
+        List<OnlineCommand> addConsoleHandlers = new LinkedList<>();
+        addConsoleHandlers.add(Logging.handler().console().add(CONSOLE_HANDLER).build());
+        addConsoleHandlers.add(Logging.handler().console().add(CONSOLE_HANDLER_TB_REMOVED).build());
+        client.apply(addConsoleHandlers);
+        administration.reloadIfRequired();
     }
 
     @AfterClass
-    public static void tearDown() {
-        dispatcher.close();
+    public static void tearDown() throws InterruptedException, TimeoutException, IOException, OperationException {
+        operations.removeIfExists(C_HANDLER_ADDRESS);
+        operations.removeIfExists(C_HANDLER_TB_REMOVED_ADDRESS);
+        administration.reloadIfRequired();
     }
 
     @Drone
@@ -61,110 +62,50 @@ public class ConsoleHandlerTestCase {
 
     @Before
     public void before() {
-        if (ConfigUtils.isDomain()) {
-            navigation = new FinderNavigation(browser, DomainConfigEntryPoint.class)
-                    .addAddress(FinderNames.CONFIGURATION, FinderNames.PROFILES)
-                    .addAddress(FinderNames.PROFILE, "default")
-                    .addAddress(FinderNames.SUBSYSTEM, "Logging");
-            address = new ResourceAddress(domainPath);
-        } else {
-            navigation = new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
-                    .addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
-                    .addAddress(FinderNames.SUBSYSTEM, "Logging");
-            address = new ResourceAddress(path);
-        }
-
-        navigation.selectRow().invoke(FinderNames.VIEW);
-        Application.waitUntilVisible();
-
+        page.navigate();
         page.switchToHandlerTab();
+        page.selectHandler(CONSOLE_HANDLER);
     }
 
     @Test
-    @InSequence(0)
-    public void addConsoleHandler() {
-        page.addConsoleHandler(CONSOLEHANDLER, "PATTERN");
+    public void addConsoleHandler() throws Exception {
+        String name = "CONSOLE_HANDLER_" + RandomStringUtils.randomAlphanumeric(5);
+        page.addConsoleHandler(name, "ALL");
 
-        verifier.verifyResource(address, true);
+        new ResourceVerifier(LOGGING_SUBSYSTEM.and("console-handler", name), client).verifyExists();
     }
 
     @Test
-    @InSequence(1)
-    public void updateConsoleHandlerLevel() {
-        page.getResourceManager().getResourceTable().selectRowByText(0, CONSOLEHANDLER);
-        page.edit();
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().select("level", "DEBUG");
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "level", "DEBUG", 500);
+    public void updateConsoleHandlerLevel() throws Exception {
+        selectOptionAndVerify(C_HANDLER_ADDRESS, "level", "DEBUG");
     }
 
     @Test
-    @InSequence(2)
-    public void updateConsoleHandlerNamedFormatter() {
-        page.getResourceManager().getResourceTable().selectRowByText(0, CONSOLEHANDLER);
-        page.edit();
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("named-formatter", "");
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "named-formatter" , "undefined", 500);
+    public void updateConsoleHandlerNamedFormatter() throws Exception {
+        editTextAndVerify(C_HANDLER_ADDRESS, "named-formatter", "PATTERN");
     }
 
     @Test
-    @InSequence(3)
-    public void updateConsoleHandlerTarget() {
-        page.getResourceManager().getResourceTable().selectRowByText(0, CONSOLEHANDLER);
-        page.edit();
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().select("target", "console");
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "target" , "console", 500);
+    public void updateConsoleHandlerTarget() throws Exception {
+        selectOptionAndVerify(C_HANDLER_ADDRESS, "target", "console");
     }
 
     @Test
-    @InSequence(4)
-    public void updateConsoleHandlerAutoflush() {
-        page.getResourceManager().getResourceTable().selectRowByText(0, CONSOLEHANDLER);
-        page.edit();
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().checkbox("autoflush", false);
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "autoflush" , false, 500);
+    public void updateConsoleHandlerAutoflush() throws Exception {
+        editCheckboxAndVerify(C_HANDLER_ADDRESS, "autoflush", false);
     }
 
     @Test
-    @InSequence(5)
-    public void updateConsoleHandlerFormatter() {
-        page.getResourceManager().getResourceTable().selectRowByText(0, CONSOLEHANDLER);
-        page.edit();
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("formatter", "");
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "formatter" , "%d{HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n", 500);
+    public void updateConsoleHandlerFormatter() throws Exception {
+        editTextAndVerify(C_HANDLER_ADDRESS, "formatter", RandomStringUtils.randomAlphanumeric(6));
     }
 
     @Test
-    @InSequence(6)
-    public void removeConsoleHandler() {
-        page.getResourceManager().getResourceTable().selectRowByText(0, CONSOLEHANDLER);
+    public void removeConsoleHandler() throws Exception {
+        page.selectHandler(CONSOLE_HANDLER_TB_REMOVED);
         page.remove();
 
-        verifier.verifyResource(address, false);
+        new ResourceVerifier(C_HANDLER_TB_REMOVED_ADDRESS, client).verifyDoesNotExist();
     }
 
 }

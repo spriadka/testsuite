@@ -6,9 +6,10 @@ import org.jboss.hal.testsuite.cli.TimeoutException;
 import org.jboss.hal.testsuite.finder.Application;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
+import org.jboss.hal.testsuite.finder.Row;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
-import org.jboss.hal.testsuite.page.ConfigPage;
+import org.jboss.hal.testsuite.page.Navigatable;
 import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.PropUtils;
@@ -18,7 +19,7 @@ import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
 
-public class LoggingPage extends ConfigPage {
+public class LoggingPage extends ConfigurationPage implements Navigatable {
     private FinderNavigation navigation;
 
     public void navigateToLogging() {
@@ -35,8 +36,9 @@ public class LoggingPage extends ConfigPage {
             navigation = new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
                     .addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
                     .addAddress(FinderNames.SUBSYSTEM, "Logging");
-
-            navigation.selectRow().invoke(FinderNames.VIEW);
+            Row row = navigation.selectRow();
+            Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
+            row.invoke(FinderNames.VIEW);
             Application.waitUntilVisible();
         }
     }
@@ -62,16 +64,14 @@ public class LoggingPage extends ConfigPage {
     public void addLogger(String name, String category, String level) {
         clickButton("Add");
         getWindowFragment().getEditor().text("name", name);
-        getWindowFragment().getEditor().text("category", category);
         getWindowFragment().getEditor().select("level", level);
         getWindowFragment().getEditor().checkbox("use-parent-handlers", true);
         getWindowFragment().clickButton("Save");
     }
 
-    public void addFormatter(String name, String pattern) {
+    public void addFormatter(String name) {
         clickButton("Add");
         getWindowFragment().getEditor().text("name", name);
-        getWindowFragment().getEditor().text("pattern", pattern);
         getWindowFragment().clickButton("Save");
     }
 
@@ -96,10 +96,10 @@ public class LoggingPage extends ConfigPage {
         getWindowFragment().getEditor().clickButton("Save");
     }
 
-    public void addConsoleHandler(String name, String namedFormatter) {
+    public void addConsoleHandler(String name, String level) {
         clickButton("Add");
         getWindowFragment().getEditor().text("name", name);
-        getWindowFragment().getEditor().text("named-formatter", namedFormatter);
+        getWindowFragment().getEditor().select("level", level);
         getWindowFragment().clickButton("Save");
     }
 
@@ -220,5 +220,35 @@ public class LoggingPage extends ConfigPage {
         WebElement selectElement = Console.withBrowser(browser).findElement(selector, getContentRoot());
         Select select = new Select(selectElement);
         select.selectByVisibleText(value);
+    }
+
+    public void navigate() {
+        FinderNavigation navigation;
+        if (ConfigUtils.isDomain()) {
+            navigation = new FinderNavigation(browser, DomainConfigEntryPoint.class)
+                    .addAddress(FinderNames.CONFIGURATION, FinderNames.PROFILES)
+                    .addAddress(FinderNames.PROFILE, ConfigUtils.getDefaultProfile())
+                    .addAddress(FinderNames.SUBSYSTEM, "Logging");
+        } else {
+            navigation = new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
+                    .addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
+                    .addAddress(FinderNames.SUBSYSTEM, "Logging");
+        }
+        Row row = navigation.selectRow();
+        Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
+        row.invoke(FinderNames.VIEW);
+        Application.waitUntilVisible();
+    }
+
+    public void selectLogger(String name) {
+        getResourceManager().getResourceTable().selectRowByText(0, name);
+    }
+
+    public void selectFormatter(String name) {
+        getResourceManager().getResourceTable().selectRowByText(0, name);
+    }
+
+    public void selectHandler(String name) {
+        getResourceManager().getResourceTable().selectRowByText(0, name);
     }
 }

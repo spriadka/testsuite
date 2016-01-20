@@ -1,20 +1,14 @@
 package org.jboss.hal.testsuite.test.configuration.logging;
 
+import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.arquillian.junit.InSequence;
-import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Standalone;
-import org.jboss.hal.testsuite.dmr.Dispatcher;
-import org.jboss.hal.testsuite.dmr.ResourceAddress;
-import org.jboss.hal.testsuite.dmr.ResourceVerifier;
-import org.jboss.hal.testsuite.finder.Application;
-import org.jboss.hal.testsuite.finder.FinderNames;
-import org.jboss.hal.testsuite.finder.FinderNavigation;
+import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
+import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.jboss.hal.testsuite.page.config.LoggingPage;
-import org.jboss.hal.testsuite.page.config.StandaloneConfigEntryPoint;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -22,6 +16,11 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
+import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.OperationException;
+
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
 import static org.junit.Assert.assertTrue;
 
@@ -30,25 +29,34 @@ import static org.junit.Assert.assertTrue;
  */
 @RunWith(Arquillian.class)
 @Category(Standalone.class)
-public class SizeHandlerTestCase {
-    private static final String SIZE_HANDLER = "Size_HANDLER";
+public class SizeHandlerTestCase extends LoggingAbstractTestCase {
 
-    private FinderNavigation navigation;
+    private static final String SIZE_HANDLER = "Size_HANDLER" + RandomStringUtils.randomAlphanumeric(6);
+    private static final String SIZE_HANDLER_TBA = "Size_HANDLER_TBA" + RandomStringUtils.randomAlphanumeric(6);
+    private static final String SIZE_HANDLER_TBR = "Size_HANDLER_TBR" + RandomStringUtils.randomAlphanumeric(6);
 
-    private ModelNode path = new ModelNode("/subsystem=logging/size-rotating-file-handler=" + SIZE_HANDLER);
-    private ResourceAddress address = new ResourceAddress(path);
-    private static Dispatcher dispatcher;
-    private static ResourceVerifier verifier;
+    private static final Address SIZE_HANDLER_ADDRESS = LOGGING_SUBSYSTEM
+            .and("size-rotating-file-handler", SIZE_HANDLER);
+    private static final Address SIZE_HANDLER_TBA_ADDRESS = LOGGING_SUBSYSTEM
+            .and("size-rotating-file-handler", SIZE_HANDLER_TBA);
+    private static final Address SIZE_HANDLER_TBR_ADDRESS = LOGGING_SUBSYSTEM
+            .and("size-rotating-file-handler", SIZE_HANDLER_TBR);
 
     @BeforeClass
-    public static void setUp() {
-        dispatcher = new Dispatcher();
-        verifier  = new ResourceVerifier(dispatcher);
+    public static void setUp() throws Exception {
+        createFileHandler(SIZE_HANDLER_ADDRESS, "sizehandler.log");
+        new ResourceVerifier(SIZE_HANDLER_ADDRESS, client).verifyExists();
+        createFileHandler(SIZE_HANDLER_TBR_ADDRESS, "sizehandler2.log");
+        new ResourceVerifier(SIZE_HANDLER_TBR_ADDRESS, client).verifyExists();
+        administration.reloadIfRequired();
     }
 
     @AfterClass
-    public static void tearDown() {
-        dispatcher.close();
+    public static void tearDown() throws IOException, OperationException, TimeoutException, InterruptedException {
+        operations.removeIfExists(SIZE_HANDLER_ADDRESS);
+        operations.removeIfExists(SIZE_HANDLER_TBA_ADDRESS);
+        operations.removeIfExists(SIZE_HANDLER_TBR_ADDRESS);
+        administration.reloadIfRequired();
     }
 
     @Drone
@@ -58,215 +66,111 @@ public class SizeHandlerTestCase {
 
     @Before
     public void before() {
-        navigation = new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
-                .addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
-                .addAddress(FinderNames.SUBSYSTEM, "Logging");
-
-        navigation.selectRow().invoke(FinderNames.VIEW);
-        Application.waitUntilVisible();
-
+        page.navigate();
         page.switchToHandlerTab();
         page.switchToSize();
+        page.selectHandler(SIZE_HANDLER);
     }
 
     @Test
-    @InSequence(0)
-    public void addSizeHandler() {
-        page.addFileHandler(SIZE_HANDLER);
-
-        verifier.verifyResource(address, true);
+    public void addSizeHandler() throws Exception {
+        page.addFileHandler(SIZE_HANDLER_TBA);
+        new ResourceVerifier(SIZE_HANDLER_TBA_ADDRESS, client).verifyExists();
     }
 
     @Test
-    @InSequence(1)
-    public void updateSizeHandlerNamedFormatter() {
-        page.edit();
+    public void updateSizeHandlerNamedFormatter() throws Exception {
+        editTextAndVerify(SIZE_HANDLER_ADDRESS, "named-formatter", "PATTERN");
+    }
+
+    @Test
+    public void updateSizeHandlerEncoding() throws Exception {
+        editTextAndVerify(SIZE_HANDLER_ADDRESS, "encoding", "UTF-8");
+    }
+
+    @Test
+    public void updateSizeHandlerAppend() throws Exception {
+        editCheckboxAndVerify(SIZE_HANDLER_ADDRESS, "append", false);
+    }
+
+    @Test
+    public void updateSizeHandlerAutoflush() throws Exception {
+        editCheckboxAndVerify(SIZE_HANDLER_ADDRESS, "autoflush", false);
+    }
+
+    @Test
+    public void disableSizeHandler() throws Exception {
+        editCheckboxAndVerify(SIZE_HANDLER_ADDRESS, "enabled", false);
+    }
+
+    @Test
+    public void updateSizeHandlerLevel() throws Exception {
+        selectOptionAndVerify(SIZE_HANDLER_ADDRESS, "level", "CONFIG");
+    }
+
+    @Test
+    public void updateSizeHandlerFilterSpec() throws Exception {
+        editTextAndVerify(SIZE_HANDLER_ADDRESS, "filter-spec", "match(\"JBEAP.*\")");
+    }
+
+    @Test
+    public void updateSizeHandlerFormatter() throws Exception {
+        editTextAndVerify(SIZE_HANDLER_ADDRESS, "formatter", "%d{HH:mm:ss,SSS}");
+    }
+
+    @Test
+    public void updateSizeHandlerRotateOnBoot() throws Exception {
+        editCheckboxAndVerify(SIZE_HANDLER_ADDRESS, "rotate-on-boot", true);
+    }
+
+    @Test
+    public void updateSizeHandlerMaxBackupIndex() throws Exception {
+        editTextAndVerify(SIZE_HANDLER_ADDRESS, "max-backup-index", 3);
+    }
+
+    @Test
+    public void updateSizeHandlerSuffix() throws Exception {
+        editTextAndVerify(SIZE_HANDLER_ADDRESS, "suffix", ".yyyy-MM-dd,HH:mm");
+    }
+
+    @Test
+    public void updateSizeHandlerToDefaultSettings() throws Exception {
+
         ConfigFragment editPanelFragment = page.getConfigFragment();
+        Editor editor = editPanelFragment.edit();
 
-        editPanelFragment.getEditor().text("named-formatter", "PATTERN");
+       editor.text("named-formatter", "");
+       editor.text("encoding", "");
+       editor.text("filter-spec", "");
+       editor.text("formatter", "%d{HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n");
+       editor.text("max-backup-index", "1");
+       editor.text("suffix", "");
+       editor.checkbox("append", true);
+       editor.checkbox("autoflush", true);
+       editor.checkbox("enabled", true);
+       editor.checkbox("rotate-on-boot", false);
+       editor.select("level", "ALL");
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "named-formatter", "PATTERN", 500);
-
+        new ResourceVerifier(SIZE_HANDLER_ADDRESS, client).verifyAttributeIsUndefined("named-formatter");
+        new ResourceVerifier(SIZE_HANDLER_ADDRESS, client).verifyAttributeIsUndefined("encoding");
+        new ResourceVerifier(SIZE_HANDLER_ADDRESS, client).verifyAttributeIsUndefined("filter-spec");
+        new ResourceVerifier(SIZE_HANDLER_ADDRESS, client).verifyAttribute("formatter", "%d{HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n");
+        new ResourceVerifier(SIZE_HANDLER_ADDRESS, client).verifyAttributeIsUndefined("suffix");
+        new ResourceVerifier(SIZE_HANDLER_ADDRESS, client).verifyAttribute("max-backup-index", 1);
+        new ResourceVerifier(SIZE_HANDLER_ADDRESS, client).verifyAttribute("append", true);
+        new ResourceVerifier(SIZE_HANDLER_ADDRESS, client).verifyAttribute("autoflush", true);
+        new ResourceVerifier(SIZE_HANDLER_ADDRESS, client).verifyAttribute("enabled", true);
+        new ResourceVerifier(SIZE_HANDLER_ADDRESS, client).verifyAttribute("rotate-on-boot", false);
+        new ResourceVerifier(SIZE_HANDLER_ADDRESS, client).verifyAttribute("level", "ALL");
     }
 
     @Test
-    @InSequence(2)
-    public void updateSizeHandlerEncoding() {
-        page.edit();
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("encoding", "UTF-8");
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "encoding", "UTF-8", 500);
-
-    }
-
-    @Test
-    @InSequence(3)
-    public void updateSizeHandlerAppend() {
-        page.edit();
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().checkbox("append", false);
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "append", false, 500);
-
-    }
-
-    @Test
-    @InSequence(4)
-    public void updateSizeHandlerAutoflush() {
-        page.edit();
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().checkbox("autoflush", false);
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "autoflush", false, 500);
-
-    }
-
-    @Test
-    @InSequence(5)
-    public void disableSizeHandler() {
-        page.edit();
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().checkbox("enabled", false);
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "enabled", false, 500);
-
-    }
-
-    @Test
-    @InSequence(6)
-    public void updateSizeHandlerLevel() {
-        page.edit();
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().select("level", "CONFIG");
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "level" , "CONFIG", 500);
-    }
-
-    @Test
-    @InSequence(7)
-    public void updateSizeHandlerFilterSpec() {
-        page.edit();
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("filter-spec", "match(\"JBEAP.*\")");
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "filter-spec", "match(\"JBEAP.*\")", 500);
-
-    }
-
-    @Test
-    @InSequence(8)
-    public void updateSizeHandlerFormatter() {
-        page.edit();
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("formatter", "%d{HH:mm:ss,SSS}");
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "formatter", "%d{HH:mm:ss,SSS}", 500);
-
-    }
-
-    @Test
-    @InSequence(9)
-    public void updateSizeHandlerRotateOnBoot() {
-        page.edit();
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().checkbox("rotate-on-boot", true);
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "rotate-on-boot", true, 500);
-
-    }
-
-    @Test
-    @InSequence(10)
-    public void updateSizeHandlerMaxBackupIndex() {
-        page.edit();
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("max-backup-index", "3");
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "max-backup-index", "3", 500);
-    }
-
-    @Test
-    @InSequence(11)
-    public void updateSizeHandlerSuffix() {
-        page.edit();
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("suffix", ".yyyy-MM-dd,HH:mm");
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "suffix", ".yyyy-MM-dd,HH:mm", 500);
-
-    }
-
-    @Test
-    @InSequence(12)
-    public void updateSizeHandlerToDefualtSettings() {
-        page.edit();
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("named-formatter", "");
-        editPanelFragment.getEditor().text("encoding", "");
-        editPanelFragment.getEditor().text("filter-spec", "");
-        editPanelFragment.getEditor().text("formatter", "%d{HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n");
-        editPanelFragment.getEditor().text("max-backup-index", "1");
-        editPanelFragment.getEditor().text("suffix", "");
-        editPanelFragment.getEditor().checkbox("append", true);
-        editPanelFragment.getEditor().checkbox("autoflush", true);
-        editPanelFragment.getEditor().checkbox("enabled", true);
-        editPanelFragment.getEditor().checkbox("rotate-on-boot", false);
-        editPanelFragment.getEditor().select("level", "ALL");
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "named-formatter", "undefined", 500);
-        verifier.verifyAttribute(address, "encoding", "undefined", 500);
-        verifier.verifyAttribute(address, "filter-spec", "undefined", 500);
-        verifier.verifyAttribute(address, "formatter", "%d{HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n", 500);
-        verifier.verifyAttribute(address, "suffix", "undefined", 500);
-        verifier.verifyAttribute(address, "max-backup-index", "1", 500);
-        verifier.verifyAttribute(address, "append", true, 500);
-        verifier.verifyAttribute(address, "autoflush", true, 500);
-        verifier.verifyAttribute(address, "enabled", true, 500);
-        verifier.verifyAttribute(address, "rotate-on-boot", false, 500);
-        verifier.verifyAttribute(address, "level", "ALL", 500);
-    }
-
-    @Test
-    @InSequence(13)
-    public void removeSizeHandler() {
+    public void removeSizeHandler() throws Exception {
+        page.selectHandler(SIZE_HANDLER_TBR);
         page.remove();
 
-        verifier.verifyResource(address, false);
+        new ResourceVerifier(SIZE_HANDLER_TBR_ADDRESS, client).verifyDoesNotExist();
     }
 }

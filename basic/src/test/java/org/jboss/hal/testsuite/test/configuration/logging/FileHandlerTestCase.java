@@ -1,20 +1,14 @@
 package org.jboss.hal.testsuite.test.configuration.logging;
 
+import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.arquillian.junit.InSequence;
-import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Standalone;
-import org.jboss.hal.testsuite.dmr.Dispatcher;
-import org.jboss.hal.testsuite.dmr.ResourceAddress;
-import org.jboss.hal.testsuite.dmr.ResourceVerifier;
-import org.jboss.hal.testsuite.finder.Application;
-import org.jboss.hal.testsuite.finder.FinderNames;
-import org.jboss.hal.testsuite.finder.FinderNavigation;
+import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
+import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.jboss.hal.testsuite.page.config.LoggingPage;
-import org.jboss.hal.testsuite.page.config.StandaloneConfigEntryPoint;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -22,6 +16,11 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
+import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.OperationException;
+
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
 import static org.junit.Assert.assertTrue;
 
@@ -30,25 +29,26 @@ import static org.junit.Assert.assertTrue;
  */
 @RunWith(Arquillian.class)
 @Category(Standalone.class)
-public class FileHandlerTestCase {
-    private static final String FILEHANDLER = "FILE_HANDLER";
+public class FileHandlerTestCase extends LoggingAbstractTestCase {
+    private static final String FILE_HANDLER = "FILE_HANDLER_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String FILE_HANDLER_TO_BE_REMOVED = "FILE_HANDLER_REMOVE_ME_" + RandomStringUtils.randomAlphanumeric(5);
 
-    private FinderNavigation navigation;
-
-    private ModelNode path = new ModelNode("/subsystem=logging/file-handler=" + FILEHANDLER);
-    private ResourceAddress address = new ResourceAddress(path);
-    private static Dispatcher dispatcher;
-    private static ResourceVerifier verifier;
+    private static final Address FILE_HANDLER_ADDRESS = LOGGING_SUBSYSTEM.and("file-handler", FILE_HANDLER);
+    private static final Address FILE_HANDLER_TB_REMOVED_ADDRESS = LOGGING_SUBSYSTEM
+            .and("file-handler", FILE_HANDLER_TO_BE_REMOVED);
 
     @BeforeClass
-    public static void setUp() {
-        dispatcher = new Dispatcher();
-        verifier  = new ResourceVerifier(dispatcher);
+    public static void setUp() throws IOException, TimeoutException, InterruptedException {
+        createFileHandler(FILE_HANDLER_ADDRESS, "tests_hal1.log");
+        createFileHandler(FILE_HANDLER_TB_REMOVED_ADDRESS, "tests_hal2.log");
+        administration.reloadIfRequired();
     }
 
     @AfterClass
-    public static void tearDown() {
-        dispatcher.close();
+    public static void tearDown() throws IOException, OperationException, TimeoutException, InterruptedException {
+        operations.removeIfExists(FILE_HANDLER_ADDRESS);
+        operations.removeIfExists(FILE_HANDLER_TB_REMOVED_ADDRESS);
+        administration.reloadIfRequired();
     }
 
     @Drone
@@ -58,169 +58,91 @@ public class FileHandlerTestCase {
 
     @Before
     public void before() {
-        navigation = new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
-                .addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
-                .addAddress(FinderNames.SUBSYSTEM, "Logging");
-
-        navigation.selectRow().invoke(FinderNames.VIEW);
-        Application.waitUntilVisible();
-
+        page.navigate();
         page.switchToHandlerTab();
         page.switchToFile();
+        page.selectHandler(FILE_HANDLER);
     }
 
     @Test
-    @InSequence(0)
-    public void addFileHandler() {
-        page.addFileHandler(FILEHANDLER);
-
-        verifier.verifyResource(address, true);
+    public void addFileHandler() throws Exception {
+        new ResourceVerifier(FILE_HANDLER_ADDRESS, client).verifyExists();
     }
 
     @Test
-    @InSequence(1)
-    public void updateFileHandlerNamedFormatter() {
-        page.edit();
+    public void updateFileHandlerNamedFormatter() throws Exception {
+        editTextAndVerify(FILE_HANDLER_ADDRESS, "named-formatter", "PATTERN");
+    }
+
+    @Test
+    public void updateFileHandlerEncoding() throws Exception {
+        editTextAndVerify(FILE_HANDLER_ADDRESS, "encoding", "UTF-8");
+    }
+
+    @Test
+    public void updateFileHandlerAppend() throws Exception {
+        editCheckboxAndVerify(FILE_HANDLER_ADDRESS, "append", false);
+    }
+
+    @Test
+    public void updateFileHandlerAutoflush() throws Exception {
+        editCheckboxAndVerify(FILE_HANDLER_ADDRESS, "autoflush", false);
+    }
+
+    @Test
+    public void disableFileHandler() throws Exception {
+        editCheckboxAndVerify(FILE_HANDLER_ADDRESS, "enabled", false);
+    }
+
+    @Test
+    public void updateFileHandlerLevel() throws Exception {
+        selectOptionAndVerify(FILE_HANDLER_ADDRESS, "level", "CONFIG");
+    }
+
+    @Test
+    public void updateFileHandlerFilterSpec() throws Exception {
+        editTextAndVerify(FILE_HANDLER_ADDRESS, "filter-spec", "match(\"JBEAP.*\")");
+    }
+
+    @Test
+    public void updateFileHandlerFormatter() throws Exception {
+        editTextAndVerify(FILE_HANDLER_ADDRESS, "formatter", "%d{HH:mm:ss,SSS}");
+    }
+
+
+    @Test
+    public void updateFileHandlerToDefaultSettings() throws Exception {
         ConfigFragment editPanelFragment = page.getConfigFragment();
+        Editor editor = editPanelFragment.edit();
 
-        editPanelFragment.getEditor().text("named-formatter", "PATTERN");
+        editor.text("named-formatter", "");
+        editor.text("encoding", "");
+        editor.text("filter-spec", "");
+        editor.text("formatter", "%d{HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n");
+        editor.checkbox("append", true);
+        editor.checkbox("autoflush", true);
+        editor.checkbox("enabled", true);
+        editor.select("level", "ALL");
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "named-formatter", "PATTERN", 500);
-
+        new ResourceVerifier(FILE_HANDLER_ADDRESS, client, 500).verifyAttribute("named-formatter", "COLOR-PATTERN");
+        new ResourceVerifier(FILE_HANDLER_ADDRESS, client, 500).verifyAttribute("encoding", "undefined");
+        new ResourceVerifier(FILE_HANDLER_ADDRESS, client, 500).verifyAttribute("filter-spec", "undefined");
+        new ResourceVerifier(FILE_HANDLER_ADDRESS, client, 500).verifyAttribute("formatter", "%d{HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n");
+        new ResourceVerifier(FILE_HANDLER_ADDRESS, client, 500).verifyAttribute("append", true);
+        new ResourceVerifier(FILE_HANDLER_ADDRESS, client, 500).verifyAttribute("autoflush", true);
+        new ResourceVerifier(FILE_HANDLER_ADDRESS, client, 500).verifyAttribute("enabled", true);
+        new ResourceVerifier(FILE_HANDLER_ADDRESS, client, 500).verifyAttribute("level", "ALL");
     }
 
     @Test
-    @InSequence(2)
-    public void updateFileHandlerEncoding() {
-        page.edit();
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("encoding", "UTF-8");
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "encoding", "UTF-8", 500);
-
-    }
-
-    @Test
-    @InSequence(3)
-    public void updateFileHandlerAppend() {
-        page.edit();
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().checkbox("append", false);
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "append", false, 500);
-
-    }
-
-    @Test
-    @InSequence(4)
-    public void updateFileHandlerAutoflush() {
-        page.edit();
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().checkbox("autoflush", false);
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "autoflush", false, 500);
-
-    }
-
-    @Test
-    @InSequence(5)
-    public void disableFileHandler() {
-        page.edit();
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().checkbox("enabled", false);
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "enabled", false, 500);
-
-    }
-
-    @Test
-    @InSequence(6)
-    public void updateFileHandlerLevel() {
-        page.edit();
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().select("level", "CONFIG");
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "level" , "CONFIG", 500);
-    }
-
-    @Test
-    @InSequence(7)
-    public void updateFileHandlerFilterSpec() {
-        page.edit();
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("filter-spec", "match(\"JBEAP.*\")");
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "filter-spec", "match(\"JBEAP.*\")", 500);
-
-    }
-
-    @Test
-    @InSequence(8)
-    public void updateFileHandlerFormatter() {
-        page.edit();
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("formatter", "%d{HH:mm:ss,SSS}");
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "formatter", "%d{HH:mm:ss,SSS}", 500);
-
-    }
-
-
-    @Test
-    @InSequence(9)
-    public void updateFileHandlerToDefualtSettings() {
-        page.edit();
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("named-formatter", "");
-        editPanelFragment.getEditor().text("encoding", "");
-        editPanelFragment.getEditor().text("filter-spec", "");
-        editPanelFragment.getEditor().text("formatter", "%d{HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n");
-        editPanelFragment.getEditor().checkbox("append", true);
-        editPanelFragment.getEditor().checkbox("autoflush", true);
-        editPanelFragment.getEditor().checkbox("enabled", true);
-        editPanelFragment.getEditor().select("level", "ALL");
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "named-formatter", "undefined", 500);
-        verifier.verifyAttribute(address, "encoding", "undefined", 500);
-        verifier.verifyAttribute(address, "filter-spec", "undefined", 500);
-        verifier.verifyAttribute(address, "formatter", "%d{HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n", 500);
-        verifier.verifyAttribute(address, "append", true, 500);
-        verifier.verifyAttribute(address, "autoflush", true, 500);
-        verifier.verifyAttribute(address, "enabled", true, 500);
-        verifier.verifyAttribute(address, "level", "ALL", 500);
-    }
-
-    @Test
-    @InSequence(10)
-    public void removeFileHandler() {
+    public void removeFileHandler() throws Exception {
+        page.selectHandler(FILE_HANDLER_TO_BE_REMOVED);
         page.remove();
 
-        verifier.verifyResource(address, false);
+        administration.reloadIfRequired();
+
+        new ResourceVerifier(FILE_HANDLER_TB_REMOVED_ADDRESS, client).verifyDoesNotExist();
     }
 }

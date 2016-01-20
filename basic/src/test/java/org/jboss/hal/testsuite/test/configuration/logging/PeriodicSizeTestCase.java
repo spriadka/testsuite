@@ -1,20 +1,12 @@
 package org.jboss.hal.testsuite.test.configuration.logging;
 
+import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.arquillian.junit.InSequence;
-import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Standalone;
-import org.jboss.hal.testsuite.dmr.Dispatcher;
-import org.jboss.hal.testsuite.dmr.ResourceAddress;
-import org.jboss.hal.testsuite.dmr.ResourceVerifier;
-import org.jboss.hal.testsuite.finder.Application;
-import org.jboss.hal.testsuite.finder.FinderNames;
-import org.jboss.hal.testsuite.finder.FinderNavigation;
-import org.jboss.hal.testsuite.fragment.ConfigFragment;
+import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.page.config.LoggingPage;
-import org.jboss.hal.testsuite.page.config.StandaloneConfigEntryPoint;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -22,33 +14,42 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
+import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.OperationException;
 
-import static org.junit.Assert.assertTrue;
+import java.io.IOException;
 
 /**
  * Created by pcyprian on 14.10.15.
  */
 @RunWith(Arquillian.class)
 @Category(Standalone.class)
-public class PeriodicSizeTestCase {
-    private static final String PERIODIC_SIZE_HANDLER = "Periodic_Size_HANDLER";
+public class PeriodicSizeTestCase extends LoggingAbstractTestCase {
 
-    private FinderNavigation navigation;
+    private static final String PERIODIC_SIZE_HANDLER = "Periodic_Size_HANDLER" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String PERIODIC_SIZE_HANDLER_TBR = "Periodic_Size_HANDLER" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String PERIODIC_SIZE_HANDLER_TBA = "Periodic_Size_HANDLER" + RandomStringUtils.randomAlphanumeric(5);
 
-    private ModelNode path = new ModelNode("/subsystem=logging/periodic-size-rotating-file-handler=" + PERIODIC_SIZE_HANDLER);
-    private ResourceAddress address = new ResourceAddress(path);
-    private static Dispatcher dispatcher;
-    private static ResourceVerifier verifier;
+    private static final Address PERIODIC_SIZE_HANDLER_ADDRESS = LOGGING_SUBSYSTEM
+            .and("periodic-size-rotating-file-handler", PERIODIC_SIZE_HANDLER);
+    private static final Address PERIODIC_SIZE_HANDLER_TBR_ADDRESS = LOGGING_SUBSYSTEM
+            .and("periodic-size-rotating-file-handler", PERIODIC_SIZE_HANDLER_TBR);
+    private static final Address PERIODIC_SIZE_HANDLER_TBA_ADDRESS = LOGGING_SUBSYSTEM
+            .and("periodic-size-rotating-file-handler", PERIODIC_SIZE_HANDLER_TBA);
+
 
     @BeforeClass
-    public static void setUp() {
-        dispatcher = new Dispatcher();
-        verifier  = new ResourceVerifier(dispatcher);
+    public static void setUp() throws Exception {
+        createPeriodicFileHandler(PERIODIC_SIZE_HANDLER, "periodic-handler.log");
+        new ResourceVerifier(PERIODIC_SIZE_HANDLER_ADDRESS, client).verifyExists();
+        createPeriodicFileHandler(PERIODIC_SIZE_HANDLER_TBR, "periodic-handler2.log");
+        new ResourceVerifier(PERIODIC_SIZE_HANDLER_TBR_ADDRESS, client).verifyExists();
     }
 
     @AfterClass
-    public static void tearDown() {
-        dispatcher.close();
+    public static void tearDown() throws IOException, OperationException {
+        operations.removeIfExists(PERIODIC_SIZE_HANDLER_ADDRESS);
+        operations.removeIfExists(PERIODIC_SIZE_HANDLER_TBR_ADDRESS);
     }
 
     @Drone
@@ -58,200 +59,74 @@ public class PeriodicSizeTestCase {
 
     @Before
     public void before() {
-        navigation = new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
-                .addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
-                .addAddress(FinderNames.SUBSYSTEM, "Logging");
-
-        navigation.selectRow().invoke(FinderNames.VIEW);
-        Application.waitUntilVisible();
-
+        page.navigate();
         page.switchToHandlerTab();
         page.switchToPeriodicSize();
+        page.selectHandler(PERIODIC_SIZE_HANDLER);
     }
 
     @Test
-    @InSequence(0)
-    public void addPeriodicSizeHandler() {
-        page.addPeriodicSizeHandler(PERIODIC_SIZE_HANDLER, ".yyyy-MM-dd,HH:mm");
+    public void addPeriodicSizeHandler() throws Exception {
+        page.addPeriodicSizeHandler(PERIODIC_SIZE_HANDLER_TBA, ".yyyy-MM-dd,HH:mm");
 
-        verifier.verifyResource(address, true);
+        new ResourceVerifier(PERIODIC_SIZE_HANDLER_TBA_ADDRESS, client).verifyExists();
     }
 
     @Test
-    @InSequence(1)
-    public void updatePeriodicSizeHandlerNamedFormatter() {
-        page.edit();
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("named-formatter", "PATTERN");
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "named-formatter", "PATTERN", 500);
-
+    public void updatePeriodicSizeHandlerNamedFormatter() throws Exception {
+        editTextAndVerify(PERIODIC_SIZE_HANDLER_ADDRESS, "named-formatter", "PATTERN");
     }
 
     @Test
-    @InSequence(2)
-    public void updatePeriodicSizeHandlerEncoding() {
-        page.edit();
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("encoding", "UTF-8");
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "encoding", "UTF-8", 500);
-
+    public void updatePeriodicSizeHandlerEncoding() throws Exception {
+        editTextAndVerify(PERIODIC_SIZE_HANDLER_ADDRESS, "encoding", "UTF-8");
     }
 
     @Test
-    @InSequence(3)
-    public void updatePeriodicSizeHandlerAppend() {
-        page.edit();
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().checkbox("append", false);
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "append", false, 500);
-
+    public void updatePeriodicSizeHandlerAppend() throws Exception {
+        editCheckboxAndVerify(PERIODIC_SIZE_HANDLER_ADDRESS, "append", false);
     }
 
     @Test
-    @InSequence(4)
-    public void updatePeriodicSizeHandlerAutoflush() {
-        page.edit();
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().checkbox("autoflush", false);
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "autoflush", false, 500);
-
+    public void updatePeriodicSizeHandlerAutoflush() throws Exception {
+        editCheckboxAndVerify(PERIODIC_SIZE_HANDLER_ADDRESS, "autoflush", false);
     }
 
     @Test
-    @InSequence(5)
-    public void disablePeriodicSizeHandler() {
-        page.edit();
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().checkbox("enabled", false);
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "enabled", false, 500);
-
+    public void disablePeriodicSizeHandler() throws Exception {
+        editCheckboxAndVerify(PERIODIC_SIZE_HANDLER_ADDRESS, "enabled", false);
     }
 
     @Test
-    @InSequence(6)
-    public void updatePeriodicSizeHandlerLevel() {
-        page.edit();
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().select("level", "CONFIG");
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "level" , "CONFIG", 500);
+    public void updatePeriodicSizeHandlerLevel() throws Exception {
+        selectOptionAndVerify(PERIODIC_SIZE_HANDLER_ADDRESS, "level", "CONFIG");
     }
 
     @Test
-    @InSequence(7)
-    public void updatePeriodicSizeHandlerFilterSpec() {
-        page.edit();
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("filter-spec", "match(\"JBEAP.*\")");
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "filter-spec", "match(\"JBEAP.*\")", 500);
-
+    public void updatePeriodicSizeHandlerFilterSpec() throws Exception {
+        editTextAndVerify(PERIODIC_SIZE_HANDLER_ADDRESS, "filter-spec", "match(\"JBEAP.*\")");
     }
 
     @Test
-    @InSequence(8)
-    public void updatePeriodicSizeHandlerFormatter() {
-        page.edit();
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("formatter", "%d{HH:mm:ss,SSS}");
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "formatter", "%d{HH:mm:ss,SSS}", 500);
-
+    public void updatePeriodicSizeHandlerFormatter() throws Exception {
+        editTextAndVerify(PERIODIC_SIZE_HANDLER_ADDRESS, "formatter", "%d{HH:mm:ss,SSS}");
     }
 
     @Test
-    @InSequence(9)
-    public void updatePeriodicSizeHandlerRotateOnBoot() {
-        page.edit();
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().checkbox("rotate-on-boot", true);
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "rotate-on-boot", true, 500);
-
+    public void updatePeriodicSizeHandlerRotateOnBoot() throws Exception {
+        editCheckboxAndVerify(PERIODIC_SIZE_HANDLER_ADDRESS, "rotate-on-boot", true);
     }
 
     @Test
-    @InSequence(10)
-    public void updatePeriodicSizeHandlerMaxBackupIndex() {
-        page.edit();
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("max-backup-index", "3");
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "max-backup-index", "3", 500);
-
+    public void updatePeriodicSizeHandlerMaxBackupIndex() throws Exception {
+        editTextAndVerify(PERIODIC_SIZE_HANDLER_ADDRESS, "max-backup-index", 3);
     }
 
     @Test
-    @InSequence(11)
-    public void updatePeriodicSizeHandlerToDefualtSettings() {
-        page.edit();
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("named-formatter", "");
-        editPanelFragment.getEditor().text("encoding", "");
-        editPanelFragment.getEditor().text("filter-spec", "");
-        editPanelFragment.getEditor().text("formatter", "%d{HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n");
-        editPanelFragment.getEditor().text("max-backup-index", "1");
-        editPanelFragment.getEditor().checkbox("append", true);
-        editPanelFragment.getEditor().checkbox("autoflush", true);
-        editPanelFragment.getEditor().checkbox("enabled", true);
-        editPanelFragment.getEditor().checkbox("rotate-on-boot", false);
-        editPanelFragment.getEditor().select("level", "ALL");
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "named-formatter", "undefined", 500);
-        verifier.verifyAttribute(address, "encoding", "undefined", 500);
-        verifier.verifyAttribute(address, "filter-spec", "undefined", 500);
-        verifier.verifyAttribute(address, "formatter", "%d{HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n", 500);
-        verifier.verifyAttribute(address, "max-backup-index", "1", 500);
-        verifier.verifyAttribute(address, "append", true, 500);
-        verifier.verifyAttribute(address, "autoflush", true, 500);
-        verifier.verifyAttribute(address, "enabled", true, 500);
-        verifier.verifyAttribute(address, "rotate-on-boot", false, 500);
-        verifier.verifyAttribute(address, "level", "ALL", 500);
-    }
-
-    @Test
-    @InSequence(12)
-    public void removePeriodicSizeHandler() {
+    public void removePeriodicSizeHandler() throws Exception {
+        page.selectHandler(PERIODIC_SIZE_HANDLER_TBR);
         page.remove();
 
-        verifier.verifyResource(address, false);
+        new ResourceVerifier(PERIODIC_SIZE_HANDLER_TBR_ADDRESS, client).verifyDoesNotExist();
     }
 }
