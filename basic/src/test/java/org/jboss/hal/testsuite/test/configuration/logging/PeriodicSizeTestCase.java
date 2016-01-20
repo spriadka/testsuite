@@ -4,7 +4,7 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.hal.testsuite.category.Standalone;
+import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.page.config.LoggingPage;
 import org.junit.AfterClass;
@@ -16,6 +16,7 @@ import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.OperationException;
+import org.wildfly.extras.creaper.core.online.operations.Values;
 
 import java.io.IOException;
 
@@ -23,7 +24,7 @@ import java.io.IOException;
  * Created by pcyprian on 14.10.15.
  */
 @RunWith(Arquillian.class)
-@Category(Standalone.class)
+@Category(Shared.class)
 public class PeriodicSizeTestCase extends LoggingAbstractTestCase {
 
     private static final String PERIODIC_SIZE_HANDLER = "Periodic_Size_HANDLER" + RandomStringUtils.randomAlphanumeric(5);
@@ -40,9 +41,9 @@ public class PeriodicSizeTestCase extends LoggingAbstractTestCase {
 
     @BeforeClass
     public static void setUp() throws Exception {
-        createPeriodicFileHandler(PERIODIC_SIZE_HANDLER, "periodic-handler.log");
+        createPeriodicSizeFileHandler(PERIODIC_SIZE_HANDLER_ADDRESS, "periodic-handler.log");
         new ResourceVerifier(PERIODIC_SIZE_HANDLER_ADDRESS, client).verifyExists();
-        createPeriodicFileHandler(PERIODIC_SIZE_HANDLER_TBR, "periodic-handler2.log");
+        createPeriodicSizeFileHandler(PERIODIC_SIZE_HANDLER_TBR_ADDRESS, "periodic-handler2.log");
         new ResourceVerifier(PERIODIC_SIZE_HANDLER_TBR_ADDRESS, client).verifyExists();
     }
 
@@ -129,4 +130,13 @@ public class PeriodicSizeTestCase extends LoggingAbstractTestCase {
 
         new ResourceVerifier(PERIODIC_SIZE_HANDLER_TBR_ADDRESS, client).verifyDoesNotExist();
     }
+
+    private static void createPeriodicSizeFileHandler(Address address, String path) throws IOException {
+        operations.add(address, Values.empty()
+                .andObject("file", Values.empty()
+                        .and("path", path)
+                        .and("relative-to", "jboss.server.log.dir"))
+                .and("suffix", "%H%m"));
+    }
+
 }

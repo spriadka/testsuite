@@ -42,8 +42,7 @@ public abstract class LoggingAbstractTestCase {
         client = ManagementClientProvider.createOnlineManagementClient();
         operations = new Operations(client);
         administration = new Administration(client);
-        LOGGING_SUBSYSTEM = client.options().isStandalone ? Address.subsystem("logging") :
-                Address.of("profile", client.options().defaultProfile).and("subsystem", "logging");
+        LOGGING_SUBSYSTEM = Address.subsystem("logging");
     }
 
     @AfterClass

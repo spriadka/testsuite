@@ -39,7 +39,7 @@ public class LogCategoriesTestCase extends LoggingAbstractTestCase {
     public static void beforeClass() throws CommandFailedException, InterruptedException, TimeoutException, IOException {
         AddLogger addLogger = Logging.logger().add(LOGGER).build();
         client.apply(addLogger);
-        AddLogger addLoggerTbr = Logging.logger().add(LOGGER).build();
+        AddLogger addLoggerTbr = Logging.logger().add(LOGGER_TO_BE_REMOVED).build();
         client.apply(addLoggerTbr);
         administration.reloadIfRequired();
     }
