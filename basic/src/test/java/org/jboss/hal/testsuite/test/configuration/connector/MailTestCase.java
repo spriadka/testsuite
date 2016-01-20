@@ -40,6 +40,7 @@ import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
 
 import java.io.IOException;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeoutException;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -108,7 +109,7 @@ public class MailTestCase {
     }
 
     @AfterClass
-    public static void cleanUp() throws IOException, OperationException {
+    public static void cleanUp() throws IOException, OperationException, InterruptedException, TimeoutException {
         try {
             operations.removeIfExists(SERVER_ADDRESS);
             operations.removeIfExists(SERVER_TBR_ADDRESS);
@@ -116,6 +117,7 @@ public class MailTestCase {
             operations.removeIfExists(MAIL_SESSION_TBR_ADDRESS);
             operations.removeIfExists(MAIL_SESSION_ADDRESS);
             operations.removeIfExists(MAIL_SESSION_INV_ADDRESS);
+            administration.reloadIfRequired();
         } finally {
             client.close();
         }
