@@ -1,6 +1,9 @@
 package org.jboss.hal.testsuite.fragment.config.datasource;
 
+import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
+import org.jboss.hal.testsuite.fragment.shared.table.ResourceTableFragment;
+import org.jboss.hal.testsuite.fragment.shared.util.ResourceManager;
 import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.PropUtils;
 import org.openqa.selenium.By;
@@ -26,6 +29,10 @@ public class DatasourceWizard extends WizardWindow {
 
     public void switchToDetectedDriver() {
         root.findElement(DETECTED_DRIVER_BUTTON).click();
+    }
+
+    public ResourceTableFragment getResourceTable() {
+        return Graphene.createPageFragment(ResourceManager.class, root).getResourceTable();
     }
 
 }

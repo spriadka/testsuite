@@ -112,6 +112,7 @@ public class DatasourcesTestCase {
         editor.text("jndiName", "java:/" + addressName);
         wizard.next();
         wizard.switchToDetectedDriver();
+        wizard.getResourceTable().selectRowByText(0, "h2");
         wizard.next();
         editor.text("connectionUrl", "url");
         Assert.assertEquals(fillSensitive, editor.getText("username").isEnabled());
