@@ -316,6 +316,10 @@ public class MessagingPage extends ConfigPage implements Navigatable {
     public void removeProperty(String key) {
         ConfigPropertiesFragment config = getConfig().propertiesConfig();
         ResourceManager properties = config.getResourceManager();
-        properties.removeResource(key).confirmAndDismissReloadRequiredMessage();
+        try {
+            properties.removeResource(key).confirmAndDismissReloadRequiredMessage();
+        } catch (TimeoutException ignored) {
+
+        }
     }
 }

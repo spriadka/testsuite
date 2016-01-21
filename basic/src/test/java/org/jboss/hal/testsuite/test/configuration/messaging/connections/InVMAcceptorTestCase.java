@@ -31,8 +31,6 @@ import java.util.concurrent.TimeoutException;
 @Category(Shared.class)
 public class InVMAcceptorTestCase extends AbstractMessagingTestCase {
 
-    private static final String MSG_SERVER = "msg-sever_" + RandomStringUtils.randomAlphanumeric(5);
-
     private static final String IN_VM_ACCEPTOR = "in-vm-acceptor_" + RandomStringUtils.randomAlphanumeric(5);
     private static final String IN_VM_ACCEPTOR_TBA = "in-vm-acceptor-TBA_" + RandomStringUtils.randomAlphanumeric(5);
     private static final String IN_VM_ACCEPTOR_TBR = "in-vm-acceptor-TBR_" + RandomStringUtils.randomAlphanumeric(5);
@@ -48,12 +46,12 @@ public class InVMAcceptorTestCase extends AbstractMessagingTestCase {
 
     @BeforeClass
     public static void setUp() throws CommandFailedException {
-        client.apply(new AddAcceptor.InVmBuilder(MSG_SERVER, IN_VM_ACCEPTOR)
-                .serverId(ThreadLocalRandom.current().nextInt())
+        client.apply(new AddAcceptor.InVmBuilder(IN_VM_ACCEPTOR)
+                .serverId(ThreadLocalRandom.current().nextInt(100000))
                 .param(PROPERTY_TBR_KEY, "test")
                 .build());
-        client.apply(new AddAcceptor.InVmBuilder(MSG_SERVER, IN_VM_ACCEPTOR_TBR)
-                .serverId(ThreadLocalRandom.current().nextInt())
+        client.apply(new AddAcceptor.InVmBuilder(IN_VM_ACCEPTOR_TBR)
+                .serverId(ThreadLocalRandom.current().nextInt(100000))
                 .build());
     }
 
@@ -83,13 +81,13 @@ public class InVMAcceptorTestCase extends AbstractMessagingTestCase {
 
     @Test
     public void addInVmAcceptor() throws Exception {
-        page.addInVmAcceptor(IN_VM_ACCEPTOR_TBA, MSG_SERVER);
+        page.addInVmAcceptor(IN_VM_ACCEPTOR_TBA, "123456");
         new ResourceVerifier(IN_VM_ACCEPTOR_ADDRESS_TBA, client).verifyExists();
     }
 
     @Test
     public void updateAcceptorServerID() throws Exception {
-        editTextAndVerify(IN_VM_ACCEPTOR_ADDRESS, "server-id", 0);
+        editTextAndVerify(IN_VM_ACCEPTOR_ADDRESS, "serverId", "server-id", ThreadLocalRandom.current().nextInt(100000));
     }
 
     @Test
@@ -102,7 +100,7 @@ public class InVMAcceptorTestCase extends AbstractMessagingTestCase {
     @Test
     public void removeAcceptorProperties() throws IOException {
         page.removeProperty(PROPERTY_TBR_KEY);
-        Assert.assertTrue(PropertiesOps.isPropertyPresentInParams(IN_VM_ACCEPTOR_ADDRESS, PROPERTY_TBR_KEY));
+        Assert.assertFalse(PropertiesOps.isPropertyPresentInParams(IN_VM_ACCEPTOR_ADDRESS, PROPERTY_TBR_KEY));
     }
 
     @Test
