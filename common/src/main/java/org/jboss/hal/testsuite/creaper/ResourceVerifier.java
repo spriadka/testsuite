@@ -44,13 +44,15 @@ import org.wildfly.extras.creaper.core.online.operations.Operations;
 public class ResourceVerifier {
 
     private static final Logger log = LoggerFactory.getLogger(ResourceVerifier.class);
+    private static final int DEFAULT_TIMEOUT = Integer.valueOf(ConfigUtils.get("propagate.to.model.timeout", "500"));
+    public static final int LONG_TIMEOUT = Integer.valueOf(ConfigUtils.get("propagate.to.model.timeout.long", "6000"));
 
     private Address resourceAddress;
     private Operations ops;
     private int timeout;
 
     public ResourceVerifier(Address resourceAddress, OnlineManagementClient client) {
-        this(resourceAddress, client, Integer.valueOf(ConfigUtils.get("propagate.to.model.timeout", "500")));
+        this(resourceAddress, client, DEFAULT_TIMEOUT);
     }
 
     /**
