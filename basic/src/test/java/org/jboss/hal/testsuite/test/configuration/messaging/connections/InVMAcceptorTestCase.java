@@ -1,61 +1,67 @@
 package org.jboss.hal.testsuite.test.configuration.messaging.connections;
 
+import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Shared;
-import org.jboss.hal.testsuite.cli.CliClient;
-import org.jboss.hal.testsuite.cli.CliClientFactory;
-import org.jboss.hal.testsuite.dmr.Dispatcher;
-import org.jboss.hal.testsuite.dmr.ResourceAddress;
-import org.jboss.hal.testsuite.dmr.ResourceVerifier;
-import org.jboss.hal.testsuite.fragment.ConfigFragment;
-import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConfigPropertiesFragment;
-import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConfigPropertyWizard;
+import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.page.config.MessagingPage;
-import org.jboss.hal.testsuite.util.ConfigUtils;
+import org.jboss.hal.testsuite.test.configuration.messaging.AbstractMessagingTestCase;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
+import org.wildfly.extras.creaper.commands.messaging.AddAcceptor;
+import org.wildfly.extras.creaper.core.CommandFailedException;
+import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.OperationException;
 
-import static org.junit.Assert.assertTrue;
+import java.io.IOException;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeoutException;
 
-/**
- * Created by pcyprian on 7.9.15.
- */
+
 @RunWith(Arquillian.class)
 @Category(Shared.class)
-public class InVMAcceptorTestCase {
-    private static final String NAME = "in-vm-test-acceptor";
-    private static final String SERVER = "1";
-    private static final String ADD = "/subsystem=messaging-activemq/server=default/in-vm-acceptor=" + NAME + ":add(server-id=" + SERVER + ")";
-    private static final String DOMAIN = "/profile=full-ha" ;
+public class InVMAcceptorTestCase extends AbstractMessagingTestCase {
 
-    private String command;
-    private String remove = "/subsystem=messaging-activemq/server=default/in-vm-acceptor=" + NAME + ":remove";
-    private String addProperty = "/subsystem=messaging-activemq/server=default/in-vm-acceptor=" + NAME + ":write-attribute(name=params.prop,value=test)";
-    private ModelNode path = new ModelNode("/subsystem=messaging-activemq/server=default/in-vm-acceptor=" + NAME);
-    private ModelNode domainPath = new ModelNode("/profile=full-ha/subsystem=messaging-activemq/server=default/in-vm-acceptor=" + NAME);
-    private ResourceAddress address;
-    private static Dispatcher dispatcher;
-    private static ResourceVerifier verifier;
-    CliClient cliClient = CliClientFactory.getClient();
+    private static final String MSG_SERVER = "msg-sever_" + RandomStringUtils.randomAlphanumeric(5);
+
+    private static final String IN_VM_ACCEPTOR = "in-vm-acceptor_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String IN_VM_ACCEPTOR_TBA = "in-vm-acceptor-TBA_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String IN_VM_ACCEPTOR_TBR = "in-vm-acceptor-TBR_" + RandomStringUtils.randomAlphanumeric(5);
+
+    private static final Address IN_VM_ACCEPTOR_ADDRESS = DEFAULT_MESSAGING_SERVER
+            .and("in-vm-acceptor", IN_VM_ACCEPTOR);
+    private static final Address IN_VM_ACCEPTOR_ADDRESS_TBA = DEFAULT_MESSAGING_SERVER
+            .and("in-vm-acceptor", IN_VM_ACCEPTOR_TBA);
+    private static final Address IN_VM_ACCEPTOR_ADDRESS_TBR = DEFAULT_MESSAGING_SERVER
+            .and("in-vm-acceptor", IN_VM_ACCEPTOR_TBR);
+
+    private static final String PROPERTY_TBR_KEY = "prop42";
 
     @BeforeClass
-    public static void setUp() {
-        dispatcher = new Dispatcher();
-        verifier  = new ResourceVerifier(dispatcher);
+    public static void setUp() throws CommandFailedException {
+        client.apply(new AddAcceptor.InVmBuilder(MSG_SERVER, IN_VM_ACCEPTOR)
+                .serverId(ThreadLocalRandom.current().nextInt())
+                .param(PROPERTY_TBR_KEY, "test")
+                .build());
+        client.apply(new AddAcceptor.InVmBuilder(MSG_SERVER, IN_VM_ACCEPTOR_TBR)
+                .serverId(ThreadLocalRandom.current().nextInt())
+                .build());
     }
 
     @AfterClass
-    public static void tearDown() {
-        dispatcher.close();
+    public static void tearDown() throws IOException, OperationException {
+        operations.removeIfExists(IN_VM_ACCEPTOR_ADDRESS);
+        operations.removeIfExists(IN_VM_ACCEPTOR_ADDRESS_TBA);
+        operations.removeIfExists(IN_VM_ACCEPTOR_ADDRESS_TBR);
     }
 
     @Drone
@@ -65,102 +71,45 @@ public class InVMAcceptorTestCase {
 
     @Before
     public void before() {
-        if (ConfigUtils.isDomain()) {
-            address = new ResourceAddress(domainPath);
-            command = DOMAIN + ADD;
-            remove = DOMAIN + remove;
-            addProperty = DOMAIN + addProperty;
-        } else {
-            address = new ResourceAddress(path);
-            command = ADD;
-        }
+        page.navigateToMessaging();
+        page.selectView("Connections");
+        page.switchType("Type: In-VM");
+        page.selectInTable(IN_VM_ACCEPTOR, 0);
     }
     @After
-    public void after() {
-        cliClient.executeCommand(remove);
+    public void after() throws InterruptedException, TimeoutException, IOException {
+        administration.reloadIfRequired();
     }
 
     @Test
-    public void addInVmAcceptor() {
-        page.navigateToMessaging();
-        page.selectView("Connections");
-        page.switchType("Type: In-VM");
-        page.addInVmAcceptor(NAME, SERVER);
-
-        verifier.verifyResource(address, true);
-
-        cliClient.executeCommand(remove);
-
-        verifier.verifyResource(address, false);
+    public void addInVmAcceptor() throws Exception {
+        page.addInVmAcceptor(IN_VM_ACCEPTOR_TBA, MSG_SERVER);
+        new ResourceVerifier(IN_VM_ACCEPTOR_ADDRESS_TBA, client).verifyExists();
     }
 
     @Test
-    public void updateAcceptorServerID() {
-        cliClient.executeCommand(command);
-        page.navigateToMessaging();
-        page.selectView("Connections");
-        page.switchType("Type: In-VM");
-        page.selectInTable(NAME, 0);
-        page.edit();
-
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("serverId", "0");
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "server-id", "0", 500);
-
-        cliClient.executeCommand(remove);
+    public void updateAcceptorServerID() throws Exception {
+        editTextAndVerify(IN_VM_ACCEPTOR_ADDRESS, "server-id", 0);
     }
 
     @Test
-    public void updateAcceptorProperties() {
-        cliClient.executeCommand(command);
-        page.navigateToMessaging();
-        page.selectView("Connections");
-        page.switchType("Type: In-VM");
-        page.selectInTable(NAME, 0);
-
-        ConfigPropertiesFragment properties = page.getConfig().propertiesConfig();
-        ConfigPropertyWizard wizard = properties.addProperty();
-        boolean result = wizard.name("prop").value("test").finish();
-
-        assertTrue("Property should be added and wizard closed.", result);
-        verifier.verifyAttribute(address, "params", "{\"prop\" => \"test\"}", 500);
-
-        cliClient.executeCommand(remove);
+    public void updateAcceptorProperties() throws IOException {
+        boolean isClosed = page.addProperty("prop", "test");
+        Assert.assertTrue("Property should be added and wizard closed.", isClosed);
+        Assert.assertTrue(PropertiesOps.isPropertyPresentInParams(IN_VM_ACCEPTOR_ADDRESS, "prop"));
     }
 
     @Test
-    public void removeAcceptorProperties() {
-        cliClient.executeCommand(command);
-        cliClient.executeCommand(addProperty);
-        page.navigateToMessaging();
-        page.selectView("Connections");
-        page.switchType("Type: In-VM");
-        page.selectInTable(NAME, 0);
-        ConfigPropertiesFragment properties = page.getConfig().propertiesConfig();
-        properties.removeProperty("prop");
-
-        verifier.verifyAttribute(address, "params", "undefined", 500);
-
-        cliClient.executeCommand(remove);
+    public void removeAcceptorProperties() throws IOException {
+        page.removeProperty(PROPERTY_TBR_KEY);
+        Assert.assertTrue(PropertiesOps.isPropertyPresentInParams(IN_VM_ACCEPTOR_ADDRESS, PROPERTY_TBR_KEY));
     }
 
     @Test
-    public void removeInVmAcceptor() {
-        cliClient.executeCommand(command);
-
-        page.navigateToMessaging();
-        page.selectView("Connections");
-        page.switchType("Type: In-VM");
-
-        verifier.verifyResource(address, true);
-
-        page.selectInTable(NAME, 0);
+    public void removeInVmAcceptor() throws Exception {
+        page.selectInTable(IN_VM_ACCEPTOR_TBR, 0);
         page.remove();
 
-        verifier.verifyResource(address, false);
+        new ResourceVerifier(IN_VM_ACCEPTOR_ADDRESS_TBR, client).verifyDoesNotExist();
     }
 }

@@ -3,23 +3,27 @@ package org.jboss.hal.testsuite.page.config;
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.hal.testsuite.cli.Library;
-import org.jboss.hal.testsuite.cli.TimeoutException;
 import org.jboss.hal.testsuite.finder.Application;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.finder.Row;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.config.messaging.MessagingConfigArea;
+import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConfigPropertiesFragment;
+import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConfigPropertyWizard;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
+import org.jboss.hal.testsuite.fragment.shared.util.ResourceManager;
 import org.jboss.hal.testsuite.page.ConfigPage;
 import org.jboss.hal.testsuite.page.Navigatable;
 import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.PropUtils;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
+
 
 
 /**
@@ -297,5 +301,21 @@ public class MessagingPage extends ConfigPage implements Navigatable {
 
     public MessagingConfigArea getConfig() {
         return getConfig(MessagingConfigArea.class);
+    }
+
+    public boolean addProperty(String key, String value) {
+        ConfigPropertiesFragment properties = getConfig().propertiesConfig();
+        ConfigPropertyWizard wizard = properties.addProperty();
+        wizard.name(key).value(value).clickSave();
+
+        Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
+
+        return wizard.isClosed();
+    }
+
+    public void removeProperty(String key) {
+        ConfigPropertiesFragment config = getConfig().propertiesConfig();
+        ResourceManager properties = config.getResourceManager();
+        properties.removeResource(key).confirmAndDismissReloadRequiredMessage();
     }
 }
