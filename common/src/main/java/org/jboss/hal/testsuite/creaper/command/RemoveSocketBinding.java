@@ -9,10 +9,10 @@ import org.wildfly.extras.creaper.core.online.operations.Operations;
 import java.io.IOException;
 
 /**
- * @author Jan Kasik <jkasik@redhat.com>
- *         Created on 18.12.15.
+ * Command for removing socket bindings. If no socket binding group is set, 'full-sockets' will be used for domain and
+ * 'standard-sockets' for standalone.
  */
-public class RemoveSocketBinding implements OnlineCommand {
+public final class RemoveSocketBinding implements OnlineCommand {
 
     private final String socketBindingName;
     private final String socketBindingGroup;
