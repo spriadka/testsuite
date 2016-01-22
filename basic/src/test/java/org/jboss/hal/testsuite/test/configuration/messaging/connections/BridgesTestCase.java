@@ -1,54 +1,57 @@
 package org.jboss.hal.testsuite.test.configuration.messaging.connections;
 
+import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Shared;
-import org.jboss.hal.testsuite.cli.CliClient;
-import org.jboss.hal.testsuite.cli.CliClientFactory;
-import org.jboss.hal.testsuite.dmr.Dispatcher;
-import org.jboss.hal.testsuite.dmr.ResourceAddress;
-import org.jboss.hal.testsuite.dmr.ResourceVerifier;
+import org.jboss.hal.testsuite.creaper.ResourceVerifier;
+import org.jboss.hal.testsuite.creaper.command.BackupAndRestoreAttributes;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
+import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.jboss.hal.testsuite.page.config.MessagingPage;
-import org.jboss.hal.testsuite.util.ConfigUtils;
+import org.jboss.hal.testsuite.test.configuration.messaging.AbstractMessagingTestCase;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
+import org.wildfly.extras.creaper.commands.messaging.AddQueue;
+import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.OperationException;
+import org.wildfly.extras.creaper.core.online.operations.Values;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.concurrent.TimeoutException;
 
 @RunWith(Arquillian.class)
 @Category(Shared.class)
-public class BridgesTestCase {
-    private static final String NAME = "test-bridge";
+public class BridgesTestCase extends AbstractMessagingTestCase {
+
+    private static final String BRIDGE = "bridge_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String BRIDGE_TBA = "bridge-TBA_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String BRIDGE_TBR = "bridge-TBR_" + RandomStringUtils.randomAlphanumeric(5);
+
+    private static final Address BRIDGE_ADDRESS = DEFAULT_MESSAGING_SERVER.and("bridge", BRIDGE);
+    private static final Address BRIDGE_TBR_ADDRESS = DEFAULT_MESSAGING_SERVER.and("bridge", BRIDGE_TBR);
+    private static final Address BRIDGE_TBA_ADDRESS = DEFAULT_MESSAGING_SERVER.and("bridge", BRIDGE_TBA);
+
     private static final String CONNECTOR = "http-connector";
-    private static final String QUEUE = "queue";
-    private static final String ADD = "/subsystem=messaging-activemq/server=default/bridge=" + NAME + ":add(static-connectors=[" +
-            CONNECTOR + "],queue-name=" + QUEUE + ")";
-    private static final String DOMAIN = "/profile=full-ha" ;
-
-    private String command;
-    private String remove = "/subsystem=messaging-activemq/server=default/bridge=" + NAME + ":remove";
-
-    private ModelNode path = new ModelNode("/subsystem=messaging-activemq/server=default/bridge=" + NAME);
-    private ModelNode domainPath = new ModelNode("/profile=full-ha/subsystem=messaging-activemq/server=default/bridge=" + NAME);
-    private ResourceAddress address;
-    private static Dispatcher dispatcher;
-    private static ResourceVerifier verifier;
-    CliClient cliClient = CliClientFactory.getClient();
+    private static final String QUEUE = "testQueue_" + RandomStringUtils.randomAlphanumeric(5);
 
     @BeforeClass
-    public static void setUp() {
-        dispatcher = new Dispatcher();
-        verifier = new ResourceVerifier(dispatcher);
+    public static void setUp() throws Exception {
+        List<String> jndiEntries = Arrays.asList(QUEUE);
+        client.apply(new AddQueue.Builder(QUEUE).jndiEntries(jndiEntries).build());
+        createBridge(BRIDGE_ADDRESS);
+        createBridge(BRIDGE_TBR_ADDRESS);
+        administration.reloadIfRequired();
     }
 
     @Drone
@@ -58,241 +61,106 @@ public class BridgesTestCase {
 
     @Before
     public void before() {
-        if (ConfigUtils.isDomain()) {
-            address = new ResourceAddress(domainPath);
-            command = DOMAIN + ADD;
-            remove = DOMAIN + remove;
-        } else {
-            address = new ResourceAddress(path);
-            command = ADD;
-        }
+        page.navigateToMessaging();
+        page.selectConnectionsView();
+        page.switchToBridges();
+        page.selectInTable(BRIDGE);
     }
     @After
-    public void after() {
-        cliClient.executeCommand(remove);
+    public void after() throws InterruptedException, TimeoutException, IOException {
+        administration.reloadIfRequired();
     }
 
     @AfterClass
-    public static void tearDown() {
-        dispatcher.close();
-    }
-
-    //https://issues.jboss.org/browse/HAL-831 https://issues.jboss.org/browse/HAL-880
-
-    @Test
-    public void addBridge() {
-        page.navigateToMessaging();
-        page.selectView("Connections");
-        page.switchToBridges();
-
-        page.addBridge(NAME, QUEUE, "faddress", CONNECTOR);
-
-
-        verifier.verifyResource(address, true);
-
-        cliClient.executeCommand(remove);
-
-        verifier.verifyResource(address, false);
+    public static void afterClass() throws IOException, OperationException {
+        operations.removeIfExists(BRIDGE_ADDRESS);
+        operations.removeIfExists(BRIDGE_TBA_ADDRESS);
+        operations.removeIfExists(BRIDGE_TBR_ADDRESS);
     }
 
     @Test
-    public void updateBridgeFilter() {
-        cliClient.executeCommand(command);
-        page.navigateToMessaging();
-        page.selectView("Connections");
-        page.switchToBridges();
-        page.selectInTable(NAME, 0);
-        page.edit();
-
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("filter", "filter");
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "filter", "filter", 500);
-
-        cliClient.executeCommand(remove);
+    public void addBridge() throws Exception {
+        page.addBridge(BRIDGE_TBA, QUEUE, "testAddress", CONNECTOR);
+        new ResourceVerifier(BRIDGE_TBA_ADDRESS, client).verifyExists();
     }
 
     @Test
-    public void updateBridgeQueue() {
-        cliClient.executeCommand(command);
-        page.navigateToMessaging();
-        page.selectView("Connections");
-        page.switchToBridges();
-        page.selectInTable(NAME, 0);
-        page.edit();
-
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("queueName", "q");
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "queue-name", "q", 500);
-
-        cliClient.executeCommand(remove);
+    public void updateBridgeFilter() throws Exception {
+        editTextAndVerify(BRIDGE_ADDRESS, "filter", "testFilter");
     }
 
     @Test
-    public void updateBridgeForwardingAddress() {
-        cliClient.executeCommand(command);
-        page.navigateToMessaging();
-        page.selectView("Connections");
-        page.switchToBridges();
-        page.selectInTable(NAME, 0);
-        page.edit();
-
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("forwardingAddress", "address");
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "forwarding-address", "address", 500);
-
-        cliClient.executeCommand(remove);
+    public void updateBridgeQueue() throws Exception {
+        editTextAndVerify(BRIDGE_ADDRESS, "queueName", "queue-name", "q");
     }
 
     @Test
-    public void updateBridgeTransformerClass() {
-        cliClient.executeCommand(command);
-        page.navigateToMessaging();
-        page.selectView("Connections");
-        page.switchToBridges();
-        page.selectInTable(NAME, 0);
-        page.edit();
+    public void updateBridgeForwardingAddress() throws Exception {
+        editTextAndVerify(BRIDGE_ADDRESS, "forwardingAddress", "forwarding-address", "address5");
+    }
 
-        ConfigFragment editPanelFragment = page.getConfigFragment();
+    @Test
+    public void updateBridgeTransformerClass() throws Exception {
+        BackupAndRestoreAttributes backup = new BackupAndRestoreAttributes.Builder(BRIDGE_ADDRESS)
+                .excluded("discovery-group")
+                .build();
+        try {
+            client.apply(backup.backup());
+            editTextAndVerify(BRIDGE_ADDRESS, "transformerClass", "transformer-class-name", "testClass");
+        } finally {
+            client.apply(backup.restore());
+        }
 
-        editPanelFragment.getEditor().text("transformerClass", "transClass");
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "transformer-class-name", "transClass", 500);
-
-        cliClient.executeCommand(remove);
     }
 
     @Test //https://issues.jboss.org/browse/HAL-903
-    public void updateBridgeDiscoveryGroup() {
-        cliClient.executeCommand(command);
-        page.navigateToMessaging();
-        page.selectView("Connections");
-        page.switchToBridges();
-        page.selectInTable(NAME, 0);
-        page.edit();
-
+    public void updateBridgeDiscoveryGroup() throws Exception {
         ConfigFragment editPanelFragment = page.getConfigFragment();
+        Editor editor = editPanelFragment.edit();
 
-        editPanelFragment.getEditor().text("staticConnectors", "");
-        editPanelFragment.getEditor().text("discoveryGroup", "dq-group1");
+        editor.text("staticConnectors", "");
+        editor.text("discoveryGroup", "dq-group1");
         boolean finished = editPanelFragment.save();
 
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "discovery-group", "dg-group1", 500);
-
-        cliClient.executeCommand(remove);
+        Assert.assertTrue("Config should be saved and closed.", finished);
+        new ResourceVerifier(BRIDGE_ADDRESS, client).verifyAttribute("discovery-group", "dg-group1"); //should fail [HAL-903]
     }
 
     @Test
-    public void updateBridgePassword() {
-        cliClient.executeCommand(command);
-        page.navigateToMessaging();
-        page.selectView("Connections");
-        page.switchToBridges();
+    public void updateBridgePassword() throws Exception {
         page.switchToConnectionManagementTab();
-        page.selectInTable(NAME, 0);
-        page.edit();
-
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("password", "pwd1");
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "password", "pwd1", 500);
-
-        cliClient.executeCommand(remove);
+        editTextAndVerify(BRIDGE_ADDRESS, "password", "pwd1");
     }
 
     @Test
-    public void updateBridgeRetryInterval() {
-        cliClient.executeCommand(command);
-        page.navigateToMessaging();
-        page.selectView("Connections");
-        page.switchToBridges();
+    public void updateBridgeRetryInterval() throws Exception {
         page.switchToConnectionManagementTab();
-        page.selectInTable(NAME, 0);
-        page.edit();
-
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("retryInterval", "1");
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "retry-interval", "1", 500);
-
-        cliClient.executeCommand(remove);
+        editTextAndVerify(BRIDGE_ADDRESS, "retryInterval", "retry-interval", 1L);
     }
 
     @Test
     public void updateBridgeRetryIntervalWrongValue() {
-        cliClient.executeCommand(command);
-        page.navigateToMessaging();
-        page.selectView("Connections");
-        page.switchToBridges();
         page.switchToConnectionManagementTab();
-        page.selectInTable(NAME, 0);
-        page.edit();
-
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("retryInterval", "-10");
-        boolean finished = editPanelFragment.save();
-
-        assertFalse("Config should not be saved and closed. Wrong value.", finished);
-        verifier.verifyAttribute(address, "retry-interval", "2000", 500);
-
-        cliClient.executeCommand(remove);
+        verifyIfErrorAppears("retryInterval", "-10");
     }
 
     @Test
-    public void updateBridgeReconnectAttempts() {
-        cliClient.executeCommand(command);
-        page.navigateToMessaging();
-        page.selectView("Connections");
-        page.switchToBridges();
+    public void updateBridgeReconnectAttempts() throws Exception {
         page.switchToConnectionManagementTab();
-        page.selectInTable(NAME, 0);
-        page.edit();
-
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("reconnectAttempts", "-1");
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "reconnect-attempts", "-1", 500);
-
-        cliClient.executeCommand(remove);
+        editTextAndVerify(BRIDGE_ADDRESS, "reconnectAttempts", "reconnect-attempts", -1);
     }
 
     @Test
-    public void removeBridge() {
-        cliClient.executeCommand(command);
-
-        page.navigateToMessaging();
-        page.selectView("Connections");
-        page.switchToBridges();
-
-        verifier.verifyResource(address, true);
-
-        page.selectInTable(NAME, 0);
-        page.remove();
-
-        verifier.verifyResource(address, false);
+    public void removeBridge() throws Exception {
+        page.remove(BRIDGE_TBR);
+        new ResourceVerifier(BRIDGE_TBR_ADDRESS, client).verifyDoesNotExist();
     }
+
+    private static void createBridge(Address address) throws Exception {
+        operations.add(address, Values.empty()
+                .andList("static-connectors", CONNECTOR)
+                .and("queue-name", QUEUE));
+        new ResourceVerifier(address, client).verifyExists();
+    }
+
 }
