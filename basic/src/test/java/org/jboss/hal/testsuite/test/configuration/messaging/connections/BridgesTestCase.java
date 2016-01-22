@@ -25,9 +25,6 @@ import org.openqa.selenium.WebDriver;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-/**
- * Created by pcyprian on 7.9.15.
- */
 @RunWith(Arquillian.class)
 @Category(Shared.class)
 public class BridgesTestCase {

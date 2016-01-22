@@ -17,19 +17,16 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
+import org.wildfly.extras.creaper.commands.messaging.AddConnector;
 import org.wildfly.extras.creaper.core.CommandFailedException;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.OperationException;
-import org.wildfly.extras.creaper.core.online.operations.Values;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
 import static org.junit.Assert.assertTrue;
 
-/**
- * Created by pcyprian on 7.9.15.
- */
 @RunWith(Arquillian.class)
 @Category(Shared.class)
 public class GenericConnectorTestCase extends AbstractMessagingTestCase {
@@ -46,12 +43,17 @@ public class GenericConnectorTestCase extends AbstractMessagingTestCase {
     private static final String FACTORY_CLASS = "factoryClass";
 
     @BeforeClass
-    public static void setUp() throws Exception {
-        addGenericConnector(GENERIC_CONNECTOR_ADDRESS);
-        new ResourceVerifier(GENERIC_CONNECTOR_ADDRESS, client).verifyExists();
-        operations.writeAttribute(GENERIC_CONNECTOR_ADDRESS, "params." + PROPERTY_TBR_KEY, "marvin");
-        addGenericConnector(GENERIC_CONNECTOR_TBR_ADDRESS);
-        new ResourceVerifier(GENERIC_CONNECTOR_TBR_ADDRESS, client).verifyExists();
+    public static void setUp() throws CommandFailedException {
+        client.apply(new AddConnector.GenericBuilder(GENERIC_CONNECTOR)
+                .param(PROPERTY_TBR_KEY, "testThis")
+                .socketBinding(createSocketBinding())
+                .factoryClass(FACTORY_CLASS)
+                .build());
+        client.apply(new AddConnector.GenericBuilder(GENERIC_CONNECTOR_TBR)
+                .param(PROPERTY_TBR_KEY, "testThis")
+                .socketBinding(createSocketBinding())
+                .factoryClass(FACTORY_CLASS)
+                .build());
     }
 
     @AfterClass
@@ -69,10 +71,10 @@ public class GenericConnectorTestCase extends AbstractMessagingTestCase {
     @Before
     public void before() {
         page.navigateToMessaging();
-        page.selectView("Connections");
+        page.selectConnectionsView();
         page.switchToConnector();
-        page.switchType("Type: Generic");
-        page.selectInTable(GENERIC_CONNECTOR, 0);
+        page.switchToGenericType();
+        page.selectInTable(GENERIC_CONNECTOR);
     }
 
     @After
@@ -101,28 +103,18 @@ public class GenericConnectorTestCase extends AbstractMessagingTestCase {
         boolean isClosed = page.addProperty("prop", "test");
         assertTrue("Property should be added and wizard closed.", isClosed);
 
-        Assert.assertTrue(PropertiesOps.isPropertyPresentInParams(GENERIC_CONNECTOR_ADDRESS, "prop"));
+        Assert.assertTrue(PropertiesOps.isPropertyPresentInParams(GENERIC_CONNECTOR_ADDRESS, client, "prop"));
     }
 
     @Test
     public void removeConnectorProperty() throws IOException {
         page.removeProperty(PROPERTY_TBR_KEY);
-        Assert.assertFalse(PropertiesOps.isPropertyPresentInParams(GENERIC_CONNECTOR_ADDRESS, PROPERTY_TBR_KEY));
+        Assert.assertFalse(PropertiesOps.isPropertyPresentInParams(GENERIC_CONNECTOR_ADDRESS, client, PROPERTY_TBR_KEY));
     }
 
-    @Test //https://issues.jboss.org/browse/HAL-830
+    @Test
     public void removeGenericConnector() throws Exception {
-        page.selectInTable(GENERIC_CONNECTOR_TBR, 0);
-        page.remove();
-        System.out.print('a');
+        page.remove(GENERIC_CONNECTOR_TBR);
         new ResourceVerifier(GENERIC_CONNECTOR_TBR_ADDRESS, client).verifyDoesNotExist();
-    }
-
-    private static boolean addGenericConnector(Address address) throws IOException, CommandFailedException {
-        String socketBinding = "genericAcceptorSocketBinding_" + RandomStringUtils.randomAlphanumeric(5);
-        createSocketBinding(socketBinding);
-        return operations.add(address, Values
-                .of("socket-binding", socketBinding)
-                .and("factory-class", FACTORY_CLASS)).isSuccess();
     }
 }

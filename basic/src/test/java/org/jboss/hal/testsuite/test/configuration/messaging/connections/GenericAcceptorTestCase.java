@@ -1,22 +1,13 @@
 package org.jboss.hal.testsuite.test.configuration.messaging.connections;
 
 import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.mina.util.AvailablePortFinder;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Shared;
-import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
-import org.jboss.hal.testsuite.creaper.command.AddSocketBinding;
-import org.jboss.hal.testsuite.fragment.ConfigFragment;
-import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConfigPropertiesFragment;
-import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConfigPropertyWizard;
-import org.jboss.hal.testsuite.fragment.shared.util.ResourceManager;
 import org.jboss.hal.testsuite.page.config.MessagingPage;
 import org.jboss.hal.testsuite.test.configuration.messaging.AbstractMessagingTestCase;
-import org.jboss.hal.testsuite.util.Console;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -26,14 +17,10 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.wildfly.extras.creaper.commands.messaging.AddAcceptor;
 import org.wildfly.extras.creaper.core.CommandFailedException;
-import org.wildfly.extras.creaper.core.online.ModelNodeResult;
-import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.OperationException;
-import org.wildfly.extras.creaper.core.online.operations.Values;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
@@ -57,11 +44,16 @@ public class GenericAcceptorTestCase extends AbstractMessagingTestCase {
 
     @BeforeClass
     public static void setUp() throws IOException, CommandFailedException, TimeoutException, InterruptedException {
-        addGenericAcceptor(GENERIC_ACCEPTOR_ADDRESS);
-        new ResourceVerifier(GENERIC_ACCEPTOR_ADDRESS, client);
-        operations.writeAttribute(GENERIC_ACCEPTOR_ADDRESS, "params." + PROPERTY_TBR_KEY, "marvin");
-        addGenericAcceptor(GENERIC_ACCEPTOR_ADDRESS_TBR);
-        new ResourceVerifier(GENERIC_ACCEPTOR_ADDRESS_TBR, client);
+        client.apply(new AddAcceptor.GenericBuilder(GENERIC_ACCEPTOR)
+                .param(PROPERTY_TBR_KEY, "testThis")
+                .socketBinding(createSocketBinding())
+                .factoryClass(FACTORY_CLASS)
+                .build());
+        client.apply(new AddAcceptor.GenericBuilder(GENERIC_ACCEPTOR_TBR)
+                .param(PROPERTY_TBR_KEY, "testThis")
+                .socketBinding(createSocketBinding())
+                .factoryClass(FACTORY_CLASS)
+                .build());
         administration.reloadIfRequired();
     }
 
@@ -80,9 +72,10 @@ public class GenericAcceptorTestCase extends AbstractMessagingTestCase {
     @Before
     public void before() {
         page.navigateToMessaging();
-        page.selectView("Connections");
-        page.switchType("Type: Generic");
-        page.selectInTable(GENERIC_ACCEPTOR, 0);
+        page.selectConnectionsView();
+        page.switchToAcceptor();
+        page.switchToGenericType();
+        page.selectInTable(GENERIC_ACCEPTOR);
     }
 
     @After
@@ -114,30 +107,19 @@ public class GenericAcceptorTestCase extends AbstractMessagingTestCase {
         boolean isClosed = page.addProperty("prop", "test");
         assertTrue("Property should be added and wizard closed.", isClosed);
 
-        Assert.assertTrue(PropertiesOps.isPropertyPresentInParams(GENERIC_ACCEPTOR_ADDRESS, "prop"));
+        Assert.assertTrue(PropertiesOps.isPropertyPresentInParams(GENERIC_ACCEPTOR_ADDRESS, client, "prop"));
     }
 
     @Test
     public void removeAcceptorProperty() throws Exception {
         page.removeProperty(PROPERTY_TBR_KEY);
-        Assert.assertFalse(PropertiesOps.isPropertyPresentInParams(GENERIC_ACCEPTOR_ADDRESS, PROPERTY_TBR_KEY));
+        Assert.assertFalse(PropertiesOps.isPropertyPresentInParams(GENERIC_ACCEPTOR_ADDRESS, client, PROPERTY_TBR_KEY));
     }
 
     @Test
     public void removeGenericAcceptor() throws Exception {
-        page.selectInTable(GENERIC_ACCEPTOR_TBR, 0);
-        page.remove();
-
+        page.remove(GENERIC_ACCEPTOR_TBR);
         new ResourceVerifier(GENERIC_ACCEPTOR_ADDRESS_TBR, client).verifyDoesNotExist();
     }
-
-    private static boolean addGenericAcceptor(Address address) throws IOException, CommandFailedException {
-        String socketBinding = "genericAcceptorSocketBinding_" + RandomStringUtils.randomAlphanumeric(5);
-        createSocketBinding(socketBinding);
-        return operations.add(address, Values
-                .of("socket-binding", socketBinding)
-                .and("factory-class", FACTORY_CLASS)).isSuccess();
-    }
-
 
 }

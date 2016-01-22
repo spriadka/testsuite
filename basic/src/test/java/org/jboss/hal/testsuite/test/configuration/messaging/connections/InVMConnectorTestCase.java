@@ -70,10 +70,10 @@ public class InVMConnectorTestCase extends AbstractMessagingTestCase {
     @Before
     public void before() {
         page.navigateToMessaging();
-        page.selectView("Connections");
+        page.selectConnectionsView();
         page.switchToConnector();
-        page.switchType("Type: In-VM");
-        page.selectInTable(IN_VM_CONNECTOR, 0);
+        page.switchToInVmType();
+        page.selectInTable(IN_VM_CONNECTOR);
     }
     @After
     public void after() throws InterruptedException, TimeoutException, IOException {
@@ -95,13 +95,13 @@ public class InVMConnectorTestCase extends AbstractMessagingTestCase {
     public void updateConnectorProperties() throws IOException {
         boolean isClosed = page.addProperty("prop", "test");
         Assert.assertTrue("Property should be added and wizard closed.", isClosed);
-        Assert.assertTrue(PropertiesOps.isPropertyPresentInParams(IN_VM_CONNECTOR_ADDRESS, "prop"));
+        Assert.assertTrue(PropertiesOps.isPropertyPresentInParams(IN_VM_CONNECTOR_ADDRESS, client, "prop"));
     }
 
     @Test
     public void removeConnectorProperties() throws IOException {
         page.removeProperty(PROPERTY_TBR_KEY);
-        Assert.assertFalse(PropertiesOps.isPropertyPresentInParams(IN_VM_CONNECTOR_ADDRESS, PROPERTY_TBR_KEY));
+        Assert.assertFalse(PropertiesOps.isPropertyPresentInParams(IN_VM_CONNECTOR_ADDRESS, client, PROPERTY_TBR_KEY));
     }
 
     @Test

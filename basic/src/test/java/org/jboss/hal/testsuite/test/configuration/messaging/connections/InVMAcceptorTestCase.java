@@ -43,15 +43,16 @@ public class InVMAcceptorTestCase extends AbstractMessagingTestCase {
             .and("in-vm-acceptor", IN_VM_ACCEPTOR_TBR);
 
     private static final String PROPERTY_TBR_KEY = "prop42";
+    private static final int SERVER_ID_BOUND = 1000000;
 
     @BeforeClass
     public static void setUp() throws CommandFailedException {
         client.apply(new AddAcceptor.InVmBuilder(IN_VM_ACCEPTOR)
-                .serverId(ThreadLocalRandom.current().nextInt(100000))
+                .serverId(ThreadLocalRandom.current().nextInt(SERVER_ID_BOUND))
                 .param(PROPERTY_TBR_KEY, "test")
                 .build());
         client.apply(new AddAcceptor.InVmBuilder(IN_VM_ACCEPTOR_TBR)
-                .serverId(ThreadLocalRandom.current().nextInt(100000))
+                .serverId(ThreadLocalRandom.current().nextInt(SERVER_ID_BOUND))
                 .build());
     }
 
@@ -70,9 +71,10 @@ public class InVMAcceptorTestCase extends AbstractMessagingTestCase {
     @Before
     public void before() {
         page.navigateToMessaging();
-        page.selectView("Connections");
-        page.switchType("Type: In-VM");
-        page.selectInTable(IN_VM_ACCEPTOR, 0);
+        page.selectConnectionsView();
+        page.switchToAcceptor();
+        page.switchToInVmType();
+        page.selectInTable(IN_VM_ACCEPTOR);
     }
     @After
     public void after() throws InterruptedException, TimeoutException, IOException {
@@ -87,20 +89,20 @@ public class InVMAcceptorTestCase extends AbstractMessagingTestCase {
 
     @Test
     public void updateAcceptorServerID() throws Exception {
-        editTextAndVerify(IN_VM_ACCEPTOR_ADDRESS, "serverId", "server-id", ThreadLocalRandom.current().nextInt(100000));
+        editTextAndVerify(IN_VM_ACCEPTOR_ADDRESS, "serverId", "server-id", ThreadLocalRandom.current().nextInt(SERVER_ID_BOUND));
     }
 
     @Test
     public void updateAcceptorProperties() throws IOException {
         boolean isClosed = page.addProperty("prop", "test");
         Assert.assertTrue("Property should be added and wizard closed.", isClosed);
-        Assert.assertTrue(PropertiesOps.isPropertyPresentInParams(IN_VM_ACCEPTOR_ADDRESS, "prop"));
+        Assert.assertTrue(PropertiesOps.isPropertyPresentInParams(IN_VM_ACCEPTOR_ADDRESS, client, "prop"));
     }
 
     @Test
     public void removeAcceptorProperties() throws IOException {
         page.removeProperty(PROPERTY_TBR_KEY);
-        Assert.assertFalse(PropertiesOps.isPropertyPresentInParams(IN_VM_ACCEPTOR_ADDRESS, PROPERTY_TBR_KEY));
+        Assert.assertFalse(PropertiesOps.isPropertyPresentInParams(IN_VM_ACCEPTOR_ADDRESS, client, PROPERTY_TBR_KEY));
     }
 
     @Test

@@ -31,9 +31,6 @@ import java.util.concurrent.TimeoutException;
 
 import static org.junit.Assert.assertTrue;
 
-/**
- * Created by pcyprian on 7.9.15.
- */
 @RunWith(Arquillian.class)
 @Category(Shared.class)
 public class ConnectorServicesTestCase extends AbstractMessagingTestCase {
@@ -52,11 +49,11 @@ public class ConnectorServicesTestCase extends AbstractMessagingTestCase {
     @BeforeClass
     public static void setUp() throws Exception {
         operations.add(CONNECTOR_SERVICE_ADDRESS, Values.of("factory-class", FACTORY_CLASS));
+        PropertiesOps.addProperty(CONNECTOR_SERVICE_ADDRESS, client, PROPERTY_TBR_KEY, "test");
         new ResourceVerifier(CONNECTOR_SERVICE_ADDRESS, client).verifyExists();
         operations.add(CONNECTOR_SERVICE_ADDRESS_TBR, Values.of("factory-class", FACTORY_CLASS));
         new ResourceVerifier(CONNECTOR_SERVICE_ADDRESS_TBR, client).verifyExists();
         administration.reloadIfRequired();
-        addPropertyToConnectorService(PROPERTY_TBR_KEY, "value2"); //Property which will be removed
     }
 
     @AfterClass
@@ -75,9 +72,9 @@ public class ConnectorServicesTestCase extends AbstractMessagingTestCase {
     @Before
     public void before() {
         page.navigateToMessaging();
-        page.selectView("Connections");
+        page.selectConnectionsView();
         page.switchToConnectorServices();
-        page.selectInTable(CONNECTOR_SERVICE, 0);
+        page.selectInTable(CONNECTOR_SERVICE);
     }
 
     @After
@@ -101,13 +98,13 @@ public class ConnectorServicesTestCase extends AbstractMessagingTestCase {
         boolean isClosed = page.addProperty("prop", "test");
         assertTrue("Property should be added and wizard closed.", isClosed);
 
-        Assert.assertTrue(PropertiesOps.isPropertyPresentInParams(CONNECTOR_SERVICE_ADDRESS, "prop"));
+        Assert.assertTrue(PropertiesOps.isPropertyPresentInParams(CONNECTOR_SERVICE_ADDRESS, client, "prop"));
     }
 
     @Test
     public void removeConnectorServicesProperties() throws Exception {
         page.removeProperty(PROPERTY_TBR_KEY);
-        Assert.assertFalse(PropertiesOps.isPropertyPresentInParams(CONNECTOR_SERVICE_ADDRESS, PROPERTY_TBR_KEY));
+        Assert.assertFalse(PropertiesOps.isPropertyPresentInParams(CONNECTOR_SERVICE_ADDRESS, client, PROPERTY_TBR_KEY));
     }
 
     @Test
@@ -117,10 +114,4 @@ public class ConnectorServicesTestCase extends AbstractMessagingTestCase {
 
         new ResourceVerifier(CONNECTOR_SERVICE_ADDRESS_TBR, client).verifyDoesNotExist();
     }
-
-    private static void addPropertyToConnectorService(String key, String value) throws IOException {
-        ModelNode property = new ModelNode().set(key, value).asObject();
-        operations.writeAttribute(CONNECTOR_SERVICE_ADDRESS, "params", property);
-    }
-
 }
