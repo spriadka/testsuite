@@ -4,16 +4,9 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Shared;
-import org.jboss.hal.testsuite.cli.CliClient;
-import org.jboss.hal.testsuite.cli.CliClientFactory;
-import org.jboss.hal.testsuite.dmr.Dispatcher;
-import org.jboss.hal.testsuite.dmr.ResourceAddress;
-import org.jboss.hal.testsuite.dmr.ResourceVerifier;
 import org.jboss.hal.testsuite.page.config.MessagingPage;
 import org.jboss.hal.testsuite.test.configuration.messaging.AbstractMessagingTestCase;
-import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -27,9 +20,6 @@ import org.wildfly.extras.creaper.core.online.operations.OperationException;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
-
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 @RunWith(Arquillian.class)
 @Category(Shared.class)
