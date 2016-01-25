@@ -1,14 +1,12 @@
 package org.jboss.hal.testsuite.test.configuration.messaging.clustering;
 
 import org.apache.commons.lang.RandomStringUtils;
-import org.apache.mina.util.AvailablePortFinder;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
-import org.jboss.hal.testsuite.creaper.command.AddSocketBinding;
 import org.jboss.hal.testsuite.page.config.MessagingPage;
 import org.jboss.hal.testsuite.test.configuration.messaging.AbstractMessagingTestCase;
 import org.junit.AfterClass;

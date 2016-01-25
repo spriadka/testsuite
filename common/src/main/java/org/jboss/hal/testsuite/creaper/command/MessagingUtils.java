@@ -8,7 +8,9 @@ import org.wildfly.extras.creaper.core.online.operations.Operations;
 import java.util.List;
 
 final class MessagingUtils {
-    private MessagingUtils() {}
+    private MessagingUtils() {
+
+    }
 
     static final String DEFAULT_SERVER_NAME = "default";
 

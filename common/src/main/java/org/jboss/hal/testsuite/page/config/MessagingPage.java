@@ -8,7 +8,6 @@ import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.finder.Row;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
-import org.jboss.hal.testsuite.fragment.WindowFragment;
 import org.jboss.hal.testsuite.fragment.config.messaging.MessagingConfigArea;
 import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConfigPropertiesFragment;
 import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConfigPropertyWizard;
