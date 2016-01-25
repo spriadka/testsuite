@@ -21,6 +21,7 @@
  */
 package org.jboss.hal.testsuite.test.configuration.container;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
@@ -28,11 +29,8 @@ import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.junit.InSequence;
 import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Standalone;
-import org.jboss.hal.testsuite.cli.CliClient;
-import org.jboss.hal.testsuite.cli.CliClientFactory;
-import org.jboss.hal.testsuite.dmr.Dispatcher;
-import org.jboss.hal.testsuite.dmr.ResourceAddress;
-import org.jboss.hal.testsuite.dmr.ResourceVerifier;
+import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
+import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.finder.Application;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
@@ -45,15 +43,19 @@ import org.jboss.hal.testsuite.page.config.StandaloneConfigurationPage;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
+import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -70,26 +72,18 @@ public class IIOPTestCase {
     private static final String KEY_VALUE = "IIOPKey_" +  RandomStringUtils.randomAlphanumeric(5);
     private static final String VALUE = "IIOPValue_" + RandomStringUtils.randomAlphanumeric(5);
 
-    @Drone WebDriver browser;
+    @Drone
+    public WebDriver browser;
     private FinderNavigation navigation;
     private FinderNavigation transactionNavigation;
-    private ModelNode path = new ModelNode("/subsystem=iiop-openjdk");
-    private ResourceAddress address = new ResourceAddress(path);
-    private ModelNode transactionPath = new ModelNode("/subsystem=transactions");
-    private ResourceAddress transactionAddress = new ResourceAddress(transactionPath);
-    private static Dispatcher dispatcher;
-    private static ResourceVerifier verifier;
-    CliClient cliClient = CliClientFactory.getClient();
-
-    @BeforeClass
-    public static void setUp() {
-        dispatcher = new Dispatcher();
-        verifier  = new ResourceVerifier(dispatcher);
-    }
+    private Address iiopSubsystemAddress = Address.subsystem("iiop-openjdk");
+    private Address transactionSubsystemAddress = Address.subsystem("transactions");
+    private static OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
+    private Administration adminOps = new Administration(client);
 
     @AfterClass
     public static void tearDown() {
-        dispatcher.close();
+        IOUtils.closeQuietly(client);
     }
 
     @Page
@@ -110,16 +104,14 @@ public class IIOPTestCase {
     }
 
     @After
-    public void after() {
-        cliClient.reload();
+    public void after() throws IOException, InterruptedException, TimeoutException {
+        adminOps.restartIfRequired();
+        adminOps.reloadIfRequired();
     }
-
-
-
 
     @Test
     @InSequence(0)
-    public void expectErrorForInvalidNumberToReclaimValue() {
+    public void expectErrorForInvalidNumberToReclaimValue() throws Exception {
         page.switchToEditMode();
         ConfigFragment editPanelFragment = page.getConfigFragment();
 
@@ -127,19 +119,19 @@ public class IIOPTestCase {
         boolean finished = editPanelFragment.save();
 
         assertFalse("Config wasn't supposed to be saved, read-write view should be active.", finished);
-        verifier.verifyAttribute(address, "number-to-reclaim", "undefined");
+        new ResourceVerifier(iiopSubsystemAddress, client).verifyAttributeIsUndefined("number-to-reclaim");
     }
 
     @Test
     @InSequence(1)
-    public void numberToReclaimValueTest() {
+    public void numberToReclaimValueTest() throws Exception {
         page.switchToEditMode();
         ConfigFragment editPanelFragment = page.getConfigFragment();
         editPanelFragment.getEditor().text("number-to-reclaim", "5");
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "number-to-reclaim", "5");
+        new ResourceVerifier(iiopSubsystemAddress, client).verifyAttribute("number-to-reclaim", 5);
 
         page.switchToEditMode();
         editPanelFragment = page.getConfigFragment();
@@ -147,12 +139,12 @@ public class IIOPTestCase {
         finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "number-to-reclaim", "undefined"); //https://issues.jboss.org/browse/HAL-790
+        new ResourceVerifier(iiopSubsystemAddress, client).verifyAttributeIsUndefined("number-to-reclaim"); //https://issues.jboss.org/browse/HAL-790
     }
 
     @Test
     @InSequence(2)
-    public void expectErrorForInvalidHighWaterMarkValue() {
+    public void expectErrorForInvalidHighWaterMarkValue() throws Exception {
         page.switchToEditMode();
         ConfigFragment editPanelFragment = page.getConfigFragment();
 
@@ -160,19 +152,19 @@ public class IIOPTestCase {
         boolean finished = editPanelFragment.save();
         log.debug("f : " + finished);
         assertFalse("Config wasn't supposed to be saved, read-write view should be active.", finished);
-        verifier.verifyAttribute(address, "high-water-mark", "undefined");
+        new ResourceVerifier(iiopSubsystemAddress, client).verifyAttributeIsUndefined("high-water-mark");
     }
 
     @Test
     @InSequence(3)
-    public void highWaterMarkValueTest() {
+    public void highWaterMarkValueTest() throws Exception {
         page.switchToEditMode();
         ConfigFragment editPanelFragment = page.getConfigFragment();
         editPanelFragment.getEditor().text("high-water-mark", "7");
         boolean finished = editPanelFragment.save();
 
         assertTrue("onfig should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "high-water-mark", "7");
+        new ResourceVerifier(iiopSubsystemAddress, client).verifyAttribute("high-water-mark", 7);
 
         page.switchToEditMode();
         editPanelFragment = page.getConfigFragment();
@@ -180,29 +172,29 @@ public class IIOPTestCase {
         finished = editPanelFragment.save();
 
         assertTrue("onfig should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "high-water-mark", "undefined"); //https://issues.jboss.org/browse/HAL-790
+        new ResourceVerifier(iiopSubsystemAddress, client).verifyAttributeIsUndefined("high-water-mark"); //https://issues.jboss.org/browse/HAL-790
     }
 
     @Test
     @InSequence(4)
-    public void setAuthMethodValues() {
+    public void setAuthMethodValues() throws Exception {
         page.switchToEditMode();
         ConfigFragment editPanelFragment = page.getConfigFragment();
-        editPanelFragment.getEditor().select("auth-method", "none");
-        boolean finished = editPanelFragment.save();
-        log.debug("f : " + finished);
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "auth-method", "none");
-
-        page.switchToEditMode();
         editPanelFragment = page.getConfigFragment();
         editPanelFragment.getEditor().select("auth-method", "");
-        finished = editPanelFragment.save();
+        boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
         //when setting undefined ("") value , value is set to default
-        verifier.verifyAttribute(address, "auth-method", "username_password");
+        new ResourceVerifier(iiopSubsystemAddress, client).verifyAttribute("auth-method", "username_password");
+
+        page.switchToEditMode();
+        editPanelFragment.getEditor().select("auth-method", "none");
+        finished = editPanelFragment.save();
+        log.debug("f : " + finished);
+
+        assertTrue("Config should be saved and closed.", finished);
+        new ResourceVerifier(iiopSubsystemAddress, client).verifyAttribute("auth-method", "none");
 
         page.switchToEditMode();
         editPanelFragment = page.getConfigFragment();
@@ -210,47 +202,92 @@ public class IIOPTestCase {
         finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "auth-method", "username_password");
+        new ResourceVerifier(iiopSubsystemAddress, client).verifyAttribute("auth-method", "username_password");
     }
 
     @Test
     @InSequence(5)
-    public void addProperty() {
+    public void addProperty() throws Exception {
         ConfigPropertiesFragment properties = page.getConfig().propertiesConfig();
         page.waitUntilPropertiesAreVisible();
         ConfigPropertyWizard wizard = properties.addProperty();
 
-        boolean result = wizard.name(KEY_VALUE).value(VALUE).finish();
+        boolean result = wizard.name(KEY_VALUE).value(VALUE).finishAndDismissReloadRequiredWindow();
 
-        assertTrue("Property shoudl be added and wizard closed.", result);
+        assertTrue("Property should be added and wizard closed.", result);
 
         List<ResourceTableRowFragment> actual = page.getResourceManager().getResourceTable().getAllRows();
 
-        assertEquals("Talbe should have one row.", 1, actual.size());
+        assertEquals("Table should have one row.", 1, actual.size());
+
+        ModelNode expectedPropertiesNode = new ModelNode();
+        expectedPropertiesNode.get(KEY_VALUE).set(VALUE); // add child pair
+        new ResourceVerifier(iiopSubsystemAddress, client).verifyAttribute("properties", expectedPropertiesNode);
     }
 
     @Test
     @InSequence(6)
-    public void removeProperty() {
+    public void removeProperty() throws Exception {
         ConfigPropertiesFragment properties = page.getConfig().propertiesConfig();
         page.waitUntilPropertiesAreVisible();
         properties.removeProperty(KEY_VALUE);
 
         List<ResourceTableRowFragment> actual = page.getResourceManager().getResourceTable().getAllRows();
 
-        assertEquals("Talbe should be empty.", 0, actual.size());
+        assertEquals("Table should be empty.", 0, actual.size());
+        new ResourceVerifier(iiopSubsystemAddress, client).verifyAttributeIsUndefined("properties");
+    }
+
+    @Test
+    @InSequence(7)
+    public void setRealmValues() throws Exception {
+        page.switchToEditMode();
+        ConfigFragment editPanelFragment = page.getConfigFragment();
+        editPanelFragment.getEditor().text("realm", VALUE);
+        boolean finished = editPanelFragment.save();
+
+        assertTrue("Config should be saved and closed.", finished);
+        new ResourceVerifier(iiopSubsystemAddress, client).verifyAttribute("realm", VALUE);
+
+        page.switchToEditMode();
+        editPanelFragment = page.getConfigFragment();
+        editPanelFragment.getEditor().text("realm", "");
+        finished = editPanelFragment.save();
+
+        assertTrue("Config should be saved and closed.", finished);
+        new ResourceVerifier(iiopSubsystemAddress, client).verifyAttributeIsUndefined("realm");
+    }
+
+    @Test
+    @InSequence(8)
+    public void setSecurityDomainValues() throws Exception {
+        page.switchToEditMode();
+        ConfigFragment editPanelFragment = page.getConfigFragment();
+        editPanelFragment.getEditor().text("security-domain", VALUE);
+        boolean finished = editPanelFragment.save();
+
+        assertTrue("Config should be saved and closed.", finished);
+        new ResourceVerifier(iiopSubsystemAddress, client).verifyAttribute("security-domain", VALUE);
+
+        page.switchToEditMode();
+        editPanelFragment = page.getConfigFragment();
+        editPanelFragment.getEditor().text("security-domain", "");
+        finished = editPanelFragment.save();
+
+        assertTrue("Config should be saved and closed.", finished);
+        new ResourceVerifier(iiopSubsystemAddress, client).verifyAttributeIsUndefined("security-domain");
     }
 
     @Test
     @InSequence(9)
-    public void setTransactionsToNoneWithEnablingJTS() {
+    public void setTransactionsToNoneWithEnablingJTS() throws Exception {
         page.switchToEditMode();
         ConfigFragment editPanelFragment = page.getConfigFragment();
         editPanelFragment.getEditor().select("transactions", "none");
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "transactions", "none");
+        new ResourceVerifier(iiopSubsystemAddress, client).verifyAttribute("transactions", "none");
 
         transactionNavigation.selectRow().invoke("View");
         Application.waitUntilVisible();
@@ -261,19 +298,19 @@ public class IIOPTestCase {
         finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(transactionAddress, "jts", true);
+        new ResourceVerifier(transactionSubsystemAddress, client).verifyAttribute("jts", true);
     }
 
     @Test
     @InSequence(10)
-    public void setTransactionsToSpecWithDisablingJTS() {
+    public void setTransactionsToSpecWithDisablingJTS() throws Exception {
         page.switchToEditMode();
         ConfigFragment editPanelFragment = page.getConfigFragment();
         editPanelFragment.getEditor().select("transactions", "spec");
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "transactions", "spec");
+        new ResourceVerifier(iiopSubsystemAddress, client).verifyAttribute("transactions", "spec");
 
         transactionNavigation.selectRow().invoke("View");
         Application.waitUntilVisible();
@@ -284,46 +321,6 @@ public class IIOPTestCase {
         finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(transactionAddress, "jts", false);
-    }
-
-    @Test
-    @InSequence(7)
-    public void setRealmValues() {
-        page.switchToEditMode();
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-        editPanelFragment.getEditor().text("realm", VALUE);
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "realm", VALUE);
-
-        page.switchToEditMode();
-        editPanelFragment = page.getConfigFragment();
-        editPanelFragment.getEditor().text("realm", "");
-        finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "realm", "undefined");
-    }
-
-    @Test
-    @InSequence(8)
-    public void setSecurityDomainValues() {
-        page.switchToEditMode();
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-        editPanelFragment.getEditor().text("security-domain", VALUE);
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "security-domain", VALUE);
-
-        page.switchToEditMode();
-        editPanelFragment = page.getConfigFragment();
-        editPanelFragment.getEditor().text("security-domain", "");
-        finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "security-domain", "undefined");
+        new ResourceVerifier(transactionSubsystemAddress, client).verifyAttribute("jts", false);
     }
 }
