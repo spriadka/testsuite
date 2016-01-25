@@ -1,18 +1,14 @@
 package org.jboss.hal.testsuite.test.configuration.messaging.destinations;
 
+import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Shared;
-import org.jboss.hal.testsuite.cli.CliClient;
-import org.jboss.hal.testsuite.cli.CliClientFactory;
-import org.jboss.hal.testsuite.dmr.Dispatcher;
-import org.jboss.hal.testsuite.dmr.ResourceAddress;
-import org.jboss.hal.testsuite.dmr.ResourceVerifier;
-import org.jboss.hal.testsuite.fragment.ConfigFragment;
+import org.jboss.hal.testsuite.creaper.ResourceVerifier;
+import org.jboss.hal.testsuite.creaper.command.BackupAndRestoreAttributes;
 import org.jboss.hal.testsuite.page.config.MessagingPage;
-import org.jboss.hal.testsuite.util.ConfigUtils;
+import org.jboss.hal.testsuite.test.configuration.messaging.AbstractMessagingTestCase;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -21,40 +17,41 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
+import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.OperationException;
+import org.wildfly.extras.creaper.core.online.operations.Values;
 
-import static org.junit.Assert.assertTrue;
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
-/**
- * Created by pcyprian on 9.9.15.
- */
 @RunWith(Arquillian.class)
 @Category(Shared.class)
-public class DivertsTestCase {
-    private static final String NAME = "test-divert";
-    private static final String DIVERTADDRESS = "divert";
-    private static final String FORWATDADDRESS = "forward";
-    private static final String ADD = "/subsystem=messaging-activemq/server=default/divert=" + NAME + ":add(divert-address="
-            + DIVERTADDRESS + ",forwarding-address=" + FORWATDADDRESS + ",routing-name=" + NAME + ")";
-    private static final String DOMAIN = "/profile=full-ha";
+public class DivertsTestCase extends AbstractMessagingTestCase {
 
-    private String command;
-    private String remove = "/subsystem=messaging-activemq/server=default/divert=" + NAME + ":remove";
-    private ModelNode path = new ModelNode("/subsystem=messaging-activemq/server=default/divert=" + NAME );
-    private ModelNode domainPath = new ModelNode("/profile=full-ha/subsystem=messaging-activemq/server=default/divert=" + NAME);
-    private ResourceAddress address;
-    private static Dispatcher dispatcher;
-    private static ResourceVerifier verifier;
-    CliClient cliClient = CliClientFactory.getClient();
+    private static final String DIVERT = "test-divert_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String DIVERT_TBA = "test-divert-TBA_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String DIVERT_TBR = "test-divert-TBR_" + RandomStringUtils.randomAlphanumeric(5);
+
+    private static final Address DIVERT_ADDRESS = DEFAULT_MESSAGING_SERVER.and("divert", DIVERT);
+    private static final Address DIVERT_TBA_ADDRESS = DEFAULT_MESSAGING_SERVER.and("divert", DIVERT_TBA);
+    private static final Address DIVERT_TBR_ADDRESS = DEFAULT_MESSAGING_SERVER.and("divert", DIVERT_TBR);
+
+    private static final String DIVERT_ADDRESS_ARG = "divert";
+    private static final String FORWARD_ADDRESS_ARG = "forward";
+
 
     @BeforeClass
-    public static void setUp() {
-        dispatcher = new Dispatcher();
-        verifier  = new ResourceVerifier(dispatcher);
+    public static void setUp() throws Exception {
+        addDivert(DIVERT_ADDRESS, FORWARD_ADDRESS_ARG, DIVERT_ADDRESS_ARG, DIVERT);
+        addDivert(DIVERT_TBR_ADDRESS, FORWARD_ADDRESS_ARG, DIVERT_ADDRESS_ARG, DIVERT_TBR);
+        administration.reloadIfRequired();
     }
 
     @AfterClass
-    public static void tearDown() {
-        dispatcher.close();
+    public static void tearDown() throws IOException, OperationException {
+        operations.removeIfExists(DIVERT_ADDRESS);
+        operations.removeIfExists(DIVERT_TBA_ADDRESS);
+        operations.removeIfExists(DIVERT_TBR_ADDRESS);
     }
 
     @Drone
@@ -64,152 +61,66 @@ public class DivertsTestCase {
 
     @Before
     public void before() {
-        if (ConfigUtils.isDomain()) {
-            address = new ResourceAddress(domainPath);
-            command = DOMAIN + ADD;
-            remove = DOMAIN + remove;
-        } else {
-            address = new ResourceAddress(path);
-            command = ADD;
-        }
+        page.navigateToMessaging();
+        page.selectQueuesAndTopics();
+        page.switchToDiverts();
+        page.selectInTable(DIVERT);
     }
 
     @After
-    public void after() {
-        cliClient.executeCommand(remove);
+    public void after() throws InterruptedException, TimeoutException, IOException {
+        administration.reloadIfRequired();
     }
 
     @Test
-    public void addDiverts() {
-        page.navigateToMessaging();
-        page.selectQueuesAndTopics();
-        page.switchToDiverts();
-
-        page.addDiverts(NAME, DIVERTADDRESS, FORWATDADDRESS);
-
-        verifier.verifyResource(address, true);
-
-        cliClient.executeCommand(remove);
-
-        verifier.verifyResource(address, false);
+    public void addDiverts() throws Exception {
+        page.addDiverts(DIVERT_TBA, DIVERT_ADDRESS_ARG, FORWARD_ADDRESS_ARG);
+        new ResourceVerifier(DIVERT_TBA_ADDRESS, client).verifyExists();
     }
 
     @Test
-    public void updateDivertsDivertAddress() {
-        cliClient.executeCommand(command);
-
-        page.navigateToMessaging();
-        page.selectQueuesAndTopics();
-        page.switchToDiverts();
-        page.selectInTable(NAME, 0);
-        page.edit();
-
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("divertAddress", "divAdd");
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "divert-address", "divAdd", 500);
-
-        cliClient.executeCommand(remove);
+    public void updateDivertsDivertAddress() throws Exception {
+        editTextAndVerify(DIVERT_ADDRESS, "divertAddress", "divert-address", "divAdd");
     }
 
     @Test
-    public void updateDivertsForwardAddress() {
-        cliClient.executeCommand(command);
-
-        page.navigateToMessaging();
-        page.selectQueuesAndTopics();
-        page.switchToDiverts();
-        page.selectInTable(NAME, 0);
-        page.edit();
-
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("forwardingAddress", "fowAdd");
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "forwarding-address", "fowAdd", 500);
-
-        cliClient.executeCommand(remove);
+    public void updateDivertsForwardAddress() throws Exception {
+        editTextAndVerify(DIVERT_ADDRESS, "forwardingAddress", "forwarding-address", "fowAdd");
     }
 
     @Test
-    public void updateDivertExclusive() {
-        cliClient.executeCommand(command);
-
-        page.navigateToMessaging();
-        page.selectQueuesAndTopics();
-        page.switchToDiverts();
-        page.selectInTable(NAME, 0);
-        page.edit();
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().checkbox("exclusive", true);
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "exclusive", true, 500);
-
-        cliClient.executeCommand(remove);
+    public void updateDivertExclusive() throws Exception {
+        editCheckboxAndVerify(DIVERT_ADDRESS, "exclusive", true);
     }
 
     @Test
-    public void updateDivertsFilter() {
-        cliClient.executeCommand(command);
-
-        page.navigateToMessaging();
-        page.selectQueuesAndTopics();
-        page.switchToDiverts();
-        page.selectInTable(NAME, 0);
-        page.edit();
-
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("filter", "myFilter");
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "filter", "myFilter", 500);
-
-        cliClient.executeCommand(remove);
+    public void updateDivertsFilter() throws Exception {
+        editTextAndVerify(DIVERT_ADDRESS, "filter", "myFilter");
     }
 
     @Test
-    public void updateDivertsTransformerClass() {
-        cliClient.executeCommand(command);
-
-        page.navigateToMessaging();
-        page.selectQueuesAndTopics();
-        page.switchToDiverts();
-        page.selectInTable(NAME, 0);
-        page.edit();
-
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("transformerClass", "clazz");
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "transformer-class-name", "clazz", 500);
-
-        cliClient.executeCommand(remove);
+    public void updateDivertsTransformerClass() throws Exception {
+        BackupAndRestoreAttributes backup = new BackupAndRestoreAttributes.Builder(DIVERT_ADDRESS)
+                .build();
+        try {
+            client.apply(backup.backup());
+            editTextAndVerify(DIVERT_ADDRESS, "transformerClass", "transformer-class-name", "clazz");
+        } finally {
+            client.apply(backup.restore());
+        }
     }
 
     @Test
-    public void removeDiverts() {
-        cliClient.executeCommand(command);
+    public void removeDiverts() throws Exception {
+        page.remove(DIVERT_TBR);
+        new ResourceVerifier(DIVERT_TBR_ADDRESS, client).verifyDoesNotExist();
+    }
 
-        page.navigateToMessaging();
-        page.selectQueuesAndTopics();
-        page.switchToDiverts();
-
-        verifier.verifyResource(address, true);
-        page.selectInTable(NAME, 0);
-        page.remove();
-
-        verifier.verifyResource(address, false);
+    private static void addDivert(Address address, String forwardingAddress, String divertAddress, String routingName) throws Exception {
+        operations.add(address, Values.empty()
+                .and("divert-address", divertAddress)
+                .and("forwarding-address", forwardingAddress)
+                .and("routing-name", routingName));
+        new ResourceVerifier(address, client).verifyExists();
     }
 }
