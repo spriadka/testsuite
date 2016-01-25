@@ -33,6 +33,19 @@ public class WizardWindow extends WindowFragment {
      * @return true if window is not present after the button was clicked
      */
     public boolean finish() {
+        return finish(false);
+    }
+
+    /**
+     * Clicks either Finish or Save button, dismiss 'Reload required' window if appears and wait unit the wizard window
+     * is closed
+     * @return true if window is not present after the button was clicked
+     */
+    public boolean finishAndDismissReloadRequiredWindow() {
+        return finish(true);
+    }
+
+    private boolean finish(boolean dismissRealoadRequitedWindow) {
         try {
             clickFinishButton();
         } catch (WebDriverException e) {
@@ -44,6 +57,10 @@ public class WizardWindow extends WindowFragment {
             }
         }
 
+        if (dismissRealoadRequitedWindow) {
+            Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
+        }
+
         try {
             Graphene.waitModel().until().element(root).is().not().present();
             closed = true;
@@ -53,7 +70,6 @@ public class WizardWindow extends WindowFragment {
             log.debug("Wizard window remains open");
             return false;
         }
-
     }
 
     private void clickDoneButton() {
