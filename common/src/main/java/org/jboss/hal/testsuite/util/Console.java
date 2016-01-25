@@ -305,9 +305,13 @@ public class Console {
 
     public void dismissReloadRequiredWindowIfPresent() {
         try {
+            // there may be more popup windows so we need to wait for 'reload required' one to appear
+            By popupMessageTitleSelector = ByJQuery.selector("." + PropUtils.get("modals.window.title.class")
+                    + ":contains('Message')");
+            Graphene.waitGui().until().element(popupMessageTitleSelector).is().present();
             openedWindow("Message", ReloadRequiredWindow.class).dismiss();
         } catch (TimeoutException e) {
-            log.debug("Reaload required message window not present e.g. since it was already closed before.");
+            log.debug("Reload required message window not present e.g. since it was already closed before.");
         }
     }
 }
