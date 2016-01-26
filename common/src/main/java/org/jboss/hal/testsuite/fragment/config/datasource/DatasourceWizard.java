@@ -35,4 +35,8 @@ public class DatasourceWizard extends WizardWindow {
         return Graphene.createPageFragment(ResourceManager.class, root).getResourceTable();
     }
 
+    public void selectDriver(String driverName) {
+        getResourceTable().selectRowByText(0, driverName);
+    }
+
 }
