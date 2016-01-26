@@ -81,7 +81,7 @@ public class ModuleTestCase {
         Class <? extends BasePage> expectedAddressPage = ConfigUtils.isDomain() ?
                 DomainConfigEntryPoint.class
               : StandaloneConfigEntryPoint.class;
-        assertModule("config", expectedAddressPage, 1);
+        assertModule("config", expectedAddressPage, 2);
     }
 
     @Test
