@@ -30,14 +30,14 @@ import static org.junit.Assert.assertFalse;
 @Category(Standalone.class)
 public class DeploymentScannerTestCase {
     private static final String NAME = "test";
-    private static final String PATH = "../standalone/deployments";
+    private static final String PATH = "deployments";
 
     private ModelNode path = new ModelNode("/subsystem=deployment-scanner/scanner=" + NAME);
     private ResourceAddress address = new ResourceAddress(path);
     static Dispatcher dispatcher = new Dispatcher();
     ResourceVerifier verifier = new ResourceVerifier(dispatcher);
     private CliClient cliClient = CliClientFactory.getClient();
-    private String add = "/subsystem=deployment-scanner/scanner=" + NAME + ":add(path=" + PATH + ")";
+    private String add = "/subsystem=deployment-scanner/scanner=" + NAME + ":add(path=" + PATH + ", relative-to=jboss.server.base.dir)";
 
 
     @Drone
@@ -62,7 +62,7 @@ public class DeploymentScannerTestCase {
         page.navigateToDeploymentScanners();
         page.clickButton("Add");
         page.getWindowFragment().getEditor().text("name", NAME);
-        page.getWindowFragment().getEditor().text("path", PATH);
+        page.getWindowFragment().getEditor().text("path", "${jboss.server.base.dir:null}/" + PATH);
         page.getWindowFragment().clickButton("Save");
 
         verifier.verifyResource(address, true);
