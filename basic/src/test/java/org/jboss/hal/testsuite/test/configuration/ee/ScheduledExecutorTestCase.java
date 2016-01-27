@@ -151,18 +151,18 @@ public class ScheduledExecutorTestCase extends EETestCaseAbstract {
         Editor editor = wizard.getEditor();
         editor.text("name", name);
         editor.text(JNDI_NAME, JNDI_VALID);
-        boolean result = wizard.finish();
+        wizard.saveAndDismissReloadRequiredWindow();
 
-        assertTrue("Window should be closed", result);
         assertTrue("Scheduled executor should be present in table", config.resourceIsPresent(name));
         ResourceAddress address = new ResourceAddress(eeAddress).add(EE_CHILD, name);
         verifier.verifyResource(address, true, 5000);
+        removeEEChild(EE_CHILD, name);
     }
 
     @Test
     public void removeExecutorInGUI() {
         ConfigFragment config = page.getConfigFragment();
-        config.getResourceManager().removeResource(executorService).confirm();
+        config.getResourceManager().removeResource(executorService).confirmAndDismissReloadRequiredMessage();
 
         Assert.assertFalse("Scheduled executor should not be present in table", config.resourceIsPresent(executorService));
         Assert.assertFalse("Scheduled executor should not be present on server", removeEEChild(EE_CHILD, executorService));

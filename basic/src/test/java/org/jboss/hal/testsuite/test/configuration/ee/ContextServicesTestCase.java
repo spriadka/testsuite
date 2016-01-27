@@ -91,18 +91,18 @@ public class ContextServicesTestCase extends EETestCaseAbstract {
         Editor editor = wizard.getEditor();
         editor.text("name", name);
         editor.text(JNDI_NAME, JNDI_VALID);
-        boolean result = wizard.finish();
+        wizard.saveAndDismissReloadRequiredWindow();
 
-        assertTrue("Window should be closed", result);
         assertTrue("Context service should be present in table", config.resourceIsPresent(name));
         ResourceAddress address = new ResourceAddress(eeAddress).add(EE_CHILD, name);
         verifier.verifyResource(address, true, 5000);
+        removeEEChild(EE_CHILD, name);
     }
 
     @Test
     public void removeContextServiceInGUI() {
         ConfigFragment config = page.getConfigFragment();
-        config.getResourceManager().removeResource(contextService).confirm();
+        config.getResourceManager().removeResource(contextService).confirmAndDismissReloadRequiredMessage();
 
         Assert.assertFalse("Context service should not be present in table", config.resourceIsPresent(contextService));
         Assert.assertFalse("Context service should not be present on server", removeEEChild(EE_CHILD, contextService));
