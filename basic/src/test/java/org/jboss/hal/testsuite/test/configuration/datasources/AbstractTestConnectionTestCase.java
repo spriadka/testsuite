@@ -50,6 +50,7 @@ public abstract class AbstractTestConnectionTestCase {
         wizard.next();
 
         wizard.switchToDetectedDriver();
+        wizard.selectDriver("h2");
         wizard.next();
 
         editor.text("connectionUrl", url);
@@ -70,6 +71,7 @@ public abstract class AbstractTestConnectionTestCase {
         wizard.next();
 
         wizard.switchToDetectedDriver();
+        wizard.selectDriver("h2");
         wizard.next();
 
         PropertyEditor properties = editor.properties();
