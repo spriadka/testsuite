@@ -28,48 +28,44 @@ public class WizardWindow extends WindowFragment {
     }
 
     /**
-     * Clicks either Finish or Save button and wait's unit the wizard window is closed
+     * Clicks Save button and waits unit the wizard window is closed.
+     *
+     * @return true if window is not present after the button was clicked
+     */
+    public boolean save() {
+        clickSave();
+        return isWizardClosed();
+    }
+
+    /**
+     * Clicks Save button, dismiss 'Reload required' window if appears and waits unit the wizard window is closed.
+     * @return true if window is not present after the button was clicked
+     */
+    public boolean saveAndDismissReloadRequiredWindow() {
+        clickSave();
+        dismissRealoadRequitedWindow();
+        return isWizardClosed();
+    }
+
+    /**
+     * Clicks either Finish, Done or Save button and waits unit the wizard window is closed.
      *
      * @return true if window is not present after the button was clicked
      */
     public boolean finish() {
-        return finish(false);
+        chooseAndClickFinishingButton();
+        return isWizardClosed();
     }
 
     /**
-     * Clicks either Finish or Save button, dismiss 'Reload required' window if appears and wait unit the wizard window
-     * is closed
+     * Clicks either Finish, Done or Save button, dismiss 'Reload required' window if appears and waits unit the wizard
+     * window is closed.
      * @return true if window is not present after the button was clicked
      */
     public boolean finishAndDismissReloadRequiredWindow() {
-        return finish(true);
-    }
-
-    private boolean finish(boolean dismissRealoadRequitedWindow) {
-        try {
-            clickFinishButton();
-        } catch (WebDriverException e) {
-            try {
-                clickDoneButton();
-            }
-            catch (WebDriverException ex) {
-                clickSave();
-            }
-        }
-
-        if (dismissRealoadRequitedWindow) {
-            Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
-        }
-
-        try {
-            Graphene.waitModel().until().element(root).is().not().present();
-            closed = true;
-            log.debug("Wizard window finished (should be closed)");
-            return true;
-        } catch (TimeoutException e) {
-            log.debug("Wizard window remains open");
-            return false;
-        }
+        chooseAndClickFinishingButton();
+        dismissRealoadRequitedWindow();
+        return isWizardClosed();
     }
 
     private void clickDoneButton() {
@@ -80,6 +76,35 @@ public class WizardWindow extends WindowFragment {
     private void clickFinishButton() {
         String label = PropUtils.get("modals.wizard.finish.label");
         clickButton(label);
+    }
+
+    private void chooseAndClickFinishingButton() {
+        try {
+            clickFinishButton();
+        } catch (WebDriverException e) {
+            try {
+                clickDoneButton();
+            }
+            catch (WebDriverException ex) {
+                clickSave();
+            }
+        }
+    }
+
+    private void dismissRealoadRequitedWindow() {
+        Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
+    }
+
+    private boolean isWizardClosed() {
+        try {
+            Graphene.waitModel().until().element(root).is().not().present();
+            closed = true;
+            log.debug("Wizard window finished (should be closed)");
+            return true;
+        } catch (TimeoutException e) {
+            log.debug("Wizard window remains open");
+            return false;
+        }
     }
 
     /**
