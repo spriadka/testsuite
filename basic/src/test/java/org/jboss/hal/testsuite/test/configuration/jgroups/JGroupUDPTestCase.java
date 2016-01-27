@@ -18,7 +18,7 @@ public class JGroupUDPTestCase extends JGroupAbstractTestCase {
 
     @BeforeClass
     public static void setUpUDP() throws IOException {
-        BASE_ADDRESS =  Address.subsystem("jgroups").and("stack", "udp");
+        BASE_ADDRESS =  JGROUPS_ADDRESS.and("stack", "udp");
         PROTOCOL_ADDRESS = BASE_ADDRESS.and("protocol", DEFAULT_PROTOCOL);
         TRANSPORT_ADDRESS = BASE_ADDRESS.and("transport", "UDP");
 

@@ -1,5 +1,7 @@
 package org.jboss.hal.testsuite.test.configuration.jgroups;
 
+import org.jboss.dmr.ModelNode;
+import org.jboss.dmr.Property;
 import org.wildfly.extras.creaper.core.online.ModelNodeResult;
 import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
 import org.wildfly.extras.creaper.core.online.operations.Address;
@@ -32,8 +34,9 @@ public class JGroupsOperations {
         }
     }
 
-    public boolean propertyExists(Address address, String name) throws IOException {
+    public boolean propertyExists(Address address, String name, String value) throws IOException {
+        ModelNode expectedProperty = new ModelNode().set(new Property(name, new ModelNode(value)));
         ModelNodeResult result = operations.readAttribute(address, "properties");
-        return result.hasDefinedValue() && result.value().keys().contains(name);
+        return result.hasDefinedValue() && result.value().asList().contains(expectedProperty);
     }
 }

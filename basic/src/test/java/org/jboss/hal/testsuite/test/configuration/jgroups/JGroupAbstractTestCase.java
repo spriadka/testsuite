@@ -53,11 +53,17 @@ public class JGroupAbstractTestCase {
     protected static final String DEFAULT_PROTOCOL = "UNICAST3";
 
     protected static final String  PROTOCOL_PROPERTY_TBR = "protocolProperty_" + RandomStringUtils.randomAlphanumeric(3);
+    protected static final String  PROTOCOL_PROPERTY_TBR_VALUE = RandomStringUtils.randomAlphanumeric(3);
     protected static final String  TRANSPORT_PROPERTY_TBR = "protocolProperty_" + RandomStringUtils.randomAlphanumeric(3);
+    protected static final String  TRANSPORT_PROPERTY_TBR_VALUE = RandomStringUtils.randomAlphanumeric(3);
+
 
     protected static OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
     protected static Administration administration = new Administration(client);
     protected static JGroupsOperations jGroupsOperations = new JGroupsOperations(client);
+
+    protected static final Address JGROUPS_ADDRESS = client.options().isStandalone ? Address.subsystem("jgroups") :
+            Address.of("profile", "full-ha").and("subsystem", "jgroups");
 
     @Drone
     public WebDriver browser;
@@ -160,14 +166,14 @@ public class JGroupAbstractTestCase {
         JGroupsTransportPropertyWizard wizard = properties.addProperty();
         wizard.key(PROPERTY_NAME).value(PROPERTY_VALUE).clickSave();
         Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
-        assertTrue(jGroupsOperations.propertyExists(TRANSPORT_ADDRESS, PROPERTY_NAME));
+        assertTrue(jGroupsOperations.propertyExists(TRANSPORT_ADDRESS, PROPERTY_NAME, PROPERTY_VALUE));
     }
 
     @Test
     public void removeTransportProperty() throws IOException {
         JGroupsTransportPropertiesFragment properties = page.getConfig().transportPropertiesConfig();
         properties.removeProperty(TRANSPORT_PROPERTY_TBR);
-        assertFalse(jGroupsOperations.propertyExists(TRANSPORT_ADDRESS, TRANSPORT_PROPERTY_TBR));
+        assertFalse(jGroupsOperations.propertyExists(TRANSPORT_ADDRESS, TRANSPORT_PROPERTY_TBR, TRANSPORT_PROPERTY_TBR_VALUE));
     }
 
 
@@ -178,7 +184,7 @@ public class JGroupAbstractTestCase {
         JGroupsProtocolPropertiesFragment properties = page.getConfig().protocolPropertiesConfig();
         JGroupsProtocolPropertyWizard wizard = properties.addProperty();
         wizard.key(PROPERTY_NAME).value(PROPERTY_VALUE).finish();
-        assertTrue(jGroupsOperations.propertyExists(PROTOCOL_ADDRESS, PROPERTY_NAME));
+        assertTrue(jGroupsOperations.propertyExists(PROTOCOL_ADDRESS, PROPERTY_NAME, PROPERTY_VALUE));
     }
 
     @InSequence(1)
@@ -187,7 +193,7 @@ public class JGroupAbstractTestCase {
         page.switchToProtocol(DEFAULT_PROTOCOL);
         JGroupsProtocolPropertiesFragment properties = page.getConfig().protocolPropertiesConfig();
         properties.removeProperty(PROTOCOL_PROPERTY_TBR);
-        assertFalse(jGroupsOperations.propertyExists(PROTOCOL_ADDRESS, PROTOCOL_PROPERTY_TBR));
+        assertFalse(jGroupsOperations.propertyExists(PROTOCOL_ADDRESS, PROTOCOL_PROPERTY_TBR, PROTOCOL_PROPERTY_TBR_VALUE));
     }
 
     private void editTextAndVerify(Address address, String identifier, String value) throws Exception {
