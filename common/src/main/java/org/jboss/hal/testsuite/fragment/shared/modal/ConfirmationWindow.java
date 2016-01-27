@@ -2,6 +2,7 @@ package org.jboss.hal.testsuite.fragment.shared.modal;
 
 import org.jboss.hal.testsuite.fragment.WindowFragment;
 import org.jboss.hal.testsuite.fragment.WindowState;
+import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.PropUtils;
 
 /**
@@ -25,8 +26,7 @@ public class ConfirmationWindow extends WindowFragment {
         clickButton(confirmButtonLabel);
 
         if (dismissExpectedRealoadWindow) {
-            String dismissButtonLabel = PropUtils.get("modals.reload.required.dismiss.label");
-            clickButton(dismissButtonLabel);
+            Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
         }
 
         waitUntilClosed();
