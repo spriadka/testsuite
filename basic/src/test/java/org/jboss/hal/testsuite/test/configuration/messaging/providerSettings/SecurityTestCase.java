@@ -1,17 +1,13 @@
 package org.jboss.hal.testsuite.test.configuration.messaging.providerSettings;
 
+import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Shared;
-import org.jboss.hal.testsuite.cli.CliClient;
-import org.jboss.hal.testsuite.cli.CliClientFactory;
-import org.jboss.hal.testsuite.dmr.Dispatcher;
-import org.jboss.hal.testsuite.dmr.ResourceAddress;
-import org.jboss.hal.testsuite.dmr.ResourceVerifier;
+import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.page.config.MessagingPage;
-import org.jboss.hal.testsuite.util.ConfigUtils;
+import org.jboss.hal.testsuite.test.configuration.messaging.AbstractMessagingTestCase;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -20,38 +16,29 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
+import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.OperationException;
 
-import static org.junit.Assert.assertTrue;
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
-/**
- * Created by pcyprian on 9.9.15.
- */
 @RunWith(Arquillian.class)
 @Category(Shared.class)
-public class SecurityTestCase {
-    private static final String NAME = "test-provider";
-    private static final String ADD = "/subsystem=messaging-activemq/server=" + NAME + ":add()";
-    private static final String DOMAIN = "/profile=full-ha";
-    private static final String REMOVE = "/subsystem=messaging-activemq/server=" + NAME + ":remove";
+public class SecurityTestCase extends AbstractMessagingTestCase {
+    private static final String SERVER_NAME  = "test-provider_" + RandomStringUtils.randomAlphanumeric(5);
 
-    private String command;
-    private String removeCmd;
-    private ModelNode path = new ModelNode("/subsystem=messaging-activemq/server=" + NAME);
-    private ModelNode domainPath = new ModelNode("/profile=full-ha/subsystem=messaging-activemq/server=" + NAME);
-    private ResourceAddress address;
-    private static Dispatcher dispatcher;
-    private static ResourceVerifier verifier;
-    CliClient cliClient = CliClientFactory.getClient();
+    private static final Address SERVER_ADDRESS = MESSAGING_SUBSYSTEM.and("server", SERVER_NAME);
 
     @BeforeClass
-    public static void setUp() {
-        dispatcher = new Dispatcher();
-        verifier  = new ResourceVerifier(dispatcher);
+    public static void setUp() throws Exception {
+        operations.add(SERVER_ADDRESS);
+        new ResourceVerifier(SERVER_ADDRESS, client).verifyExists();
+        administration.reloadIfRequired();
     }
 
     @AfterClass
-    public static void tearDown() {
-        dispatcher.close();
+    public static void tearDown() throws IOException, OperationException {
+        operations.removeIfExists(SERVER_ADDRESS);
     }
 
     @Drone
@@ -61,91 +48,38 @@ public class SecurityTestCase {
 
     @Before
     public void before() {
-        if (ConfigUtils.isDomain()) {
-            address = new ResourceAddress(domainPath);
-            command = DOMAIN + ADD;
-            removeCmd = DOMAIN + REMOVE;
-        } else {
-            address = new ResourceAddress(path);
-            command = ADD;
-            removeCmd = REMOVE;
-        }
-        cliClient.executeCommand(command);
+        page.selectProvider(SERVER_NAME);
+        page.InvokeProviderSettings();
+        page.switchToSecurityTab();
     }
 
     @After
-    public void after() {
-        cliClient.executeCommand(removeCmd);
-        cliClient.reload();
+    public void after() throws InterruptedException, TimeoutException, IOException {
+        administration.reloadIfRequired();
     }
 
     @Test
-    public void updateClusterUser() {
-        page.selectProvider(NAME);
-        page.InvokeProviderSettings();
-        page.switchToSecurityTab();
-        page.getWindowFragment().edit();
-
-        page.getWindowFragment().getEditor().text("cluster-user", "TESTER");
-        boolean finished =  page.getWindowFragment().save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "cluster-user", "TESTER", 500);
+    public void updateClusterUser() throws Exception {
+        editTextAndVerify(SERVER_ADDRESS, "cluster-user", "TESTER");
     }
 
     @Test
-    public void updateClusterPassword() {
-        page.selectProvider(NAME);
-        page.InvokeProviderSettings();
-        page.switchToSecurityTab();
-        page.getWindowFragment().edit();
-
-        page.getWindowFragment().getEditor().text("cluster-password", "TESTER.PASSWORD");
-        boolean finished =  page.getWindowFragment().save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "cluster-password", "TESTER.PASSWORD", 500);
+    public void updateClusterPassword() throws Exception {
+        editTextAndVerify(SERVER_ADDRESS, "cluster-password", "TESTER.PASSWORD");
     }
 
     @Test
-    public void updateSecurityEnabled() {
-        page.selectProvider(NAME);
-        page.InvokeProviderSettings();
-        page.switchToSecurityTab();
-        page.getWindowFragment().edit();
-
-        page.getWindowFragment().getEditor().checkbox("security-enabled", false);
-        boolean finished =  page.getWindowFragment().save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "security-enabled", false, 500);
+    public void updateSecurityEnabled() throws Exception {
+        editCheckboxAndVerify(SERVER_ADDRESS, "security-enabled", false);
     }
 
     @Test
-    public void updateSecurityInvalidationInterval() {
-        page.selectProvider(NAME);
-        page.InvokeProviderSettings();
-        page.switchToSecurityTab();
-        page.getWindowFragment().edit();
-
-        page.getWindowFragment().getEditor().text("security-invalidation-interval", "10");
-        boolean finished =  page.getWindowFragment().save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "security-invalidation-interval", "10", 500);
+    public void updateSecurityInvalidationInterval() throws Exception {
+        editTextAndVerify(SERVER_ADDRESS, "security-invalidation-interval", 10L);
     }
 
     @Test
-    public void updateSecurityDomain() {
-        page.selectProvider(NAME);
-        page.InvokeProviderSettings();
-        page.switchToSecurityTab();
-        page.getWindowFragment().edit();
-
-        page.getWindowFragment().getEditor().text("security-domain", "jboss-web-policy");
-        boolean finished =  page.getWindowFragment().save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "security-domain", "jboss-web-policy", 500);
+    public void updateSecurityDomain() throws Exception {
+        editTextAndVerify(SERVER_ADDRESS, "security-domain", "jboss-web-policy");
     }
 }
