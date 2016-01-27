@@ -7,7 +7,6 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
-import org.wildfly.extras.creaper.core.online.operations.Address;
 
 import java.io.IOException;
 
