@@ -23,22 +23,28 @@
 package org.jboss.hal.testsuite.test.homepage;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
 import org.jboss.arquillian.drone.api.annotation.Drone;
+import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Shared;
+import org.jboss.hal.testsuite.fragment.WindowFragment;
 import org.jboss.hal.testsuite.fragment.homepage.HomepageNeedHelpSectionFragment;
 import org.jboss.hal.testsuite.page.home.HomePage;
+import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.PropUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
 
 /**
  * Created by pjelinek on Oct 21, 2015
@@ -85,6 +91,21 @@ public class NeedHelpTestCase {
         assertLinksArePresent(section, links);
     }
 
+    @Test
+    public void newToEAP7Test() {
+        WebElement root = homePage.getContentRoot();
+
+        assertElementIsPresent("'New to EAP?' text should be present.", root,
+                new ByJQuery(":contains('" + PropUtils.get("homepage.newtoeap.text") + "')"));
+
+        By linkSelector = new ByJQuery("a:contains('" + PropUtils.get("homepage.newtoeap.link") + "')");
+        assertElementIsPresent("'New to EAP?' link should be present.", root, linkSelector);
+
+        root.findElement(linkSelector).click();
+
+        Console.withBrowser(browser).openedWindow(WindowFragment.class);
+    }
+
     private Map<String, String> expectedLinks(String sectionKey, String[] linkKeys) {
         return Arrays.stream(linkKeys).collect(Collectors.toMap(
                 link -> PropUtils.get("homepage.needhelp." + sectionKey + ".links." + link + ".label"),
@@ -101,6 +122,12 @@ public class NeedHelpTestCase {
         }
 
         Assert.assertTrue("Unexpected links: " + sectionLinks, sectionLinks.isEmpty());
+    }
+
+    private void assertElementIsPresent(String message, WebElement root, By selector) {
+        List<WebElement> found = root.findElements(selector);
+
+        Assert.assertFalse(message, found.isEmpty());
     }
 
 }
