@@ -3,27 +3,33 @@ package org.jboss.hal.testsuite.page.config;
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.hal.testsuite.cli.Library;
-import org.jboss.hal.testsuite.cli.TimeoutException;
 import org.jboss.hal.testsuite.finder.Application;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
+import org.jboss.hal.testsuite.finder.Row;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.config.messaging.MessagingConfigArea;
+import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConfigPropertiesFragment;
+import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConfigPropertyWizard;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
+import org.jboss.hal.testsuite.fragment.shared.util.ResourceManager;
 import org.jboss.hal.testsuite.page.ConfigPage;
+import org.jboss.hal.testsuite.page.Navigatable;
 import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.PropUtils;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
+
 
 
 /**
  * Created by pcyprian on 2.9.15.
  */
-public class MessagingPage extends ConfigPage {
+public class MessagingPage extends ConfigPage implements Navigatable {
 
     private FinderNavigation navigation;
 
@@ -41,7 +47,7 @@ public class MessagingPage extends ConfigPage {
         if (ConfigUtils.isDomain()) {
             navigation = new FinderNavigation(browser, DomainConfigEntryPoint.class)
                     .addAddress(FinderNames.CONFIGURATION, FinderNames.PROFILES)
-                    .addAddress(FinderNames.PROFILE, "full-ha")
+                    .addAddress(FinderNames.PROFILE, ConfigUtils.getDefaultProfile())
                     .addAddress(FinderNames.SUBSYSTEM, "Messaging")
                     .addAddress("Messaging Provider", "default");
         } else {
@@ -81,8 +87,14 @@ public class MessagingPage extends ConfigPage {
     }
 
     public void selectView(String view) {
-        navigation.selectRow().invoke(view);
+        Row row = navigation.selectRow();
+        Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
+        row.invoke(view);
         Application.waitUntilVisible();
+    }
+
+    public void selectConnectionsView() {
+        selectView("Connections");
     }
 
     public void selectQueuesAndTopics() {
@@ -138,6 +150,10 @@ public class MessagingPage extends ConfigPage {
         switchView("Connector");
     }
 
+    public void switchToAcceptor() {
+        switchView("Acceptor");
+    }
+
     public void switchToConnectorServices() {
         switchView("Connector Services");
     }
@@ -170,18 +186,36 @@ public class MessagingPage extends ConfigPage {
         getResourceManager().getResourceTable().selectRowByText(column, value);
     }
 
+    public void selectInTable(String text) {
+        selectInTable(text, 0);
+    }
+
     public void switchType(String type) {
         Select select = new Select(browser.findElement(ByJQuery.selector(".gwt-ListBox:visible")));
-        select.selectByValue(type);
+        select.selectByValue("Type: " + type);
+    }
+
+    public void switchToGenericType() {
+        switchType("Generic");
+    }
+
+    public void switchToInVmType() {
+        switchType("In-VM");
+    }
+
+    public void switchToRemoteType() {
+        switchType("Remote");
     }
 
     public void addBridge(String name, String queue, String address, String connector) {
         clickButton("Add");
-        getWindowFragment().getEditor().text("name", name);
-        getWindowFragment().getEditor().text("queueName", queue);
-        getWindowFragment().getEditor().text("forwardingAddress", address);
-        getWindowFragment().getEditor().text("staticConnectors", connector);
-        getWindowFragment().clickButton("Save");
+        ConfigFragment windowFragment = getWindowFragment();
+        Editor editor = windowFragment.getEditor();
+        editor.text("name", name);
+        editor.text("queueName", queue);
+        editor.text("forwardingAddress", address);
+        editor.text("staticConnectors", connector);
+        windowFragment.clickButton("Save");
     }
 
     public void addBroadcastGroup(String name, String binding) {
@@ -189,6 +223,19 @@ public class MessagingPage extends ConfigPage {
         getWindowFragment().getEditor().text("name", name);
         getWindowFragment().getEditor().text("socket-binding", binding);
         getWindowFragment().clickButton("Save");
+    }
+
+    public void addRemoteAcceptor(String name, String socketBinding) {
+        clickButton(FinderNames.ADD);
+        ConfigFragment windowFragment = getWindowFragment();
+        Editor editor = windowFragment.getEditor();
+        editor.text("name", name);
+        editor.text("socketBinding", socketBinding);
+        windowFragment.save();
+    }
+
+    public void addRemoteConnector(String name, String socketBinding) {
+        addRemoteAcceptor(name, socketBinding);
     }
 
     public void addDiscoveryGroup(String name, String binding) {
@@ -285,13 +332,38 @@ public class MessagingPage extends ConfigPage {
     public void remove() {
         clickButton("Remove");
         try {
-            Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
+            Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirmAndDismissReloadRequiredMessage();
         } catch (TimeoutException ignored) {
         }
+    }
+
+    public void remove(String text) {
+        selectInTable(text);
+        remove();
     }
 
 
     public MessagingConfigArea getConfig() {
         return getConfig(MessagingConfigArea.class);
+    }
+
+    public boolean addProperty(String key, String value) {
+        ConfigPropertiesFragment properties = getConfig().propertiesConfig();
+        ConfigPropertyWizard wizard = properties.addProperty();
+        wizard.name(key).value(value).clickSave();
+
+        Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
+
+        return wizard.isClosed();
+    }
+
+    public void removeProperty(String key) {
+        ConfigPropertiesFragment config = getConfig().propertiesConfig();
+        ResourceManager properties = config.getResourceManager();
+        try {
+            properties.removeResource(key).confirmAndDismissReloadRequiredMessage();
+        } catch (TimeoutException ignored) {
+
+        }
     }
 }

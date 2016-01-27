@@ -1,74 +1,59 @@
 package org.jboss.hal.testsuite.test.configuration.messaging.connections;
 
 import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.mina.util.AvailablePortFinder;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Shared;
-import org.jboss.hal.testsuite.cli.CliClient;
-import org.jboss.hal.testsuite.cli.CliClientFactory;
-import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
-import org.jboss.hal.testsuite.creaper.command.AddSocketBinding;
-import org.jboss.hal.testsuite.dmr.Dispatcher;
-import org.jboss.hal.testsuite.dmr.ResourceAddress;
-import org.jboss.hal.testsuite.dmr.ResourceVerifier;
-import org.jboss.hal.testsuite.fragment.ConfigFragment;
-import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConfigPropertiesFragment;
-import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConfigPropertyWizard;
+import org.jboss.hal.testsuite.creaper.ResourceVerifier;
+import org.jboss.hal.testsuite.creaper.command.messaging.AddMessagingConnector;
 import org.jboss.hal.testsuite.page.config.MessagingPage;
-import org.jboss.hal.testsuite.util.ConfigUtils;
+import org.jboss.hal.testsuite.test.configuration.messaging.AbstractMessagingTestCase;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.wildfly.extras.creaper.core.CommandFailedException;
-import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
+import org.wildfly.extras.creaper.core.online.operations.Address;
 
 import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
-import static org.junit.Assert.assertTrue;
-
-/**
- * Created by pcyprian on 7.9.15.
- */
 @RunWith(Arquillian.class)
 @Category(Shared.class)
-public class RemoteConnectorTestCase {
+public class RemoteConnectorTestCase extends AbstractMessagingTestCase {
 
-    private static final Logger log = LoggerFactory.getLogger(RemoteConnectorTestCase.class);
+    private static final String REMOTE_CONNECTOR = "remote-connector_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String REMOTE_CONNECTOR_TBR = "remote-connector-TBR_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String REMOTE_CONNECTOR_TBA = "remote-connector-TBA_" + RandomStringUtils.randomAlphanumeric(5);
 
-    private static final String NAME = "remote-test-connector";
-    private static final String BINDING = "socket-binding";
-    private static final String ADD = "/subsystem=messaging-activemq/server=default/remote-connector=" + NAME + ":add(socket-binding=" + BINDING + ")";
-    private static final String DOMAIN = "/profile=full-ha";
+    private static final Address REMOTE_CONNECTOR_ADDRESS = DEFAULT_MESSAGING_SERVER.and("remote-connector", REMOTE_CONNECTOR);
+    private static final Address REMOTE_CONNECTOR_TBR_ADDRESS = DEFAULT_MESSAGING_SERVER.and("remote-connector", REMOTE_CONNECTOR_TBR);
+    private static final Address REMOTE_CONNECTOR_TBA_ADDRESS = DEFAULT_MESSAGING_SERVER.and("remote-connector", REMOTE_CONNECTOR_TBA);
 
-    private String command;
-    private String remove = "/subsystem=messaging-activemq/server=default/remote-connector=" + NAME + ":remove";
-    private String addProperty = "/subsystem=messaging-activemq/server=default/remote-connector=" + NAME + ":write-attribute(name=params.prop,value=test)";
-    private ModelNode path = new ModelNode("/subsystem=messaging-activemq/server=default/remote-connector=" + NAME);
-    private ModelNode domainPath = new ModelNode("/profile=full-ha/subsystem=messaging-activemq/server=default/remote-connector=" + NAME);
-    private ResourceAddress address;
-    private static Dispatcher dispatcher;
-    private static ResourceVerifier verifier;
-    CliClient cliClient = CliClientFactory.getClient();
+    private static final String PROP_TBR_KEY = "prop123";
+
 
     @BeforeClass
-    public static void setUp() {
-        dispatcher = new Dispatcher();
-        verifier  = new ResourceVerifier(dispatcher);
+    public static void setUp() throws CommandFailedException, InterruptedException, TimeoutException, IOException {
+        client.apply(new AddMessagingConnector.RemoteBuilder(REMOTE_CONNECTOR)
+                .param(PROP_TBR_KEY, "test")
+                .socketBinding(createSocketBinding())
+                .build());
+        client.apply(new AddMessagingConnector.RemoteBuilder(REMOTE_CONNECTOR_TBR)
+                .socketBinding(createSocketBinding())
+                .build());
+        administration.reloadIfRequired();
     }
 
     @AfterClass
     public static void tearDown() {
-        dispatcher.close();
+
     }
 
     @Drone
@@ -78,116 +63,44 @@ public class RemoteConnectorTestCase {
 
     @Before
     public void before() {
-        if (ConfigUtils.isDomain()) {
-            address = new ResourceAddress(domainPath);
-            command = DOMAIN + ADD;
-            remove = DOMAIN + remove;
-            addProperty = DOMAIN + addProperty;
-        } else {
-            address = new ResourceAddress(path);
-            command = ADD;
-        }
+        page.navigateToMessaging();
+        page.selectConnectionsView();
+        page.switchToConnector();
+        page.selectInTable(REMOTE_CONNECTOR);
     }
     @After
-    public void after() {
-        cliClient.executeCommand(remove);
+    public void after() throws InterruptedException, TimeoutException, IOException {
+        administration.reloadIfRequired();
     }
 
     @Test
-    public void addRemoteConnector() {
-        page.navigateToMessaging();
-        page.selectView("Connections");
-        page.switchToConnector();
-        //same fields in connector adding
-        page.addDiscoveryGroup(NAME, BINDING);
-
-
-        verifier.verifyResource(address, true);
-
-        cliClient.executeCommand(remove);
-
-        verifier.verifyResource(address, false);
+    public void addRemoteConnector() throws Exception {
+        page.addRemoteAcceptor(REMOTE_CONNECTOR_TBA, createSocketBinding());
+        new ResourceVerifier(REMOTE_CONNECTOR_TBA_ADDRESS, client).verifyExists();
     }
 
     @Test
-    public void updateConnectorSocketBinding() throws IOException, CommandFailedException {
-        cliClient.executeCommand(command);
-        page.navigateToMessaging();
-        page.selectView("Connections");
-        page.switchToConnector();
-        page.selectInTable(NAME, 0);
-        page.edit();
-
-        String socketBindingName = "RemoteConnectorSB" + RandomStringUtils.randomAlphanumeric(5);
-
-        try (OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient()) {
-            int port = AvailablePortFinder.getNextAvailable(1024);
-            log.info("Obtained port for socket binding '" + socketBindingName + "' is " + port);
-            client.apply(new AddSocketBinding.Builder(socketBindingName)
-                    .port(port)
-                    .build());
-        }
-
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("socketBinding", socketBindingName);
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-
-        verifier.verifyAttribute(address, "socket-binding", socketBindingName, 500);
-        cliClient.executeCommand(remove);
+    public void updateConnectorSocketBinding() throws Exception {
+        editTextAndVerify(REMOTE_CONNECTOR_ADDRESS, "socketBinding", "socket-binding", createSocketBinding());
     }
 
     @Test
-    public void updateConnectorProperties() {
-        cliClient.executeCommand(command);
-        page.navigateToMessaging();
-        page.selectView("Connections");
-        page.switchToConnector();
-        page.selectInTable(NAME, 0);
-
-        ConfigPropertiesFragment properties = page.getConfig().propertiesConfig();
-        ConfigPropertyWizard wizard = properties.addProperty();
-        boolean result = wizard.name("prop").value("test").finish();
-
-        assertTrue("Property should be added and wizard closed.", result);
-
-        verifier.verifyAttribute(address, "params", "{\"prop\" => \"test\"}", 500);
-
-        cliClient.executeCommand(remove);
+    public void updateConnectorProperties() throws IOException {
+        String propKey = "prop123_" + RandomStringUtils.randomAlphanumeric(5);
+        boolean isClosed = page.addProperty(propKey, "yipeeeee");
+        Assert.assertTrue("Property should be added and wizard closed.", isClosed);
+        Assert.assertTrue(PropertiesOps.isPropertyPresentInParams(REMOTE_CONNECTOR_ADDRESS, client, propKey));
     }
 
     @Test
-    public void removeConnectorProperties() {
-        cliClient.executeCommand(command);
-        cliClient.executeCommand(addProperty);
-        page.navigateToMessaging();
-        page.selectView("Connections");
-        page.switchToConnector();
-        page.selectInTable(NAME, 0);
-
-        ConfigPropertiesFragment properties = page.getConfig().propertiesConfig();
-        properties.removeProperty("prop");
-
-        verifier.verifyAttribute(address, "params", "undefined", 500);
-
-        cliClient.executeCommand(remove);
+    public void removeConnectorProperties() throws IOException {
+        page.removeProperty(PROP_TBR_KEY);
+        Assert.assertFalse(PropertiesOps.isPropertyPresentInParams(REMOTE_CONNECTOR_ADDRESS, client, PROP_TBR_KEY));
     }
 
-    @Test //https://issues.jboss.org/browse/HAL-830
-    public void removeRemoteConnector() {
-        cliClient.executeCommand(command);
-
-        page.navigateToMessaging();
-        page.selectView("Connections");
-        page.switchToConnector();
-
-        verifier.verifyResource(address, true);
-        page.switchToConnector();
-        page.selectInTable(NAME, 0);
-        page.remove();
-
-        verifier.verifyResource(address, false);
+    @Test
+    public void removeRemoteConnector() throws Exception {
+        page.remove(REMOTE_CONNECTOR_TBR);
+        new ResourceVerifier(REMOTE_CONNECTOR_TBR_ADDRESS, client).verifyDoesNotExist();
     }
 }

@@ -1,61 +1,65 @@
 package org.jboss.hal.testsuite.test.configuration.messaging.connections;
 
+import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Shared;
-import org.jboss.hal.testsuite.cli.CliClient;
-import org.jboss.hal.testsuite.cli.CliClientFactory;
-import org.jboss.hal.testsuite.dmr.Dispatcher;
-import org.jboss.hal.testsuite.dmr.ResourceAddress;
-import org.jboss.hal.testsuite.dmr.ResourceVerifier;
-import org.jboss.hal.testsuite.fragment.ConfigFragment;
-import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConfigPropertiesFragment;
-import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConfigPropertyWizard;
+import org.jboss.hal.testsuite.creaper.ResourceVerifier;
+import org.jboss.hal.testsuite.creaper.command.messaging.AddMessagingConnector;
 import org.jboss.hal.testsuite.page.config.MessagingPage;
-import org.jboss.hal.testsuite.util.ConfigUtils;
+import org.jboss.hal.testsuite.test.configuration.messaging.AbstractMessagingTestCase;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
+import org.wildfly.extras.creaper.core.CommandFailedException;
+import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.OperationException;
 
-import static org.junit.Assert.assertTrue;
+import java.io.IOException;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.TimeoutException;
 
-/**
- * Created by pcyprian on 7.9.15.
- */
+
 @RunWith(Arquillian.class)
 @Category(Shared.class)
-public class InVMConnectorTestCase {
-    private static final String NAME = "in-vm-test-connector";
-    private static final String SERVER = "1";
-    private static final String ADD = "/subsystem=messaging-activemq/server=default/in-vm-connector=" + NAME + ":add(server-id=" + SERVER + ")";
-    private static final String DOMAIN = "/profile=full-ha" ;
+public class InVMConnectorTestCase extends AbstractMessagingTestCase {
 
-    private String command;
-    private String remove = "/subsystem=messaging-activemq/server=default/in-vm-connector=" + NAME + ":remove";
-    private String addProperty = "/subsystem=messaging-activemq/server=default/in-vm-connector=" + NAME + ":write-attribute(name=params.prop,value=test)";
-    private ModelNode path = new ModelNode("/subsystem=messaging-activemq/server=default/in-vm-connector=" + NAME);
-    private ModelNode domainPath = new ModelNode("/profile=full-ha/subsystem=messaging-activemq/server=default/in-vm-connector=" + NAME);
-    private ResourceAddress address;
-    private static Dispatcher dispatcher;
-    private static ResourceVerifier verifier;
-    CliClient cliClient = CliClientFactory.getClient();
+    private static final String IN_VM_CONNECTOR = "in-vm-connector_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String IN_VM_CONNECTOR_TBA = "in-vm-connector-TBA_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String IN_VM_CONNECTOR_TBR = "in-vm-connector-TBR_" + RandomStringUtils.randomAlphanumeric(5);
+
+    private static final Address IN_VM_CONNECTOR_ADDRESS = DEFAULT_MESSAGING_SERVER
+            .and("in-vm-connector", IN_VM_CONNECTOR);
+    private static final Address IN_VM_CONNECTOR_ADDRESS_TBA = DEFAULT_MESSAGING_SERVER
+            .and("in-vm-connector", IN_VM_CONNECTOR_TBA);
+    private static final Address IN_VM_CONNECTOR_ADDRESS_TBR = DEFAULT_MESSAGING_SERVER
+            .and("in-vm-connector", IN_VM_CONNECTOR_TBR);
+
+    private static final String PROPERTY_TBR_KEY = "prop42";
 
     @BeforeClass
-    public static void setUp() {
-        dispatcher = new Dispatcher();
-        verifier  = new ResourceVerifier(dispatcher);
+    public static void setUp() throws CommandFailedException {
+        client.apply(new AddMessagingConnector.InVmBuilder(IN_VM_CONNECTOR)
+                .serverId(ThreadLocalRandom.current().nextInt(100000))
+                .param(PROPERTY_TBR_KEY, "test")
+                .build());
+        client.apply(new AddMessagingConnector.InVmBuilder(IN_VM_CONNECTOR_TBR)
+                .serverId(ThreadLocalRandom.current().nextInt(100000))
+                .build());
     }
 
     @AfterClass
-    public static void tearDown() {
-        dispatcher.close();
+    public static void tearDown() throws IOException, OperationException {
+        operations.removeIfExists(IN_VM_CONNECTOR_ADDRESS);
+        operations.removeIfExists(IN_VM_CONNECTOR_ADDRESS_TBA);
+        operations.removeIfExists(IN_VM_CONNECTOR_ADDRESS_TBR);
     }
 
     @Drone
@@ -65,107 +69,46 @@ public class InVMConnectorTestCase {
 
     @Before
     public void before() {
-        if (ConfigUtils.isDomain()) {
-            address = new ResourceAddress(domainPath);
-            command = DOMAIN + ADD;
-            remove = DOMAIN + remove;
-            addProperty = DOMAIN + addProperty;
-        } else {
-            address = new ResourceAddress(path);
-            command = ADD;
-        }
+        page.navigateToMessaging();
+        page.selectConnectionsView();
+        page.switchToConnector();
+        page.switchToInVmType();
+        page.selectInTable(IN_VM_CONNECTOR);
     }
     @After
-    public void after() {
-        cliClient.executeCommand(remove);
+    public void after() throws InterruptedException, TimeoutException, IOException {
+        administration.reloadIfRequired();
     }
 
     @Test
-    public void addInVmConnector() {
-        page.navigateToMessaging();
-        page.selectView("Connections");
-        page.switchToConnector();
-        page.switchType("Type: In-VM");
-        page.addInVmAcceptor(NAME, SERVER);
-
-        verifier.verifyResource(address, true);
-
-        cliClient.executeCommand(remove);
-
-        verifier.verifyResource(address, false);
+    public void addInVmAcceptor() throws Exception {
+        page.addInVmAcceptor(IN_VM_CONNECTOR_TBA, "123456");
+        new ResourceVerifier(IN_VM_CONNECTOR_ADDRESS_TBA, client).verifyExists();
     }
 
     @Test
-    public void updateConnectorServerID() {
-        cliClient.executeCommand(command);
-        page.navigateToMessaging();
-        page.selectView("Connections");
-        page.switchToConnector();
-        page.switchType("Type: In-VM");
-        page.selectInTable(NAME, 0);
-        page.edit();
-
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("serverId", "0");
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "server-id", "0", 500);
-
-        cliClient.executeCommand(remove);
+    public void updateConnectorServerID() throws Exception {
+        editTextAndVerify(IN_VM_CONNECTOR_ADDRESS, "serverId", "server-id", ThreadLocalRandom.current().nextInt(100000));
     }
 
     @Test
-    public void updateConnectorProperties() {
-        cliClient.executeCommand(command);
-        page.navigateToMessaging();
-        page.selectView("Connections");
-        page.switchToConnector();
-        page.switchType("Type: In-VM");
-        page.selectInTable(NAME, 0);
-
-        ConfigPropertiesFragment properties = page.getConfig().propertiesConfig();
-        ConfigPropertyWizard wizard = properties.addProperty();
-        boolean result = wizard.name("prop").value("test").finish();
-
-        assertTrue("Property should be added and wizard closed.", result);
-        verifier.verifyAttribute(address, "params", "{\"prop\" => \"test\"}", 500);
-
-        cliClient.executeCommand(remove);
+    public void updateConnectorProperties() throws IOException {
+        boolean isClosed = page.addProperty("prop", "test");
+        Assert.assertTrue("Property should be added and wizard closed.", isClosed);
+        Assert.assertTrue(PropertiesOps.isPropertyPresentInParams(IN_VM_CONNECTOR_ADDRESS, client, "prop"));
     }
 
     @Test
-    public void removeConnectorProperties() {
-        cliClient.executeCommand(command);
-        cliClient.executeCommand(addProperty);
-        page.navigateToMessaging();
-        page.selectView("Connections");
-        page.switchToConnector();
-        page.switchType("Type: In-VM");
-        page.selectInTable(NAME, 0);
-        ConfigPropertiesFragment properties = page.getConfig().propertiesConfig();
-        properties.removeProperty("prop");
-
-        verifier.verifyAttribute(address, "params", "undefined", 500);
-
-        cliClient.executeCommand(remove);
+    public void removeConnectorProperties() throws IOException {
+        page.removeProperty(PROPERTY_TBR_KEY);
+        Assert.assertFalse(PropertiesOps.isPropertyPresentInParams(IN_VM_CONNECTOR_ADDRESS, client, PROPERTY_TBR_KEY));
     }
 
-    @Test //https://issues.jboss.org/browse/HAL-830
-    public void removeInVmConnector() {
-        cliClient.executeCommand(command);
-
-        page.navigateToMessaging();
-        page.selectView("Connections");
-        page.switchToConnector();
-        page.switchType("Type: In-VM");
-
-        verifier.verifyResource(address, true);
-
-        page.selectInTable(NAME, 0);
+    @Test
+    public void removeInVmConnector() throws Exception {
+        page.selectInTable(IN_VM_CONNECTOR_TBR, 0);
         page.remove();
 
-        verifier.verifyResource(address, false);
+        new ResourceVerifier(IN_VM_CONNECTOR_ADDRESS_TBR, client).verifyDoesNotExist();
     }
 }

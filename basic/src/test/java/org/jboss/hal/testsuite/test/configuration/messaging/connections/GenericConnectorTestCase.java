@@ -1,75 +1,66 @@
 package org.jboss.hal.testsuite.test.configuration.messaging.connections;
 
 import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.mina.util.AvailablePortFinder;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Shared;
-import org.jboss.hal.testsuite.cli.CliClient;
-import org.jboss.hal.testsuite.cli.CliClientFactory;
-import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
-import org.jboss.hal.testsuite.creaper.command.AddSocketBinding;
-import org.jboss.hal.testsuite.dmr.Dispatcher;
-import org.jboss.hal.testsuite.dmr.ResourceAddress;
-import org.jboss.hal.testsuite.dmr.ResourceVerifier;
-import org.jboss.hal.testsuite.fragment.ConfigFragment;
-import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConfigPropertiesFragment;
-import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConfigPropertyWizard;
+import org.jboss.hal.testsuite.creaper.ResourceVerifier;
+import org.jboss.hal.testsuite.creaper.command.messaging.AddMessagingConnector;
 import org.jboss.hal.testsuite.page.config.MessagingPage;
-import org.jboss.hal.testsuite.util.ConfigUtils;
+import org.jboss.hal.testsuite.test.configuration.messaging.AbstractMessagingTestCase;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.wildfly.extras.creaper.core.CommandFailedException;
-import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
+import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.OperationException;
 
 import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
 import static org.junit.Assert.assertTrue;
 
-/**
- * Created by pcyprian on 7.9.15.
- */
 @RunWith(Arquillian.class)
 @Category(Shared.class)
-public class GenericConnectorTestCase {
+public class GenericConnectorTestCase extends AbstractMessagingTestCase {
 
-    private static final Logger log = LoggerFactory.getLogger(GenericConnectorTestCase.class);
+    private static final String GENERIC_CONNECTOR = "generic-connector_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String GENERIC_CONNECTOR_TBA = "generic-connector-TBA_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String GENERIC_CONNECTOR_TBR = "generic-connector-TBR_" + RandomStringUtils.randomAlphanumeric(5);
 
-    private static final String NAME = "generic-text-connector";
-    private static final String BINDING = "socket-binding";
-    private static final String FACTORYCLASS = "factoryClass";
-    private static final String ADD = "/subsystem=messaging-activemq/server=default/connector=" + NAME + ":add(socket-binding=" + BINDING + ",factory-class=" + FACTORYCLASS + ")";
-    private static final String DOMAIN = "/profile=full-ha" ;
+    private static final Address GENERIC_CONNECTOR_ADDRESS = DEFAULT_MESSAGING_SERVER.and("connector", GENERIC_CONNECTOR);
+    private static final Address GENERIC_CONNECTOR_TBA_ADDRESS = DEFAULT_MESSAGING_SERVER.and("connector", GENERIC_CONNECTOR_TBA);
+    private static final Address GENERIC_CONNECTOR_TBR_ADDRESS = DEFAULT_MESSAGING_SERVER.and("connector", GENERIC_CONNECTOR_TBR);
 
-    private String command;
-    private String remove = "/subsystem=messaging-activemq/server=default/connector=" + NAME + ":remove";
-    private String addProperty = "/subsystem=messaging-activemq/server=default/connector=" + NAME + ":write-attribute(name=params.prop,value=test)";
-    private ModelNode path = new ModelNode("/subsystem=messaging-activemq/server=default/connector=" + NAME);
-    private ModelNode domainPath = new ModelNode("/profile=full-ha/subsystem=messaging-activemq/server=default/connector=" + NAME);
-    private ResourceAddress address;
-    private static Dispatcher dispatcher;
-    private static ResourceVerifier verifier;
-    CliClient cliClient = CliClientFactory.getClient();
+    private static final String PROPERTY_TBR_KEY = "prop42";
+    private static final String FACTORY_CLASS = "factoryClass";
 
     @BeforeClass
-    public static void setUp() {
-        dispatcher = new Dispatcher();
-        verifier  = new ResourceVerifier(dispatcher);
+    public static void setUp() throws CommandFailedException {
+        client.apply(new AddMessagingConnector.GenericBuilder(GENERIC_CONNECTOR)
+                .param(PROPERTY_TBR_KEY, "testThis")
+                .socketBinding(createSocketBinding())
+                .factoryClass(FACTORY_CLASS)
+                .build());
+        client.apply(new AddMessagingConnector.GenericBuilder(GENERIC_CONNECTOR_TBR)
+                .param(PROPERTY_TBR_KEY, "testThis")
+                .socketBinding(createSocketBinding())
+                .factoryClass(FACTORY_CLASS)
+                .build());
     }
 
     @AfterClass
-    public static void tearDown() {
-        dispatcher.close();
+    public static void tearDown() throws IOException, OperationException {
+        operations.removeIfExists(GENERIC_CONNECTOR_ADDRESS);
+        operations.removeIfExists(GENERIC_CONNECTOR_TBA_ADDRESS);
+        operations.removeIfExists(GENERIC_CONNECTOR_TBR_ADDRESS);
     }
 
     @Drone
@@ -79,141 +70,51 @@ public class GenericConnectorTestCase {
 
     @Before
     public void before() {
-        if (ConfigUtils.isDomain()) {
-            address = new ResourceAddress(domainPath);
-            command = DOMAIN + ADD;
-            remove = DOMAIN + remove;
-            addProperty = DOMAIN + addProperty;
-        } else {
-            address = new ResourceAddress(path);
-            command = ADD;
-        }
+        page.navigateToMessaging();
+        page.selectConnectionsView();
+        page.switchToConnector();
+        page.switchToGenericType();
+        page.selectInTable(GENERIC_CONNECTOR);
     }
 
     @After
-    public void after() {
-        cliClient.executeCommand(remove);
+    public void after() throws InterruptedException, TimeoutException, IOException {
+        administration.reloadIfRequired();
     }
 
     @Test
-    public void addGenericConnector() {
-        page.navigateToMessaging();
-        page.selectView("Connections");
-        page.switchToConnector();
-        page.switchType("Type: Generic");
-        page.addGenericAcceptor(NAME, BINDING, FACTORYCLASS);
-
-        verifier.verifyResource(address, true);
-
-        cliClient.executeCommand(remove);
-
-        verifier.verifyResource(address, false);
+    public void addGenericConnector() throws Exception {
+        page.addGenericAcceptor(GENERIC_CONNECTOR_TBA, createSocketBinding(), FACTORY_CLASS);
+        new ResourceVerifier(GENERIC_CONNECTOR_TBA_ADDRESS, client).verifyExists();
     }
 
     @Test
-    public void updateConnectorSocketBinding() throws IOException, CommandFailedException {
-        cliClient.executeCommand(command);
-        page.navigateToMessaging();
-        page.selectView("Connections");
-        page.switchToConnector();
-        page.switchType("Type: Generic");
-        page.selectInTable(NAME, 0);
-        page.edit();
-
-        String socketBindingName = "genericConnectorSocketBinding" + RandomStringUtils.randomAlphanumeric(5);
-
-        try (OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient()) {
-            int port = AvailablePortFinder.getNextAvailable(1024);
-            log.info("Obtained port for socket binding '" + socketBindingName + "' is " + port);
-            client.apply(new AddSocketBinding.Builder(socketBindingName)
-                    .port(port)
-                    .build());
-        }
-
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("socketBinding", socketBindingName);
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-
-        verifier.verifyAttribute(address, "socket-binding", "sb", 500);
-        verifier.verifyAttribute(address, "socket-binding", socketBindingName, 500);
-
-        cliClient.executeCommand(remove);
+    public void editSocketBinding() throws Exception {
+       editTextAndVerify(GENERIC_CONNECTOR_ADDRESS, "socketBinding", "socket-binding", createSocketBinding());
     }
 
     @Test
-    public void updateGenericConnectorFactoryClass() {
-        cliClient.executeCommand(command);
-        page.navigateToMessaging();
-        page.selectView("Connections");
-        page.switchToConnector();
-        page.switchType("Type: Generic");
-        page.selectInTable(NAME, 0);
-        page.edit();
-
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("factoryClass", "fc");
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "factory-class", "fc", 500);
-
-        cliClient.executeCommand(remove);
+    public void editFactoryClass() throws Exception {
+        editTextAndVerify(GENERIC_CONNECTOR_ADDRESS, "factoryClass", "factory-class", "fc");
     }
 
     @Test
-    public void updateConnectorProperties() {
-        cliClient.executeCommand(command);
-        page.navigateToMessaging();
-        page.selectView("Connections");
-        page.switchToConnector();
-        page.switchType("Type: Generic");
-        page.selectInTable(NAME, 0);
+    public void addConnectorProperty() throws IOException {
+        boolean isClosed = page.addProperty("prop", "test");
+        assertTrue("Property should be added and wizard closed.", isClosed);
 
-        ConfigPropertiesFragment properties = page.getConfig().propertiesConfig();
-        ConfigPropertyWizard wizard = properties.addProperty();
-        boolean result = wizard.name("prop").value("test").finish();
-
-        assertTrue("Property should be added and wizard closed.", result);
-        verifier.verifyAttribute(address, "params", "{\"prop\" => \"test\"}", 500);
-
-        cliClient.executeCommand(remove);
+        Assert.assertTrue(PropertiesOps.isPropertyPresentInParams(GENERIC_CONNECTOR_ADDRESS, client, "prop"));
     }
 
     @Test
-    public void removeConnectorProperties() {
-        cliClient.executeCommand(command);
-        cliClient.executeCommand(addProperty);
-        page.navigateToMessaging();
-        page.selectView("Connections");
-        page.switchToConnector();
-        page.switchType("Type: Generic");
-        page.selectInTable(NAME, 0);
-        ConfigPropertiesFragment properties = page.getConfig().propertiesConfig();
-        properties.removeProperty("prop");
-
-        verifier.verifyAttribute(address, "params", "undefined", 500);
-
-        cliClient.executeCommand(remove);
+    public void removeConnectorProperty() throws IOException {
+        page.removeProperty(PROPERTY_TBR_KEY);
+        Assert.assertFalse(PropertiesOps.isPropertyPresentInParams(GENERIC_CONNECTOR_ADDRESS, client, PROPERTY_TBR_KEY));
     }
 
-    @Test //https://issues.jboss.org/browse/HAL-830
-    public void removeGenericConnector() {
-        cliClient.executeCommand(command);
-
-        page.navigateToMessaging();
-        page.selectView("Connections");
-        page.switchToConnector();
-        page.switchType("Type: Generic");
-
-        verifier.verifyResource(address, true);
-
-        page.selectInTable(NAME, 0);
-        page.remove();
-
-        verifier.verifyResource(address, false);
+    @Test
+    public void removeGenericConnector() throws Exception {
+        page.remove(GENERIC_CONNECTOR_TBR);
+        new ResourceVerifier(GENERIC_CONNECTOR_TBR_ADDRESS, client).verifyDoesNotExist();
     }
 }
