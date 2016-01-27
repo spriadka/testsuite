@@ -43,7 +43,7 @@ public class WizardWindow extends WindowFragment {
      */
     public boolean saveAndDismissReloadRequiredWindow() {
         clickSave();
-        dismissRealoadRequitedWindow();
+        dismissReloadRequiredWindow();
         return isWizardClosed();
     }
 
@@ -64,7 +64,7 @@ public class WizardWindow extends WindowFragment {
      */
     public boolean finishAndDismissReloadRequiredWindow() {
         chooseAndClickFinishingButton();
-        dismissRealoadRequitedWindow();
+        dismissReloadRequiredWindow();
         return isWizardClosed();
     }
 
@@ -91,7 +91,7 @@ public class WizardWindow extends WindowFragment {
         }
     }
 
-    private void dismissRealoadRequitedWindow() {
+    private void dismissReloadRequiredWindow() {
         Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
     }
 
