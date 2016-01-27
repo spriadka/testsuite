@@ -8,7 +8,6 @@ import org.jboss.hal.testsuite.dmr.ResourceAddress;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
-import org.jboss.hal.testsuite.util.Console;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -92,8 +91,7 @@ public class ContextServicesTestCase extends EETestCaseAbstract {
         Editor editor = wizard.getEditor();
         editor.text("name", name);
         editor.text(JNDI_NAME, JNDI_VALID);
-        wizard.clickSave();
-        Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
+        wizard.saveAndDismissReloadRequiredWindow();
 
         assertTrue("Context service should be present in table", config.resourceIsPresent(name));
         ResourceAddress address = new ResourceAddress(eeAddress).add(EE_CHILD, name);
