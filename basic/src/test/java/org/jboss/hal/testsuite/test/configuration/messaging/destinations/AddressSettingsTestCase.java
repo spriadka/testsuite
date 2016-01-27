@@ -1,18 +1,13 @@
 package org.jboss.hal.testsuite.test.configuration.messaging.destinations;
 
+import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Shared;
-import org.jboss.hal.testsuite.cli.CliClient;
-import org.jboss.hal.testsuite.cli.CliClientFactory;
-import org.jboss.hal.testsuite.dmr.Dispatcher;
-import org.jboss.hal.testsuite.dmr.ResourceAddress;
-import org.jboss.hal.testsuite.dmr.ResourceVerifier;
-import org.jboss.hal.testsuite.fragment.ConfigFragment;
+import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.page.config.MessagingPage;
-import org.jboss.hal.testsuite.util.ConfigUtils;
+import org.jboss.hal.testsuite.test.configuration.messaging.AbstractMessagingTestCase;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -21,28 +16,23 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
+import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.OperationException;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
-/**
- * Created by pcyprian on 9.9.15.
- */
 @RunWith(Arquillian.class)
 @Category(Shared.class)
-public class AddressSettingsTestCase {
-    private static final String PATTERN = "test-p";
-    private static final String ADD = "/subsystem=messaging-activemq/server==default/address-setting=" + PATTERN + ":add()";
-    private static final String DOMAIN = "/profile=full-ha";
+public class AddressSettingsTestCase extends AbstractMessagingTestCase {
 
-    private String command;
-    private String remove = "/subsystem=messaging-activemq/server=default/address-setting=" + PATTERN + ":remove";
-    private ModelNode path = new ModelNode("/subsystem=messaging-activemq/server=default/address-setting=" + PATTERN );
-    private ModelNode domainPath = new ModelNode("/profile=full-ha/subsystem=messaging-activemq/server=default/address-setting=" + PATTERN);
-    private ResourceAddress address;
-    private static Dispatcher dispatcher;
-    private static ResourceVerifier verifier;
-    CliClient cliClient = CliClientFactory.getClient();
+    private static final String PATTERN = "test-pattern_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String PATTERN_TBA = "test-pattern-TBA_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String PATTERN_TBR = "test-pattern-TBR_" + RandomStringUtils.randomAlphanumeric(5);
+
+    private static final Address PATTERN_ADDRESS = DEFAULT_MESSAGING_SERVER.and("address-setting", PATTERN);
+    private static final Address PATTERN_TBA_ADDRESS = DEFAULT_MESSAGING_SERVER.and("address-setting", PATTERN_TBA);
+    private static final Address PATTERN_TBR_ADDRESS = DEFAULT_MESSAGING_SERVER.and("address-setting", PATTERN_TBR);
 
     @Drone
     private WebDriver browser;
@@ -50,165 +40,68 @@ public class AddressSettingsTestCase {
     private MessagingPage page;
 
     @BeforeClass
-    public static void setUp() {
-        dispatcher = new Dispatcher();
-        verifier = new ResourceVerifier(dispatcher);
+    public static void setUp() throws Exception {
+        operations.add(PATTERN_ADDRESS);
+        new ResourceVerifier(PATTERN_ADDRESS, client).verifyExists();
+        operations.add(PATTERN_TBR_ADDRESS);
+        new ResourceVerifier(PATTERN_TBR_ADDRESS, client).verifyExists();
+        administration.reloadIfRequired();
     }
 
     @Before
     public void before() {
-        if (ConfigUtils.isDomain()) {
-            address = new ResourceAddress(domainPath);
-            command = DOMAIN + ADD;
-            remove = DOMAIN + remove;
-        } else {
-            address = new ResourceAddress(path);
-            command = ADD;
-        }
+        page.navigateToMessaging();
+        page.selectQueuesAndTopics();
+        page.switchToAddressSettings();
+        page.selectInTable(PATTERN);
     }
 
     @After
-    public void after() {
-        cliClient.executeCommand(remove);
+    public void after() throws InterruptedException, TimeoutException, IOException {
+        administration.reloadIfRequired();
     }
 
     @AfterClass
-    public static void tearDown() {
-        dispatcher.close();
+    public static void tearDown() throws IOException, OperationException {
+        operations.removeIfExists(PATTERN_ADDRESS);
+        operations.removeIfExists(PATTERN_TBA_ADDRESS);
+        operations.removeIfExists(PATTERN_TBR_ADDRESS);
     }
 
     @Test
-    public void addAddressSetting() {
-        page.navigateToMessaging();
-        page.selectQueuesAndTopics();
-        page.switchToAddressSettings();
-
-        page.addAddressSettings(PATTERN);
-
-        verifier.verifyResource(address, true);
-
-        cliClient.executeCommand(remove);
-
-        verifier.verifyResource(address, false);
+    public void addAddressSetting() throws Exception {
+        page.addAddressSettings(PATTERN_TBA);
+        new ResourceVerifier(PATTERN_TBA_ADDRESS, client).verifyExists();
     }
 
     @Test
-    public void updateDeadLetterAddressSetting() {
-        cliClient.executeCommand(command);
-
-        page.navigateToMessaging();
-        page.selectQueuesAndTopics();
-        page.switchToAddressSettings();
-        page.selectInTable(PATTERN, 0);
-        page.edit();
-
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("deadLetterQueue", "jms.queue.ExpiryQueue");
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "dead-letter-address", "jms.queue.ExpiryQueue", 500);
-
-        cliClient.executeCommand(remove);
+    public void updateDeadLetterAddressSetting() throws Exception {
+        editTextAndVerify(PATTERN_ADDRESS, "deadLetterQueue", "dead-letter-address", "jms.queue.ExpiryQueue");
     }
 
     @Test
-    public void updateExpiryAddressSetting() {
-        cliClient.executeCommand(command);
-
-        page.navigateToMessaging();
-        page.selectQueuesAndTopics();
-        page.switchToAddressSettings();
-        page.selectInTable(PATTERN, 0);
-        page.edit();
-
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("expiryQueue", "jms.queue.DLQ");
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "expiry-address", "jms.queue.DLQ", 500);
-
-        cliClient.executeCommand(remove);
+    public void updateExpiryAddressSetting() throws Exception {
+        editTextAndVerify(PATTERN_ADDRESS, "expiryQueue", "expiry-address", "jms.queue.ExpiryQueue");
     }
 
     @Test
-    public void updateRedeliveryDelayAddressSetting() {
-        cliClient.executeCommand(command);
-
-        page.navigateToMessaging();
-        page.selectQueuesAndTopics();
-        page.switchToAddressSettings();
-        page.selectInTable(PATTERN, 0);
-        page.edit();
-
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("redeliveryDelay", "10");
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "redelivery-delay", "10", 500);
-
-        cliClient.executeCommand(remove);
+    public void updateRedeliveryDelayAddressSetting() throws Exception {
+        editTextAndVerify(PATTERN_ADDRESS, "redeliveryDelay", "redelivery-delay", 10L);
     }
 
     @Test
     public void updateRedeliveryDelayAddressSettingWrongValue() {
-        cliClient.executeCommand(command);
-
-        page.navigateToMessaging();
-        page.selectQueuesAndTopics();
-        page.switchToAddressSettings();
-        page.selectInTable(PATTERN, 0);
-        page.edit();
-
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("redeliveryDelay", "-1");
-        boolean finished = editPanelFragment.save();
-
-        assertFalse("Config should not be saved and closed.Value was invalid.", finished);
-        verifier.verifyAttribute(address, "redelivery-delay", "0", 500);
-
-        cliClient.executeCommand(remove);
+        verifyIfErrorAppears("redeliveryDelay", "-1");
     }
 
     @Test
-    public void updateMaxDeliveryAttemptsAddressSetting() {
-        cliClient.executeCommand(command);
-
-        page.navigateToMessaging();
-        page.selectQueuesAndTopics();
-        page.switchToAddressSettings();
-        page.selectInTable(PATTERN, 0);
-        page.edit();
-
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-
-        editPanelFragment.getEditor().text("maxDelivery", "0");
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(address, "max-delivery-attempts", "0", 500);
-
-        cliClient.executeCommand(remove);
+    public void updateMaxDeliveryAttemptsAddressSetting() throws Exception {
+        editTextAndVerify(PATTERN_ADDRESS, "maxDelivery", "max-delivery-attempts", 0);
     }
 
     @Test
-    public void removeAddressSetting() {
-        cliClient.executeCommand(command);
-
-        page.navigateToMessaging();
-        page.selectQueuesAndTopics();
-        page.switchToAddressSettings();
-
-        verifier.verifyResource(address, true);
-        page.selectInTable(PATTERN, 0);
-        page.remove();
-
-        verifier.verifyResource(address, false);
+    public void removeAddressSetting() throws Exception {
+        page.remove(PATTERN_TBR);
+        new ResourceVerifier(PATTERN_TBR_ADDRESS, client).verifyDoesNotExist();
     }
 }

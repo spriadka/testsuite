@@ -290,10 +290,17 @@ public class MessagingPage extends ConfigPage implements Navigatable {
 
     public void addQueue(String name, String jndiName) {
         clickButton("Add");
-        getWindowFragment().getEditor().text("name", name);
-        getWindowFragment().getEditor().text("entries", jndiName);
-        getWindowFragment().clickButton("Save");
+        ConfigFragment configFragment = getWindowFragment();
+        Editor editor = configFragment.getEditor();
+        editor.text("name", name);
+        editor.text("entries", jndiName);
+        configFragment.clickButton("Save");
     }
+
+    public void addTopic(String name, String jndiName) {
+        addQueue(name, jndiName);
+    }
+
     public void addFactory(String name, String jndiName, String connector) {
         clickButton("Add");
         getWindowFragment().getEditor().text("name", name);

@@ -1,65 +1,73 @@
 package org.jboss.hal.testsuite.test.configuration.messaging.destinations;
 
+import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Shared;
-import org.jboss.hal.testsuite.cli.CliClient;
-import org.jboss.hal.testsuite.cli.CliClientFactory;
-import org.jboss.hal.testsuite.dmr.Dispatcher;
-import org.jboss.hal.testsuite.dmr.ResourceAddress;
-import org.jboss.hal.testsuite.dmr.ResourceVerifier;
+import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.page.config.MessagingPage;
-import org.jboss.hal.testsuite.util.ConfigUtils;
+import org.jboss.hal.testsuite.test.configuration.messaging.AbstractMessagingTestCase;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
+import org.wildfly.extras.creaper.commands.messaging.AddQueue;
+import org.wildfly.extras.creaper.commands.messaging.AddTopic;
+import org.wildfly.extras.creaper.core.CommandFailedException;
+import org.wildfly.extras.creaper.core.online.ModelNodeResult;
+import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.OperationException;
+
+import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.TimeoutException;
 
 import static org.junit.Assert.assertTrue;
 
-/**
- * Created by pcyprian on 8.9.15.
- */
 @RunWith(Arquillian.class)
 @Category(Shared.class)
-public class QueuesTopicsTestCase {
-    private static final String NAME = "test-queue";
-    private static final String TOPICSNAME = "test-topics";
-    private static final String JNDINAME = "java:/jndi-queue";
-    private static final String JNDI_TOPICS_NAME = "java:/jndi-topics";
-    private static final String ADD = "/subsystem=messaging-activemq/server=default/jms-queue=" + NAME + ":add(entries=[" + JNDINAME + "])";
-    private static final String DOMAIN = "/profile=full-ha";
+public class QueuesTopicsTestCase extends AbstractMessagingTestCase {
 
-    private String command;
-    private String remove = "/subsystem=messaging-activemq/server=default/jms-queue=" + NAME + ":remove";
-    private String removeTopics = "/subsystem=messaging-activemq/server=default/jms-topic=" + TOPICSNAME + ":remove";
-    private String addTopics = "/subsystem=messaging-activemq/server=default/jms-topic=" + TOPICSNAME + ":add(entries=[" + JNDI_TOPICS_NAME + "])";
-    private ModelNode path = new ModelNode("/subsystem=messaging-activemq/server=default/jms-queue=" + NAME);
-    private ModelNode domainPath = new ModelNode("/profile=full-ha/subsystem=messaging-activemq/server=default/jms-queue=" + NAME);
-    private ModelNode topicsPath = new ModelNode("/subsystem=messaging-activemq/server=default/jms-topic=" + TOPICSNAME);
-    private ModelNode topicsDomainPath = new ModelNode("/profile=full-ha/subsystem=messaging-activemq/server=default/jms-topic=" + TOPICSNAME);
-    private ResourceAddress address;
-    private ResourceAddress topicsAddress;
-    private static Dispatcher dispatcher;
-    private static ResourceVerifier verifier;
-    CliClient cliClient = CliClientFactory.getClient();
+    private static final String QUEUE_TBA = "test-queue-TBA_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String QUEUE_TBR = "test-queue-TBR_" + RandomStringUtils.randomAlphanumeric(5);
+
+    private static final Address QUEUE_TBA_ADDRESS = DEFAULT_MESSAGING_SERVER.and("jms-queue", QUEUE_TBA);
+    private static final Address QUEUE_TBR_ADDRESS = DEFAULT_MESSAGING_SERVER.and("jms-queue", QUEUE_TBR);
+
+    private static final String TOPIC = "test-topic_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String TOPIC_TBA = "test-topic-TBA_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String TOPIC_TBR = "test-topic-TBR_" + RandomStringUtils.randomAlphanumeric(5);
+
+    private static final Address TOPIC_ADDRESS = DEFAULT_MESSAGING_SERVER.and("jms-topic", TOPIC);
+    private static final Address TOPIC_TBA_ADDRESS = DEFAULT_MESSAGING_SERVER.and("jms-topic", TOPIC_TBA);
+    private static final Address TOPIC_TBR_ADDRESS = DEFAULT_MESSAGING_SERVER.and("jms-topic", TOPIC_TBR);
+
+    private static final String JNDI_NAME = "java:/jndi-queue_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String JNDI_TOPICS_NAME = "java:/jndi-topics";
 
     @BeforeClass
-    public static void setUp() {
-        dispatcher = new Dispatcher();
-        verifier  = new ResourceVerifier(dispatcher);
+    public static void setUp() throws CommandFailedException, InterruptedException, TimeoutException, IOException {
+        client.apply(new AddQueue.Builder(QUEUE_TBR).jndiEntries(getJNDIEntriesList()).build());
+        client.apply(new AddTopic.Builder(TOPIC).jndiEntries(getJNDIEntriesList()).build());
+        client.apply(new AddTopic.Builder(TOPIC_TBR).jndiEntries(getJNDIEntriesList()).build());
+        administration.reloadIfRequired();
     }
 
     @AfterClass
-    public static void tearDown() {
-        dispatcher.close();
+    public static void tearDown() throws CommandFailedException, IOException, OperationException {
+        operations.removeIfExists(QUEUE_TBA_ADDRESS);
+        operations.removeIfExists(QUEUE_TBR_ADDRESS);
+        operations.removeIfExists(TOPIC_ADDRESS);
+        operations.removeIfExists(TOPIC_TBA_ADDRESS);
+        operations.removeIfExists(TOPIC_TBR_ADDRESS);
     }
 
     @Drone
@@ -69,104 +77,67 @@ public class QueuesTopicsTestCase {
 
     @Before
     public void before() {
-        if (ConfigUtils.isDomain()) {
-            address = new ResourceAddress(domainPath);
-            topicsAddress = new ResourceAddress(topicsDomainPath);
-            command = DOMAIN + ADD;
-            remove = DOMAIN + remove;
-            removeTopics = DOMAIN + removeTopics;
-            addTopics = DOMAIN + addTopics;
-        } else {
-            address = new ResourceAddress(path);
-            topicsAddress = new ResourceAddress(topicsPath);
-            command = ADD;
-        }
+        page.navigateToMessaging();
+        page.selectQueuesAndTopics();
+        page.selectInTable(TOPIC);
     }
 
     @After
-    public void after() {
-        cliClient.executeCommand(removeTopics);
-        cliClient.executeCommand(remove);
+    public void after() throws InterruptedException, TimeoutException, IOException {
+        administration.reloadIfRequired();
     }
 
     @Test
-    public void addJmsQueue() {
-        page.navigateToMessaging();
-        page.selectQueuesAndTopics();
-        page.addQueue(NAME, JNDINAME);
-
-        verifier.verifyResource(address, true);
-
-        cliClient.executeCommand(remove);
-
-        verifier.verifyResource(address, false);
+    public void addJmsQueue() throws Exception {
+        page.addQueue(QUEUE_TBA, JNDI_NAME);
+        new ResourceVerifier(QUEUE_TBA_ADDRESS, client).verifyExists();
     }
 
     @Test
-    public void removeJmsQueue() {
-        cliClient.executeCommand(command);
-
-        page.navigateToMessaging();
-        page.selectQueuesAndTopics();
-
-        verifier.verifyResource(address, true);
-        page.selectInTable(NAME, 0);
-        page.remove();
-
-        verifier.verifyResource(address, false);
+    public void removeJmsQueue() throws Exception {
+        page.remove(QUEUE_TBR);
+        new ResourceVerifier(QUEUE_TBR_ADDRESS, client).verifyDoesNotExist();
     }
 
     @Test
-    public void addJmsTopics() {
-        page.navigateToMessaging();
-        page.selectQueuesAndTopics();
+    public void addJmsTopics() throws Exception {
         page.getConfig().topicsConfig();
-        page.addQueue(TOPICSNAME, JNDI_TOPICS_NAME);
-
-        verifier.verifyResource(topicsAddress, true);
-
-        cliClient.executeCommand(removeTopics);
-
-        verifier.verifyResource(topicsAddress, false);
+        page.addTopic(TOPIC_TBA, JNDI_TOPICS_NAME);
+        new ResourceVerifier(TOPIC_TBA_ADDRESS, client).verifyExists();
     }
 
     @Test
-    public void updateTopicsJndiNames() {
-        cliClient.executeCommand(addTopics);
-
-        page.navigateToMessaging();
-        page.selectQueuesAndTopics();
+    public void updateTopicsJndiNames() throws InterruptedException, TimeoutException, IOException {
         page.getConfig().topicsConfig();
-        page.selectInTable(TOPICSNAME, 0);
-        page.edit();
+        page.selectInTable(TOPIC);
+
+        String jndiName = "java:/jndi-name" + RandomStringUtils.randomAlphanumeric(5);
 
         ConfigFragment editPanelFragment = page.getConfigFragment();
 
-        editPanelFragment.getEditor().text("entries", "java:/jndi-name");
+        editPanelFragment.edit().text("entries", jndiName);
         boolean finished = editPanelFragment.save();
-        cliClient.reload();
+
+        administration.reloadIfRequired();
 
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(topicsAddress, "entries", "[\"java:/jndi-name\"]", 500);
 
-        cliClient.executeCommand(removeTopics);
-        //reload is required because of update JNDInames
-        cliClient.reload();
+        ModelNodeResult result = operations.readAttribute(TOPIC_ADDRESS, "entries");
+
+        Assert.assertTrue(result.hasDefinedValue() && result.stringValue().contains(jndiName));
     }
 
     @Test
-    public void removeJmsTopics() {
-        cliClient.executeCommand(addTopics);
-
-        page.navigateToMessaging();
-        page.selectQueuesAndTopics();
+    public void removeJmsTopics() throws Exception {
         page.getConfig().topicsConfig();
+        page.remove(TOPIC_TBR);
+        new ResourceVerifier(TOPIC_TBR_ADDRESS, client).verifyDoesNotExist();
+    }
 
-        verifier.verifyResource(topicsAddress, true);
-        page.selectInTable(TOPICSNAME, 0);
-        page.remove();
-
-        verifier.verifyResource(topicsAddress, false);
+    private static List<String> getJNDIEntriesList() {
+        List<String> jndi = new LinkedList<>();
+        jndi.add("java:/jndi-entry-dummy_" + RandomStringUtils.randomAlphanumeric(5));
+        return jndi;
     }
 
 }

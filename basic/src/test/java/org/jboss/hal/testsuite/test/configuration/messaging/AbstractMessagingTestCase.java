@@ -27,10 +27,6 @@ import java.util.List;
 
 import static org.junit.Assert.assertTrue;
 
-/**
- * @author Jan Kasik <jkasik@redhat.com>
- *         Created on 18.12.15.
- */
 public abstract class AbstractMessagingTestCase {
 
     protected static OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
@@ -105,10 +101,14 @@ public abstract class AbstractMessagingTestCase {
     }
 
     protected void editCheckboxAndVerify(Address address, String name, boolean value) throws Exception {
-        boolean finished = page.getConfigFragment().editCheckboxAndSave(name, value);
+        editCheckboxAndVerify(address, name, name, value);
+    }
+
+    protected void editCheckboxAndVerify(Address address, String identifier, String attribute, boolean value) throws Exception {
+        boolean finished = page.getConfigFragment().editCheckboxAndSave(identifier, value);
         assertTrue("Config should be saved and closed.", finished);
         administration.reloadIfRequired();
-        new ResourceVerifier(address, client, 500).verifyAttribute(name, value);
+        new ResourceVerifier(address, client, 500).verifyAttribute(attribute, value);
     }
 
     protected  void selectOptionAndVerify(Address address, String name, String value) throws Exception {

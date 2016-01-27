@@ -1,17 +1,13 @@
 package org.jboss.hal.testsuite.test.configuration.messaging.destinations;
 
+import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Shared;
-import org.jboss.hal.testsuite.cli.CliClient;
-import org.jboss.hal.testsuite.cli.CliClientFactory;
-import org.jboss.hal.testsuite.dmr.Dispatcher;
-import org.jboss.hal.testsuite.dmr.ResourceAddress;
-import org.jboss.hal.testsuite.dmr.ResourceVerifier;
+import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.page.config.MessagingPage;
-import org.jboss.hal.testsuite.util.ConfigUtils;
+import org.jboss.hal.testsuite.test.configuration.messaging.AbstractMessagingTestCase;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -20,28 +16,28 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
+import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.OperationException;
+import org.wildfly.extras.creaper.core.online.operations.Values;
 
-/**
- * Created by pcyprian on 8.9.15.
- */
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
+
 @RunWith(Arquillian.class)
 @Category(Shared.class)
-public class ConnectionFactoriesTestCase {
-    private static final String NAME = "test-cf";
-    private static final String JNDINAME = "java:/jndi-cf";
-    private static final String CONNECTOR = "http-connector";
-    private static final String ADD = "/subsystem=messaging-activemq/server==default/connection-factory=" + NAME + ":add(entries=["
-            + JNDINAME + "],connectors=[" + CONNECTOR + "])";
-    private static final String DOMAIN = "/profile=full-ha";
+public class ConnectionFactoriesTestCase extends AbstractMessagingTestCase {
 
-    private String command;
-    private String remove = "/subsystem=messaging-activemq/server=default/connection-factory=" + NAME + ":remove";
-    private ModelNode path = new ModelNode("/subsystem=messaging-activemq/server=default/connection-factory=" + NAME);
-    private ModelNode domainPath = new ModelNode("/profile=full-ha/subsystem=messaging-activemq/server=default/connection-factory=" + NAME);
-    private ResourceAddress address;
-    private static Dispatcher dispatcher;
-    private static ResourceVerifier verifier;
-    CliClient cliClient = CliClientFactory.getClient();
+    private static final String CONNECTION_FACTORY_TBR = "connFactory-TBR_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String CONNECTION_FACTORY_TBA = "connFactory-TBA_" + RandomStringUtils.randomAlphanumeric(5);
+
+    private static final Address CONN_FACTORY_TBA_ADDRESS = DEFAULT_MESSAGING_SERVER
+            .and("connection-factory", CONNECTION_FACTORY_TBA);
+    private static final Address CONN_FACTORY_TBR_ADDRESS = DEFAULT_MESSAGING_SERVER
+            .and("connection-factory", CONNECTION_FACTORY_TBR);
+
+
+    private static final String JNDI_NAME_TBA = "java:/jndi-cf-" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String CONNECTOR_TBA = "http-connector";
 
     @Drone
     private WebDriver browser;
@@ -49,60 +45,46 @@ public class ConnectionFactoriesTestCase {
     private MessagingPage page;
 
     @BeforeClass
-    public static void setUp() {
-        dispatcher = new Dispatcher();
-        verifier = new ResourceVerifier(dispatcher);
+    public static void setUp() throws Exception {
+        createConnectionFactory(CONN_FACTORY_TBR_ADDRESS, "java:/" + CONNECTION_FACTORY_TBR, CONNECTOR_TBA);
+        administration.reloadIfRequired();
     }
 
     @Before
     public void before() {
-        if (ConfigUtils.isDomain()) {
-            address = new ResourceAddress(domainPath);
-            command = DOMAIN + ADD;
-            remove = DOMAIN + remove;
-        } else {
-            address = new ResourceAddress(path);
-            command = ADD;
-        }
+        page.navigateToMessaging();
+        page.selectQueuesAndTopics();
+        page.switchToConnectionFactories();
     }
 
     @After
-    public void after() {
-        cliClient.executeCommand(remove);
+    public void after() throws InterruptedException, TimeoutException, IOException {
+        administration.reloadIfRequired();
     }
 
     @AfterClass
-    public static void tearDown() {
-        dispatcher.close();
-    }
-
-    @Test //https://issues.jboss.org/browse/HAL-832
-    public void addConnectionFactory() {
-        page.navigateToMessaging();
-        page.selectQueuesAndTopics();
-        page.switchToConnectionFactories();
-
-        page.addFactory(NAME, JNDINAME, CONNECTOR);
-
-        verifier.verifyResource(address, true);
-
-        cliClient.executeCommand(remove);
-
-        verifier.verifyResource(address, false);
+    public static void tearDown() throws IOException, OperationException {
+        operations.removeIfExists(CONN_FACTORY_TBA_ADDRESS);
+        operations.removeIfExists(CONN_FACTORY_TBR_ADDRESS);
     }
 
     @Test
-    public void removeConnectionFactory() {
-        cliClient.executeCommand(command);
+    public void addConnectionFactory() throws Exception {
+        page.addFactory(CONNECTION_FACTORY_TBA, JNDI_NAME_TBA, CONNECTOR_TBA);
+        new ResourceVerifier(CONN_FACTORY_TBA_ADDRESS, client).verifyExists();
+    }
 
-        page.navigateToMessaging();
-        page.selectQueuesAndTopics();
-        page.switchToConnectionFactories();
+    @Test
+    public void removeConnectionFactory() throws Exception {
+        page.remove(CONNECTION_FACTORY_TBR);
+        new ResourceVerifier(CONN_FACTORY_TBA_ADDRESS, client).verifyDoesNotExist();
+    }
 
-        verifier.verifyResource(address, true);
-        page.selectInTable(NAME, 0);
-        page.remove();
-
-        verifier.verifyResource(address, false);
+    private static void createConnectionFactory(Address address, String jndiName, String connector) throws Exception {
+        operations.add(address, Values.empty()
+                .andList("entries", jndiName)
+                .andList("connectors", connector));
+        administration.reloadIfRequired();
+        new ResourceVerifier(address, client).verifyExists();
     }
 }
