@@ -1,90 +1,42 @@
 package org.jboss.hal.testsuite.test.configuration.jgroups;
 
-import org.jboss.hal.testsuite.cli.CliClient;
+import org.jboss.dmr.ModelNode;
+import org.jboss.dmr.Property;
+import org.wildfly.extras.creaper.core.online.ModelNodeResult;
+import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
+import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.OperationException;
+import org.wildfly.extras.creaper.core.online.operations.Operations;
+import org.wildfly.extras.creaper.core.online.operations.Values;
 
-/**
- * Created by jkasik on 23.7.15.
- */
+import java.io.IOException;
+
 public class JGroupsOperations {
 
-    private CliClient client;
-    private String transport = "";
-    private String baseDrmPath = "";
+    private OnlineManagementClient client;
+    private Operations operations;
 
-    public JGroupsOperations(CliClient client) {
+    public JGroupsOperations(OnlineManagementClient client) {
         this.client = client;
+        this.operations = new Operations(client);
     }
 
-    public String getTransport() {
-        return transport;
+    public boolean addProperty(Address address, String name, String value) throws IOException {
+        ModelNodeResult result = operations.add(address.and("property", name), Values.of("value", value));
+        return result.isSuccess();
     }
 
-    public void setTransport(String transport) {
-        this.transport = transport;
+    public void removeProperty(Address address, String name) throws IOException, OperationException {
+        try {
+            operations.removeIfExists(address.and("property", name));
+        } catch (OperationException ignored) {
+            //operation fails if resource does not exists
+        }
     }
 
-    private String getBaseDmrPath() {
-        return baseDrmPath;
-    }
-
-    public void setBaseDrmPath(String baseDrmPath) {
-        this.baseDrmPath = baseDrmPath;
-    }
-
-    private String getTransportDrmPath() {
-        return getBaseDmrPath() + "transport=" + transport + "/";
-    }
-
-    private String getProtocolDrmPath(String name) { //TODO: verify
-        return getBaseDmrPath() + "protocol=" + name + "/";
-    }
-
-    /**/
-
-    private boolean addProperty(String path, String name, String value) {
-        String command = path + "property=" + name + ":add(value=" + value + ")";
-        return client.executeForSuccess(command);
-    }
-
-    private void removeProperty(String path, String name) {
-        String command = path + "property=" + name + ":remove";
-        client.executeCommand(command);
-    }
-
-    public boolean verifyProperty(String path, String name, String value) {
-        String command = path + ":read-resource";
-        return client.executeForResponse(command)
-                .get("result")
-                .get("properties")
-                .toJSONString(false)
-                .contains("\"" + name + "\" : \"" + value + "\"");
-    }
-
-    /*transport properties*/
-
-    public boolean addTransportProperty(String name, String value) {
-        return addProperty(getTransportDrmPath(), name, value);
-    }
-
-    public void removeTransportProperty(String name, String value) {
-        removeProperty(getTransportDrmPath(), name);
-    }
-
-    public boolean verifyTransportProperty(String name, String value) {
-        return verifyProperty(getTransportDrmPath(), name, value);
-    }
-
-    /*protocol properties*/
-
-    public boolean addProtocolProperty(String protocol, String name, String value) {
-        return addProperty(getProtocolDrmPath(protocol), name, value);
-    }
-
-    public boolean verifyProtocolProperty(String protocol, String name, String value) {
-        return verifyProperty(getProtocolDrmPath(protocol), name, value);
-    }
-
-    public void removeProtocolProperty(String protocol, String name) {
-        removeProperty(getProtocolDrmPath(protocol), name);
+    public boolean propertyExists(Address address, String name, String value) throws IOException {
+        ModelNode expectedProperty = new ModelNode().set(new Property(name, new ModelNode(value)));
+        ModelNodeResult result = operations.readAttribute(address, "properties");
+        return result.hasDefinedValue() && result.value().asList().contains(expectedProperty);
     }
 }

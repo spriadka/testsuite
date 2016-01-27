@@ -5,8 +5,8 @@ import org.apache.mina.util.AvailablePortFinder;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.InSequence;
-import org.jboss.hal.testsuite.cli.CliClient;
-import org.jboss.hal.testsuite.cli.CliClientFactory;
+import org.jboss.dmr.ModelNode;
+import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.creaper.command.AddSocketBinding;
 import org.jboss.hal.testsuite.finder.Application;
@@ -19,10 +19,8 @@ import org.jboss.hal.testsuite.fragment.config.jgroups.JGroupsTransportPropertyW
 import org.jboss.hal.testsuite.page.config.DomainConfigEntryPoint;
 import org.jboss.hal.testsuite.page.config.JGroupsPage;
 import org.jboss.hal.testsuite.page.config.StandaloneConfigEntryPoint;
-import org.jboss.hal.testsuite.test.util.ConfigAreaChecker;
 import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.jboss.hal.testsuite.util.Console;
-import org.jboss.hal.testsuite.util.ResourceVerifier;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -30,20 +28,23 @@ import org.junit.Test;
 import org.openqa.selenium.WebDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.wildfly.extras.creaper.core.CommandFailedException;
 import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
+import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.OperationException;
+import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
 
 import java.io.IOException;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-/**
- * Created by jkasik <jkasik@redhat.com>
- */
 public class JGroupAbstractTestCase {
 
     private static final Logger log = LoggerFactory.getLogger(JGroupAbstractTestCase.class);
+
+    protected static Address BASE_ADDRESS;
+    protected static Address PROTOCOL_ADDRESS;
+    protected static Address TRANSPORT_ADDRESS;
 
     protected static final String PROPERTY_NAME = "URL";
     protected static final String PROPERTY_VALUE = "url";
@@ -51,12 +52,18 @@ public class JGroupAbstractTestCase {
     protected static final String PROPERTY_VALUE_P = "url1";
     protected static final String DEFAULT_PROTOCOL = "UNICAST3";
 
-    private static CliClient client = CliClientFactory.getClient();
-    protected static ResourceVerifier verifier = new ResourceVerifier("", client);
-    private ConfigAreaChecker checker = new ConfigAreaChecker(verifier);
+    protected static final String  PROTOCOL_PROPERTY_TBR = "protocolProperty_" + RandomStringUtils.randomAlphanumeric(3);
+    protected static final String  PROTOCOL_PROPERTY_TBR_VALUE = RandomStringUtils.randomAlphanumeric(3);
+    protected static final String  TRANSPORT_PROPERTY_TBR = "protocolProperty_" + RandomStringUtils.randomAlphanumeric(3);
+    protected static final String  TRANSPORT_PROPERTY_TBR_VALUE = RandomStringUtils.randomAlphanumeric(3);
+
+
+    protected static OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
+    protected static Administration administration = new Administration(client);
     protected static JGroupsOperations jGroupsOperations = new JGroupsOperations(client);
 
-    private FinderNavigation navigation;
+    protected static final Address JGROUPS_ADDRESS = client.options().isStandalone ? Address.subsystem("jgroups") :
+            Address.of("profile", "full-ha").and("subsystem", "jgroups");
 
     @Drone
     public WebDriver browser;
@@ -66,6 +73,7 @@ public class JGroupAbstractTestCase {
 
     @Before
     public void before() {
+        FinderNavigation navigation;
         if (ConfigUtils.isDomain()) {
             navigation = new FinderNavigation(browser, DomainConfigEntryPoint.class)
                     .addAddress(FinderNames.CONFIGURATION, FinderNames.PROFILES)
@@ -78,6 +86,7 @@ public class JGroupAbstractTestCase {
                 .selectRow(true)
                 .invoke(FinderNames.VIEW);
         Application.waitUntilVisible();
+        Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
     }
 
     @After
@@ -87,16 +96,19 @@ public class JGroupAbstractTestCase {
     }
 
     @AfterClass
-    public static void tearDown() {
-        jGroupsOperations.removeTransportProperty(PROPERTY_NAME, PROPERTY_VALUE);
-        jGroupsOperations.removeTransportProperty(PROPERTY_NAME_P, PROPERTY_VALUE_P);
-        jGroupsOperations.removeProtocolProperty(DEFAULT_PROTOCOL, PROPERTY_NAME);
-        jGroupsOperations.removeProtocolProperty(DEFAULT_PROTOCOL, PROPERTY_NAME_P);
+    public static void tearDown() throws IOException, OperationException {
+        jGroupsOperations.removeProperty(TRANSPORT_ADDRESS, TRANSPORT_PROPERTY_TBR);
+        jGroupsOperations.removeProperty(PROTOCOL_ADDRESS, PROTOCOL_PROPERTY_TBR);
+        jGroupsOperations.removeProperty(TRANSPORT_ADDRESS, PROPERTY_NAME);
+        jGroupsOperations.removeProperty(TRANSPORT_ADDRESS, PROPERTY_NAME);
+        jGroupsOperations.removeProperty(TRANSPORT_ADDRESS, PROPERTY_NAME_P);
+        jGroupsOperations.removeProperty(PROTOCOL_ADDRESS, PROPERTY_NAME);
+        jGroupsOperations.removeProperty(PROTOCOL_ADDRESS, PROPERTY_NAME_P);
     }
 
     @Test
-    public void socketBindingEdit() throws IOException, CommandFailedException {
-        String name = "JGroupsSocketBinding_";
+    public void socketBindingEdit() throws Exception {
+        String name = "JGroupsSocketBinding_" + RandomStringUtils.randomAlphanumeric(5);
         try (OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient()) {
             int port = AvailablePortFinder.getNextAvailable();
             log.info("Obtained port for socket binding '" + name + "' is " + port);
@@ -104,84 +116,100 @@ public class JGroupAbstractTestCase {
                     .port(port)
                     .build());
         }
-        checker.editTextAndAssert(page, "socketBinding", name).dmrAttribute("socket-binding").invoke();
-    }
-
-    @Test(expected = AssertionError.class)
-    public void socketBindingEditInvalid() {
-        String name = "JGroupsInvalidSocket_" + RandomStringUtils.randomAlphabetic(6);
-        checker.editTextAndAssert(page, "socketBinding", name).dmrAttribute("socket-binding").invoke();
+        editTextAndVerify(TRANSPORT_ADDRESS,  "socketBinding", "socket-binding", name);
     }
 
     @Test
-    public void diagnosticSocketEdit() {
+    public void socketBindingEditInvalid() throws Exception {
+        verifyValueIsNotSaved(TRANSPORT_ADDRESS, "SocketBinding", "socket-binding", RandomStringUtils.randomAlphabetic(6));
+    }
+
+    @Test
+    public void diagnosticSocketEdit() throws Exception {
         String name = "jgroups-udp";
-        checker.editTextAndAssert(page, "diagSocketBinding", name)
-                .dmrAttribute("diagnostics-socket-binding").invoke();
+        editTextAndVerify(TRANSPORT_ADDRESS, "diagSocketBinding", "diagnostics-socket-binding", name);
     }
 
-    @Test(expected = AssertionError.class)
-    public void diagnosticSocketEditInvalid() {
+    @Test
+    public void diagnosticSocketEditInvalid() throws Exception {
         String name = "qwedfsdg"; //non-existing socket binding
-        checker.editTextAndAssert(page, "diagSocketBinding", name)
-                .dmrAttribute("diagnostics-socket-binding").invoke();
+        verifyValueIsNotSaved(TRANSPORT_ADDRESS, "diagSocketBinding", "diagnostics-socket-binding", name);
     }
 
     @Test
-    public void machineEdit() {
+    public void machineEdit() throws Exception {
         String name = "JGroupsMachine_" + RandomStringUtils.randomAlphabetic(6);
-        checker.editTextAndAssert(page, "machine", name).dmrAttribute("machine").invoke();
+        editTextAndVerify(TRANSPORT_ADDRESS, "machine", name);
     }
 
     @Test
-    public void sharedStatusEdit() {
-        checker.editCheckboxAndAssert(page, "shared", true).dmrAttribute("shared").invoke();
+    public void sharedStatusEdit() throws Exception {
+        page.getConfigFragment().editCheckboxAndSave("shared", true);
+        new ResourceVerifier(TRANSPORT_ADDRESS, client).verifyAttribute("shared", true);
     }
 
     @Test
-    public void siteEdit() {
+    public void siteEdit() throws Exception {
         String name = "JGroupsSite_" + RandomStringUtils.randomAlphabetic(6);
-        checker.editTextAndAssert(page, "site", name).invoke();
+        editTextAndVerify(TRANSPORT_ADDRESS, "site", name);
     }
 
     @Test
-    public void rackEdit() {
+    public void rackEdit() throws Exception {
         String name = "JGroupsRack_" + RandomStringUtils.randomAlphabetic(6);
-        checker.editTextAndAssert(page, "rack", name).invoke();
+        editTextAndVerify(TRANSPORT_ADDRESS, "rack", name);
     }
 
     @Test
-    public void createTransportProperty() {
+    public void createTransportProperty() throws IOException {
         JGroupsTransportPropertiesFragment properties = page.getConfig().transportPropertiesConfig();
         JGroupsTransportPropertyWizard wizard = properties.addProperty();
-        wizard.key(PROPERTY_NAME).value(PROPERTY_VALUE).finish();
-        assertTrue(jGroupsOperations.verifyTransportProperty(PROPERTY_NAME, PROPERTY_VALUE));
+        wizard.key(PROPERTY_NAME).value(PROPERTY_VALUE).clickSave();
+        Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
+        assertTrue(jGroupsOperations.propertyExists(TRANSPORT_ADDRESS, PROPERTY_NAME, PROPERTY_VALUE));
     }
 
     @Test
-    public void removeTransportProperty() {
+    public void removeTransportProperty() throws IOException {
         JGroupsTransportPropertiesFragment properties = page.getConfig().transportPropertiesConfig();
-        properties.removeProperty(PROPERTY_NAME_P);
-        assertFalse(jGroupsOperations.verifyTransportProperty(PROPERTY_NAME_P, PROPERTY_VALUE_P));
+        properties.removeProperty(TRANSPORT_PROPERTY_TBR);
+        assertFalse(jGroupsOperations.propertyExists(TRANSPORT_ADDRESS, TRANSPORT_PROPERTY_TBR, TRANSPORT_PROPERTY_TBR_VALUE));
     }
 
 
     @InSequence(2)
     @Test
-    public void createProtocolProperty() {
+    public void createProtocolProperty() throws IOException {
         page.switchToProtocol(DEFAULT_PROTOCOL);
         JGroupsProtocolPropertiesFragment properties = page.getConfig().protocolPropertiesConfig();
         JGroupsProtocolPropertyWizard wizard = properties.addProperty();
         wizard.key(PROPERTY_NAME).value(PROPERTY_VALUE).finish();
-        assertTrue(jGroupsOperations.verifyProtocolProperty(DEFAULT_PROTOCOL, PROPERTY_NAME, PROPERTY_VALUE));
+        assertTrue(jGroupsOperations.propertyExists(PROTOCOL_ADDRESS, PROPERTY_NAME, PROPERTY_VALUE));
     }
 
     @InSequence(1)
     @Test
-    public void removeProtocolProperty() {
+    public void removeProtocolProperty() throws IOException {
         page.switchToProtocol(DEFAULT_PROTOCOL);
         JGroupsProtocolPropertiesFragment properties = page.getConfig().protocolPropertiesConfig();
-        properties.removeProperty(PROPERTY_NAME_P);
-        assertFalse(jGroupsOperations.verifyProtocolProperty(DEFAULT_PROTOCOL, PROPERTY_NAME_P, PROPERTY_VALUE_P));
+        properties.removeProperty(PROTOCOL_PROPERTY_TBR);
+        assertFalse(jGroupsOperations.propertyExists(PROTOCOL_ADDRESS, PROTOCOL_PROPERTY_TBR, PROTOCOL_PROPERTY_TBR_VALUE));
     }
+
+    private void editTextAndVerify(Address address, String identifier, String value) throws Exception {
+        editTextAndVerify(address, identifier, identifier, value);
+    }
+
+    private void editTextAndVerify(Address address, String identifier, String attribute, String value) throws Exception {
+        page.editTextAndSave(identifier, value);
+        administration.reloadIfRequired();
+        new ResourceVerifier(address, client).verifyAttribute(attribute, value);
+    }
+
+    private void verifyValueIsNotSaved(Address address, String identifier, String attribute, String value) throws Exception {
+        page.editTextAndSave(identifier, value);
+        administration.reloadIfRequired();
+        new ResourceVerifier(address, client).verifyAttributeNotEqual(attribute, new ModelNode(value));
+    }
+
 }
