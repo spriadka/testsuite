@@ -50,7 +50,7 @@ abstract class AbstractTransportConfigAddCommand implements OnlineCommand {
         this.factoryClass = factoryClass;
     }
 
-    protected AbstractTransportConfigAddCommand(InVmBuilder builder, TransportConfigItem configItem) {
+    protected AbstractTransportConfigAddCommand(InVmBuilder<?> builder, TransportConfigItem configItem) {
         this(TransportConfigType.IN_VM,
                 configItem,
                 builder.name,
@@ -62,7 +62,7 @@ abstract class AbstractTransportConfigAddCommand implements OnlineCommand {
                 null);
     }
 
-    protected AbstractTransportConfigAddCommand(GenericBuilder builder, TransportConfigItem configItem) {
+    protected AbstractTransportConfigAddCommand(GenericBuilder<?> builder, TransportConfigItem configItem) {
         this(TransportConfigType.GENERIC,
                 configItem,
                 builder.name,
@@ -74,7 +74,7 @@ abstract class AbstractTransportConfigAddCommand implements OnlineCommand {
                 builder.factoryClass);
     }
 
-    protected AbstractTransportConfigAddCommand(RemoteBuilder builder, TransportConfigItem configItem) {
+    protected AbstractTransportConfigAddCommand(RemoteBuilder<?> builder, TransportConfigItem configItem) {
         this(TransportConfigType.REMOTE,
                 configItem,
                 builder.name,
