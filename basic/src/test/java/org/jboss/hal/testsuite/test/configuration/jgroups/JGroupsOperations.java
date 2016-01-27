@@ -32,7 +32,7 @@ public class JGroupsOperations {
         }
     }
 
-    public boolean verifyProperty(Address address, String name) throws IOException {
+    public boolean propertyExists(Address address, String name) throws IOException {
         ModelNodeResult result = operations.readAttribute(address, "properties");
         return result.hasDefinedValue() && result.value().keys().contains(name);
     }
