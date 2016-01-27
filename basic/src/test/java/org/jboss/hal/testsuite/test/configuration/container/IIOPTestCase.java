@@ -230,7 +230,7 @@ public class IIOPTestCase {
     public void removeProperty() throws Exception {
         ConfigPropertiesFragment properties = page.getConfig().propertiesConfig();
         page.waitUntilPropertiesAreVisible();
-        properties.removeProperty(KEY_VALUE);
+        properties.removePropertyAndDismissReloadRequiredButton(KEY_VALUE);
 
         List<ResourceTableRowFragment> actual = page.getResourceManager().getResourceTable().getAllRows();
 

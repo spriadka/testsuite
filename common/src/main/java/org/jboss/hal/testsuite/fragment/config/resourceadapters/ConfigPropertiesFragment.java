@@ -14,4 +14,8 @@ public class ConfigPropertiesFragment extends ConfigFragment {
     public void removeProperty(String key) {
         getResourceManager().removeResourceAndConfirm(key);
     }
+
+    public void removePropertyAndDismissReloadRequiredButton(String key) {
+        getResourceManager().removeResource(key).confirmAndDismissReloadRequiredMessage();
+    }
 }
