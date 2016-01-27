@@ -6,7 +6,7 @@ import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
-import org.jboss.hal.testsuite.creaper.command.AddAcceptor;
+import org.jboss.hal.testsuite.creaper.command.messaging.AddMessagingAcceptor;
 import org.jboss.hal.testsuite.page.config.MessagingPage;
 import org.jboss.hal.testsuite.test.configuration.messaging.AbstractMessagingTestCase;
 import org.junit.After;
@@ -44,12 +44,12 @@ public class GenericAcceptorTestCase extends AbstractMessagingTestCase {
 
     @BeforeClass
     public static void setUp() throws IOException, CommandFailedException, TimeoutException, InterruptedException {
-        client.apply(new AddAcceptor.GenericBuilder(GENERIC_ACCEPTOR)
+        client.apply(new AddMessagingAcceptor.GenericBuilder(GENERIC_ACCEPTOR)
                 .param(PROPERTY_TBR_KEY, "testThis")
                 .socketBinding(createSocketBinding())
                 .factoryClass(FACTORY_CLASS)
                 .build());
-        client.apply(new AddAcceptor.GenericBuilder(GENERIC_ACCEPTOR_TBR)
+        client.apply(new AddMessagingAcceptor.GenericBuilder(GENERIC_ACCEPTOR_TBR)
                 .param(PROPERTY_TBR_KEY, "testThis")
                 .socketBinding(createSocketBinding())
                 .factoryClass(FACTORY_CLASS)

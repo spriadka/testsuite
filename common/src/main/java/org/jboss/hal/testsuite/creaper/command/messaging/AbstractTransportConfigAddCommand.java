@@ -1,4 +1,4 @@
-package org.jboss.hal.testsuite.creaper.command;
+package org.jboss.hal.testsuite.creaper.command.messaging;
 
 import org.wildfly.extras.creaper.core.CommandFailedException;
 import org.wildfly.extras.creaper.core.online.OnlineCommand;
@@ -14,55 +14,77 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * An abstract class which implements common properties of connector and acceptor in messaging connections.
+ * Implementation of common properties of connector and acceptor in messaging connections.
  */
 abstract class AbstractTransportConfigAddCommand implements OnlineCommand {
 
-    protected TransportConfigType type;
-    protected String name;
-    protected String serverName;
-    protected Map<String, String> params;
-    protected boolean replaceExisting;
+    protected final TransportConfigType configType;
+    protected final TransportConfigItem configItem;
+    protected final String name;
+    protected final String serverName;
+    protected final Map<String, String> params;
+    protected final boolean replaceExisting;
 
     //in-vm
-    protected Integer serverId;
+    protected final Integer serverId;
 
     //generic and remote
-    protected String socketBinding;
+    protected final String socketBinding;
 
     //remote
-    protected String factoryClass;
+    protected final String factoryClass;
 
-    protected AbstractTransportConfigAddCommand(InVmBuilder builder) {
-        this.type = TransportConfigType.IN_VM;
-        this.serverId = builder.serverId;
-        initCommonOptions(builder);
+
+    private AbstractTransportConfigAddCommand(TransportConfigType configType, TransportConfigItem configItem,
+                                              String name, String serverName, Map<String, String> params,
+                                              boolean replaceExisting, Integer serverId, String socketBinding,
+                                              String factoryClass) {
+        this.configType = configType;
+        this.configItem = configItem;
+        this.name = name;
+        this.serverName = serverName;
+        this.params = params;
+        this.replaceExisting = replaceExisting;
+        this.serverId = serverId;
+        this.socketBinding = socketBinding;
+        this.factoryClass = factoryClass;
     }
 
-    protected AbstractTransportConfigAddCommand(GenericBuilder builder) {
-        this.type = TransportConfigType.GENERIC;
-        this.factoryClass = builder.factoryClass;
-        this.socketBinding = builder.socketBinding;
-        initCommonOptions(builder);
+    protected AbstractTransportConfigAddCommand(InVmBuilder builder, TransportConfigItem configItem) {
+        this(TransportConfigType.IN_VM,
+                configItem,
+                builder.name,
+                builder.serverName,
+                builder.params,
+                builder.replaceExisting,
+                builder.serverId,
+                null,
+                null);
     }
 
-    protected AbstractTransportConfigAddCommand(RemoteBuilder builder) {
-        this.type = TransportConfigType.REMOTE;
-        this.socketBinding = builder.socketBinding;
-        initCommonOptions(builder);
+    protected AbstractTransportConfigAddCommand(GenericBuilder builder, TransportConfigItem configItem) {
+        this(TransportConfigType.GENERIC,
+                configItem,
+                builder.name,
+                builder.serverName,
+                builder.params,
+                builder.replaceExisting,
+                null,
+                builder.socketBinding,
+                builder.factoryClass);
     }
 
-    private void initCommonOptions(Builder builder) {
-        this.name = builder.name;
-        this.serverName = builder.serverName;
-        this.params = builder.params;
-        this.replaceExisting = builder.replaceExisting;
+    protected AbstractTransportConfigAddCommand(RemoteBuilder builder, TransportConfigItem configItem) {
+        this(TransportConfigType.REMOTE,
+                configItem,
+                builder.name,
+                builder.serverName,
+                builder.params,
+                builder.replaceExisting,
+                null,
+                builder.socketBinding,
+                null);
     }
-
-    /**
-     * Get type of transport configuration's instance
-     */
-    protected abstract TransportConfigItem getConfigType();
 
     private Address getAddress(OnlineManagementClient client) throws CommandFailedException {
         String serverName = this.serverName;
@@ -71,7 +93,7 @@ abstract class AbstractTransportConfigAddCommand implements OnlineCommand {
         }
         return MessagingUtils
                 .address(client, serverName)
-                .and(type.getPrefix() + getConfigType().getName(), name);
+                .and(configType.getPrefix() + configItem.getName(), name);
     }
 
     @Override
@@ -83,13 +105,13 @@ abstract class AbstractTransportConfigAddCommand implements OnlineCommand {
             try {
                 operations.removeIfExists(address);
             } catch (OperationException e) {
-                throw new CommandFailedException("Failed to remove previously defined " + getConfigType().getName() + "!");
+                throw new CommandFailedException("Failed to remove previously defined " + configItem.getName() + "!");
             }
         }
 
         Values params = Values.empty().andObjectOptional("params", Values.fromMap(this.params));
 
-        switch (this.type) {
+        switch (this.configType) {
             case GENERIC:
                 params = params.and("factory-class", factoryClass)
                         .and("socket-binding", socketBinding);
@@ -107,11 +129,11 @@ abstract class AbstractTransportConfigAddCommand implements OnlineCommand {
         operations.add(address, params);
     }
 
-    private abstract static class Builder<THIS extends AbstractTransportConfigAddCommand.Builder<THIS>> {
-        private String name;
-        private String serverName;
-        private Map<String, String> params;
-        private boolean replaceExisting;
+    private abstract static class Builder<THIS extends Builder<THIS>> {
+        protected String name;
+        protected String serverName;
+        protected Map<String, String> params;
+        protected boolean replaceExisting;
 
         private Builder(String name) {
             this(name, null);
@@ -160,11 +182,10 @@ abstract class AbstractTransportConfigAddCommand implements OnlineCommand {
             return (THIS) this;
         }
 
-        public THIS validate() {
+        protected void validate() {
             if (serverId == null) {
                 throw new IllegalArgumentException("Server id has to be set!");
             }
-            return (THIS) this;
         }
     }
 
@@ -193,11 +214,10 @@ abstract class AbstractTransportConfigAddCommand implements OnlineCommand {
             return (THIS) this;
         }
 
-        public THIS validate() {
+        protected void validate() {
             if (socketBinding == null || factoryClass == null) {
                 throw new IllegalArgumentException("Both socket binding and factory class have to be set!");
             }
-            return (THIS) this;
         }
     }
 
@@ -220,11 +240,10 @@ abstract class AbstractTransportConfigAddCommand implements OnlineCommand {
             return (THIS) this;
         }
 
-        public THIS validate() {
+        protected void validate() {
             if (socketBinding == null) {
                 throw new IllegalArgumentException("Socket binding has to be set!");
             }
-            return (THIS) this;
         }
     }
 }

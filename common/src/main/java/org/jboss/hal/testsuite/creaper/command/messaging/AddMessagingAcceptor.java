@@ -1,25 +1,20 @@
-package org.jboss.hal.testsuite.creaper.command;
+package org.jboss.hal.testsuite.creaper.command.messaging;
 
 /**
  * Command which creates and adds an acceptor to given server
  */
-public final class AddAcceptor extends AbstractTransportConfigAddCommand {
+public final class AddMessagingAcceptor extends AbstractTransportConfigAddCommand {
 
-    private AddAcceptor(InVmBuilder builder) {
-        super(builder);
+    private AddMessagingAcceptor(InVmBuilder builder) {
+        super(builder, TransportConfigItem.ACCEPTOR);
     }
 
-    private AddAcceptor(GenericBuilder builder) {
-        super(builder);
+    private AddMessagingAcceptor(GenericBuilder builder) {
+        super(builder, TransportConfigItem.ACCEPTOR);
     }
 
-    private AddAcceptor(RemoteBuilder builder) {
-        super(builder);
-    }
-
-    @Override
-    protected TransportConfigItem getConfigType() {
-        return TransportConfigItem.ACCEPTOR;
+    private AddMessagingAcceptor(RemoteBuilder builder) {
+        super(builder, TransportConfigItem.ACCEPTOR);
     }
 
     public static final class InVmBuilder extends AbstractTransportConfigAddCommand.InVmBuilder<InVmBuilder> {
@@ -33,8 +28,9 @@ public final class AddAcceptor extends AbstractTransportConfigAddCommand {
         }
 
         @Override
-        public AddAcceptor build() {
-            return new AddAcceptor(validate());
+        public AddMessagingAcceptor build() {
+            validate();
+            return new AddMessagingAcceptor(this);
         }
     }
 
@@ -49,8 +45,9 @@ public final class AddAcceptor extends AbstractTransportConfigAddCommand {
         }
 
         @Override
-        public AddAcceptor build() {
-            return new AddAcceptor(this);
+        public AddMessagingAcceptor build() {
+            validate();
+            return new AddMessagingAcceptor(this);
         }
     }
 
@@ -65,8 +62,9 @@ public final class AddAcceptor extends AbstractTransportConfigAddCommand {
         }
 
         @Override
-        public AddAcceptor build() {
-            return new AddAcceptor(this);
+        public AddMessagingAcceptor build() {
+            validate();
+            return new AddMessagingAcceptor(this);
         }
     }
 }

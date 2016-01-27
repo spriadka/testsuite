@@ -6,7 +6,7 @@ import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
-import org.jboss.hal.testsuite.creaper.command.AddConnector;
+import org.jboss.hal.testsuite.creaper.command.messaging.AddMessagingConnector;
 import org.jboss.hal.testsuite.page.config.MessagingPage;
 import org.jboss.hal.testsuite.test.configuration.messaging.AbstractMessagingTestCase;
 import org.junit.After;
@@ -41,11 +41,11 @@ public class RemoteConnectorTestCase extends AbstractMessagingTestCase {
 
     @BeforeClass
     public static void setUp() throws CommandFailedException, InterruptedException, TimeoutException, IOException {
-        client.apply(new AddConnector.RemoteBuilder(REMOTE_CONNECTOR)
+        client.apply(new AddMessagingConnector.RemoteBuilder(REMOTE_CONNECTOR)
                 .param(PROP_TBR_KEY, "test")
                 .socketBinding(createSocketBinding())
                 .build());
-        client.apply(new AddConnector.RemoteBuilder(REMOTE_CONNECTOR_TBR)
+        client.apply(new AddMessagingConnector.RemoteBuilder(REMOTE_CONNECTOR_TBR)
                 .socketBinding(createSocketBinding())
                 .build());
         administration.reloadIfRequired();

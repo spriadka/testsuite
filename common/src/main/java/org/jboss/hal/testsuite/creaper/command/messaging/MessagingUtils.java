@@ -1,4 +1,4 @@
-package org.jboss.hal.testsuite.creaper.command;
+package org.jboss.hal.testsuite.creaper.command.messaging;
 
 import org.wildfly.extras.creaper.core.CommandFailedException;
 import org.wildfly.extras.creaper.core.online.OnlineManagementClient;

@@ -1,25 +1,20 @@
-package org.jboss.hal.testsuite.creaper.command;
+package org.jboss.hal.testsuite.creaper.command.messaging;
 
 /**
  * Command which creates and adds a connector to given server
  */
-public final class AddConnector extends AbstractTransportConfigAddCommand {
+public final class AddMessagingConnector extends AbstractTransportConfigAddCommand {
 
-    private AddConnector(InVmBuilder builder) {
-        super(builder);
+    private AddMessagingConnector(InVmBuilder builder) {
+        super(builder, TransportConfigItem.CONNECTOR);
     }
 
-    private AddConnector(GenericBuilder builder) {
-        super(builder);
+    private AddMessagingConnector(GenericBuilder builder) {
+        super(builder, TransportConfigItem.CONNECTOR);
     }
 
-    private AddConnector(RemoteBuilder builder) {
-        super(builder);
-    }
-
-    @Override
-    protected TransportConfigItem getConfigType() {
-        return TransportConfigItem.CONNECTOR;
+    private AddMessagingConnector(RemoteBuilder builder) {
+        super(builder, TransportConfigItem.CONNECTOR);
     }
 
     public static final class InVmBuilder extends AbstractTransportConfigAddCommand.InVmBuilder<InVmBuilder> {
@@ -33,8 +28,9 @@ public final class AddConnector extends AbstractTransportConfigAddCommand {
         }
 
         @Override
-        public AddConnector build() {
-            return new AddConnector(validate());
+        public AddMessagingConnector build() {
+            validate();
+            return new AddMessagingConnector(this);
         }
     }
 
@@ -49,8 +45,9 @@ public final class AddConnector extends AbstractTransportConfigAddCommand {
         }
 
         @Override
-        public AddConnector build() {
-            return new AddConnector(this);
+        public AddMessagingConnector build() {
+            validate();
+            return new AddMessagingConnector(this);
         }
     }
 
@@ -65,8 +62,9 @@ public final class AddConnector extends AbstractTransportConfigAddCommand {
         }
 
         @Override
-        public AddConnector build() {
-            return new AddConnector(this);
+        public AddMessagingConnector build() {
+            validate();
+            return new AddMessagingConnector(this);
         }
     }
 }

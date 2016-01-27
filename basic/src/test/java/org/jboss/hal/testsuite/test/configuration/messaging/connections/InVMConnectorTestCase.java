@@ -6,7 +6,7 @@ import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
-import org.jboss.hal.testsuite.creaper.command.AddConnector;
+import org.jboss.hal.testsuite.creaper.command.messaging.AddMessagingConnector;
 import org.jboss.hal.testsuite.page.config.MessagingPage;
 import org.jboss.hal.testsuite.test.configuration.messaging.AbstractMessagingTestCase;
 import org.junit.After;
@@ -46,11 +46,11 @@ public class InVMConnectorTestCase extends AbstractMessagingTestCase {
 
     @BeforeClass
     public static void setUp() throws CommandFailedException {
-        client.apply(new AddConnector.InVmBuilder(IN_VM_CONNECTOR)
+        client.apply(new AddMessagingConnector.InVmBuilder(IN_VM_CONNECTOR)
                 .serverId(ThreadLocalRandom.current().nextInt(100000))
                 .param(PROPERTY_TBR_KEY, "test")
                 .build());
-        client.apply(new AddConnector.InVmBuilder(IN_VM_CONNECTOR_TBR)
+        client.apply(new AddMessagingConnector.InVmBuilder(IN_VM_CONNECTOR_TBR)
                 .serverId(ThreadLocalRandom.current().nextInt(100000))
                 .build());
     }

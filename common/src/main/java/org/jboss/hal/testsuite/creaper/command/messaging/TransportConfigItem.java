@@ -1,4 +1,4 @@
-package org.jboss.hal.testsuite.creaper.command;
+package org.jboss.hal.testsuite.creaper.command.messaging;
 
 enum TransportConfigItem {
     CONNECTOR("connector"),

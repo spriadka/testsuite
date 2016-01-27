@@ -6,7 +6,7 @@ import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
-import org.jboss.hal.testsuite.creaper.command.AddConnector;
+import org.jboss.hal.testsuite.creaper.command.messaging.AddMessagingConnector;
 import org.jboss.hal.testsuite.page.config.MessagingPage;
 import org.jboss.hal.testsuite.test.configuration.messaging.AbstractMessagingTestCase;
 import org.junit.After;
@@ -44,12 +44,12 @@ public class GenericConnectorTestCase extends AbstractMessagingTestCase {
 
     @BeforeClass
     public static void setUp() throws CommandFailedException {
-        client.apply(new AddConnector.GenericBuilder(GENERIC_CONNECTOR)
+        client.apply(new AddMessagingConnector.GenericBuilder(GENERIC_CONNECTOR)
                 .param(PROPERTY_TBR_KEY, "testThis")
                 .socketBinding(createSocketBinding())
                 .factoryClass(FACTORY_CLASS)
                 .build());
-        client.apply(new AddConnector.GenericBuilder(GENERIC_CONNECTOR_TBR)
+        client.apply(new AddMessagingConnector.GenericBuilder(GENERIC_CONNECTOR_TBR)
                 .param(PROPERTY_TBR_KEY, "testThis")
                 .socketBinding(createSocketBinding())
                 .factoryClass(FACTORY_CLASS)
