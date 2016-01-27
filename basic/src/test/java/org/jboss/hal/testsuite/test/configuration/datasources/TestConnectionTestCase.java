@@ -73,6 +73,7 @@ public class TestConnectionTestCase extends AbstractTestConnectionTestCase {
         Console.withBrowser(browser).waitUntilLoaded();
         datasourcesPage.selectMenu("Non-XA");
         Console.withBrowser(browser).waitUntilLoaded();
+        Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
     }
 
     @After
