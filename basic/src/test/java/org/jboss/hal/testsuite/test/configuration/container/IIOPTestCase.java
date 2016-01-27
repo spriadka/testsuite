@@ -212,7 +212,7 @@ public class IIOPTestCase {
         page.waitUntilPropertiesAreVisible();
         ConfigPropertyWizard wizard = properties.addProperty();
 
-        boolean result = wizard.name(KEY_VALUE).value(VALUE).finishAndDismissReloadRequiredWindow();
+        boolean result = wizard.name(KEY_VALUE).value(VALUE).saveAndDismissReloadRequiredWindow();
 
         assertTrue("Property should be added and wizard closed.", result);
 
