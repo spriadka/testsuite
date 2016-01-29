@@ -34,7 +34,7 @@ public class MessagingProviderTestCase {
     private static final String PASSWORD = "12345";
 
     private ModelNode path = new ModelNode("/subsystem=messaging-activemq/server=" + NAME );
-    private ModelNode domainPath = new ModelNode("/profile=full-ha/subsystem=messaging-activemq/server=" + NAME);
+    private ModelNode domainPath = new ModelNode("/profile=full/subsystem=messaging-activemq/server=" + NAME);
     private ResourceAddress address;
     private static Dispatcher dispatcher;
     private static ResourceVerifier verifier;
