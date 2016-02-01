@@ -43,7 +43,7 @@ public class JDBCTestCase extends TransactionsTestCaseAbstract {
     private final String JDBC_COMMUNICATION_STORE_TABLE_PREFIX_ATTR = "jdbc-communication-store-table-prefix";
     private final String JDBC_STATE_STORE_DROP_TABLE_ATTR = "jdbc-state-store-drop-table";
     private final String JDBC_STATE_STORE_TABLE_PREFIX_ATTR = "jdbc-state-store-table-prefix";
-    private final String JDBC_STORE_DATASOURCE_ATTR = "jdbc-store-datasource";
+    private static final String JDBC_STORE_DATASOURCE_ATTR = "jdbc-store-datasource";
 
     @Drone
     public WebDriver browser;
@@ -131,6 +131,10 @@ public class JDBCTestCase extends TransactionsTestCaseAbstract {
                 .param(NAME, USE_JDBC_STORE_ATTR)
                 .param(VALUE, true)
                 .build();
-        dispatcher.execute(new Composite(disableUseJournalStore, enableUseJDBCStore));
+        Operation setJDBCStoreDatasource = new Operation.Builder(WRITE_ATTRIBUTE_OPERATION, address)
+                .param(NAME, JDBC_STORE_DATASOURCE_ATTR)
+                .param(VALUE, "ExampleDS")
+                .build();
+        dispatcher.execute(new Composite(disableUseJournalStore, enableUseJDBCStore, setJDBCStoreDatasource));
     }
 }
