@@ -3,14 +3,17 @@ package org.jboss.hal.testsuite.test.configuration.infinispan;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Shared;
-import org.jboss.hal.testsuite.dmr.AddressTemplate;
-import org.jboss.hal.testsuite.dmr.Operation;
+import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.fragment.config.infinispan.CacheWizard;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
+import org.wildfly.extras.creaper.core.online.operations.OperationException;
+import org.wildfly.extras.creaper.core.online.operations.Values;
+
+import java.io.IOException;
 
 /**
  * @author mkrajcov <mkrajcov@redhat.com>
@@ -21,7 +24,7 @@ public class LocalCacheTestCase extends AbstractCacheTestCase {
 
     @Override
     @Test
-    public void createCache() {
+    public void createCache() throws Exception {
         String name = "cn_" + RandomStringUtils.randomAlphanumeric(5);
         CacheWizard wizard = page.content().addCache();
 
@@ -29,12 +32,17 @@ public class LocalCacheTestCase extends AbstractCacheTestCase {
                 .finish();
 
         Assert.assertTrue("Window should be closed", result);
-        reloadIfRequiredAndWaitForRunning();
-        validVerifier.verifyResource(cacheAddress.resolve(context, name));
+        administration.reloadIfRequired();
+        new ResourceVerifier(cacheAddress, client).verifyExists();
 
         page.content().getResourceManager().removeResourceAndConfirm(name);
-        reloadIfRequiredAndWaitForRunning();
-        validVerifier.verifyResource(cacheAddress.resolve(context, name), false);
+        administration.reloadIfRequired();
+        new ResourceVerifier(cacheAddress, client).verifyDoesNotExist();
+    }
+
+    @Override
+    protected CacheType getCacheType() {
+        return CacheType.LOCAL;
     }
 
     @Before
@@ -42,22 +50,15 @@ public class LocalCacheTestCase extends AbstractCacheTestCase {
         page.local();
     }
 
-    @Override
-    protected AddressTemplate getCacheTemplate() {
-        return ABSTRACT_CACHE_TEMPLATE.append("/local-cache=*");
+    public void addCache() throws IOException {
+        operations.add(cacheAddress, Values.of("mode", "SYNC"));
+        operations.add(transactionAddress);
+        operations.add(storeAddress, Values.of("class", "org.infinispan.configuration.cache.SingleFileStoreConfigurationBuilder"));
+        operations.add(lockingAddress);
     }
 
-    public void addCache() {
-        dispatcher.execute(new Operation.Builder("add", cacheAddress.resolve(context, cacheName)).build());
-        dispatcher.execute(new Operation.Builder("add", transactionTemplate.resolve(context, cacheName)).build());
-        dispatcher.execute(new Operation.Builder("add", storeTemplate.resolve(context, cacheName))
-                .param("class", "org.infinispan.configuration.cache.SingleFileStoreConfigurationBuilder")
-                .build());
-        dispatcher.execute(new Operation.Builder("add", lockingTemplate.resolve(context, cacheName)).build());
-    }
-
-    public void deleteCache() {
-        dispatcher.execute(new Operation.Builder("remove", cacheAddress.resolve(context, cacheName)).build());
+    public void deleteCache() throws IOException, OperationException {
+        operations.removeIfExists(cacheAddress);
     }
 }
 

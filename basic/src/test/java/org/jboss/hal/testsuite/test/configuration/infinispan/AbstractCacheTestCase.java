@@ -3,19 +3,11 @@ package org.jboss.hal.testsuite.test.configuration.infinispan;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
-import org.jboss.hal.testsuite.cli.CliClient;
-import org.jboss.hal.testsuite.cli.CliClientFactory;
-import org.jboss.hal.testsuite.cli.DomainManager;
-import org.jboss.hal.testsuite.dmr.AddressTemplate;
-import org.jboss.hal.testsuite.dmr.DefaultContext;
-import org.jboss.hal.testsuite.dmr.Dispatcher;
-import org.jboss.hal.testsuite.dmr.ResourceAddress;
-import org.jboss.hal.testsuite.dmr.ResourceVerifier;
-import org.jboss.hal.testsuite.dmr.StatementContext;
+import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
+import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.config.infinispan.CacheWizard;
 import org.jboss.hal.testsuite.page.config.HibernateCachePage;
-import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -23,26 +15,34 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.openqa.selenium.WebDriver;
+import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
+import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.OperationException;
+import org.wildfly.extras.creaper.core.online.operations.Operations;
+import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
+
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
 /**
  * @author mkrajcov <mkrajcov@redhat.com>
  */
 public abstract class AbstractCacheTestCase {
 
-    protected static final AddressTemplate ABSTRACT_CACHE_TEMPLATE = AddressTemplate.of("{default.profile}/subsystem=infinispan/cache-container=hibernate");
+    protected static final Address ABSTRACT_CACHE_ADDRESS = Address.subsystem("infinispan").and("cache-container", "hibernate");
 
     protected final String cacheName = "cache_" + RandomStringUtils.randomAlphanumeric(5);
-    protected final AddressTemplate cacheAddress = getCacheTemplate();
+    protected final String cacheTypeAddress = getCacheType().getAddressName();
+    protected final Address cacheAddress = ABSTRACT_CACHE_ADDRESS.and(cacheTypeAddress, cacheName);
 
-    protected final AddressTemplate lockingTemplate = cacheAddress.append("/locking=LOCKING");
-    protected final AddressTemplate transactionTemplate = cacheAddress.append("/transaction=TRANSACTION");
-    protected final AddressTemplate storeTemplate = cacheAddress.append("/store=STORE");
+    protected final Address lockingAddress = cacheAddress.and("locking", "LOCKING");
+    protected final Address transactionAddress = cacheAddress.and("transaction", "TRANSACTION");
+    protected final Address storeAddress = cacheAddress.and("store", "STORE");
 
-    protected CliClient client = CliClientFactory.getClient();
+    protected static OnlineManagementClient client;
+    protected static Administration administration;
+    protected static Operations operations;
 
-    protected static Dispatcher dispatcher;
-    protected static ResourceVerifier validVerifier;
-    protected StatementContext context = new DefaultContext();
 
     @Drone
     public WebDriver browser;
@@ -52,32 +52,33 @@ public abstract class AbstractCacheTestCase {
 
     @BeforeClass
     public static void beforeClass() {
-        dispatcher = new Dispatcher();
-        validVerifier = new ResourceVerifier(dispatcher);
+        client = ManagementClientProvider.createOnlineManagementClient();
+        operations = new Operations(client);
+        administration = new Administration(client);
     }
 
     @Before
-    public void before() {
+    public void before() throws InterruptedException, TimeoutException, IOException {
         addCache();
-        reloadIfRequiredAndWaitForRunning();
+        administration.reloadIfRequired();
         page.navigate();
         page.selectCache(cacheName);
     }
 
     @After
-    public void after() {
+    public void after() throws InterruptedException, TimeoutException, IOException, OperationException {
         deleteCache();
-        reloadIfRequiredAndWaitForRunning();
+        administration.reloadIfRequired();
     }
 
     @AfterClass
-    public static void tearDown() {
-        dispatcher.close();
+    public static void tearDown() throws IOException {
+        client.close();
     }
 
 
     @Test
-    public void createCache() {
+    public void createCache() throws Exception {
         String name = "cn_" + RandomStringUtils.randomAlphanumeric(5);
 
         CacheWizard wizard = page.content().addCache();
@@ -87,166 +88,164 @@ public abstract class AbstractCacheTestCase {
                 .finish();
 
         Assert.assertTrue("Window should be closed", result);
-        validVerifier.verifyResource(cacheAddress.resolve(context, name));
+        new ResourceVerifier(ABSTRACT_CACHE_ADDRESS.and(cacheTypeAddress, name), client).verifyExists();
 
         page.content().getResourceManager().removeResourceAndConfirm(name);
-        validVerifier.verifyResource(cacheAddress.resolve(context, name), false);
+        new ResourceVerifier(ABSTRACT_CACHE_ADDRESS.and(cacheTypeAddress, name), client).verifyDoesNotExist();
     }
 
     //ATTRIBUTES
     @Test
-    public void editJndiName() {
-        ResourceAddress address = cacheAddress.resolve(context, cacheName);
-        editTextAndVerify(address, "jndi-name", "java:/" + cacheName);
+    public void editJndiName() throws Exception {
+        editTextAndVerify(cacheAddress, "jndi-name", "java:/" + cacheName);
     }
 
     //STORE
     @Test
-    public void editShared() {
+    public void editShared() throws Exception {
         page.getConfig().switchTo("Store");
         page.selectCache(cacheName);
-        ResourceAddress address = storeTemplate.resolve(context, cacheName);
-        editCheckboxAndVerify(address, "shared", true);
+        editCheckboxAndVerify(storeAddress, "shared", true);
         page.selectCache(cacheName);
-        editCheckboxAndVerify(address, "shared", false);
+        editCheckboxAndVerify(storeAddress, "shared", false);
     }
 
     @Test
-    public void editPassivation() {
+    public void editPassivation() throws Exception {
         page.getConfig().switchTo("Store");
         page.selectCache(cacheName);
-        ResourceAddress address = storeTemplate.resolve(context, cacheName);
-        editCheckboxAndVerify(address, "passivation", true);
+        editCheckboxAndVerify(storeAddress, "passivation", true);
         page.selectCache(cacheName);
-        editCheckboxAndVerify(address, "passivation", false);
+        editCheckboxAndVerify(storeAddress, "passivation", false);
     }
 
     @Test
-    public void editPreload() {
+    public void editPreload() throws Exception {
         page.getConfig().switchTo("Store");
         page.selectCache(cacheName);
-        ResourceAddress address = storeTemplate.resolve(context, cacheName);
-        editCheckboxAndVerify(address, "preload", true);
+        editCheckboxAndVerify(storeAddress, "preload", true);
         page.selectCache(cacheName);
-        editCheckboxAndVerify(address, "preload", false);
+        editCheckboxAndVerify(storeAddress, "preload", false);
     }
 
     @Test
-    public void editFetchState() {
+    public void editFetchState() throws Exception {
         page.getConfig().switchTo("Store");
         page.selectCache(cacheName);
-        ResourceAddress address = storeTemplate.resolve(context, cacheName);
-        editCheckboxAndVerify(address, "fetch-state", true);
+        editCheckboxAndVerify(storeAddress, "fetch-state", true);
         page.selectCache(cacheName);
-        editCheckboxAndVerify(address, "fetch-state", false);
+        editCheckboxAndVerify(storeAddress, "fetch-state", false);
     }
 
     @Test
-    public void editPurge() {
+    public void editPurge() throws Exception {
         page.getConfig().switchTo("Store");
         page.selectCache(cacheName);
-        ResourceAddress address = storeTemplate.resolve(context, cacheName);
-        editCheckboxAndVerify(address, "purge", true);
+        editCheckboxAndVerify(storeAddress, "purge", true);
         page.selectCache(cacheName);
-        editCheckboxAndVerify(address, "purge", false);
+        editCheckboxAndVerify(storeAddress, "purge", false);
     }
 
     @Test
-    public void editSingleton() {
+    public void editSingleton() throws Exception {
         page.getConfig().switchTo("Store");
         page.selectCache(cacheName);
-        ResourceAddress address = storeTemplate.resolve(context, cacheName);
-        editCheckboxAndVerify(address, "singleton", true);
+        editCheckboxAndVerify(storeAddress, "singleton", true);
         page.selectCache(cacheName);
-        editCheckboxAndVerify(address, "singleton", false);
+        editCheckboxAndVerify(storeAddress, "singleton", false);
     }
 
     //LOCKING
     @Test
-    public void editConcurrencyLevel() {
+    public void editConcurrencyLevel() throws Exception {
         page.getConfig().switchTo("Locking");
         page.selectCache(cacheName);
-        ResourceAddress address = lockingTemplate.resolve(context, cacheName);
-        editTextAndVerify(address, "concurrency-level", "1");
+        editTextAndVerify(lockingAddress, "concurrency-level", 1);
         verifyIfErrorAppears("concurrency-level", "-1");
     }
 
     @Test
-    public void editIsolation() {
+    public void editIsolation() throws Exception {
         page.getConfig().switchTo("Locking");
         page.selectCache(cacheName);
-        ResourceAddress address = lockingTemplate.resolve(context, cacheName);
-        selectOptionAndVerify(address, "isolation", "REPEATABLE_READ");
+        selectOptionAndVerify(lockingAddress, "isolation", "REPEATABLE_READ");
         page.selectCache(cacheName);
-        selectOptionAndVerify(address, "isolation", "NONE");
+        selectOptionAndVerify(lockingAddress, "isolation", "NONE");
         page.selectCache(cacheName);
-        selectOptionAndVerify(address, "isolation", "SERIALIZABLE");
+        selectOptionAndVerify(lockingAddress, "isolation", "SERIALIZABLE");
     }
 
 
     @Test
-    public void editStriping() {
+    public void editStriping() throws Exception {
         page.getConfig().switchTo("Locking");
         page.selectCache(cacheName);
-        ResourceAddress address = lockingTemplate.resolve(context, cacheName);
-        editCheckboxAndVerify(address, "striping", true);
+        editCheckboxAndVerify(lockingAddress, "striping", true);
         page.selectCache(cacheName);
-        editCheckboxAndVerify(address, "striping", false);
+        editCheckboxAndVerify(lockingAddress, "striping", false);
     }
 
     @Test
-    public void editAcquireTimeout() {
+    public void editAcquireTimeout() throws Exception {
         page.getConfig().switchTo("Locking");
         page.selectCache(cacheName);
-        ResourceAddress address = lockingTemplate.resolve(context, cacheName);
         verifyIfErrorAppears("acquire-timeout", "-1");
         page.selectCache(cacheName);
-        editTextAndVerify(address, "acquire-timeout", "5000");
+        editTextAndVerify(lockingAddress, "acquire-timeout", 5000L);
     }
 
     //TRANSACTION
     @Test
-    public void editMode() {
+    public void editMode() throws Exception {
         page.getConfig().switchTo("Transaction");
         page.selectCache(cacheName);
-        ResourceAddress address = transactionTemplate.resolve(context, cacheName);
-        selectOptionAndVerify(address, "mode", "NONE");
+        selectOptionAndVerify(transactionAddress, "mode", "NONE");
         page.selectCache(cacheName);
-        selectOptionAndVerify(address, "mode", "NON_XA");
+        selectOptionAndVerify(transactionAddress, "mode", "NON_XA");
     }
 
     @Test
-    public void editLocking() {
+    public void editLocking() throws Exception {
         page.getConfig().switchTo("Transaction");
         page.selectCache(cacheName);
-        ResourceAddress address = transactionTemplate.resolve(context, cacheName);
-        selectOptionAndVerify(address, "locking", "OPTIMISTIC");
+        selectOptionAndVerify(transactionAddress, "locking", "OPTIMISTIC");
         page.selectCache(cacheName);
-        selectOptionAndVerify(address, "locking", "PESSIMISTIC");
+        selectOptionAndVerify(transactionAddress, "locking", "PESSIMISTIC");
     }
 
     @Test
-    public void editStopTimeout() {
+    public void editStopTimeout() throws Exception {
         page.getConfig().switchTo("Transaction");
         page.selectCache(cacheName);
-        ResourceAddress address = transactionTemplate.resolve(context, cacheName);
-        editTextAndVerify(address, "stop-timeout", "13400");
+        editTextAndVerify(transactionAddress, "stop-timeout", 13400L);
         page.selectCache(cacheName);
         verifyIfErrorAppears("stop-timeout", "150asdf50");
         page.selectCache(cacheName);
         verifyIfErrorAppears("stop-timeout", "-15000");
     }
 
-    protected void editTextAndVerify(ResourceAddress address, String identifier, String value) {
+    protected void editTextAndVerify(Address address, String identifier, String value) throws Exception {
         page.editTextAndSave(identifier, value);
-        reloadIfRequiredAndWaitForRunning();
-        validVerifier.verifyAttribute(address, identifier, value);
+        administration.reloadIfRequired();
+        new ResourceVerifier(address, client).verifyAttribute(identifier, value);
     }
 
-    protected void selectOptionAndVerify(ResourceAddress address, String identifier, String value) {
+    protected void editTextAndVerify(Address address, String identifier, int value) throws Exception {
+        page.editTextAndSave(identifier, String.valueOf(value));
+        administration.reloadIfRequired();
+        new ResourceVerifier(address, client).verifyAttribute(identifier, value);
+    }
+
+    protected void editTextAndVerify(Address address, String identifier, long value) throws Exception {
+        page.editTextAndSave(identifier, String.valueOf(value));
+        administration.reloadIfRequired();
+        new ResourceVerifier(address, client).verifyAttribute(identifier, value);
+    }
+
+    protected void selectOptionAndVerify(Address address, String identifier, String value) throws Exception {
         page.selectOptionAndSave(identifier, value);
-        reloadIfRequiredAndWaitForRunning();
-        validVerifier.verifyAttribute(address, identifier, value);
+        administration.reloadIfRequired();
+        new ResourceVerifier(address, client).verifyAttribute(identifier, value);
     }
 
     protected void verifyIfErrorAppears(String identifier, String value) {
@@ -256,24 +255,16 @@ public abstract class AbstractCacheTestCase {
         config.cancel();
     }
 
-    protected void editCheckboxAndVerify(ResourceAddress address, String identifier, Boolean value) {
+    protected void editCheckboxAndVerify(Address address, String identifier, Boolean value) throws Exception {
         page.editCheckboxAndSave(identifier, value);
-        reloadIfRequiredAndWaitForRunning();
-        validVerifier.verifyAttribute(address, identifier, value.toString());
+        administration.reloadIfRequired();
+        new ResourceVerifier(address, client).verifyAttribute(identifier, value);
     }
 
-    protected abstract AddressTemplate getCacheTemplate();
+    protected abstract CacheType getCacheType();
 
-    public abstract void addCache();
+    public abstract void addCache() throws IOException;
 
-    public abstract void deleteCache();
+    public abstract void deleteCache() throws IOException, OperationException;
 
-    protected void reloadIfRequiredAndWaitForRunning() {
-        int timeout = 60000;
-        if (ConfigUtils.isDomain()) {
-            new DomainManager(client).reloadAndWaitUntilRunning(timeout);
-        } else {
-            client.reload(false);
-        }
-    }
 }
