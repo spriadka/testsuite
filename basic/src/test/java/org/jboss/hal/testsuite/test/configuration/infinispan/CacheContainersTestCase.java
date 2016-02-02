@@ -87,82 +87,91 @@ public class CacheContainersTestCase {
     @Test
     public void editJndiName() throws IOException, InterruptedException, TimeoutException, Exception {
         String attributeName = "jndi-name";
+        String attributeValue = JNDI_NAME;
         addCacheContainer();
         page.navigate();
         page.invokeContainerSettings(CACHE_CONTAINER_NAME);
-        ConfigChecker.edit(page.getSettingsConfig(), InputType.TEXT, attributeName, JNDI_NAME, cacheContainerAddress, client)
+        new ConfigChecker.Builder(client, cacheContainerAddress).configFragment(page.getSettingsConfig())
+            .editAndSave(InputType.TEXT, attributeName, attributeValue)
             .verifyFormSaved()
-            .verifyAttribute(attributeName, JNDI_NAME);
+            .verifyAttribute(attributeName, attributeValue);
     }
 
     @Test
     public void editDefaultCache() throws IOException, InterruptedException, TimeoutException, Exception {
         String attributeName = "default-cache";
-        String cacheNameValue = "infDefCache_" + RandomStringUtils.randomAlphanumeric(5);
+        String attributeValue = "infDefCache_" + RandomStringUtils.randomAlphanumeric(5);
         addCacheContainer();
         page.navigate();
         page.invokeContainerSettings(CACHE_CONTAINER_NAME);
-        ConfigChecker.edit(page.getSettingsConfig(), InputType.TEXT, attributeName, cacheNameValue, cacheContainerAddress, client)
+        new ConfigChecker.Builder(client, cacheContainerAddress).configFragment(page.getSettingsConfig())
+            .editAndSave(InputType.TEXT, attributeName, attributeValue)
             .verifyFormSaved()
-            .verifyAttribute(attributeName, cacheNameValue);
+            .verifyAttribute(attributeName, attributeValue);
     }
 
     @Test
     public void editModule() throws IOException, InterruptedException, TimeoutException, Exception {
         String attributeName = "default-cache";
-        String moduleNameValue = "infModule" + RandomStringUtils.randomAlphanumeric(5);
+        String attributeValue = "infModule" + RandomStringUtils.randomAlphanumeric(5);
         addCacheContainer();
         page.navigate();
         page.invokeContainerSettings(CACHE_CONTAINER_NAME);
-        ConfigChecker.edit(page.getSettingsConfig(), InputType.TEXT, attributeName, moduleNameValue, cacheContainerAddress, client)
+        new ConfigChecker.Builder(client, cacheContainerAddress).configFragment(page.getSettingsConfig())
+            .editAndSave(InputType.TEXT, attributeName, attributeValue)
             .verifyFormSaved()
-            .verifyAttribute(attributeName, moduleNameValue);
+            .verifyAttribute(attributeName, attributeValue);
     }
 
     @Test
     public void setStatisticsEnabledToTrue() throws IOException, InterruptedException, TimeoutException, Exception {
         String attributeName = "statistics-enabled";
+        boolean attributeValue = true;
         addCacheContainer();
         page.navigate();
         page.invokeContainerSettings(CACHE_CONTAINER_NAME);
-        ConfigChecker.edit(page.getSettingsConfig(), InputType.CHECKBOX, attributeName, true, cacheContainerAddress, client)
+        new ConfigChecker.Builder(client, cacheContainerAddress).configFragment(page.getSettingsConfig())
+            .editAndSave(InputType.CHECKBOX, attributeName, attributeValue)
             .verifyFormSaved()
-            .verifyAttribute(attributeName, true);
+            .verifyAttribute(attributeName, attributeValue);
     }
 
     @Test
     public void setStatisticsEnabledToFalse() throws InterruptedException, TimeoutException, Exception {
         String attributeName = "statistics-enabled";
+        boolean attributeValue = false;
         addCacheContainer();
         page.navigate();
         page.invokeContainerSettings(CACHE_CONTAINER_NAME);
-        ConfigChecker.edit(page.getSettingsConfig(), InputType.CHECKBOX, attributeName, false, cacheContainerAddress, client)
+        new ConfigChecker.Builder(client, cacheContainerAddress).configFragment(page.getSettingsConfig())
+            .editAndSave(InputType.CHECKBOX, attributeName, attributeValue)
             .verifyFormSaved()
-            .verifyAttribute(attributeName, false);
+            .verifyAttribute(attributeName, attributeValue);
     }
 
     @Test
     public void editAliases() throws IOException, InterruptedException, TimeoutException, Exception {
         String attributeName = "aliases";
-        ModelNode aliasesNode = new ModelNode().add("this").add("that");
         addCacheContainer();
         page.navigate();
         page.invokeContainerSettings(CACHE_CONTAINER_NAME);
-        ConfigChecker.edit(page.getSettingsConfig(), InputType.TEXT, attributeName, "this\nthat", cacheContainerAddress, client)
+        new ConfigChecker.Builder(client, cacheContainerAddress).configFragment(page.getSettingsConfig())
+            .editAndSave(InputType.TEXT, attributeName, "this\nthat")
             .verifyFormSaved()
-            .verifyAttribute(attributeName, aliasesNode);
+            .verifyAttribute(attributeName, new ModelNode().add("this").add("that"));
     }
 
     @Test
     public void editLockTimeout() throws IOException, InterruptedException, TimeoutException, Exception {
         String attributeName = "lock-timeout";
-        long timeoutValue = 3600000;
+        long attributeValue = 3600000;
         addCacheContainer();
         page.navigate();
         page.invokeTransportSettings(CACHE_CONTAINER_NAME);
-        ConfigChecker.edit(page.getSettingsConfig(), InputType.TEXT, attributeName, timeoutValue, transportAddress, client)
+        new ConfigChecker.Builder(client, transportAddress).configFragment(page.getSettingsConfig())
+            .editAndSave(InputType.TEXT, attributeName, attributeValue)
             .verifyFormSaved()
-            .verifyAttribute(attributeName, timeoutValue);
+            .verifyAttribute(attributeName, attributeValue);
     }
 
     @Test
@@ -172,7 +181,8 @@ public class CacheContainersTestCase {
         addCacheContainer();
         page.navigate();
         page.invokeTransportSettings(CACHE_CONTAINER_NAME);
-        ConfigChecker.edit(page.getSettingsConfig(), InputType.TEXT, attributeName, attributeValue, transportAddress, client)
+        new ConfigChecker.Builder(client, transportAddress).configFragment(page.getSettingsConfig())
+            .editAndSave(InputType.TEXT, attributeName, attributeValue)
             .verifyFormSaved()
             .verifyAttribute(attributeName, attributeValue);
     }

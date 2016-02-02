@@ -36,18 +36,9 @@ import org.wildfly.extras.creaper.core.online.operations.Address;
  */
 public final class ConfigChecker {
 
-    private OnlineManagementClient client;
-    private Address resourceAddress;
+    private final OnlineManagementClient client;
+    private final Address resourceAddress;
     private boolean saved;
-
-    /**
-     * Edits field identified by <b>{@code attrName}</b> with <b>{@code attrValue}</b> and try to save.
-     */
-    public static ConfigChecker edit(ConfigFragment config, InputType inputType, String attrName, Object attrValue,
-            Address resourceAddress, OnlineManagementClient client) throws IOException, InterruptedException,
-            TimeoutException {
-        return new ConfigChecker(client, config, inputType, resourceAddress, attrName, attrValue);
-    }
 
     /**
      * Verifies that form switch back to read-only mode.
@@ -67,13 +58,12 @@ public final class ConfigChecker {
         return new ResourceVerifier(resourceAddress, client);
     }
 
-    private ConfigChecker(OnlineManagementClient client, ConfigFragment config, InputType inputType,
-            Address resourceAddress, String identifier, Object attrValue)
+    private ConfigChecker(Builder builder)
             throws IOException, InterruptedException, TimeoutException {
-        this.client = client;
-        this.resourceAddress = resourceAddress;
-        attrValue = getAttrValue(attrValue, inputType);
-        edit(inputType, config, identifier, attrValue);
+        this.client = builder.client;
+        this.resourceAddress = builder.resourceAddress;
+        Object attrValue = getAttrValue(builder.attrValue, builder.inputType);
+        edit(builder.config, builder.inputType, builder.identifier, attrValue);
     }
 
     private Object getAttrValue(Object attrValue, InputType inputType) {
@@ -99,7 +89,7 @@ public final class ConfigChecker {
         }
     }
 
-    private void edit(InputType inputType, ConfigFragment config, String identifier, Object attrValue) throws IOException, InterruptedException, TimeoutException {
+    private void edit(ConfigFragment config, InputType inputType, String identifier, Object attrValue) throws IOException, InterruptedException, TimeoutException {
         switch (inputType) {
             case TEXT:
                 saved = config.editTextAndSave(identifier, (String) attrValue); break;
@@ -115,5 +105,41 @@ public final class ConfigChecker {
 
     public enum InputType {
         TEXT, SELECT, CHECKBOX;
+    }
+
+    public static class Builder {
+        private final OnlineManagementClient client;
+        private final Address resourceAddress;
+        private ConfigFragment config;
+        private InputType inputType;
+        private String identifier;
+        private Object attrValue;
+
+        public Builder(OnlineManagementClient client, Address resourceAddress) {
+            this.client = client;
+            this.resourceAddress = resourceAddress;
+        }
+
+        /**
+         * setter for {@link ConfigFragment}
+         */
+        public Builder configFragment(ConfigFragment config) {
+            this.config = config;
+            return this;
+        }
+
+        /**
+         * Edits field identified by <b>{@code attrName}</b> with <b>{@code attrValue}</b> and try to save.
+         */
+        public ConfigChecker editAndSave(InputType inputType, String identifier, Object attrValue) throws IOException,
+            InterruptedException, TimeoutException {
+            if (config == null) {
+                throw new IllegalStateException("ConfigFragment has to be set!");
+            }
+            this.inputType = inputType;
+            this.identifier = identifier;
+            this.attrValue = attrValue;
+            return new ConfigChecker(this);
+        }
     }
 }
