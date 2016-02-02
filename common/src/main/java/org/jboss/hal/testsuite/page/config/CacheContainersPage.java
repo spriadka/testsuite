@@ -1,9 +1,11 @@
 package org.jboss.hal.testsuite.page.config;
 
 import org.jboss.arquillian.graphene.Graphene;
+import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.arquillian.graphene.page.Location;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
+import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.config.infinispan.CacheContainerWizard;
 import org.jboss.hal.testsuite.fragment.config.infinispan.CacheContainersFragment;
 import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
@@ -13,6 +15,7 @@ import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.PropUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
+import org.openqa.selenium.WebElement;
 
 /**
  * @author mkrajcov <mkrajcov@redhat.com>
@@ -67,5 +70,11 @@ public class CacheContainersPage extends ConfigurationPage implements Navigatabl
         } catch (TimeoutException ignored) {
         }
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
+    }
+
+    public ConfigFragment getSettingsConfig() {
+        By selector = ByJQuery.selector("." + PropUtils.get("page.content.rhs.class") + ":visible");
+        WebElement formRoot = browser.findElement(selector);
+        return Graphene.createPageFragment(ConfigFragment.class, formRoot);
     }
 }
