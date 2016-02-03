@@ -1,7 +1,6 @@
 package org.jboss.hal.testsuite.test.configuration.messaging.destinations;
 
 import org.apache.commons.lang.RandomStringUtils;
-import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Shared;
@@ -15,7 +14,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
-import org.openqa.selenium.WebDriver;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.OperationException;
 import org.wildfly.extras.creaper.core.online.operations.Values;
@@ -39,8 +37,6 @@ public class ConnectionFactoriesTestCase extends AbstractMessagingTestCase {
     private static final String JNDI_NAME_TBA = "java:/jndi-cf-" + RandomStringUtils.randomAlphanumeric(5);
     private static final String CONNECTOR_TBA = "http-connector";
 
-    @Drone
-    private WebDriver browser;
     @Page
     private MessagingPage page;
 

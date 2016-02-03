@@ -1,7 +1,6 @@
 package org.jboss.hal.testsuite.test.configuration.messaging.destinations;
 
 import org.apache.commons.lang.RandomStringUtils;
-import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Shared;
@@ -15,7 +14,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
-import org.openqa.selenium.WebDriver;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.OperationException;
 
@@ -34,8 +32,6 @@ public class AddressSettingsTestCase extends AbstractMessagingTestCase {
     private static final Address PATTERN_TBA_ADDRESS = DEFAULT_MESSAGING_SERVER.and("address-setting", PATTERN_TBA);
     private static final Address PATTERN_TBR_ADDRESS = DEFAULT_MESSAGING_SERVER.and("address-setting", PATTERN_TBR);
 
-    @Drone
-    private WebDriver browser;
     @Page
     private MessagingPage page;
 

@@ -1,7 +1,6 @@
 package org.jboss.hal.testsuite.test.configuration.messaging.connections;
 
 import org.apache.commons.lang.RandomStringUtils;
-import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Shared;
@@ -17,7 +16,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
-import org.openqa.selenium.WebDriver;
 import org.wildfly.extras.creaper.core.CommandFailedException;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.OperationException;
@@ -62,8 +60,6 @@ public class InVMConnectorTestCase extends AbstractMessagingTestCase {
         operations.removeIfExists(IN_VM_CONNECTOR_ADDRESS_TBR);
     }
 
-    @Drone
-    private WebDriver browser;
     @Page
     private MessagingPage page;
 

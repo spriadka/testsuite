@@ -1,7 +1,6 @@
 package org.jboss.hal.testsuite.test.configuration.messaging.clustering;
 
 import org.apache.commons.lang.RandomStringUtils;
-import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.dmr.ModelNode;
@@ -15,7 +14,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
-import org.openqa.selenium.WebDriver;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.OperationException;
 import org.wildfly.extras.creaper.core.online.operations.Values;
@@ -41,8 +39,6 @@ public class BroadcastGroupsTestCase extends AbstractMessagingTestCase {
     private static final Address BG_TBA_ADDRESS = NEW_SERVER.and("broadcast-group", BG_TBA_NAME);
     private static final Address BG_TBR_ADDRESS = NEW_SERVER.and("broadcast-group", BG_TBR_NAME);
 
-    @Drone
-    private WebDriver browser;
     @Page
     private MessagingPage page;
 

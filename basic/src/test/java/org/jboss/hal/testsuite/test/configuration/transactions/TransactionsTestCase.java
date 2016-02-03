@@ -1,6 +1,5 @@
 package org.jboss.hal.testsuite.test.configuration.transactions;
 
-import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Shared;
@@ -9,7 +8,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
-import org.openqa.selenium.WebDriver;
 import org.wildfly.extras.creaper.core.CommandFailedException;
 
 import java.io.IOException;
@@ -41,9 +39,6 @@ public class TransactionsTestCase extends TransactionsTestCaseAbstract {
     private final String RECOVERY_LISTENER_ATTR = "recovery-listener";
     private final String OBJECT_STORE_PATH_ATTR = "object-store-path";
     private final String OBJECT_STORE_RELATIVE_TO_ATTR = "object-store-relative-to";
-
-    @Drone
-    public WebDriver browser;
 
     @Page
     public TransactionsPage page;

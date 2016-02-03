@@ -1,7 +1,6 @@
 package org.jboss.hal.testsuite.test.configuration.messaging.connections;
 
 import org.apache.commons.lang3.RandomStringUtils;
-import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Shared;
@@ -10,14 +9,12 @@ import org.jboss.hal.testsuite.creaper.command.messaging.AddMessagingConnector;
 import org.jboss.hal.testsuite.page.config.MessagingPage;
 import org.jboss.hal.testsuite.test.configuration.messaging.AbstractMessagingTestCase;
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
-import org.openqa.selenium.WebDriver;
 import org.wildfly.extras.creaper.core.CommandFailedException;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 
@@ -51,13 +48,6 @@ public class RemoteConnectorTestCase extends AbstractMessagingTestCase {
         administration.reloadIfRequired();
     }
 
-    @AfterClass
-    public static void tearDown() {
-
-    }
-
-    @Drone
-    private WebDriver browser;
     @Page
     private MessagingPage page;
 

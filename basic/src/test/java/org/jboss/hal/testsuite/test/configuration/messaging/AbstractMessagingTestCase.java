@@ -46,7 +46,7 @@ public abstract class AbstractMessagingTestCase {
     protected MessagingPage page;
 
     @Drone
-    private WebDriver browser;
+    protected WebDriver browser;
 
     @BeforeClass
     public static void beforeClass_() {

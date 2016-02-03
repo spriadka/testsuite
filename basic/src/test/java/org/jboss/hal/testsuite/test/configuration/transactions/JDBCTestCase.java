@@ -1,6 +1,5 @@
 package org.jboss.hal.testsuite.test.configuration.transactions;
 
-import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Shared;
@@ -12,8 +11,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
-import org.openqa.selenium.WebDriver;
-
 import java.io.IOException;
 
 import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.NAME;
@@ -44,9 +41,6 @@ public class JDBCTestCase extends TransactionsTestCaseAbstract {
     private final String JDBC_STATE_STORE_DROP_TABLE_ATTR = "jdbc-state-store-drop-table";
     private final String JDBC_STATE_STORE_TABLE_PREFIX_ATTR = "jdbc-state-store-table-prefix";
     private static final String JDBC_STORE_DATASOURCE_ATTR = "jdbc-store-datasource";
-
-    @Drone
-    public WebDriver browser;
 
     @Page
     public TransactionsPage page;
