@@ -1,27 +1,33 @@
 package org.jboss.hal.testsuite.test.configuration.infinispan;
 
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
+
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.arquillian.junit.InSequence;
+import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Shared;
-import org.jboss.hal.testsuite.cli.CliClient;
-import org.jboss.hal.testsuite.cli.CliClientFactory;
-import org.jboss.hal.testsuite.cli.CliUtils;
+import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
+import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.fragment.config.infinispan.CacheContainerWizard;
 import org.jboss.hal.testsuite.page.config.CacheContainersPage;
-import org.jboss.hal.testsuite.test.util.ConfigAreaChecker;
-import org.jboss.hal.testsuite.util.ConfigUtils;
-import org.jboss.hal.testsuite.util.ResourceVerifier;
+import org.jboss.hal.testsuite.util.ConfigChecker;
+import org.jboss.hal.testsuite.util.ConfigChecker.InputType;
 import org.junit.After;
-import org.junit.Before;
+import org.junit.AfterClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
+import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
+import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.OperationException;
+import org.wildfly.extras.creaper.core.online.operations.Operations;
+import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
 
-import static org.jboss.hal.testsuite.cli.CliConstants.CACHE_CONTAINER_ADDRESS;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -33,23 +39,14 @@ public class CacheContainersTestCase {
 
     private static final String CACHE_CONTAINER_NAME = "cc_" + RandomStringUtils.randomAlphabetic(5);
     private static final String JNDI_NAME = "java:/" + CACHE_CONTAINER_NAME;
-    private static final String START = "LAZY";
-    private static final String EVICTION_EXECUTOR = "ee_" + RandomStringUtils.randomAlphanumeric(5);
-    private static final String LISTENER_EXECUTOR = "le_" + RandomStringUtils.randomAlphanumeric(5);
-    private static final String REPLICATION_QUEUE_EXECUTOR = "rqe_" + RandomStringUtils.randomAlphanumeric(5);
-    private static final String TRANSPORT_VALUE = "1000";
-    private static final String ALIASES_VALUE = "this\nthat";
 
-    private final String cacheContainerName = "container_" + RandomStringUtils.randomAlphanumeric(5);
-    private final String profile = ConfigUtils.isDomain() ? "/profile=" + ConfigUtils.getDefaultProfile() : "";
-    private final String cacheContainerDmr = profile + CACHE_CONTAINER_ADDRESS + "=" + cacheContainerName;
-    private final String transportDmr = cacheContainerDmr + "/transport=TRANSPORT";
+    private static final OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
+    private final Operations ops = new Operations(client);
+    private final Administration adminOps = new Administration(client);
 
-    private CliClient client = CliClientFactory.getClient();
-    private ResourceVerifier attrVerifier = new ResourceVerifier(cacheContainerDmr, client);
-    private ConfigAreaChecker attrChecker = new ConfigAreaChecker(attrVerifier);
-    private ResourceVerifier transportVerifier = new ResourceVerifier(transportDmr, client);
-    private ConfigAreaChecker transportChecker = new ConfigAreaChecker(transportVerifier);
+    private final Address cacheContainerAddress = Address.subsystem("infinispan").and("cache-container",
+            CACHE_CONTAINER_NAME);
+    private final Address transportAddress = cacheContainerAddress.and("transport", "TRANSPORT");
 
     @Drone
     public WebDriver browser;
@@ -57,97 +54,146 @@ public class CacheContainersTestCase {
     @Page
     public CacheContainersPage page;
 
-    @Before
-    public void before_() {
-        addCacheContainer();
-        page.navigate();
+    @After
+    public void after() throws IOException, InterruptedException, TimeoutException, OperationException {
+        deleteCacheContainer();
+        adminOps.reloadIfRequired();
     }
 
-    @After
-    public void after() {
-        deleteCacheContainer();
+    @AfterClass
+    public static void afterClass() {
+        IOUtils.closeQuietly(client);
     }
 
     @Test
-    @InSequence(0)
-    public void createCacheContainer() {
+    public void createCacheContainer() throws Exception {
+        page.navigate();
         CacheContainerWizard wizard = page.invokeAddCacheContainer();
         boolean result = wizard.name(CACHE_CONTAINER_NAME).finish();
 
         assertTrue("Window should be closed.", result);
-        attrVerifier.verifyResource(CACHE_CONTAINER_ADDRESS + "=" + CACHE_CONTAINER_NAME, true);
+        new ResourceVerifier(cacheContainerAddress, client).verifyExists();
     }
 
 
     @Test
-    @InSequence(1)
-    public void removeCacheContainer() {
+    public void removeCacheContainer() throws Exception {
+        addCacheContainer();
+        page.navigate();
         page.removeCacheContainer(CACHE_CONTAINER_NAME);
-
-        attrVerifier.verifyResource(CACHE_CONTAINER_ADDRESS + "=" + CACHE_CONTAINER_NAME, false);
-
+        new ResourceVerifier(cacheContainerAddress, client).verifyDoesNotExist();
     }
 
     @Test
-    public void editJndiName() {
-        page.invokeContainerSettings(cacheContainerName);
-        attrChecker.editTextAndAssert(page, "jndi-name", JNDI_NAME).invoke();
+    public void editJndiName() throws IOException, InterruptedException, TimeoutException, Exception {
+        String attributeName = "jndi-name";
+        String attributeValue = JNDI_NAME;
+        addCacheContainer();
+        page.navigate();
+        page.invokeContainerSettings(CACHE_CONTAINER_NAME);
+        new ConfigChecker.Builder(client, cacheContainerAddress).configFragment(page.getSettingsConfig())
+            .editAndSave(InputType.TEXT, attributeName, attributeValue)
+            .verifyFormSaved()
+            .verifyAttribute(attributeName, attributeValue);
     }
 
     @Test
-    public void editDefaultCache() {
-        page.invokeContainerSettings(cacheContainerName);
-        attrChecker.editTextAndAssert(page, "default-cache", "infDefCache_" + RandomStringUtils.randomAlphanumeric(5)).invoke();
+    public void editDefaultCache() throws IOException, InterruptedException, TimeoutException, Exception {
+        String attributeName = "default-cache";
+        String attributeValue = "infDefCache_" + RandomStringUtils.randomAlphanumeric(5);
+        addCacheContainer();
+        page.navigate();
+        page.invokeContainerSettings(CACHE_CONTAINER_NAME);
+        new ConfigChecker.Builder(client, cacheContainerAddress).configFragment(page.getSettingsConfig())
+            .editAndSave(InputType.TEXT, attributeName, attributeValue)
+            .verifyFormSaved()
+            .verifyAttribute(attributeName, attributeValue);
     }
 
     @Test
-    public void editModule() {
-        page.invokeContainerSettings(cacheContainerName);
-        attrChecker.editTextAndAssert(page, "module", "infModule" + RandomStringUtils.randomAlphanumeric(5)).invoke();
+    public void editModule() throws IOException, InterruptedException, TimeoutException, Exception {
+        String attributeName = "default-cache";
+        String attributeValue = "infModule" + RandomStringUtils.randomAlphanumeric(5);
+        addCacheContainer();
+        page.navigate();
+        page.invokeContainerSettings(CACHE_CONTAINER_NAME);
+        new ConfigChecker.Builder(client, cacheContainerAddress).configFragment(page.getSettingsConfig())
+            .editAndSave(InputType.TEXT, attributeName, attributeValue)
+            .verifyFormSaved()
+            .verifyAttribute(attributeName, attributeValue);
     }
 
     @Test
-    public void setStatisticsEnabledToTrue() {
-        page.invokeContainerSettings(cacheContainerName);
-        attrChecker.editCheckboxAndAssert(page, "statistics-enabled", true).invoke();
+    public void setStatisticsEnabledToTrue() throws IOException, InterruptedException, TimeoutException, Exception {
+        String attributeName = "statistics-enabled";
+        boolean attributeValue = true;
+        addCacheContainer();
+        page.navigate();
+        page.invokeContainerSettings(CACHE_CONTAINER_NAME);
+        new ConfigChecker.Builder(client, cacheContainerAddress).configFragment(page.getSettingsConfig())
+            .editAndSave(InputType.CHECKBOX, attributeName, attributeValue)
+            .verifyFormSaved()
+            .verifyAttribute(attributeName, attributeValue);
     }
 
     @Test
-    public void setStatisticsEnabledToFalse() {
-        page.invokeContainerSettings(cacheContainerName);
-        attrChecker.editCheckboxAndAssert(page, "statistics-enabled", false).invoke();
+    public void setStatisticsEnabledToFalse() throws InterruptedException, TimeoutException, Exception {
+        String attributeName = "statistics-enabled";
+        boolean attributeValue = false;
+        addCacheContainer();
+        page.navigate();
+        page.invokeContainerSettings(CACHE_CONTAINER_NAME);
+        new ConfigChecker.Builder(client, cacheContainerAddress).configFragment(page.getSettingsConfig())
+            .editAndSave(InputType.CHECKBOX, attributeName, attributeValue)
+            .verifyFormSaved()
+            .verifyAttribute(attributeName, attributeValue);
     }
 
     @Test
-    public void editAliases() {
-        page.invokeContainerSettings(cacheContainerName);
-        attrChecker.editTextAndAssert(page, "aliases", ALIASES_VALUE).invoke();
+    public void editAliases() throws IOException, InterruptedException, TimeoutException, Exception {
+        String attributeName = "aliases";
+        addCacheContainer();
+        page.navigate();
+        page.invokeContainerSettings(CACHE_CONTAINER_NAME);
+        new ConfigChecker.Builder(client, cacheContainerAddress).configFragment(page.getSettingsConfig())
+            .editAndSave(InputType.TEXT, attributeName, "this\nthat")
+            .verifyFormSaved()
+            .verifyAttribute(attributeName, new ModelNode().add("this").add("that"));
     }
 
     @Test
-    public void editLockTimeout() {
-        page.invokeTransportSettings(cacheContainerName);
-        transportChecker.editTextAndAssert(page, "lock-timeout", TRANSPORT_VALUE)
-                .invoke();
+    public void editLockTimeout() throws IOException, InterruptedException, TimeoutException, Exception {
+        String attributeName = "lock-timeout";
+        long attributeValue = 3600000;
+        addCacheContainer();
+        page.navigate();
+        page.invokeTransportSettings(CACHE_CONTAINER_NAME);
+        new ConfigChecker.Builder(client, transportAddress).configFragment(page.getSettingsConfig())
+            .editAndSave(InputType.TEXT, attributeName, attributeValue)
+            .verifyFormSaved()
+            .verifyAttribute(attributeName, attributeValue);
     }
 
     @Test
-    public void editChannel() {
-        page.invokeTransportSettings(cacheContainerName);
-        transportChecker.editTextAndAssert(page, "channel", TRANSPORT_VALUE)
-                .invoke();
+    public void editChannel() throws IOException, InterruptedException, TimeoutException, Exception {
+        String attributeName = "channel";
+        String attributeValue = attributeName + RandomStringUtils.randomAlphanumeric(5);
+        addCacheContainer();
+        page.navigate();
+        page.invokeTransportSettings(CACHE_CONTAINER_NAME);
+        new ConfigChecker.Builder(client, transportAddress).configFragment(page.getSettingsConfig())
+            .editAndSave(InputType.TEXT, attributeName, attributeValue)
+            .verifyFormSaved()
+            .verifyAttribute(attributeName, attributeValue);
     }
 
-    private void addCacheContainer() {
-        String addContainer = CliUtils.buildCommand(cacheContainerDmr, ":add");
-        String addTransport = CliUtils.buildCommand(transportDmr, ":add");
-        client.executeCommand(addContainer);
-        client.executeCommand(addTransport);
+    private void addCacheContainer() throws Exception {
+        ops.add(cacheContainerAddress);
+        new ResourceVerifier(cacheContainerAddress, client).verifyExists();
     }
 
-    private void deleteCacheContainer() {
-        String cmd = CliUtils.buildCommand(cacheContainerDmr, ":remove");
-        client.executeCommand(cmd);
+    private void deleteCacheContainer() throws IOException, OperationException {
+        ops.removeIfExists(cacheContainerAddress);
     }
 
 }
