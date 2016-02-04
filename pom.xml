@@ -35,7 +35,7 @@
     <as.managementPort>9990</as.managementPort>
     <arq.managementPort>${as.managementPort}</arq.managementPort>
     <take.screenshot.after.each.test>false</take.screenshot.after.each.test>
-    <version.org.wildfly.extras.creaper>0.9.3</version.org.wildfly.extras.creaper>
+    <version.org.wildfly.extras.creaper>0.9.4</version.org.wildfly.extras.creaper>
     <version.org.apache.mina>2.0.9</version.org.apache.mina>
     <version.org.jgrapht>0.9.1</version.org.jgrapht>
   </properties>
