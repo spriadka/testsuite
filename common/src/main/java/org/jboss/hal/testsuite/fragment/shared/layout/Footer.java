@@ -8,7 +8,6 @@ import org.jboss.hal.testsuite.fragment.shared.modal.SettingsWindow;
 import org.jboss.hal.testsuite.fragment.shared.modal.VersionInfoWindow;
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.ByJQuery;
-import org.jboss.hal.testsuite.util.Workaround;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebElement;
 import org.jboss.hal.testsuite.util.Console;
@@ -49,8 +48,8 @@ public class Footer extends BaseFragment {
         String label = PropUtils.get("footer.links.settings.label");
         getLink(label).click();
 
-        Workaround.withBrowser(browser)
-                  .clickLinkUntilWindowIsOpened(getLink(label), WindowFragment.ROOT_SELECTOR);
+//        Workaround.withBrowser(browser)
+//                  .clickLinkUntilWindowIsOpened(getLink(label), WindowFragment.ROOT_SELECTOR);
 
         Console console = Console.withBrowser(browser);
         SettingsWindow window = console.openedWindow(SettingsWindow.class);

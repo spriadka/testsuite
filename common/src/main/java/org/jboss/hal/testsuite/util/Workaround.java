@@ -24,7 +24,10 @@ public class Workaround {
     }
 
 
-    // TODO: fix problem with window not being opened after link is clicked
+    /**
+     * @deprecated
+     * <br /> TODO: fix problem with window not being opened after link is clicked
+     */
     public void clickLinkUntilWindowIsOpened(WebElement link, By selector) {
         boolean done = false;
         int attempts = 10;
