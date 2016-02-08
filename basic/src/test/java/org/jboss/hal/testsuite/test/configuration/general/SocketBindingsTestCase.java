@@ -114,7 +114,7 @@ public class SocketBindingsTestCase {
     @InSequence(3)
     public void removeInboundSocketBinding() {
         InboundSocketBindingFragment fragment = page.switchToInbound();
-        fragment.getResourceManager().removeResourceAndConfirm(INBOUND_NAME);
+        fragment.getResourceManager().removeResource(INBOUND_NAME).confirmAndDismissReloadRequiredMessage();
 
         verifier.verifyResource(false);
 
@@ -134,7 +134,7 @@ public class SocketBindingsTestCase {
         assertTrue("Socket Binding should be present in table", fragment.resourceIsPresent(OUTBOUND_LOCAL_NAME));
         verifier.verifyResource(DMR_OUTBOUND_LOCAL, true);
 
-        fragment.getResourceManager().removeResourceAndConfirm(OUTBOUND_LOCAL_NAME);
+        fragment.getResourceManager().removeResource(OUTBOUND_LOCAL_NAME).confirmAndDismissReloadRequiredMessage();
         verifier.verifyResource(DMR_OUTBOUND_LOCAL, false);
     }
 
@@ -153,7 +153,7 @@ public class SocketBindingsTestCase {
         assertTrue("Socket Binding should be present in table", fragment.resourceIsPresent(OUTBOUND_REMOTE_NAME));
         verifier.verifyResource(DMR_OUTBOUND_REMOTE, true);
 
-        fragment.getResourceManager().removeResourceAndConfirm(OUTBOUND_REMOTE_NAME);
+        fragment.getResourceManager().removeResource(OUTBOUND_REMOTE_NAME).confirmAndDismissReloadRequiredMessage();
 
         verifier.verifyResource(DMR_OUTBOUND_REMOTE, false);
     }

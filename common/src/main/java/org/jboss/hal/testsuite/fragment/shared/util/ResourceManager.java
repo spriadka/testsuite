@@ -69,6 +69,10 @@ public class ResourceManager extends BaseFragment {
         return removeResource(name, ConfirmationWindow.class);
     }
 
+    /**
+     * When 'Reload required' window is expected use {@link ResourceManager#removeResource(String)}
+     * .{@link ConfirmationWindow#confirmAndDismissReloadRequiredMessage()} instead!
+     */
     public void removeResourceAndConfirm(String name) {
         ConfirmationWindow confirmationWindow = removeResource(name, ConfirmationWindow.class);
         confirmationWindow.confirm();
