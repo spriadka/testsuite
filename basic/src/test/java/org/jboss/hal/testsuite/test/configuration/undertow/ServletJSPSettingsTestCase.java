@@ -33,7 +33,7 @@ public class ServletJSPSettingsTestCase extends UndertowTestCaseAbstract {
     private final String JAVA_ENCODING = "java-encoding";
     private final String MAPPED_FILE = "mapped-file";
     private final String SCRATCH_DIR = "scratch-dir";
-    private final String SMAP = "smap";
+    private final String SMAP = "_smap";
     private final String SOURCE_VM = "source-vm";
     private final String TAG_POOLING = "tag-pooling";
     private final String TARGET_VM = "target-vm";
