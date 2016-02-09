@@ -453,24 +453,30 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
     }
 
     @Test
-    public void addHTTPSListenerInGUI() throws IOException, CommandFailedException {
+    public void addHTTPSListenerInGUI() throws IOException, CommandFailedException, InterruptedException,
+            TimeoutException {
         String name = "HTTPSListener_" + RandomStringUtils.randomAlphanumeric(6);
         String socketBinding = operations.createSocketBinding();
         ConfigFragment config = page.getConfigFragment();
         WizardWindow wizard = config.getResourceManager().addResource();
+        String securityRealmValue = operations.createSecurityRealm();
 
-        Editor editor = wizard.getEditor();
-        editor.text("name", name);
-        editor.text(SECURITY_REALM, SECURITY_REALM_VALUE);
-        editor.text(SOCKET_BINDING, socketBinding);
-        boolean result = wizard.finish();
+        try {
+            Editor editor = wizard.getEditor();
+            editor.text("name", name);
+            editor.text(SECURITY_REALM, securityRealmValue);
+            editor.text(SOCKET_BINDING, socketBinding);
+            boolean result = wizard.finish();
 
-        Assert.assertTrue("Window should be closed", result);
-        Assert.assertTrue("HTTPS listener should be present in table", config.resourceIsPresent(name));
-        ResourceAddress address = httpsListenerTemplate.resolve(context, httpServer, name);
-        verifier.verifyResource(address, true);
-        verifier.verifyAttribute(address, SOCKET_BINDING, socketBinding);
-        verifier.verifyAttribute(address, SECURITY_REALM, SECURITY_REALM_VALUE);
+            Assert.assertTrue("Window should be closed", result);
+            Assert.assertTrue("HTTPS listener should be present in table", config.resourceIsPresent(name));
+            ResourceAddress address = httpsListenerTemplate.resolve(context, httpServer, name);
+            verifier.verifyResource(address, true);
+            verifier.verifyAttribute(address, SOCKET_BINDING, socketBinding);
+            verifier.verifyAttribute(address, SECURITY_REALM, securityRealmValue);
+        } finally {
+            operations.removeSecurityRealm(securityRealmValue);
+        }
     }
 
     @Test

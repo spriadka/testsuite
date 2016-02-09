@@ -19,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wildfly.extras.creaper.commands.undertow.AddHttpsSecurityRealm;
 import org.wildfly.extras.creaper.commands.undertow.AddUndertowListener;
+import org.wildfly.extras.creaper.commands.undertow.RemoveHttpsSecurityRealm;
 import org.wildfly.extras.creaper.commands.undertow.RemoveUndertowListener;
 import org.wildfly.extras.creaper.commands.undertow.SslVerifyClient;
 import org.wildfly.extras.creaper.commands.undertow.UndertowListenerType;
@@ -38,7 +39,7 @@ import java.util.concurrent.TimeoutException;
  * @author Jan Kasik <jkasik@redhat.com>
  *         Created on 17.9.15.
  */
-public class UndertowOperations {
+public final class UndertowOperations {
 
     private static final Logger log = LoggerFactory.getLogger(UndertowOperations.class);
 
@@ -102,16 +103,9 @@ public class UndertowOperations {
 
     public String createHTTPSListener(String httpServer) throws IOException, CommandFailedException, TimeoutException, InterruptedException, OperationException {
         String name = RandomStringUtils.randomAlphanumeric(6);
-        String securityRealm = "SecurityRealm_" + RandomStringUtils.randomAlphanumeric(6);
-        client.apply(new AddHttpsSecurityRealm.Builder(securityRealm)
-            .keystorePassword("random")
-            .truststorePassword("random")
-            .keyPassword("random")
-            .keystorePath(getClass().getClassLoader().getResource("clientkeystore").getPath())
-            .build());
-        administration.reload();
+        String realmName = createSecurityRealm();
         client.apply(new AddUndertowListener.HttpsBuilder(name, httpServer, createSocketBinding())
-                .securityRealm(securityRealm)
+                .securityRealm(realmName)
                 .verifyClient(SslVerifyClient.NOT_REQUESTED)
                 .enabled(true)
                 .build());
@@ -121,6 +115,28 @@ public class UndertowOperations {
 
     public void removeHTTPSListener(String httpServer, String listenerName) throws CommandFailedException, InterruptedException, IOException, TimeoutException {
         removeListener(httpServer, listenerName, UndertowListenerType.HTTPS_LISTENER);
+    }
+
+    /**
+     * @return name of created security realm
+     */
+    public String createSecurityRealm() throws CommandFailedException, IOException,
+            InterruptedException, TimeoutException {
+        String realmName = "SecurityRealm_" + RandomStringUtils.randomAlphanumeric(6);
+        client.apply(new AddHttpsSecurityRealm.Builder(realmName)
+            .keystorePassword("random")
+            .truststorePassword("random")
+            .keyPassword("random")
+            .keystorePath(getClass().getClassLoader().getResource("clientkeystore").getPath())
+            .build());
+        administration.reload();
+        return realmName;
+    }
+
+    public void removeSecurityRealm(String realmName) throws CommandFailedException, IOException,
+            InterruptedException, TimeoutException {
+        client.apply(new RemoveHttpsSecurityRealm(realmName));
+        administration.reloadIfRequired();
     }
 
     public String createHTTPServerHost(String httpServer) throws InterruptedException, IOException, TimeoutException {
