@@ -478,7 +478,7 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
         ConfigFragment config = page.getConfigFragment();
         config.getResourceManager()
                 .removeResource(httpsListenerToBeRemoved)
-                .confirm();
+                .confirmAndDismissReloadRequiredMessage();
 
         ResourceAddress address = httpsListenerTemplate.resolve(context, httpServer, httpsListenerToBeRemoved);
         Assert.assertFalse("HTTPS listener host should not be present in table", config.resourceIsPresent(httpsListenerToBeRemoved));

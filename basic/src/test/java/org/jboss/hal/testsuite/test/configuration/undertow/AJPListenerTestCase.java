@@ -413,7 +413,7 @@ public class AJPListenerTestCase extends UndertowTestCaseAbstract {
         ConfigFragment config = page.getConfigFragment();
         config.getResourceManager()
                 .removeResource(ajpListenerToBeRemoved)
-                .confirm();
+                .confirmAndDismissReloadRequiredMessage();
 
         ResourceAddress address = ajpListenerTemplate.resolve(context, httpServer, ajpListenerToBeRemoved);
         Assert.assertFalse("AJP listener host should not be present in table", config.resourceIsPresent(ajpListenerToBeRemoved));
