@@ -9,6 +9,7 @@ import org.jboss.hal.testsuite.creaper.command.messaging.AddMessagingConnector;
 import org.jboss.hal.testsuite.page.config.MessagingPage;
 import org.jboss.hal.testsuite.test.configuration.messaging.AbstractMessagingTestCase;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -17,6 +18,7 @@ import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.wildfly.extras.creaper.core.CommandFailedException;
 import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.OperationException;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
@@ -45,6 +47,14 @@ public class RemoteConnectorTestCase extends AbstractMessagingTestCase {
         client.apply(new AddMessagingConnector.RemoteBuilder(REMOTE_CONNECTOR_TBR)
                 .socketBinding(createSocketBinding())
                 .build());
+        administration.reloadIfRequired();
+    }
+
+    @AfterClass
+    public static void afterClass() throws IOException, OperationException, InterruptedException, TimeoutException {
+        operations.removeIfExists(REMOTE_CONNECTOR_ADDRESS);
+        operations.removeIfExists(REMOTE_CONNECTOR_TBR_ADDRESS);
+        operations.removeIfExists(REMOTE_CONNECTOR_TBA_ADDRESS);
         administration.reloadIfRequired();
     }
 
