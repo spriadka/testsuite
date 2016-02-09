@@ -115,8 +115,7 @@ public class AJPListenerTestCase extends UndertowTestCaseAbstract {
 
     @Before
     public void before() {
-        page.navigate();
-        page.viewHTTPServer(httpServer).switchToAJPListeners();
+        navigate2ajpListener();
     }
 
     @AfterClass
@@ -364,6 +363,9 @@ public class AJPListenerTestCase extends UndertowTestCaseAbstract {
 
     @Test
     public void setTCPKeepAliveToFalse() throws IOException, InterruptedException, TimeoutException {
+        operations.writeAttribute(address, TCP_KEEP_ALIVE_ATTR, true);
+        operations.reloadIfRequiredAndWaitForRunning();
+        navigate2ajpListener();
         editCheckboxAndVerify(address, TCP_KEEP_ALIVE, TCP_KEEP_ALIVE_ATTR, false);
     }
 
@@ -418,5 +420,9 @@ public class AJPListenerTestCase extends UndertowTestCaseAbstract {
         verifier.verifyResource(address, false); //HTTP server host should not be present on the server
     }
 
+    private void navigate2ajpListener() {
+        page.navigate();
+        page.viewHTTPServer(httpServer).switchToAJPListeners();
+    }
 
 }

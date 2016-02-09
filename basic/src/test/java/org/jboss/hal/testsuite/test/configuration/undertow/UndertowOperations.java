@@ -1,5 +1,9 @@
 package org.jboss.hal.testsuite.test.configuration.undertow;
 
+import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.NAME;
+import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.VALUE;
+import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.WRITE_ATTRIBUTE_OPERATION;
+
 import org.apache.commons.lang.RandomStringUtils;
 import org.apache.mina.util.AvailablePortFinder;
 import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
@@ -254,5 +258,18 @@ public class UndertowOperations {
     public void removeBufferCache(String name) throws IOException, OperationException {
         Address address = Address.subsystem("undertow").and("buffer-cache", name);
         operations.removeIfExists(address);
+    }
+
+    public void writeAttribute(ResourceAddress resourceAddress, String attrName, boolean attrValue) {
+        Operation writeAttrOperation = new Operation.Builder(WRITE_ATTRIBUTE_OPERATION, resourceAddress)
+                .param(NAME, attrName)
+                .param(VALUE, attrValue)
+                .build();
+        Dispatcher dispatcher = new Dispatcher();
+        try {
+            dispatcher.execute(writeAttrOperation);
+        } finally {
+            dispatcher.close();
+        }
     }
 }

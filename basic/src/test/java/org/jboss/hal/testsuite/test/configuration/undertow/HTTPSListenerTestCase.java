@@ -130,8 +130,7 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
 
     @Before
     public void before() {
-        page.navigate();
-        page.viewHTTPServer(httpServer).switchToHTTPSListeners();
+        navigate2httpsListener();
     }
 
     @AfterClass
@@ -422,6 +421,9 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
 
     @Test
     public void setTCPKeepAliveToFalse() throws IOException, InterruptedException, TimeoutException {
+        operations.writeAttribute(address, TCP_KEEP_ALIVE_ATTR, true);
+        operations.reloadIfRequiredAndWaitForRunning();
+        navigate2httpsListener();
         editCheckboxAndVerify(address, TCP_KEEP_ALIVE, TCP_KEEP_ALIVE_ATTR, false);
     }
 
@@ -481,6 +483,11 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
         ResourceAddress address = httpsListenerTemplate.resolve(context, httpServer, httpsListenerToBeRemoved);
         Assert.assertFalse("HTTPS listener host should not be present in table", config.resourceIsPresent(httpsListenerToBeRemoved));
         verifier.verifyResource(address, false); //HTTP server host should not be present on the server
+    }
+
+    private void navigate2httpsListener() {
+        page.navigate();
+        page.viewHTTPServer(httpServer).switchToHTTPSListeners();
     }
 
 }
