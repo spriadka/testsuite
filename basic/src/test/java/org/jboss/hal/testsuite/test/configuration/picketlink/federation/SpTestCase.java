@@ -65,11 +65,7 @@ public class SpTestCase extends AbstractFederationTestCase {
         Editor editor = wizard.getEditor();
 
         editor.text(NAME_LABEL, spName);
-        editor.text(SECURITY_DOMAIN, "");
-        editor.text(URL, url);
-        wizard.assertFinish(false); // security domain may not be empty
-
-        editor.text(SECURITY_DOMAIN, securityDomain);
+        editor.select(SECURITY_DOMAIN, securityDomain);
         editor.text(URL, "");
         wizard.assertFinish(false); // url may not be empty
 

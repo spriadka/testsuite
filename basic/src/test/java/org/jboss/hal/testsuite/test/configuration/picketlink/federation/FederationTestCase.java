@@ -64,7 +64,7 @@ public class FederationTestCase extends AbstractFederationTestCase {
         Editor editor = window.getEditor();
         editor.text(NAME_LABEL, federationName);
         editor.text(IDENTITY_PROVIDER, idpName);
-        editor.text(SECURITY_DOMAIN, SD_OTHER);
+        editor.select(SECURITY_DOMAIN, SD_OTHER);
         editor.text(URL, idpUrl);
 
         window.clickSave().assertClosed();

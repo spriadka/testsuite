@@ -59,7 +59,7 @@ public class IdpAttrTestCase extends AbstractFederationTestCase {
 
     @Test
     public void secDomain() throws Exception {
-        edit(InputType.TEXT, idpAddress, SECURITY_DOMAIN, SD_JBOSS_WEB_POLICY)
+        edit(InputType.SELECT, idpAddress, SECURITY_DOMAIN, SD_JBOSS_WEB_POLICY)
             .verifyFormSaved()
             .verifyAttribute(SECURITY_DOMAIN, SD_JBOSS_WEB_POLICY);
     }
