@@ -8,14 +8,10 @@ import org.jboss.arquillian.junit.InSequence;
 import org.jboss.hal.testsuite.category.Standalone;
 import org.jboss.hal.testsuite.cli.CliClient;
 import org.jboss.hal.testsuite.cli.CliClientFactory;
-import org.jboss.hal.testsuite.cli.Library;
 import org.jboss.hal.testsuite.fragment.config.resourceadapters.AdminObjectWizard;
-import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConfigPropertiesFragment;
 import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConfigPropertyWizard;
 import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConnectionDefinitionWizard;
 import org.jboss.hal.testsuite.fragment.config.resourceadapters.ResourceAdapterWizard;
-import org.jboss.hal.testsuite.fragment.config.resourceadapters.ResourceAdaptersConfigArea;
-import org.jboss.hal.testsuite.fragment.config.resourceadapters.ResourceAdaptersFragment;
 import org.jboss.hal.testsuite.page.config.ResourceAdaptersPage;
 import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.ResourceVerifier;
@@ -89,9 +85,7 @@ public class ResourceAdaptersTestCase {
     @Test
     @InSequence(0)
     public void createNoTransaction() {
-        page.selectMenu("Subsystems").selectMenu("Resource Adapters");
-        ResourceAdaptersFragment fragment = page.getContent();
-        ResourceAdapterWizard wizard = fragment.addResourceAdapter();
+        ResourceAdapterWizard wizard = page.addResourceAdapter();
 
         boolean result =
                 wizard.name(NAME_NO_TRANSACTION)
@@ -99,7 +93,6 @@ public class ResourceAdaptersTestCase {
                 .tx(NO_TRANSACTION)
                 .finish();
 
-        Library.letsSleep(1000);
         assertTrue("Window should be closed", result);
         verifier.verifyResource(true);
 
@@ -108,73 +101,56 @@ public class ResourceAdaptersTestCase {
     @Test
     @InSequence(1)
     public void createProperties() {
-        page.selectMenu("Subsystems").selectMenu("Resource Adapters").view(NAME_NO_TRANSACTION);
-        Console.withBrowser(browser).waitUntilLoaded();
+        page.navigate2ra(NAME_NO_TRANSACTION).switchSubTab("Configuration");
+        page.switchConfigAreaTabTo("Properties");
 
-        ResourceAdaptersConfigArea area = page.getConfigArea();
-        ConfigPropertiesFragment fragment = area.switchToProperty();
-        ConfigPropertyWizard wizard = fragment.addProperty();
-        Console.withBrowser(browser).waitUntilLoaded();
+        ConfigPropertyWizard wizard = page.getResourceManager().addResource(ConfigPropertyWizard.class);
         wizard.getEditor().text("name", PROPERTY_KEY);
-        boolean result =
-                wizard.value(PROPERTY_VALUE)
+        boolean result = wizard
+                .value(PROPERTY_VALUE)
                 .finish();
 
-        Library.letsSleep(1000);
         assertTrue("Window should be closed", result);
-
         verifier.verifyResource(DMR_PROPERTY, true);
 
-        Library.letsSleep(1000);
-        page.getResourceManager().removeResourceAndConfirm(PROPERTY_KEY);
-
+        page.getResourceManager().removeResource(PROPERTY_KEY).confirmAndDismissReloadRequiredMessage();
         verifier.verifyResource(DMR_PROPERTY, false);
     }
 
     @Test
     @InSequence(2)
     public void addManagedConnectionDefinition() {
-        page.selectMenu("Subsystems").selectMenu("Resource Adapters").view(NAME_NO_TRANSACTION);
-        Console.withBrowser(browser).waitUntilLoaded();
-        Library.letsSleep(100);
+        page.navigate2ra(NAME_NO_TRANSACTION).switchSubTab("Connection Definitions");
 
-        page.switchSubTab("Connection Definitions");
-        Console.withBrowser(browser).waitUntilLoaded();
         ConnectionDefinitionWizard wizard = page.getResourceManager().addResource(ConnectionDefinitionWizard.class);
 
-        boolean result =
-                wizard.name(CONNECTION_DEFINITION_NAME)
+        boolean result = wizard
+                .name(CONNECTION_DEFINITION_NAME)
                 .connectionClass(CONNECTION_DEFINITION_CLASS)
                 .finish();
 
         assertTrue("Window should be closed", result);
         verifier.verifyResource(DMR_CON_DEF, true);
-        Library.letsSleep(1000);
-        page.getResourceManager().removeResourceAndConfirm(CONNECTION_DEFINITION_NAME);
 
+        page.getResourceManager().removeResource(CONNECTION_DEFINITION_NAME).confirmAndDismissReloadRequiredMessage();
         verifier.verifyResource(DMR_CON_DEF, false);
     }
 
     @Test
     @InSequence(3)
     public void addAdminObject() {
-        page.selectMenu("Subsystems").selectMenu("Resource Adapters").view(NAME_NO_TRANSACTION);
-        Console.withBrowser(browser).waitUntilLoaded();
-        Library.letsSleep(100);
+        page.navigate2ra(NAME_NO_TRANSACTION).switchSubTab("Admin Objects");
 
-        page.switchSubTab("Admin Objects");
-        Console.withBrowser(browser).waitUntilLoaded();
         AdminObjectWizard wizard = page.getResourceManager().addResource(AdminObjectWizard.class);
-
-        boolean result =
-                wizard.name(ADMIN_OBJECT_NAME)
+        boolean result = wizard
+                .name(ADMIN_OBJECT_NAME)
                 .className(ADMIN_OBJECT_CLASS)
                 .finish();
 
         assertTrue("Window should be closed", result);
         verifier.verifyResource(DMR_ADMIN_OBJ, true);
-        Library.letsSleep(1000);
-        page.getResourceManager().removeResourceAndConfirm(ADMIN_OBJECT_NAME);
+
+        page.getResourceManager().removeResource(ADMIN_OBJECT_NAME).confirmAndDismissReloadRequiredMessage();
         verifier.verifyResource(DMR_ADMIN_OBJ, false);
     }
 
@@ -182,16 +158,13 @@ public class ResourceAdaptersTestCase {
     @Test
     @InSequence(4)
     public void removeResourceAdapter() {
-        page.selectMenu("Subsystems").selectMenu("Resource Adapters").selectMenu(NAME_NO_TRANSACTION).remove();
-        Library.letsSleep(1000);
+        page.removeRa(NAME_NO_TRANSACTION).assertClosed();
         verifier.verifyResource(DMR_ADAPTER_NO, false);
     }
 
     @Test
     public void createLocalTransaction() {
-        page.selectMenu("Subsystems").selectMenu("Resource Adapters");
-        ResourceAdaptersFragment fragment = page.getContent();
-        ResourceAdapterWizard wizard = fragment.addResourceAdapter();
+        ResourceAdapterWizard wizard = page.addResourceAdapter();
 
         boolean result =
                 wizard.name(NAME_LOCAL_TRANSACTION)
@@ -199,31 +172,27 @@ public class ResourceAdaptersTestCase {
                         .tx(LOCAL_TRANSACTION)
                         .finish();
 
-        Library.letsSleep(1000);
         assertTrue("Window should be closed", result);
         verifier.verifyResource(DMR_ADAPTER_LOCAL, true);
-        Library.letsSleep(1000);
-        page.selectMenu("Subsystems").selectMenu("Resource Adapters").selectMenu(NAME_LOCAL_TRANSACTION).remove();
+
+        page.removeRa(NAME_LOCAL_TRANSACTION).assertClosed();
         verifier.verifyResource(DMR_ADAPTER_LOCAL, false);
     }
 
     @Test
     public void createXATransaction() {
-        page.selectMenu("Subsystems").selectMenu("Resource Adapters");
-        ResourceAdaptersFragment fragment = page.getContent();
-        ResourceAdapterWizard wizard = fragment.addResourceAdapter();
+        ResourceAdapterWizard wizard = page.addResourceAdapter();
 
-        boolean result =
-                wizard.name(NAME_XA_TRANSACTION)
-                        .archive(ARCHIVE)
-                        .tx(XA_TRANSACTION)
-                        .finish();
+        boolean result = wizard
+                .name(NAME_XA_TRANSACTION)
+                .archive(ARCHIVE)
+                .tx(XA_TRANSACTION)
+                .finish();
 
-        Library.letsSleep(1000);
         assertTrue("Window should be closed", result);
         verifier.verifyResource(DMR_ADAPTER_XA, true);
-        Library.letsSleep(1000);
-        page.selectMenu("Subsystems").selectMenu("Resource Adapters").selectMenu(NAME_XA_TRANSACTION).remove();
+
+        page.removeRa(NAME_XA_TRANSACTION).assertClosed();
         verifier.verifyResource(DMR_ADAPTER_XA, false);
     }
 }
