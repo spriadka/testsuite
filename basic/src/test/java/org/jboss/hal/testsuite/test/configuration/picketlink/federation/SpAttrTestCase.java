@@ -78,16 +78,15 @@ public class SpAttrTestCase extends AbstractFederationTestCase {
             .verifyAttribute(SP_LOGOUT_PAGE, newLogoutPage);
     }
 
-    // see https://issues.jboss.org/browse/JBEAP-2034
     @Test
     public void postBinding() throws Exception {
-        edit(InputType.TEXT, spAddress, SP_POST_BINDING, "false")
+        edit(InputType.CHECKBOX, spAddress, SP_POST_BINDING, false)
             .verifyFormSaved()
-            .verifyAttribute(SP_POST_BINDING, "false");
+            .verifyAttribute(SP_POST_BINDING, false);
 
-        edit(InputType.TEXT, spAddress, SP_POST_BINDING, "true")
+        edit(InputType.CHECKBOX, spAddress, SP_POST_BINDING, true)
             .verifyFormSaved()
-            .verifyAttribute(SP_POST_BINDING, "true");
+            .verifyAttribute(SP_POST_BINDING, true);
     }
 
     @Test
