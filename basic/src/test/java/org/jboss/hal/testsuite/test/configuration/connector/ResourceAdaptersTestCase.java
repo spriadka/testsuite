@@ -1,20 +1,23 @@
 package org.jboss.hal.testsuite.test.configuration.connector;
 
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
+
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.junit.InSequence;
 import org.jboss.hal.testsuite.category.Standalone;
-import org.jboss.hal.testsuite.cli.CliClient;
-import org.jboss.hal.testsuite.cli.CliClientFactory;
+import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
+import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.fragment.config.resourceadapters.AdminObjectWizard;
 import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConfigPropertyWizard;
 import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConnectionDefinitionWizard;
 import org.jboss.hal.testsuite.fragment.config.resourceadapters.ResourceAdapterWizard;
 import org.jboss.hal.testsuite.page.config.ResourceAdaptersPage;
 import org.jboss.hal.testsuite.util.Console;
-import org.jboss.hal.testsuite.util.ResourceVerifier;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -22,8 +25,12 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
+import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
+import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.OperationException;
+import org.wildfly.extras.creaper.core.online.operations.Operations;
+import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
 
-import static org.jboss.hal.testsuite.cli.CliConstants.RESOURCE_ADAPTER_ADDRESS;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -48,16 +55,20 @@ public class ResourceAdaptersTestCase {
     private static final String ADMIN_OBJECT_NAME = "aon_" + RandomStringUtils.randomAlphanumeric(5);
     private static final String ADMIN_OBJECT_JNDI_NAME = "java:/aojn_" + RandomStringUtils.randomAlphanumeric(5);
     private static final String ADMIN_OBJECT_CLASS = "aoc_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String RESOURCE_ADAPTER = "resource-adapter";
 
-    private static final String DMR_ADAPTER_NO = RESOURCE_ADAPTER_ADDRESS + "=" + NAME_NO_TRANSACTION;
-    private static final String DMR_ADAPTER_LOCAL = RESOURCE_ADAPTER_ADDRESS + "=" + NAME_LOCAL_TRANSACTION;
-    private static final String DMR_ADAPTER_XA = RESOURCE_ADAPTER_ADDRESS + "=" + NAME_XA_TRANSACTION;
-    private static final String DMR_PROPERTY = DMR_ADAPTER_NO + "/config-properties=" + PROPERTY_KEY;
-    private static final String DMR_ADMIN_OBJ = DMR_ADAPTER_NO + "/admin-objects=" + ADMIN_OBJECT_NAME;
-    private static final String DMR_CON_DEF = DMR_ADAPTER_NO + "/connection-definitions=" + CONNECTION_DEFINITION_NAME;
+    private static final Address
+        subsystemAddress = Address.subsystem("resource-adapters"),
+        adapterNoTransAddress = subsystemAddress.and(RESOURCE_ADAPTER, NAME_NO_TRANSACTION),
+        adapterLocalTransAddress = subsystemAddress.and(RESOURCE_ADAPTER, NAME_LOCAL_TRANSACTION),
+        adapterXaTransAddress = subsystemAddress.and(RESOURCE_ADAPTER, NAME_XA_TRANSACTION),
+        propertyAdress = adapterNoTransAddress.and("config-properties", PROPERTY_KEY),
+        adminObjectAdress = adapterNoTransAddress.and("admin-objects", ADMIN_OBJECT_NAME),
+        connectionDefinitionAdress = adapterNoTransAddress.and("connection-definitions", CONNECTION_DEFINITION_NAME);
 
-    private static CliClient client = CliClientFactory.getClient();
-    private static ResourceVerifier verifier = new ResourceVerifier(DMR_ADAPTER_NO, client);
+    private static final OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
+    private static final Operations ops = new Operations(client);
+    private final Administration adminOps = new Administration(client);
 
     @Drone
     public WebDriver browser;
@@ -71,20 +82,24 @@ public class ResourceAdaptersTestCase {
     }
 
     @After
-    public void after() {
-        client.reload(false);
+    public void after() throws IOException, InterruptedException, TimeoutException {
+        adminOps.reloadIfRequired();
     }
 
     @AfterClass
-    public static void cleanUp() {
-        client.removeResource(DMR_ADAPTER_NO);
-        client.removeResource(DMR_ADAPTER_XA);
-        client.removeResource(DMR_ADAPTER_LOCAL);
+    public static void cleanUp() throws IOException, OperationException {
+        try {
+            ops.removeIfExists(adapterNoTransAddress);
+            ops.removeIfExists(adapterXaTransAddress);
+            ops.removeIfExists(adapterLocalTransAddress);
+        } finally {
+            IOUtils.closeQuietly(client);
+        }
     }
 
     @Test
     @InSequence(0)
-    public void createNoTransaction() {
+    public void createNoTransaction() throws Exception {
         ResourceAdapterWizard wizard = page.addResourceAdapter();
 
         boolean result =
@@ -94,13 +109,15 @@ public class ResourceAdaptersTestCase {
                 .finish();
 
         assertTrue("Window should be closed", result);
-        verifier.verifyResource(true);
+        new ResourceVerifier(adapterNoTransAddress, client).verifyExists();
 
     }
 
     @Test
     @InSequence(1)
-    public void createProperties() {
+    public void createProperties() throws Exception {
+        ResourceVerifier propertyVerifier = new ResourceVerifier(propertyAdress, client);
+
         page.navigate2ra(NAME_NO_TRANSACTION).switchSubTab("Configuration");
         page.switchConfigAreaTabTo("Properties");
 
@@ -111,15 +128,17 @@ public class ResourceAdaptersTestCase {
                 .finish();
 
         assertTrue("Window should be closed", result);
-        verifier.verifyResource(DMR_PROPERTY, true);
+        propertyVerifier.verifyExists();
 
         page.getResourceManager().removeResource(PROPERTY_KEY).confirmAndDismissReloadRequiredMessage();
-        verifier.verifyResource(DMR_PROPERTY, false);
+        propertyVerifier.verifyDoesNotExist();
     }
 
     @Test
     @InSequence(2)
-    public void addManagedConnectionDefinition() {
+    public void addManagedConnectionDefinition() throws Exception {
+        ResourceVerifier connectionDefinitionVerifier = new ResourceVerifier(connectionDefinitionAdress, client);
+
         page.navigate2ra(NAME_NO_TRANSACTION).switchSubTab("Connection Definitions");
 
         ConnectionDefinitionWizard wizard = page.getResourceManager().addResource(ConnectionDefinitionWizard.class);
@@ -130,15 +149,17 @@ public class ResourceAdaptersTestCase {
                 .finish();
 
         assertTrue("Window should be closed", result);
-        verifier.verifyResource(DMR_CON_DEF, true);
+        connectionDefinitionVerifier.verifyExists();
 
         page.getResourceManager().removeResource(CONNECTION_DEFINITION_NAME).confirmAndDismissReloadRequiredMessage();
-        verifier.verifyResource(DMR_CON_DEF, false);
+        connectionDefinitionVerifier.verifyDoesNotExist();
     }
 
     @Test
     @InSequence(3)
-    public void addAdminObject() {
+    public void addAdminObject() throws Exception {
+        ResourceVerifier adminObjectVerifier = new ResourceVerifier(adminObjectAdress, client);
+
         page.navigate2ra(NAME_NO_TRANSACTION).switchSubTab("Admin Objects");
 
         AdminObjectWizard wizard = page.getResourceManager().addResource(AdminObjectWizard.class);
@@ -148,22 +169,24 @@ public class ResourceAdaptersTestCase {
                 .finish();
 
         assertTrue("Window should be closed", result);
-        verifier.verifyResource(DMR_ADMIN_OBJ, true);
+        adminObjectVerifier.verifyExists();
 
         page.getResourceManager().removeResource(ADMIN_OBJECT_NAME).confirmAndDismissReloadRequiredMessage();
-        verifier.verifyResource(DMR_ADMIN_OBJ, false);
+        adminObjectVerifier.verifyDoesNotExist();
     }
 
 
     @Test
     @InSequence(4)
-    public void removeResourceAdapter() {
+    public void removeResourceAdapter() throws Exception {
         page.removeRa(NAME_NO_TRANSACTION).assertClosed();
-        verifier.verifyResource(DMR_ADAPTER_NO, false);
+        new ResourceVerifier(adapterNoTransAddress, client).verifyDoesNotExist();
     }
 
     @Test
-    public void createLocalTransaction() {
+    public void createLocalTransaction() throws Exception {
+        ResourceVerifier resourceVerifier = new ResourceVerifier(adapterLocalTransAddress, client);
+
         ResourceAdapterWizard wizard = page.addResourceAdapter();
 
         boolean result =
@@ -173,14 +196,16 @@ public class ResourceAdaptersTestCase {
                         .finish();
 
         assertTrue("Window should be closed", result);
-        verifier.verifyResource(DMR_ADAPTER_LOCAL, true);
+        resourceVerifier.verifyExists();
 
         page.removeRa(NAME_LOCAL_TRANSACTION).assertClosed();
-        verifier.verifyResource(DMR_ADAPTER_LOCAL, false);
+        resourceVerifier.verifyDoesNotExist();
     }
 
     @Test
-    public void createXATransaction() {
+    public void createXATransaction() throws Exception {
+        ResourceVerifier resourceVerifier = new ResourceVerifier(adapterXaTransAddress, client);
+
         ResourceAdapterWizard wizard = page.addResourceAdapter();
 
         boolean result = wizard
@@ -190,9 +215,9 @@ public class ResourceAdaptersTestCase {
                 .finish();
 
         assertTrue("Window should be closed", result);
-        verifier.verifyResource(DMR_ADAPTER_XA, true);
+        resourceVerifier.verifyExists();
 
         page.removeRa(NAME_XA_TRANSACTION).assertClosed();
-        verifier.verifyResource(DMR_ADAPTER_XA, false);
+        resourceVerifier.verifyDoesNotExist();
     }
 }
