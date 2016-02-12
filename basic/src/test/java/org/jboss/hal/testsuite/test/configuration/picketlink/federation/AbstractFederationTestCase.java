@@ -69,6 +69,8 @@ public abstract class AbstractFederationTestCase {
     public static final void afterClass() throws IOException, InterruptedException, TimeoutException {
         if (changeSubsystem()) {
             federationOps.removeSubsystem();
+        } else {
+            adminOps.reloadIfRequired();
         }
         IOUtils.closeQuietly(client);
     }
