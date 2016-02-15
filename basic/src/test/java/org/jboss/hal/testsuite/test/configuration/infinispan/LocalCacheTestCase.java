@@ -10,6 +10,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
+import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.OperationException;
 import org.wildfly.extras.creaper.core.online.operations.Values;
 
@@ -26,18 +27,25 @@ public class LocalCacheTestCase extends AbstractCacheTestCase {
     @Test
     public void createCache() throws Exception {
         String name = "cn_" + RandomStringUtils.randomAlphanumeric(5);
+        Address localCacheAddress = ABSTRACT_CACHE_ADDRESS.and(getCacheType().getAddressName(), name);
+
         CacheWizard wizard = page.content().addCache();
 
-        boolean result = wizard.name(name)
-                .finish();
+        try {
+            boolean result = wizard.name(name)
+                    .finish();
 
-        Assert.assertTrue("Window should be closed", result);
-        administration.reloadIfRequired();
-        new ResourceVerifier(cacheAddress, client).verifyExists();
+            Assert.assertTrue("Window should be closed", result);
+            administration.reloadIfRequired();
+            new ResourceVerifier(localCacheAddress, client).verifyExists();
 
-        page.content().getResourceManager().removeResourceAndConfirm(name);
-        administration.reloadIfRequired();
-        new ResourceVerifier(cacheAddress, client).verifyDoesNotExist();
+            page.content().getResourceManager().removeResourceAndConfirm(name);
+            administration.reloadIfRequired();
+            new ResourceVerifier(localCacheAddress, client).verifyDoesNotExist();
+
+        } finally {
+            operations.removeIfExists(localCacheAddress);
+        }
     }
 
     @Override
