@@ -2,11 +2,13 @@ package org.jboss.hal.testsuite.test.configuration.infinispan;
 
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Shared;
-import org.jboss.hal.testsuite.dmr.AddressTemplate;
-import org.jboss.hal.testsuite.dmr.Operation;
 import org.junit.Before;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
+import org.wildfly.extras.creaper.core.online.operations.OperationException;
+import org.wildfly.extras.creaper.core.online.operations.Values;
+
+import java.io.IOException;
 
 /**
  * @author mkrajcov <mkrajcov@redhat.com>
@@ -15,29 +17,25 @@ import org.junit.runner.RunWith;
 @Category(Shared.class)
 public class ReplicatedCacheTestCase extends AbstractCacheTestCase {
 
-    @Override
-    protected AddressTemplate getCacheTemplate() {
-        return ABSTRACT_CACHE_TEMPLATE.append("/replicated-cache=*");
-    }
-
     @Before
     public void before_() {
         page.replicated();
     }
 
-    public void addCache() {
-        dispatcher.execute(new Operation.Builder("add", cacheAddress.resolve(context, cacheName))
-                .param("mode", "SYNC")
-                .build());
-        dispatcher.execute(new Operation.Builder("add", transactionTemplate.resolve(context, cacheName)).build());
-        dispatcher.execute(new Operation.Builder("add", storeTemplate.resolve(context, cacheName))
-                .param("class", "org.infinispan.configuration.cache.SingleFileStoreConfigurationBuilder")
-                .build());
-        dispatcher.execute(new Operation.Builder("add", lockingTemplate.resolve(context, cacheName)).build());
+    @Override
+    protected CacheType getCacheType() {
+        return CacheType.REPLICATED;
     }
 
-    public void deleteCache() {
-        dispatcher.execute(new Operation.Builder("remove", cacheAddress.resolve(context, cacheName)).build());
+    public void addCache() throws IOException {
+        operations.add(cacheAddress, Values.of("mode", "SYNC"));
+        operations.add(transactionAddress);
+        operations.add(storeAddress, Values.of("class", "org.infinispan.configuration.cache.SingleFileStoreConfigurationBuilder"));
+        operations.add(lockingAddress);
+    }
+
+    public void deleteCache() throws IOException, OperationException {
+        operations.removeIfExists(cacheAddress);
     }
 }
 
