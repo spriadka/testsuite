@@ -15,6 +15,7 @@ import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
@@ -28,6 +29,7 @@ import java.util.concurrent.TimeoutException;
 /**
  * @author jcechace
  */
+@Ignore("Test connection button has been removed from datasource wizard - JBEAP-2821")
 @Category(Domain.class)
 @RunWith(Arquillian.class)
 public class DomainTestConnectionTestCase extends AbstractTestConnectionTestCase {
