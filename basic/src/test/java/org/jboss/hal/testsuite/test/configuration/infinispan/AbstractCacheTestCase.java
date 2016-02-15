@@ -62,7 +62,6 @@ public abstract class AbstractCacheTestCase {
         addCache();
         administration.reloadIfRequired();
         page.navigate();
-        page.selectCache(cacheName);
     }
 
     @After
@@ -97,6 +96,7 @@ public abstract class AbstractCacheTestCase {
     //ATTRIBUTES
     @Test
     public void editJndiName() throws Exception {
+        page.selectCache(cacheName);
         editTextAndVerify(cacheAddress, "jndi-name", "java:/" + cacheName);
     }
 

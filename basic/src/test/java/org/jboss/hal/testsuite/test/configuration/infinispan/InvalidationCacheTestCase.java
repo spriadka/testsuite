@@ -20,6 +20,7 @@ public class InvalidationCacheTestCase extends AbstractCacheTestCase {
     @Before
     public void before_() {
         page.invalidation();
+        page.selectCache(cacheName);
     }
 
     @Override

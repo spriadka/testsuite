@@ -48,6 +48,7 @@ public class LocalCacheTestCase extends AbstractCacheTestCase {
     @Before
     public void before_() {
         page.local();
+        page.selectCache(cacheName);
     }
 
     public void addCache() throws IOException {

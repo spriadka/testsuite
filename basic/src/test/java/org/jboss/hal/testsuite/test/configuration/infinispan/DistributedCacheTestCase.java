@@ -25,6 +25,7 @@ public class DistributedCacheTestCase extends AbstractCacheTestCase {
     @Before
     public void before_() {
         page.distributed();
+        page.selectCache(cacheName);
     }
 
     public void addCache() throws IOException {

@@ -20,6 +20,7 @@ public class ReplicatedCacheTestCase extends AbstractCacheTestCase {
     @Before
     public void before_() {
         page.replicated();
+        page.selectCache(cacheName);
     }
 
     @Override
