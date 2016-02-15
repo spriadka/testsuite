@@ -1,7 +1,13 @@
 package org.jboss.hal.testsuite.test.configuration.jgroups;
 
+import org.apache.commons.lang.RandomStringUtils;
+import org.apache.mina.util.AvailablePortFinder;
 import org.jboss.dmr.ModelNode;
 import org.jboss.dmr.Property;
+import org.jboss.hal.testsuite.creaper.command.AddSocketBinding;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.wildfly.extras.creaper.core.CommandFailedException;
 import org.wildfly.extras.creaper.core.online.ModelNodeResult;
 import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
 import org.wildfly.extras.creaper.core.online.operations.Address;
@@ -11,7 +17,9 @@ import org.wildfly.extras.creaper.core.online.operations.Values;
 
 import java.io.IOException;
 
-public class JGroupsOperations {
+class JGroupsOperations {
+
+    private Logger logger = LoggerFactory.getLogger(JGroupsOperations.class);
 
     private OnlineManagementClient client;
     private Operations operations;
@@ -38,5 +46,20 @@ public class JGroupsOperations {
         ModelNode expectedProperty = new ModelNode().set(new Property(name, new ModelNode(value)));
         ModelNodeResult result = operations.readAttribute(address, "properties");
         return result.hasDefinedValue() && result.value().asList().contains(expectedProperty);
+    }
+
+    public String createSocketBinding(String name) throws IOException, CommandFailedException {
+        //editing on full-ha profile in domain
+        String socketBindingGroup = client.options().isDomain ? "full-ha-sockets" : "standard-sockets";
+        int port = AvailablePortFinder.getNextAvailable();
+        logger.info("Obtained port for socket binding '" + name + "' is " + port);
+        client.apply(new AddSocketBinding.Builder(name, socketBindingGroup)
+                .port(port)
+                .build());
+        return name;
+    }
+
+    public String createSocketBinding() throws IOException, CommandFailedException {
+        return createSocketBinding("JGroupsSocketBinding_" + RandomStringUtils.randomAlphanumeric(6));
     }
 }

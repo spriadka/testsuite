@@ -1,14 +1,12 @@
 package org.jboss.hal.testsuite.test.configuration.jgroups;
 
 import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.mina.util.AvailablePortFinder;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.InSequence;
 import org.jboss.dmr.ModelNode;
-import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
-import org.jboss.hal.testsuite.creaper.command.AddSocketBinding;
+import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.finder.Application;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
@@ -26,8 +24,6 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.openqa.selenium.WebDriver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.OperationException;
@@ -39,8 +35,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 public class JGroupAbstractTestCase {
-
-    private static final Logger log = LoggerFactory.getLogger(JGroupAbstractTestCase.class);
 
     protected static Address BASE_ADDRESS;
     protected static Address PROTOCOL_ADDRESS;
@@ -108,14 +102,7 @@ public class JGroupAbstractTestCase {
 
     @Test
     public void socketBindingEdit() throws Exception {
-        String name = "JGroupsSocketBinding_" + RandomStringUtils.randomAlphanumeric(5);
-        try (OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient()) {
-            int port = AvailablePortFinder.getNextAvailable();
-            log.info("Obtained port for socket binding '" + name + "' is " + port);
-            client.apply(new AddSocketBinding.Builder(name)
-                    .port(port)
-                    .build());
-        }
+        String name = jGroupsOperations.createSocketBinding();
         editTextAndVerify(TRANSPORT_ADDRESS,  "socketBinding", "socket-binding", name);
     }
 
@@ -126,7 +113,7 @@ public class JGroupAbstractTestCase {
 
     @Test
     public void diagnosticSocketEdit() throws Exception {
-        String name = "jgroups-udp";
+        String name = jGroupsOperations.createSocketBinding();
         editTextAndVerify(TRANSPORT_ADDRESS, "diagSocketBinding", "diagnostics-socket-binding", name);
     }
 
