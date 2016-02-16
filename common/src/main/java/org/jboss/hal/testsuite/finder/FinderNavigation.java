@@ -23,12 +23,16 @@ package org.jboss.hal.testsuite.finder;
 
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.hal.testsuite.page.BasePage;
+import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.Find;
 import org.jboss.hal.testsuite.util.PropUtils;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,6 +59,7 @@ public class FinderNavigation {
         void performAfterRowClick();
     }
 
+    private static final Logger log = LoggerFactory.getLogger(FinderNavigation.class);
     private static final String WILDCARD = "*";
 
     private final WebDriver browser;
@@ -62,6 +67,7 @@ public class FinderNavigation {
     private final List<AddressTuple> address;
     private final Hook hook;
     private boolean refresh;
+    private int naviRetriesNo = 0;
 
     /**
      * This constructor should not be used regularly! <br />
@@ -184,10 +190,23 @@ public class FinderNavigation {
                 // wait for next column to be visible
                 if (i < address.size() - 1) {
                     AddressTuple nextTuple = address.get(i + 1);
-                    Graphene.waitModel().until().element(columnSelector(nextTuple.column)).is().visible();
+                    try {
+                        Graphene.waitModel().until().element(columnSelector(nextTuple.column)).is().visible();
+
+                    // TODO remove catch as soon as JBEAP-2168 is fixed!
+                    } catch (TimeoutException e) {
+                        if (ConfigUtils.get("jbeap2168workaround") != null && naviRetriesNo++ < 3) {
+                            log.warn("Navigation frozen! JBEAP-2168 needs to be fixed!");
+                            return navigate(exactRowText);
+                        } else {
+                            naviRetriesNo = 0;
+                            throw new TimeoutException("Navigation frozen! Probably due to https://issues.jboss.org/browse/JBEAP-2168.", e);
+                        }
+                    }
                 }
             }
         }
+        naviRetriesNo = 0;
         return columnRow;
     }
 
