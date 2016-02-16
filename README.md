@@ -21,7 +21,8 @@ E.g. for standalone Wildfly 10 using CLI:
 
 ## How to run tests
 
-`mvn test -P{module},{server.mode} -Djboss.dist=${path_to_server_home} -Darq.extension.webdriver.firefox_binary=${path_to_firefox_binary}`
+`mvn test -P{module},{server.mode} -Djboss.dist=${path_to_server_home} -Darq.extension.webdriver.firefox_binary=${path_to_firefox_binary}
+ -Djbeap2168workaround`
 
 ### Required profile (-P) parameters
 
@@ -59,6 +60,12 @@ Sometimes the model resource change is not yet propagated fast enough
 even if in GUI the change seems to be already persisted.
 This parameter means how long to wait for GUI change to be propagated to model in milis.
 Default value is 500.
+
+### Optional jbeap2168workaround
+
+Until https://issues.jboss.org/browse/JBEAP-2168 is fixed you can use this optional parameter to switch on workaround
+ to re-navigate up to 2 times again if navigation seems to be frozen.
+E.g. `-Djbeap2168workaround`
 
 ## Modules
 
