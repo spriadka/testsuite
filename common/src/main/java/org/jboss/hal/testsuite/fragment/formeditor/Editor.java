@@ -6,12 +6,14 @@ import org.jboss.hal.testsuite.fragment.BaseFragment;
 import org.jboss.hal.testsuite.util.Console;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by jcechace on 03/03/14.
@@ -196,7 +198,7 @@ public class Editor extends BaseFragment {
         WebElement text = null;
         try {
             text = findInputElement("text", identifier);
-        } catch (NoSuchElementException ignore) {
+        } catch (NoSuchElementException | TimeoutException ignore) {
             log.debug("not found - looking for textarea '{}'", identifier);
 
             //String byIdSelector = "textarea[id$='" + identifier + "']:visible";
@@ -227,6 +229,7 @@ public class Editor extends BaseFragment {
         String byDmrAttrSelector = "tr[data-dmr-attr='" + identifier + "'] input:visible";
         By selector = ByJQuery.selector(byIdSelector + ", " + byNameSelector + ", " + byDmrAttrSelector);
 
+        Graphene.waitGui().withTimeout(500, TimeUnit.MILLISECONDS).until().element(selector).is().visible();
         WebElement input = findElement(selector, root);
         if (!input.isDisplayed()) {
             // maybe just too long form
