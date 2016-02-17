@@ -38,7 +38,7 @@ public class GenericConnectorTestCase extends AbstractMessagingTestCase {
     private static final Address GENERIC_CONNECTOR_TBR_ADDRESS = DEFAULT_MESSAGING_SERVER.and("connector", GENERIC_CONNECTOR_TBR);
 
     private static final String PROPERTY_TBR_KEY = "prop42";
-    private static final String FACTORY_CLASS = "factoryClass";
+    private static final String FACTORY_CLASS = "org.apache.activemq.artemis.core.remoting.impl.netty.NettyConnectorFactory";
 
     @BeforeClass
     public static void setUp() throws CommandFailedException {
@@ -92,6 +92,7 @@ public class GenericConnectorTestCase extends AbstractMessagingTestCase {
     @Test
     public void editFactoryClass() throws Exception {
         editTextAndVerify(GENERIC_CONNECTOR_ADDRESS, "factoryClass", "factory-class", "fc");
+        editTextAndVerify(GENERIC_CONNECTOR_ADDRESS, "factoryClass", "factory-class", FACTORY_CLASS);
     }
 
     @Test

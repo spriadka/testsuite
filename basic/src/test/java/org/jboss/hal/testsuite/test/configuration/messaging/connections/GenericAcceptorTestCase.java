@@ -38,7 +38,7 @@ public class GenericAcceptorTestCase extends AbstractMessagingTestCase {
     private static final Address GENERIC_ACCEPTOR_ADDRESS_TBA = DEFAULT_MESSAGING_SERVER.and("acceptor", GENERIC_ACCEPTOR_TBA);
 
     private static final String PROPERTY_TBR_KEY = "prop42";
-    private static final String FACTORY_CLASS = "factoryClass";
+    private static final String FACTORY_CLASS = "org.apache.activemq.artemis.core.remoting.impl.netty.NettyAcceptorFactory";
 
     @BeforeClass
     public static void setUp() throws IOException, CommandFailedException, TimeoutException, InterruptedException {
@@ -96,6 +96,7 @@ public class GenericAcceptorTestCase extends AbstractMessagingTestCase {
     @Test
     public void editFactoryClass() throws Exception {
         editTextAndVerify(GENERIC_ACCEPTOR_ADDRESS, "factoryClass", "factory-class", "fc");
+        editTextAndVerify(GENERIC_ACCEPTOR_ADDRESS, "factoryClass", "factory-class", FACTORY_CLASS);
     }
 
     @Test

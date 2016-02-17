@@ -19,6 +19,8 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.wildfly.extras.creaper.commands.messaging.AddQueue;
+import org.wildfly.extras.creaper.commands.messaging.RemoveQueue;
+import org.wildfly.extras.creaper.core.CommandFailedException;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.OperationException;
 import org.wildfly.extras.creaper.core.online.operations.Values;
@@ -42,13 +44,17 @@ public class BridgesTestCase extends AbstractMessagingTestCase {
 
     private static final String CONNECTOR = "http-connector";
     private static final String QUEUE = "testQueue_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String QUEUE_EDIT = "testQueue_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String DISCOVERY_GROUP_EDIT = "discoveryGroupBridges_" + RandomStringUtils.randomAlphanumeric(5);
 
     @BeforeClass
     public static void setUp() throws Exception {
         List<String> jndiEntries = Arrays.asList(QUEUE);
         client.apply(new AddQueue.Builder(QUEUE).jndiEntries(jndiEntries).build());
+        client.apply(new AddQueue.Builder(QUEUE_EDIT).jndiEntries(jndiEntries).build());
         createBridge(BRIDGE_ADDRESS);
         createBridge(BRIDGE_TBR_ADDRESS);
+        operations.add(DEFAULT_MESSAGING_SERVER.and("discovery-group", DISCOVERY_GROUP_EDIT));
         administration.reloadIfRequired();
     }
 
@@ -68,10 +74,13 @@ public class BridgesTestCase extends AbstractMessagingTestCase {
     }
 
     @AfterClass
-    public static void afterClass() throws IOException, OperationException {
+    public static void afterClass() throws IOException, OperationException, CommandFailedException {
         operations.removeIfExists(BRIDGE_ADDRESS);
         operations.removeIfExists(BRIDGE_TBA_ADDRESS);
         operations.removeIfExists(BRIDGE_TBR_ADDRESS);
+        client.apply(new RemoveQueue(QUEUE));
+        client.apply(new RemoveQueue(QUEUE_EDIT));
+        operations.remove(DEFAULT_MESSAGING_SERVER.and("discovery-group", DISCOVERY_GROUP_EDIT));
     }
 
     @Test
@@ -87,12 +96,12 @@ public class BridgesTestCase extends AbstractMessagingTestCase {
 
     @Test
     public void updateBridgeQueue() throws Exception {
-        editTextAndVerify(BRIDGE_ADDRESS, "queueName", "queue-name", "q");
+        editTextAndVerify(BRIDGE_ADDRESS, "queueName", "queue-name", QUEUE_EDIT);
     }
 
     @Test
     public void updateBridgeForwardingAddress() throws Exception {
-        editTextAndVerify(BRIDGE_ADDRESS, "forwardingAddress", "forwarding-address", "address5");
+        editTextAndVerify(BRIDGE_ADDRESS, "forwardingAddress", "forwarding-address", "127.0.0.1");
     }
 
     @Test
@@ -102,24 +111,25 @@ public class BridgesTestCase extends AbstractMessagingTestCase {
                 .build();
         try {
             client.apply(backup.backup());
-            editTextAndVerify(BRIDGE_ADDRESS, "transformerClass", "transformer-class-name", "testClass");
+            editTextAndVerify(BRIDGE_ADDRESS, "transformerClass", "transformer-class-name",
+                    "org.apache.activemq.artemis.jms.example.HatColourChangeTransformer");
         } finally {
             client.apply(backup.restore());
         }
 
     }
 
-    @Test //https://issues.jboss.org/browse/HAL-903
+    @Test
     public void updateBridgeDiscoveryGroup() throws Exception {
         ConfigFragment editPanelFragment = page.getConfigFragment();
         Editor editor = editPanelFragment.edit();
 
         editor.text("staticConnectors", "");
-        editor.text("discoveryGroup", "dq-group1");
+        editor.text("discoveryGroup", DISCOVERY_GROUP_EDIT);
         boolean finished = editPanelFragment.save();
 
         Assert.assertTrue("Config should be saved and closed.", finished);
-        new ResourceVerifier(BRIDGE_ADDRESS, client).verifyAttribute("discovery-group", "dg-group1"); //should fail [HAL-903]
+        new ResourceVerifier(BRIDGE_ADDRESS, client).verifyAttribute("discovery-group", DISCOVERY_GROUP_EDIT);
     }
 
     @Test
