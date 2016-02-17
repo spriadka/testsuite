@@ -1,6 +1,7 @@
 package org.jboss.hal.testsuite.fragment.config.container;
 
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
+import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
 
 /**
  * @author mkrajcov <mkrajcov@redhat.com>
@@ -12,6 +13,7 @@ public class EJB3BeanPoolsFragment extends ConfigFragment {
     }
 
     public void removeBeanPool(String name) {
-        getResourceManager().removeResourceAndConfirm(name);
+        ConfirmationWindow window = getResourceManager().removeResource(name);
+        window.confirmAndDismissReloadRequiredMessage();
     }
 }

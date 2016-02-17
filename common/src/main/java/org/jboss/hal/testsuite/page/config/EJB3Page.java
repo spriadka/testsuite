@@ -11,6 +11,7 @@ import org.jboss.hal.testsuite.fragment.config.container.EJB3ThreadPoolsFragment
 import org.jboss.hal.testsuite.page.ConfigPage;
 import org.jboss.hal.testsuite.page.Navigatable;
 import org.jboss.hal.testsuite.util.ConfigUtils;
+import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.PropUtils;
 import org.openqa.selenium.By;
 
@@ -49,5 +50,6 @@ public class EJB3Page extends ConfigPage implements Navigatable {
         }
         finderNavigation.selectRow().invoke("View");
         Application.waitUntilVisible();
+        Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
     }
 }
