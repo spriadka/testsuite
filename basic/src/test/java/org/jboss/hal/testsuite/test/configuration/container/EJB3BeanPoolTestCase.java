@@ -9,15 +9,10 @@ import org.jboss.hal.testsuite.category.Standalone;
 import org.jboss.hal.testsuite.cli.CliClient;
 import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.cli.CliConstants;
-import org.jboss.hal.testsuite.finder.Application;
-import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.fragment.config.container.EJB3BeanPoolsFragment;
-import org.jboss.hal.testsuite.page.config.DomainConfigurationPage;
 import org.jboss.hal.testsuite.page.config.EJB3Page;
-import org.jboss.hal.testsuite.page.config.StandaloneConfigurationPage;
 import org.jboss.hal.testsuite.test.util.ConfigAreaChecker;
-import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.jboss.hal.testsuite.util.ResourceVerifier;
 import org.junit.Assert;
 import org.junit.Before;
@@ -48,19 +43,7 @@ public class EJB3BeanPoolTestCase {
 
     @Before
     public void before() {
-        //Console.withBrowser(browser).refreshAndNavigate(EJB3Page.class);
-        if (ConfigUtils.isDomain()) {
-            finderNavigation = new FinderNavigation(browser, DomainConfigurationPage.class)
-                    .addAddress(FinderNames.CONFIGURATION, FinderNames.PROFILES)
-                    .addAddress(FinderNames.PROFILE, "full")
-                    .addAddress(FinderNames.SUBSYSTEM, "EJB 3");
-        } else {
-            finderNavigation = new FinderNavigation(browser, StandaloneConfigurationPage.class)
-                    .addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
-                    .addAddress(FinderNames.SUBSYSTEM, "EJB 3");
-        }
-        finderNavigation.selectRow().invoke("View");
-        Application.waitUntilVisible();
+        page.navigate();
         fragment = page.beanPools();
     }
 
