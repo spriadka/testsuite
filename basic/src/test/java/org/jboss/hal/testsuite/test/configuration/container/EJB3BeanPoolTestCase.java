@@ -4,27 +4,29 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.arquillian.junit.InSequence;
 import org.jboss.hal.testsuite.category.Standalone;
-import org.jboss.hal.testsuite.cli.CliClient;
-import org.jboss.hal.testsuite.cli.CliClientFactory;
-import org.jboss.hal.testsuite.cli.CliConstants;
-import org.jboss.hal.testsuite.finder.Application;
-import org.jboss.hal.testsuite.finder.FinderNames;
-import org.jboss.hal.testsuite.finder.FinderNavigation;
+import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
+import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.fragment.config.container.EJB3BeanPoolsFragment;
-import org.jboss.hal.testsuite.page.config.DomainConfigurationPage;
 import org.jboss.hal.testsuite.page.config.EJB3Page;
-import org.jboss.hal.testsuite.page.config.StandaloneConfigurationPage;
-import org.jboss.hal.testsuite.test.util.ConfigAreaChecker;
-import org.jboss.hal.testsuite.util.ConfigUtils;
-import org.jboss.hal.testsuite.util.ResourceVerifier;
+import org.jboss.hal.testsuite.util.ConfigChecker;
+import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
+import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
+import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.OperationException;
+import org.wildfly.extras.creaper.core.online.operations.Operations;
+import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
+
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
 /**
  * @author mkrajcov <mkrajcov@redhat.com>
@@ -33,12 +35,18 @@ import org.openqa.selenium.WebDriver;
 @Category(Standalone.class)
 public class EJB3BeanPoolTestCase {
 
+    private static final String BEAN_POOL = "bean-pool_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String BEAN_POOL_TBA = "bean-pool-tba_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String BEAN_POOL_TBR = "bean-pool-tbr_" + RandomStringUtils.randomAlphanumeric(5);
+
+    private static final Address BEAN_POOL_ADDRESS = Address.subsystem("ejb3").and("strict-max-bean-instance-pool", BEAN_POOL);
+    private static final Address BEAN_POOL_TBR_ADDRESS = Address.subsystem("ejb3").and("strict-max-bean-instance-pool", BEAN_POOL_TBR);
+    private static final Address BEAN_POOL_TBA_ADDRESS = Address.subsystem("ejb3").and("strict-max-bean-instance-pool", BEAN_POOL_TBA);
+
+    private static OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
+    private static Operations operations = new Operations(client);
+    private static Administration administration = new Administration(client);
     private EJB3BeanPoolsFragment fragment;
-    private static final String BEAN_POOL_NAME = "bp_" + RandomStringUtils.randomAlphanumeric(5);
-    private CliClient client = CliClientFactory.getClient();
-    private ResourceVerifier verifier = new ResourceVerifier(CliConstants.EJB3_BEAN_POOL_ADDRESS + "=" + BEAN_POOL_NAME, client);
-    private ConfigAreaChecker checker = new ConfigAreaChecker(verifier);
-    private FinderNavigation finderNavigation;
 
     @Drone
     public WebDriver browser;
@@ -46,56 +54,77 @@ public class EJB3BeanPoolTestCase {
     @Page
     public EJB3Page page;
 
+    @BeforeClass
+    public static void beforeClass() throws IOException {
+        operations.add(BEAN_POOL_ADDRESS);
+        operations.add(BEAN_POOL_TBR_ADDRESS);
+    }
+
+    @AfterClass
+    public static void afterClass() throws IOException, OperationException {
+        try {
+            operations.removeIfExists(BEAN_POOL_ADDRESS);
+            operations.removeIfExists(BEAN_POOL_TBA_ADDRESS);
+            operations.removeIfExists(BEAN_POOL_TBR_ADDRESS);
+        } finally {
+            client.close();
+        }
+    }
+
     @Before
     public void before() {
-        //Console.withBrowser(browser).refreshAndNavigate(EJB3Page.class);
-        if (ConfigUtils.isDomain()) {
-            finderNavigation = new FinderNavigation(browser, DomainConfigurationPage.class)
-                    .addAddress(FinderNames.CONFIGURATION, FinderNames.PROFILES)
-                    .addAddress(FinderNames.PROFILE, "full")
-                    .addAddress(FinderNames.SUBSYSTEM, "EJB 3");
-        } else {
-            finderNavigation = new FinderNavigation(browser, StandaloneConfigurationPage.class)
-                    .addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
-                    .addAddress(FinderNames.SUBSYSTEM, "EJB 3");
-        }
-        finderNavigation.selectRow().invoke("View");
-        Application.waitUntilVisible();
+        page.navigate();
         fragment = page.beanPools();
+        fragment.getResourceManager().selectByName(BEAN_POOL);
+    }
+
+    @After
+    public void after() throws InterruptedException, TimeoutException, IOException {
+        administration.reloadIfRequired();
     }
 
     @Test
-    @InSequence(0)
-    public void createBeanPool() {
+    public void createBeanPool() throws Exception {
         boolean result = fragment.addBeanPool()
-                .name(BEAN_POOL_NAME)
+                .name(BEAN_POOL_TBA)
                 .maxPoolSize("30")
                 .timeout("8")
                 .timeoutUnit("MINUTES")
                 .finish();
         Assert.assertTrue("Window should be closed", result);
-        verifier.verifyResource(true);
+        new ResourceVerifier(BEAN_POOL_TBA_ADDRESS, client).verifyExists();
     }
 
     @Test
-    @InSequence(1)
-    public void editMaxPoolSize() {
-        checker.editTextAndAssert(page, "max-pool-size", "56").rowName(BEAN_POOL_NAME).invoke();
-        checker.editTextAndAssert(page, "max-pool-size", "56F").rowName(BEAN_POOL_NAME).expectError().invoke();
+    public void editMaxPoolSize() throws Exception {
+        new ConfigChecker.Builder(client, BEAN_POOL_ADDRESS)
+                .configFragment(fragment)
+                .editAndSave(ConfigChecker.InputType.TEXT, "max-pool-size", 42)
+                .verifyFormSaved()
+                .verifyAttribute("max-pool-size", 42);
+        new ConfigChecker.Builder(client, BEAN_POOL_ADDRESS)
+                .configFragment(fragment)
+                .editAndSave(ConfigChecker.InputType.TEXT, "max-pool-size", "56F")
+                .verifyFormNotSaved();
     }
 
     @Test
-    @InSequence(2)
-    public void editTimeout() {
-        checker.editTextAndAssert(page, "timeout", "56").rowName(BEAN_POOL_NAME).invoke();
-        checker.editTextAndAssert(page, "timeout", "56F").rowName(BEAN_POOL_NAME).expectError().invoke();
+    public void editTimeout() throws Exception {
+        new ConfigChecker.Builder(client, BEAN_POOL_ADDRESS)
+                .configFragment(fragment)
+                .editAndSave(ConfigChecker.InputType.TEXT, "timeout", 42L)
+                .verifyFormSaved()
+                .verifyAttribute("timeout", 42L);
+        new ConfigChecker.Builder(client, BEAN_POOL_ADDRESS)
+                .configFragment(fragment)
+                .editAndSave(ConfigChecker.InputType.TEXT, "timeout", "56F")
+                .verifyFormNotSaved();
     }
 
     @Test
-    @InSequence(3)
-    public void removeBeanPool() {
-        fragment.removeBeanPool(BEAN_POOL_NAME);
-        verifier.verifyResource(false);
+    public void removeBeanPool() throws Exception {
+        fragment.removeBeanPool(BEAN_POOL_TBR);
+        new ResourceVerifier(BEAN_POOL_TBR_ADDRESS, client).verifyDoesNotExist();
     }
 
 }

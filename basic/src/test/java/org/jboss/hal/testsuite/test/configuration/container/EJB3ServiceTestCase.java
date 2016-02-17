@@ -5,25 +5,25 @@ import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Standalone;
-import org.jboss.hal.testsuite.cli.CliClient;
-import org.jboss.hal.testsuite.cli.CliClientFactory;
-import org.jboss.hal.testsuite.cli.CliConstants;
-import org.jboss.hal.testsuite.cli.CliUtils;
-import org.jboss.hal.testsuite.finder.Application;
-import org.jboss.hal.testsuite.finder.FinderNames;
-import org.jboss.hal.testsuite.finder.FinderNavigation;
-import org.jboss.hal.testsuite.page.config.DomainConfigurationPage;
+import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.page.config.EJB3Page;
-import org.jboss.hal.testsuite.page.config.StandaloneConfigurationPage;
-import org.jboss.hal.testsuite.test.util.ConfigAreaChecker;
-import org.jboss.hal.testsuite.util.ConfigUtils;
-import org.jboss.hal.testsuite.util.ResourceVerifier;
+import org.jboss.hal.testsuite.util.ConfigChecker;
+import org.jboss.hal.testsuite.util.Console;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
+import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
+import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.OperationException;
+import org.wildfly.extras.creaper.core.online.operations.Operations;
+import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
+
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
 /**
  * @author mkrajcov <mkrajcov@redhat.com>
@@ -32,14 +32,17 @@ import org.openqa.selenium.WebDriver;
 @Category(Standalone.class)
 public class EJB3ServiceTestCase {
 
-    private CliClient client = CliClientFactory.getClient();
-    private ResourceVerifier timerVerifier = new ResourceVerifier(CliConstants.EJB3_TIMER_SERVICE_ADDRESS, client);
-    private ResourceVerifier asyncVerifier = new ResourceVerifier(CliConstants.EJB3_ASYNC_SERVICE_ADDRESS, client);
-    private ResourceVerifier remoteVerifier = new ResourceVerifier(CliConstants.EJB3_REMOTE_SERVICE_ADDRESS, client);
-    private ConfigAreaChecker checker = new ConfigAreaChecker(timerVerifier);
-    private String ejbName;
-    private FinderNavigation finderNavigation;
+    private static final String THREAD_POOL_NAME_ID = "thread-pool-name";
+    private static final String THREAD_POOL_NAME = "ejb3-service_" + RandomStringUtils.randomAlphanumeric(5);
 
+    private static final Address THREAD_POOL_ADDRESS = Address.subsystem("ejb3").and("thread-pool", THREAD_POOL_NAME);
+    private static final Address TIMER_SERVICE_ADDRESS = Address.subsystem("ejb3").and("service", "timer-service");
+    private static final Address ASYNC_SERVICE_ADDRESS = Address.subsystem("ejb3").and("service", "async");
+    private static final Address REMOTE_SERVICE_ADDRESS = Address.subsystem("ejb3").and("service", "remote");
+
+    private static final OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
+    private final Operations operations = new Operations(client);
+    private final Administration administration = new Administration(client);
     @Drone
     public WebDriver browser;
 
@@ -47,57 +50,56 @@ public class EJB3ServiceTestCase {
     public EJB3Page page;
 
     @Before
-    public void before() {
-        ejbName = createThreadPool();
-        //Console.withBrowser(browser).refreshAndNavigate(EJB3Page.class);
-        if (ConfigUtils.isDomain()) {
-            finderNavigation = new FinderNavigation(browser, DomainConfigurationPage.class)
-                    .addAddress(FinderNames.CONFIGURATION, FinderNames.PROFILES)
-                    .addAddress(FinderNames.PROFILE, "full")
-                    .addAddress(FinderNames.SUBSYSTEM, "EJB 3");
-        } else {
-            finderNavigation = new FinderNavigation(browser, StandaloneConfigurationPage.class)
-                    .addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
-                    .addAddress(FinderNames.SUBSYSTEM, "EJB 3");
-        }
-        finderNavigation.selectRow().invoke("View");
-        Application.waitUntilVisible();
+    public void before() throws IOException {
+        operations.add(THREAD_POOL_ADDRESS);
+        page.navigate();
         page.service();
     }
 
     @After
-    public void after() {
-        removeThreadPool(ejbName);
+    public void after() throws IOException, OperationException, TimeoutException, InterruptedException {
+        operations.removeIfExists(THREAD_POOL_ADDRESS);
+        administration.reloadIfRequired();
+    }
+
+    @AfterClass
+    public static void afterClass() throws IOException {
+        client.close();
     }
 
     @Test
-    public void assignTimerServiceToThreadPool() {
+    public void assignTimerServiceToThreadPool() throws Exception {
         page.switchSubTab("Timer");
-        checker.editTextAndAssert(page, "thread-pool-name", ejbName).invoke();
-        checker.editTextAndAssert(page, "thread-pool-name", "default").invoke();
+        assignServiceToThreadPool(TIMER_SERVICE_ADDRESS);
     }
 
     @Test
-    public void assignAsyncServiceToThreadPool() {
+    public void assignAsyncServiceToThreadPool() throws Exception {
         page.switchSubTab("Async");
-        checker.editTextAndAssert(page, "thread-pool-name", ejbName).withVerifier(asyncVerifier).invoke();
-        checker.editTextAndAssert(page, "thread-pool-name", "default").withVerifier(asyncVerifier).invoke();
+        assignServiceToThreadPool(ASYNC_SERVICE_ADDRESS);
     }
 
     @Test
-    public void assignRemoteServiceToThreadPool() {
+    public void assignRemoteServiceToThreadPool() throws Exception {
         page.switchSubTab("Remoting Service");
-        checker.editTextAndAssert(page, "thread-pool-name", ejbName).withVerifier(remoteVerifier).invoke();
-        checker.editTextAndAssert(page, "thread-pool-name", "default").withVerifier(remoteVerifier).invoke();
+        assignServiceToThreadPool(REMOTE_SERVICE_ADDRESS);
     }
 
-    private String createThreadPool() {
-        String name = "EJB3ServiceThreadPool_" + RandomStringUtils.randomAlphanumeric(5);
-        client.executeCommand(CliUtils.buildCommand(CliConstants.EJB3_THREAD_POOL_ADDRESS + "=" + name, ":add", new String[]{"max-threads=30", "keepalive-time={time=30, unit=MINUTES}"}));
-        return name;
-    }
+    public void assignServiceToThreadPool(Address serviceAddress) throws Exception {
+        new ConfigChecker.Builder(client, serviceAddress)
+                .configFragment(page.getConfigFragment())
+                .editAndSave(ConfigChecker.InputType.TEXT, THREAD_POOL_NAME_ID, THREAD_POOL_NAME)
+                .verifyFormSaved()
+                .verifyAttribute(THREAD_POOL_NAME_ID, THREAD_POOL_NAME);
+        if (administration.isReloadRequired()) {
+            Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
+            administration.reload();
+        }
+        new ConfigChecker.Builder(client, serviceAddress)
+                .configFragment(page.getConfigFragment())
+                .editAndSave(ConfigChecker.InputType.TEXT, THREAD_POOL_NAME_ID, "default")
+                .verifyFormSaved()
+                .verifyAttribute(THREAD_POOL_NAME_ID, "default");
 
-    private void removeThreadPool(String name) {
-        client.executeCommand(CliUtils.buildCommand(CliConstants.EJB3_THREAD_POOL_ADDRESS + "=" + name, ":remove"));
     }
 }
