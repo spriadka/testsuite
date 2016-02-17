@@ -10,6 +10,7 @@ import org.jboss.hal.testsuite.page.config.EJB3Page;
 import org.jboss.hal.testsuite.util.ConfigChecker;
 import org.jboss.hal.testsuite.util.Console;
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -39,7 +40,7 @@ public class EJB3ServiceTestCase {
     private static final Address ASYNC_SERVICE_ADDRESS = Address.subsystem("ejb3").and("service", "async");
     private static final Address REMOTE_SERVICE_ADDRESS = Address.subsystem("ejb3").and("service", "remote");
 
-    private final OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
+    private static final OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
     private final Operations operations = new Operations(client);
     private final Administration administration = new Administration(client);
     @Drone
@@ -59,6 +60,11 @@ public class EJB3ServiceTestCase {
     public void after() throws IOException, OperationException, TimeoutException, InterruptedException {
         operations.removeIfExists(THREAD_POOL_ADDRESS);
         administration.reloadIfRequired();
+    }
+
+    @AfterClass
+    public static void afterClass() throws IOException {
+        client.close();
     }
 
     @Test

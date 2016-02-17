@@ -62,9 +62,13 @@ public class EJB3BeanPoolTestCase {
 
     @AfterClass
     public static void afterClass() throws IOException, OperationException {
-        operations.removeIfExists(BEAN_POOL_ADDRESS);
-        operations.removeIfExists(BEAN_POOL_TBA_ADDRESS);
-        operations.removeIfExists(BEAN_POOL_TBR_ADDRESS);
+        try {
+            operations.removeIfExists(BEAN_POOL_ADDRESS);
+            operations.removeIfExists(BEAN_POOL_TBA_ADDRESS);
+            operations.removeIfExists(BEAN_POOL_TBR_ADDRESS);
+        } finally {
+            client.close();
+        }
     }
 
     @Before
