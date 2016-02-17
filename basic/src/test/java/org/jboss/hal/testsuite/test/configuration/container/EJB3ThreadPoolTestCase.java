@@ -4,25 +4,14 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
 import org.jboss.hal.testsuite.category.Shared;
-import org.jboss.hal.testsuite.dmr.AddressTemplate;
-import org.jboss.hal.testsuite.dmr.DefaultContext;
-import org.jboss.hal.testsuite.dmr.Dispatcher;
-import org.jboss.hal.testsuite.dmr.Operation;
-import org.jboss.hal.testsuite.dmr.ResourceAddress;
-import org.jboss.hal.testsuite.dmr.ResourceCleanup;
-import org.jboss.hal.testsuite.dmr.ResourceVerifier;
-import org.jboss.hal.testsuite.finder.Application;
-import org.jboss.hal.testsuite.finder.FinderNames;
-import org.jboss.hal.testsuite.finder.FinderNavigation;
+import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
+import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.fragment.config.container.EJB3ThreadPoolWizard;
 import org.jboss.hal.testsuite.fragment.config.container.EJB3ThreadPoolsFragment;
-import org.jboss.hal.testsuite.page.config.DomainConfigurationPage;
 import org.jboss.hal.testsuite.page.config.EJB3Page;
-import org.jboss.hal.testsuite.page.config.StandaloneConfigurationPage;
-import org.jboss.hal.testsuite.test.util.ConfigAreaChecker;
-import org.jboss.hal.testsuite.util.ConfigUtils;
+import org.jboss.hal.testsuite.util.ConfigChecker;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -30,6 +19,15 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
+import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
+import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.OperationException;
+import org.wildfly.extras.creaper.core.online.operations.Operations;
+import org.wildfly.extras.creaper.core.online.operations.Values;
+import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
+
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -41,127 +39,98 @@ import static org.junit.Assert.assertTrue;
 @Category(Shared.class)
 public class EJB3ThreadPoolTestCase {
 
-    static final AddressTemplate ADDRESS_TEMPLATE = AddressTemplate
-            .of("{default.profile}/subsystem=ejb3/thread-pool=*");
+    private static final String THREAD_POOL = "EJB3ThreadPool_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String THREAD_POOL_TBA = "EJB3ThreadPool-tba_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String THREAD_POOL_TBA2 = "EJB3ThreadPool-tba2_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String THREAD_POOL_TBR = "EJB3ThreadPool-tbr_" + RandomStringUtils.randomAlphanumeric(5);
 
-    private static Dispatcher dispatcher;
+    private static final Address THREAD_POOL_ADDRESS = Address.subsystem("ejb3").and("thread-pool", THREAD_POOL);
+    private static final Address THREAD_POOL_TBA_ADDRESS = Address.subsystem("ejb3")
+            .and("thread-pool", THREAD_POOL_TBA);
+    private static final Address THREAD_POOL_TBA2_ADDRESS = Address.subsystem("ejb3")
+            .and("thread-pool", THREAD_POOL_TBA2);
+    private static final Address THREAD_POOL_TBR_ADDRESS = Address.subsystem("ejb3")
+            .and("thread-pool", THREAD_POOL_TBR);
+
+    private static final OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
+    private static final Operations operations = new Operations(client);
+    private static final Administration administration = new Administration(client);
 
     @Drone WebDriver browser;
     @Page EJB3Page page;
 
-    private DefaultContext statementContext;
-    private ResourceVerifier verifier;
-    private ResourceCleanup cleanup;
-    private FinderNavigation finderNavigation;
     private EJB3ThreadPoolsFragment fragment;
 
     @BeforeClass
-    public static void beforeClass() {
-        dispatcher = new Dispatcher();
+    public static void beforeClass() throws Exception {
+        operations.add(THREAD_POOL_ADDRESS, Values.of("max-threads", 20));
+        operations.add(THREAD_POOL_TBR_ADDRESS, Values.of("max-threads", 20));
+        administration.reloadIfRequired();
     }
 
     @Before
     public void before() {
-        statementContext = new DefaultContext();
-        verifier = new ResourceVerifier(dispatcher);
-        cleanup = new ResourceCleanup(dispatcher);
+        page.navigate();
+        fragment = page.threadPools();
+        fragment.getResourceManager().selectByName(THREAD_POOL);
+    }
 
-        if (ConfigUtils.isDomain()) {
-            finderNavigation = new FinderNavigation(browser, DomainConfigurationPage.class)
-                    .addAddress(FinderNames.CONFIGURATION, FinderNames.PROFILES)
-                    .addAddress(FinderNames.PROFILE, "full")
-                    .addAddress(FinderNames.SUBSYSTEM, "EJB 3");
-        } else {
-            finderNavigation = new FinderNavigation(browser, StandaloneConfigurationPage.class)
-                    .addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
-                    .addAddress(FinderNames.SUBSYSTEM, "EJB 3");
-        }
+    @After
+    public void after() throws InterruptedException, TimeoutException, IOException {
+        administration.reloadIfRequired();
     }
 
     @AfterClass
-    public static void afterClass() {
-        dispatcher.close();
-    }
-
-    @Test
-    public void createThreadPool() {
-        String name = "EJB3ThreadPoolThreadPool_" + RandomStringUtils.randomAlphanumeric(8);
-        ResourceAddress address = ADDRESS_TEMPLATE.resolve(statementContext, name);
-        dispatcher.execute(new Operation.Builder(ModelDescriptionConstants.ADD, address).param("max-threads", 99).build());
-
-        finderNavigation.selectRow().invoke(FinderNames.VIEW);
-        Application.waitUntilVisible();
-        fragment = page.threadPools();
-
+    public static void afterClass() throws IOException, OperationException {
         try {
-            boolean result = fragment.addThreadPool()
-                    .name(name)
-                    .maxThreads("50")
-                    .finish();
-
-            assertTrue("Window should be closed", result);
-            assertTrue(fragment.resourceIsPresent(name));
-            verifier.verifyResource(address);
-
+            operations.removeIfExists(THREAD_POOL_ADDRESS);
+            operations.removeIfExists(THREAD_POOL_TBA_ADDRESS);
+            operations.removeIfExists(THREAD_POOL_TBA2_ADDRESS);
+            operations.removeIfExists(THREAD_POOL_TBR_ADDRESS);
         } finally {
-            cleanup.removeIfPresent(address);
+            client.close();
         }
     }
 
     @Test
-    public void editMaxThreads() {
-        String name = "EJB3ThreadPoolMaxThreads_" + RandomStringUtils.randomAlphanumeric(8);
-        ResourceAddress address = ADDRESS_TEMPLATE.resolve(statementContext, name);
-        dispatcher.execute(new Operation.Builder("add", address).param("max-threads", 99).build());
+    public void createThreadPool() throws Exception {
+        boolean result = fragment.addThreadPool()
+                .name(THREAD_POOL_TBA)
+                .maxThreads("50")
+                .finish();
 
-        finderNavigation.selectRow().invoke(FinderNames.VIEW);
-        Application.waitUntilVisible();
-        fragment = page.threadPools();
-
-        ConfigAreaChecker checker = new ConfigAreaChecker(verifier, address);
-        try {
-            checker.editTextAndAssert(page, "max-threads", "1589").rowName(name).withTimeout(1000).invoke();
-            checker.editTextAndAssert(page, "max-threads", "1589f").expectError().rowName(name).withTimeout(1000)
-                    .invoke();
-
-        } finally {
-            cleanup.removeIfPresent(address);
-        }
+        assertTrue("Window should be closed", result);
+        assertTrue(fragment.resourceIsPresent(THREAD_POOL_TBA));
+        new ResourceVerifier(THREAD_POOL_TBA_ADDRESS, client).verifyExists();
     }
 
     @Test
-    public void removeBeanPool() {
-        String name = "EJB3ThreadPoolBeanPool_" + RandomStringUtils.randomAlphanumeric(8);
-        ResourceAddress address = ADDRESS_TEMPLATE.resolve(statementContext, name);
-        dispatcher.execute(new Operation.Builder("add", address).param("max-threads", 99).build());
-
-        finderNavigation.selectRow().invoke(FinderNames.VIEW);
-        Application.waitUntilVisible();
-        fragment = page.threadPools();
-
-        try {
-            fragment.removeThreadPool(name);
-            verifier.verifyResource(address, false);
-
-        } finally {
-            cleanup.removeIfPresent(address);
-        }
+    public void editMaxThreads() throws Exception {
+        new ConfigChecker.Builder(client, THREAD_POOL_ADDRESS)
+                .configFragment(fragment)
+                .editAndSave(ConfigChecker.InputType.TEXT, "max-threads", 1234)
+                .verifyFormSaved()
+                .verifyAttribute("max-threads", 1234);
+        new ConfigChecker.Builder(client, THREAD_POOL_ADDRESS)
+                .configFragment(fragment)
+                .editAndSave(ConfigChecker.InputType.TEXT, "max-threads", "1589f")
+                .verifyFormNotSaved();
     }
 
     @Test
-    public void createThreadPoolWithoutMaxThreads() {
-        String name = "EJB3ThreadPoolThreadPool2_" + RandomStringUtils.randomAlphanumeric(20);
-        ResourceAddress address = ADDRESS_TEMPLATE.resolve(statementContext, name);
+    public void removeBeanPool() throws Exception {
+        fragment.removeThreadPool(THREAD_POOL_TBR);
+        new ResourceVerifier(THREAD_POOL_TBR_ADDRESS, client).verifyDoesNotExist();
+    }
 
-        finderNavigation.selectRow().invoke(FinderNames.VIEW);
-        Application.waitUntilVisible();
-        fragment = page.threadPools();
+    @Test
+    public void createThreadPoolWithoutMaxThreads() throws Exception {
         EJB3ThreadPoolWizard wizard = fragment.addThreadPool();
 
-        boolean result = wizard.name(name)
+        boolean result = wizard.name(THREAD_POOL_TBA2)
                 .maxThreads("")
                 .finish();
         assertFalse("Window should not be closed.", result);
-        verifier.verifyResource(address, false);
+        new ResourceVerifier(THREAD_POOL_TBA2_ADDRESS, client).verifyDoesNotExist();
     }
 }
