@@ -33,8 +33,8 @@ public class ClusterConnectionsTestCase extends AbstractMessagingTestCase {
     private static final String CC_TBR_NAME = "test-cluster-TBR_" + RandomStringUtils.randomAlphanumeric(6);
 
     private static final Address CC_ADDRESS = DEFAULT_MESSAGING_SERVER.and("cluster-connection", CC_NAME);
-    private static final Address CC_TBA_ADDRESS = DEFAULT_MESSAGING_SERVER.and("cluster-connection", CC_NAME);
-    private static final Address CC_TBR_ADDRESS = DEFAULT_MESSAGING_SERVER.and("cluster-connection", CC_NAME);
+    private static final Address CC_TBA_ADDRESS = DEFAULT_MESSAGING_SERVER.and("cluster-connection", CC_TBA_NAME);
+    private static final Address CC_TBR_ADDRESS = DEFAULT_MESSAGING_SERVER.and("cluster-connection", CC_TBR_NAME);
 
     @Page
     private MessagingPage page;
