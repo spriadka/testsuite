@@ -1,8 +1,5 @@
 package org.jboss.hal.testsuite.test.configuration.connector;
 
-import java.io.IOException;
-import java.util.concurrent.TimeoutException;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
@@ -17,10 +14,8 @@ import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConfigPropertyWi
 import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConnectionDefinitionWizard;
 import org.jboss.hal.testsuite.fragment.config.resourceadapters.ResourceAdapterWizard;
 import org.jboss.hal.testsuite.page.config.ResourceAdaptersPage;
-import org.jboss.hal.testsuite.util.Console;
 import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
@@ -30,6 +25,9 @@ import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.OperationException;
 import org.wildfly.extras.creaper.core.online.operations.Operations;
 import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
+
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
 import static org.junit.Assert.assertTrue;
 
@@ -75,11 +73,6 @@ public class ResourceAdaptersTestCase {
 
     @Page
     public ResourceAdaptersPage page;
-
-    @Before
-    public void before() {
-        Console.withBrowser(browser).refreshAndNavigate(ResourceAdaptersPage.class);
-    }
 
     @After
     public void after() throws IOException, InterruptedException, TimeoutException {
