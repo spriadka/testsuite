@@ -45,16 +45,12 @@ public class BroadcastGroupsTestCase extends AbstractMessagingTestCase {
     @BeforeClass
     public static void setUp() throws Exception {
         operations.add(NEW_SERVER);
-        administration.reloadIfRequired();
         new ResourceVerifier(NEW_SERVER, client).verifyExists();
-        operations.add(CONNECTOR_ADDRESS, Values.of("factory-class", "foo"));
-        administration.reloadIfRequired();
+        operations.add(CONNECTOR_ADDRESS, Values.of("factory-class", "org.apache.activemq.artemis.core.remoting.impl.netty.NettyConnectorFactory"));
         new ResourceVerifier(CONNECTOR_ADDRESS, client).verifyExists();
         operations.add(BG_ADDRESS);
-        administration.reloadIfRequired();
         new ResourceVerifier(BG_ADDRESS, client).verifyExists();
         operations.add(BG_TBR_ADDRESS);
-        administration.reloadIfRequired();
         new ResourceVerifier(BG_TBR_ADDRESS, client).verifyExists();
         administration.reloadIfRequired();
     }
@@ -101,8 +97,7 @@ public class BroadcastGroupsTestCase extends AbstractMessagingTestCase {
 
     @Test
     public void removeBroadcastGroup() throws Exception {
-        page.selectInTable(BG_TBR_NAME, 0);
-        page.remove();
+        page.remove(BG_TBR_NAME);
 
         new ResourceVerifier(BG_TBR_ADDRESS, client).verifyDoesNotExist();
     }

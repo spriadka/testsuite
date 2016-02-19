@@ -7,7 +7,7 @@ import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.page.config.MessagingPage;
 import org.jboss.hal.testsuite.test.configuration.messaging.AbstractMessagingTestCase;
-import org.junit.After;
+import org.jboss.hal.testsuite.util.ConfigChecker;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
@@ -27,6 +27,8 @@ import static org.junit.Assert.assertTrue;
 @RunWith(Arquillian.class)
 @Category(Shared.class)
 public class ConnectorServicesTestCase extends AbstractMessagingTestCase {
+    /* There should be no reload performed in this test case because it is error prone and possibly causes crash of
+     * ActiveMQ. See note below.*/
 
     private static final String CONNECTOR_SERVICE = "connector-service_" + RandomStringUtils.randomAlphanumeric(5);
     private static final String CONNECTOR_SERVICE_TBA = "connector-service-TBA_" + RandomStringUtils.randomAlphanumeric(5);
@@ -37,7 +39,10 @@ public class ConnectorServicesTestCase extends AbstractMessagingTestCase {
 
     private static final String PROPERTY_TBR_KEY = "key4";
 
-    private static final String FACTORY_CLASS = "factoryClass";
+    /* No implementation of org.apache.activemq.artemis.core.server.ConnectorServiceFactory is currently present in
+     * ActiveMQ module so filling value is used instead. This value should be only used to verify if value is correctly
+     * propagated to model from web console configuration.*/
+    private static final String FACTORY_CLASS = "clazz";
 
     @BeforeClass
     public static void setUp() throws Exception {
@@ -46,7 +51,6 @@ public class ConnectorServicesTestCase extends AbstractMessagingTestCase {
         new ResourceVerifier(CONNECTOR_SERVICE_ADDRESS, client).verifyExists();
         operations.add(CONNECTOR_SERVICE_ADDRESS_TBR, Values.of("factory-class", FACTORY_CLASS));
         new ResourceVerifier(CONNECTOR_SERVICE_ADDRESS_TBR, client).verifyExists();
-        administration.reloadIfRequired();
     }
 
     @AfterClass
@@ -54,7 +58,7 @@ public class ConnectorServicesTestCase extends AbstractMessagingTestCase {
         operations.removeIfExists(CONNECTOR_SERVICE_ADDRESS);
         operations.removeIfExists(CONNECTOR_SERVICE_ADDRESS_TBA);
         operations.removeIfExists(CONNECTOR_SERVICE_ADDRESS_TBR);
-        administration.reloadIfRequired();
+        administration.reloadIfRequired(); //only reload which should be run
     }
 
     @Page
@@ -68,11 +72,6 @@ public class ConnectorServicesTestCase extends AbstractMessagingTestCase {
         page.selectInTable(CONNECTOR_SERVICE);
     }
 
-    @After
-    public void after() throws InterruptedException, TimeoutException, IOException {
-        administration.reloadIfRequired();
-    }
-
     @Test
     public void addConnectorServices() throws Exception {
         page.addConnetorServices(CONNECTOR_SERVICE_TBA, FACTORY_CLASS);
@@ -81,7 +80,11 @@ public class ConnectorServicesTestCase extends AbstractMessagingTestCase {
 
     @Test
     public void updateConnectorServicesServicesFactoryClass() throws Exception {
-        editTextAndVerify(CONNECTOR_SERVICE_ADDRESS, "factoryClass", "factory-class", "fc");
+        new ConfigChecker.Builder(client, CONNECTOR_SERVICE_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .editAndSave(ConfigChecker.InputType.TEXT, "factoryClass", FACTORY_CLASS)
+                .verifyFormSaved()
+                .verifyAttribute("factory-class", FACTORY_CLASS);
     }
 
     @Test
