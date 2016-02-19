@@ -11,6 +11,7 @@ import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.jboss.hal.testsuite.page.ConfigPage;
 import org.jboss.hal.testsuite.page.Navigatable;
 import org.jboss.hal.testsuite.util.ConfigUtils;
+import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.PropUtils;
 import org.openqa.selenium.By;
 
@@ -33,6 +34,7 @@ public class HibernateCachePage extends ConfigPage implements Navigatable {
                 .addAddress("Cache Container", "hibernate");
         navigation.selectRow().invoke(FinderNames.VIEW);
         Application.waitUntilVisible(50);
+        Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
     }
 
     private static final By CONTENT = By.id(PropUtils.get("page.content.id"));

@@ -1,8 +1,5 @@
 package org.jboss.hal.testsuite.test.configuration.infinispan;
 
-import java.io.IOException;
-import java.util.concurrent.TimeoutException;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
@@ -27,6 +24,9 @@ import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.OperationException;
 import org.wildfly.extras.creaper.core.online.operations.Operations;
 import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
+
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
 import static org.junit.Assert.assertTrue;
 
@@ -55,7 +55,7 @@ public class CacheContainersTestCase {
     public CacheContainersPage page;
 
     @After
-    public void after() throws IOException, InterruptedException, TimeoutException, OperationException {
+    public void after() throws OperationException, IOException, TimeoutException, InterruptedException {
         deleteCacheContainer();
         adminOps.reloadIfRequired();
     }
@@ -79,17 +79,15 @@ public class CacheContainersTestCase {
     @Test
     public void removeCacheContainer() throws Exception {
         addCacheContainer();
-        page.navigate();
-        page.removeCacheContainer(CACHE_CONTAINER_NAME);
+        page.navigateAndRemoveCacheContainer(CACHE_CONTAINER_NAME);
         new ResourceVerifier(cacheContainerAddress, client).verifyDoesNotExist();
     }
 
     @Test
-    public void editJndiName() throws IOException, InterruptedException, TimeoutException, Exception {
+    public void editJndiName() throws Exception {
         String attributeName = "jndi-name";
         String attributeValue = JNDI_NAME;
         addCacheContainer();
-        page.navigate();
         page.invokeContainerSettings(CACHE_CONTAINER_NAME);
         new ConfigChecker.Builder(client, cacheContainerAddress).configFragment(page.getSettingsConfig())
             .editAndSave(InputType.TEXT, attributeName, attributeValue)
@@ -98,11 +96,10 @@ public class CacheContainersTestCase {
     }
 
     @Test
-    public void editDefaultCache() throws IOException, InterruptedException, TimeoutException, Exception {
+    public void editDefaultCache() throws Exception {
         String attributeName = "default-cache";
         String attributeValue = "infDefCache_" + RandomStringUtils.randomAlphanumeric(5);
         addCacheContainer();
-        page.navigate();
         page.invokeContainerSettings(CACHE_CONTAINER_NAME);
         new ConfigChecker.Builder(client, cacheContainerAddress).configFragment(page.getSettingsConfig())
             .editAndSave(InputType.TEXT, attributeName, attributeValue)
@@ -111,11 +108,10 @@ public class CacheContainersTestCase {
     }
 
     @Test
-    public void editModule() throws IOException, InterruptedException, TimeoutException, Exception {
+    public void editModule() throws Exception {
         String attributeName = "default-cache";
         String attributeValue = "infModule" + RandomStringUtils.randomAlphanumeric(5);
         addCacheContainer();
-        page.navigate();
         page.invokeContainerSettings(CACHE_CONTAINER_NAME);
         new ConfigChecker.Builder(client, cacheContainerAddress).configFragment(page.getSettingsConfig())
             .editAndSave(InputType.TEXT, attributeName, attributeValue)
@@ -124,11 +120,10 @@ public class CacheContainersTestCase {
     }
 
     @Test
-    public void setStatisticsEnabledToTrue() throws IOException, InterruptedException, TimeoutException, Exception {
+    public void setStatisticsEnabledToTrue() throws Exception {
         String attributeName = "statistics-enabled";
         boolean attributeValue = true;
         addCacheContainer();
-        page.navigate();
         page.invokeContainerSettings(CACHE_CONTAINER_NAME);
         new ConfigChecker.Builder(client, cacheContainerAddress).configFragment(page.getSettingsConfig())
             .editAndSave(InputType.CHECKBOX, attributeName, attributeValue)
@@ -141,7 +136,6 @@ public class CacheContainersTestCase {
         String attributeName = "statistics-enabled";
         boolean attributeValue = false;
         addCacheContainer();
-        page.navigate();
         page.invokeContainerSettings(CACHE_CONTAINER_NAME);
         new ConfigChecker.Builder(client, cacheContainerAddress).configFragment(page.getSettingsConfig())
             .editAndSave(InputType.CHECKBOX, attributeName, attributeValue)
@@ -150,10 +144,9 @@ public class CacheContainersTestCase {
     }
 
     @Test
-    public void editAliases() throws IOException, InterruptedException, TimeoutException, Exception {
+    public void editAliases() throws Exception {
         String attributeName = "aliases";
         addCacheContainer();
-        page.navigate();
         page.invokeContainerSettings(CACHE_CONTAINER_NAME);
         new ConfigChecker.Builder(client, cacheContainerAddress).configFragment(page.getSettingsConfig())
             .editAndSave(InputType.TEXT, attributeName, "this\nthat")
@@ -162,11 +155,10 @@ public class CacheContainersTestCase {
     }
 
     @Test
-    public void editLockTimeout() throws IOException, InterruptedException, TimeoutException, Exception {
+    public void editLockTimeout() throws Exception {
         String attributeName = "lock-timeout";
         long attributeValue = 3600000;
         addCacheContainer();
-        page.navigate();
         page.invokeTransportSettings(CACHE_CONTAINER_NAME);
         new ConfigChecker.Builder(client, transportAddress).configFragment(page.getSettingsConfig())
             .editAndSave(InputType.TEXT, attributeName, attributeValue)
@@ -175,11 +167,10 @@ public class CacheContainersTestCase {
     }
 
     @Test
-    public void editChannel() throws IOException, InterruptedException, TimeoutException, Exception {
+    public void editChannel() throws Exception {
         String attributeName = "channel";
         String attributeValue = attributeName + RandomStringUtils.randomAlphanumeric(5);
         addCacheContainer();
-        page.navigate();
         page.invokeTransportSettings(CACHE_CONTAINER_NAME);
         new ConfigChecker.Builder(client, transportAddress).configFragment(page.getSettingsConfig())
             .editAndSave(InputType.TEXT, attributeName, attributeValue)
