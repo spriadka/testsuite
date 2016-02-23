@@ -46,7 +46,7 @@ public class StandardSocketBindingsPage extends ConfigPage implements Navigatabl
     @Override
     public void navigate() {
         new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
-                .addAddress(FinderNames.CONFIGURATION, "Socket Binding")
+                .step(FinderNames.CONFIGURATION, "Socket Binding")
                 .selectRow().invoke(FinderNames.VIEW);
         Application.waitUntilVisible();
         getResourceManager().viewByName("standard-sockets");

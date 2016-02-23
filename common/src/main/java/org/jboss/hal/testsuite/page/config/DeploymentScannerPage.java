@@ -15,8 +15,8 @@ public class DeploymentScannerPage extends ConfigurationPage {
 
     public void navigateToDeploymentScanners() {
         FinderNavigation navigation = new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
-                .addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
-                .addAddress(FinderNames.SUBSYSTEM, "Deployment Scanners");
+                .step(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
+                .step(FinderNames.SUBSYSTEM, "Deployment Scanners");
 
         navigation.selectRow().invoke("View");
         Application.waitUntilVisible();

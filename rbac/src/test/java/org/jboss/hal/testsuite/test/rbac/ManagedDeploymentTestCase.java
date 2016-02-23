@@ -100,11 +100,11 @@ public class ManagedDeploymentTestCase {
     public void checkButtons(boolean visible) {
         if (ConfigUtils.isDomain()) {
             navigation = new FinderNavigation(browser, DomainDeploymentPage.class)
-                        .addAddress(FinderNames.BROWSE_BY, "Content Repository")
-                    .addAddress("All Content");
+                        .step(FinderNames.BROWSE_BY, "Content Repository")
+                    .step("All Content");
             navigation.selectColumn();
         } else {
-            navigation.addAddress("Deployment").selectColumn();
+            navigation.step("Deployment").selectColumn();
         }
         By selector = ByJQuery.selector(".btn.primary:contains('Add')");
         try {
@@ -120,8 +120,8 @@ public class ManagedDeploymentTestCase {
     public void createDeployment(boolean shouldSucceed) {
         if (ConfigUtils.isDomain()) {
             navigation = new FinderNavigation(browser, DomainDeploymentPage.class)
-                    .addAddress(FinderNames.BROWSE_BY, "Content Repository")
-                    .addAddress("All Content");
+                    .step(FinderNames.BROWSE_BY, "Content Repository")
+                    .step("All Content");
             navigation.selectColumn().invoke("Add");
         } else {
             navigation.selectColumn().invoke("Add");
@@ -154,11 +154,11 @@ public class ManagedDeploymentTestCase {
     private void removeDeployment() {
         if (ConfigUtils.isDomain()) {
             navigation = new FinderNavigation(browser, DomainDeploymentPage.class)
-                    .addAddress(FinderNames.BROWSE_BY, "Content Repository")
-                    .addAddress("All Content", NAME);
+                    .step(FinderNames.BROWSE_BY, "Content Repository")
+                    .step("All Content", NAME);
             navigation.selectRow().invoke("Remove");
         } else {
-            navigation.addAddress("Deployment", NAME).selectRow().invoke("Remove");
+            navigation.step("Deployment", NAME).selectRow().invoke("Remove");
         }
 
         ConfirmationWindow window = Console.withBrowser(browser).openedWindow(ConfirmationWindow.class);
@@ -170,12 +170,12 @@ public class ManagedDeploymentTestCase {
     private void enableDeployment() {
         if (ConfigUtils.isDomain()) {
             navigation = new FinderNavigation(browser, DomainDeploymentPage.class)
-                    .addAddress(FinderNames.BROWSE_BY, "Server Groups")
-                    .addAddress(FinderNames.SERVER_GROUP, "main-server-group")
-                    .addAddress("Deployment", NAME);
+                    .step(FinderNames.BROWSE_BY, "Server Groups")
+                    .step(FinderNames.SERVER_GROUP, "main-server-group")
+                    .step("Deployment", NAME);
             navigation.selectRow().invoke("Enable");
         } else {
-            navigation.addAddress("Deployment", NAME).selectRow().invoke("Enable");
+            navigation.step("Deployment", NAME).selectRow().invoke("Enable");
         }
 
         ConfirmationWindow window = Console.withBrowser(browser).openedWindow(ConfirmationWindow.class);
@@ -185,8 +185,8 @@ public class ManagedDeploymentTestCase {
 
     private void assingDeployment() {
         navigation = new FinderNavigation(browser, DomainDeploymentPage.class)
-                .addAddress(FinderNames.BROWSE_BY, "Content Repository")
-                .addAddress("All Content", NAME);
+                .step(FinderNames.BROWSE_BY, "Content Repository")
+                .step("All Content", NAME);
         navigation.selectRow().invoke("Assign");
         ConfirmationWindow window = Console.withBrowser(browser).openedWindow(ConfirmationWindow.class);
         window.clickButton("Assign");
@@ -195,8 +195,8 @@ public class ManagedDeploymentTestCase {
 
     private void unassingDeployment() {
         navigation = new FinderNavigation(browser, DomainDeploymentPage.class)
-                .addAddress(FinderNames.BROWSE_BY, "Content Repository")
-                .addAddress("All Content", NAME);
+                .step(FinderNames.BROWSE_BY, "Content Repository")
+                .step("All Content", NAME);
         navigation.selectRow().invoke("Unassign");
         ConfirmationWindow window = Console.withBrowser(browser).openedWindow(ConfirmationWindow.class);
         window.clickButton("Assign");

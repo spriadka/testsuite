@@ -92,12 +92,12 @@ public class IIOPTestCase {
     @Before
     public void before() {
         transactionNavigation = new FinderNavigation(browser, StandaloneConfigurationPage.class)
-                .addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
-                .addAddress(FinderNames.SUBSYSTEM, "Transactions");
+                .step(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
+                .step(FinderNames.SUBSYSTEM, "Transactions");
 
         navigation = new FinderNavigation(browser, StandaloneConfigurationPage.class)
-                    .addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
-                    .addAddress(FinderNames.SUBSYSTEM, "IIOP");
+                    .step(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
+                    .step(FinderNames.SUBSYSTEM, "IIOP");
 
         navigation.selectRow().invoke(FinderNames.VIEW);
         Application.waitUntilVisible();

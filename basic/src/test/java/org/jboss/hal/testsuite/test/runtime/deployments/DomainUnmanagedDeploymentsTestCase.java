@@ -65,7 +65,7 @@ public class DomainUnmanagedDeploymentsTestCase {
     @Test
     @InSequence(0)
     public void createDeployment() throws InterruptedException {
-        navigation.addAddress(FinderNames.BROWSE_BY, "Content Repository").addAddress("All Content");
+        navigation.step(FinderNames.BROWSE_BY, "Content Repository").step("All Content");
         navigation.selectColumn().invoke("Add");
         File deployment = new File(FILE_PATH + FILE_NAME);
 
@@ -89,9 +89,9 @@ public class DomainUnmanagedDeploymentsTestCase {
     @InSequence(1)
     public void assignDeploymentToServerGroup() {
         navigation.resetNavigation();
-        navigation.addAddress(FinderNames.BROWSE_BY, "Server Groups")
-                .addAddress(FinderNames.SERVER_GROUP, "main-server-group")
-                .addAddress(FinderNames.DEPLOYMENT);
+        navigation.step(FinderNames.BROWSE_BY, "Server Groups")
+                .step(FinderNames.SERVER_GROUP, "main-server-group")
+                .step(FinderNames.DEPLOYMENT);
         navigation.selectColumn().invoke("Add");
         DeploymentWizard wizard = Console.withBrowser(browser).openedWizard(DeploymentWizard.class);
 
@@ -109,9 +109,9 @@ public class DomainUnmanagedDeploymentsTestCase {
     public void enableDeployment() {
 
         navigation.resetNavigation();
-        navigation.addAddress(FinderNames.BROWSE_BY, "Server Groups")
-                .addAddress(FinderNames.SERVER_GROUP, "main-server-group")
-                .addAddress(FinderNames.DEPLOYMENT, NAME);
+        navigation.step(FinderNames.BROWSE_BY, "Server Groups")
+                .step(FinderNames.SERVER_GROUP, "main-server-group")
+                .step(FinderNames.DEPLOYMENT, NAME);
         navigation.selectRow().invoke("Enable");
 
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
@@ -125,9 +125,9 @@ public class DomainUnmanagedDeploymentsTestCase {
     public void disableDeployment() {
 
         navigation.resetNavigation();
-        navigation.addAddress(FinderNames.BROWSE_BY, "Server Groups")
-                .addAddress(FinderNames.SERVER_GROUP, "main-server-group")
-                .addAddress(FinderNames.DEPLOYMENT, NAME);
+        navigation.step(FinderNames.BROWSE_BY, "Server Groups")
+                .step(FinderNames.SERVER_GROUP, "main-server-group")
+                .step(FinderNames.DEPLOYMENT, NAME);
         navigation.selectRow().invoke("Disable");
 
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
@@ -139,17 +139,17 @@ public class DomainUnmanagedDeploymentsTestCase {
     @InSequence(4)
     public void removeDeployment() {
         navigation.resetNavigation();
-        navigation.addAddress(FinderNames.BROWSE_BY, "Server Groups")
-                .addAddress(FinderNames.SERVER_GROUP, "main-server-group")
-                .addAddress(FinderNames.DEPLOYMENT, NAME);
+        navigation.step(FinderNames.BROWSE_BY, "Server Groups")
+                .step(FinderNames.SERVER_GROUP, "main-server-group")
+                .step(FinderNames.DEPLOYMENT, NAME);
         navigation.selectRow().invoke("Unassign");
 
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
         Library.letsSleep(1000);
 
         navigation.resetNavigation();
-        navigation.addAddress(FinderNames.BROWSE_BY, "Unassigned Content")
-                .addAddress("Unassigned", NAME);
+        navigation.step(FinderNames.BROWSE_BY, "Unassigned Content")
+                .step("Unassigned", NAME);
         navigation.selectRow().invoke("Remove");
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
         Library.letsSleep(1000);

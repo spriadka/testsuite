@@ -63,8 +63,8 @@ public class ProfileHierarchyTestCase {
         ops.addProfileWithSubsystem(profileMailName, "mail");
         ops.addComposedProfile(profileComposedName, profileIOName, profileMailName);
         navi = newNavi()
-            .addAddress(CONFIGURATION, PROFILES)
-            .addAddress(PROFILE, profileComposedName);
+            .step(CONFIGURATION, PROFILES)
+            .step(PROFILE, profileComposedName);
     }
 
     @After
@@ -85,13 +85,13 @@ public class ProfileHierarchyTestCase {
         assertTrue(profileComposedName + " should contain info that it includes " + profileIOName, rowText.contains(profileIOName));
         assertTrue(profileComposedName + " should contain info that it includes " + profileMailName, rowText.contains(profileMailName));
 
-        navi.addAddress(SUBSYSTEM, "IO").selectRow();
+        navi.step(SUBSYSTEM, "IO").selectRow();
         assertEquals(profileIOName, navi.getPreview().getIncludedFromProfile());
 
         navi = newNavi()
-            .addAddress(CONFIGURATION, PROFILES)
-            .addAddress(PROFILE, profileComposedName)
-            .addAddress(SUBSYSTEM, "Mail");
+            .step(CONFIGURATION, PROFILES)
+            .step(PROFILE, profileComposedName)
+            .step(SUBSYSTEM, "Mail");
         navi.selectRow();
         assertEquals(profileMailName, navi.getPreview().getIncludedFromProfile());
     }
@@ -105,20 +105,20 @@ public class ProfileHierarchyTestCase {
         ops.removeProfileFromIncludes(profileMailName, profileComposedName);
 
         navi = newNavi()
-            .addAddress(CONFIGURATION, PROFILES)
-            .addAddress(PROFILE, profileComposedName);
+            .step(CONFIGURATION, PROFILES)
+            .step(PROFILE, profileComposedName);
 
         String rowText = navi.selectRow().getText();
         assertTrue(profileComposedName + " should contain info that it includes " + profileIOName, rowText.contains(profileIOName));
         assertFalse(profileComposedName + " should NOT contain info that it includes " + profileMailName, rowText.contains(profileMailName));
 
-        navi.addAddress(SUBSYSTEM, "IO").selectRow();
+        navi.step(SUBSYSTEM, "IO").selectRow();
         assertEquals(profileIOName, navi.getPreview().getIncludedFromProfile());
 
         navi = newNavi()
-            .addAddress(CONFIGURATION, PROFILES)
-            .addAddress(PROFILE, profileComposedName)
-            .addAddress(SUBSYSTEM, "Mail");
+            .step(CONFIGURATION, PROFILES)
+            .step(PROFILE, profileComposedName)
+            .step(SUBSYSTEM, "Mail");
         try {
             navi.selectRow();
         } catch (NoSuchElementException e) {
@@ -136,20 +136,20 @@ public class ProfileHierarchyTestCase {
         assertTrue(profileComposedName + " should contain info that it includes " + profileIOName, rowText.contains(profileIOName));
         assertTrue(profileComposedName + " should contain info that it includes " + profileMailName, rowText.contains(profileMailName));
 
-        navi.addAddress(SUBSYSTEM, "IO").selectRow();
+        navi.step(SUBSYSTEM, "IO").selectRow();
         assertEquals(profileIOName, navi.getPreview().getIncludedFromProfile());
 
         navi = newNavi()
-            .addAddress(CONFIGURATION, PROFILES)
-            .addAddress(PROFILE, profileComposedName)
-            .addAddress(SUBSYSTEM, "Mail");
+            .step(CONFIGURATION, PROFILES)
+            .step(PROFILE, profileComposedName)
+            .step(SUBSYSTEM, "Mail");
         navi.selectRow();
         assertEquals(profileMailName, navi.getPreview().getIncludedFromProfile());
 
         navi = newNavi()
-            .addAddress(CONFIGURATION, PROFILES)
-            .addAddress(PROFILE, profileComposedName)
-            .addAddress(SUBSYSTEM, "Datasources");
+            .step(CONFIGURATION, PROFILES)
+            .step(PROFILE, profileComposedName)
+            .step(SUBSYSTEM, "Datasources");
         navi.selectRow();
         assertEquals(profileIOName, navi.getPreview().getIncludedFromProfile());
     }

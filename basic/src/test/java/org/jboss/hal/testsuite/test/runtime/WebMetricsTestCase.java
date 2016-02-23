@@ -85,17 +85,17 @@ public class WebMetricsTestCase {
         if (ConfigUtils.isDomain()) {
             new DomainManager(cliClient).reloadAndWaitUntilRunning(60000);
             navigation = new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
-                    .addAddress(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
-                    .addAddress(FinderNames.HOST, "master")
-                    .addAddress(FinderNames.SERVER, "server-one")
-                    .addAddress(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
-                    .addAddress(FinderNames.SUBSYSTEM, "Undertow");
+                    .step(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
+                    .step(FinderNames.HOST, "master")
+                    .step(FinderNames.SERVER, "server-one")
+                    .step(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
+                    .step(FinderNames.SUBSYSTEM, "Undertow");
         }
         else {
             navigation = new FinderNavigation(browser, StandaloneRuntimeEntryPoint.class)
-                    .addAddress(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
-                    .addAddress(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
-                    .addAddress(FinderNames.SUBSYSTEM, "HTTP");
+                    .step(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
+                    .step(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
+                    .step(FinderNames.SUBSYSTEM, "HTTP");
         }
 
         navigation.selectRow().invoke("View");

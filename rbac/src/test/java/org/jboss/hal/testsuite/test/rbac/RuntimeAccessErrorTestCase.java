@@ -58,60 +58,60 @@ public class RuntimeAccessErrorTestCase {
         String path = "/StandaloneServer";
         String pathSubsystem = path + "/Subsystem";
         navigation = new FinderNavigation(browser, StandaloneRuntimeEntryPoint.class)
-                .addAddress(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
-                .addAddress(FinderNames.MONITOR, "JVM");
+                .step(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
+                .step(FinderNames.MONITOR, "JVM");
         navigateToPageAndStorePathOnError(navigation, acc, path + "/JVM");
 
         navigation = new FinderNavigation(browser, StandaloneRuntimeEntryPoint.class)
-                .addAddress(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
-                .addAddress(FinderNames.MONITOR, "Environment");
+                .step(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
+                .step(FinderNames.MONITOR, "Environment");
         navigateToPageAndStorePathOnError(navigation, acc, path + "/Environment");
 
         navigation = new FinderNavigation(browser, StandaloneRuntimeEntryPoint.class)
-                .addAddress(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
-                .addAddress(FinderNames.MONITOR, FinderNames.LOG_FILES);
+                .step(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
+                .step(FinderNames.MONITOR, FinderNames.LOG_FILES);
         navigateToPageAndStorePathOnError(navigation, acc, path + "/LogFiles");
 
         navigation = new FinderNavigation(browser, StandaloneRuntimeEntryPoint.class)
-                .addAddress(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
-                .addAddress(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
-                .addAddress(FinderNames.SUBSYSTEM, "Datasources");
+                .step(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
+                .step(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
+                .step(FinderNames.SUBSYSTEM, "Datasources");
         navigateToPageAndStorePathOnError(navigation, acc, pathSubsystem + "/Datasources");
 
         navigation = new FinderNavigation(browser, StandaloneRuntimeEntryPoint.class)
-                .addAddress(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
-                .addAddress(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
-                .addAddress(FinderNames.SUBSYSTEM, "JPA");
+                .step(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
+                .step(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
+                .step(FinderNames.SUBSYSTEM, "JPA");
         navigateToPageAndStorePathOnError(navigation, acc, pathSubsystem + "/JPA");
 
         navigation = new FinderNavigation(browser, StandaloneRuntimeEntryPoint.class)
-                .addAddress(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
-                .addAddress(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
-                .addAddress(FinderNames.SUBSYSTEM, "JNDI View");
+                .step(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
+                .step(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
+                .step(FinderNames.SUBSYSTEM, "JNDI View");
         navigateToPageAndStorePathOnError(navigation, acc, pathSubsystem + "/JNDI_View");
 
         navigation = new FinderNavigation(browser, StandaloneRuntimeEntryPoint.class)
-                .addAddress(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
-                .addAddress(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
-                .addAddress(FinderNames.SUBSYSTEM, "Transactions");
+                .step(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
+                .step(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
+                .step(FinderNames.SUBSYSTEM, "Transactions");
         navigateToPageAndStorePathOnError(navigation, acc, pathSubsystem + "/Transacitons");
 
         navigation = new FinderNavigation(browser, StandaloneRuntimeEntryPoint.class)
-                .addAddress(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
-                .addAddress(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
-                .addAddress(FinderNames.SUBSYSTEM, "Transaction Logs");
+                .step(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
+                .step(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
+                .step(FinderNames.SUBSYSTEM, "Transaction Logs");
         navigateToPageAndStorePathOnError(navigation, acc, pathSubsystem + "/TransactionLogs");
 
         navigation = new FinderNavigation(browser, StandaloneRuntimeEntryPoint.class)
-                .addAddress(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
-                .addAddress(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
-                .addAddress(FinderNames.SUBSYSTEM, "HTTP"); //domain mode different
+                .step(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
+                .step(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
+                .step(FinderNames.SUBSYSTEM, "HTTP"); //domain mode different
         navigateToPageAndStorePathOnError(navigation, acc, pathSubsystem + "/HTTP");
 
         navigation = new FinderNavigation(browser, StandaloneRuntimeEntryPoint.class)
-                .addAddress(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
-                .addAddress(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
-                .addAddress(FinderNames.SUBSYSTEM, "Webservices");
+                .step(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
+                .step(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
+                .step(FinderNames.SUBSYSTEM, "Webservices");
         navigateToPageAndStorePathOnError(navigation, acc, pathSubsystem + "/WebServices");
 
         assertTrue("Insufficient privileges on following paths " + getPathsWithError(acc), acc.isEmpty());

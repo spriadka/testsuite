@@ -25,17 +25,17 @@ public class LoggingPage extends ConfigurationPage implements Navigatable {
     public void navigateToLogging() {
         if (ConfigUtils.isDomain()) {
             navigation = new FinderNavigation(browser, DomainConfigEntryPoint.class)
-                    .addAddress(FinderNames.CONFIGURATION, FinderNames.PROFILES)
-                    .addAddress(FinderNames.PROFILE, "default")
-                    .addAddress(FinderNames.SUBSYSTEM, "Logging");
+                    .step(FinderNames.CONFIGURATION, FinderNames.PROFILES)
+                    .step(FinderNames.PROFILE, "default")
+                    .step(FinderNames.SUBSYSTEM, "Logging");
 
             navigation.selectRow().invoke(FinderNames.VIEW);
             Application.waitUntilVisible();
 
         } else {
             navigation = new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
-                    .addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
-                    .addAddress(FinderNames.SUBSYSTEM, "Logging");
+                    .step(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
+                    .step(FinderNames.SUBSYSTEM, "Logging");
             Row row = navigation.selectRow();
             Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
             row.invoke(FinderNames.VIEW);
@@ -226,13 +226,13 @@ public class LoggingPage extends ConfigurationPage implements Navigatable {
         FinderNavigation navigation;
         if (ConfigUtils.isDomain()) {
             navigation = new FinderNavigation(browser, DomainConfigEntryPoint.class)
-                    .addAddress(FinderNames.CONFIGURATION, FinderNames.PROFILES)
-                    .addAddress(FinderNames.PROFILE, ConfigUtils.getDefaultProfile())
-                    .addAddress(FinderNames.SUBSYSTEM, "Logging");
+                    .step(FinderNames.CONFIGURATION, FinderNames.PROFILES)
+                    .step(FinderNames.PROFILE, ConfigUtils.getDefaultProfile())
+                    .step(FinderNames.SUBSYSTEM, "Logging");
         } else {
             navigation = new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
-                    .addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
-                    .addAddress(FinderNames.SUBSYSTEM, "Logging");
+                    .step(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
+                    .step(FinderNames.SUBSYSTEM, "Logging");
         }
         Row row = navigation.selectRow();
         Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();

@@ -35,7 +35,7 @@ public class ServerAvailabilityTestCase {
     @Before
     public void before() {
         navigation = new FinderNavigation(browser, DomainConfigEntryPoint.class)
-                .addAddress(FinderNames.CONFIGURATION, FinderNames.PROFILES);
+                .step(FinderNames.CONFIGURATION, FinderNames.PROFILES);
     }
 
     @Test
@@ -92,9 +92,9 @@ public class ServerAvailabilityTestCase {
     public void checkAvailableServer(String server, String host, boolean shouldBePresent) {
         navigation.clearNavigation();
         navigation = new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
-                .addAddress(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS);
-        navigation.addAddress(FinderNames.HOST, host)
-                .addAddress(FinderNames.SERVER, server);
+                .step(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS);
+        navigation.step(FinderNames.HOST, host)
+                .step(FinderNames.SERVER, server);
         try {
             navigation.selectRow();
         } catch (NoSuchElementException | TimeoutException ex) {

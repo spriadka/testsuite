@@ -36,7 +36,7 @@ public class ELResolverTestCase {
     @Test
     public void resolveSystemPropertyValue() throws Exception {
         FinderNavigation navigation = new FinderNavigation(browser, DomainConfigEntryPoint.class)
-                .addAddress(FinderNames.CONFIGURATION, "System Properties");
+                .step(FinderNames.CONFIGURATION, "System Properties");
 
         navigation.selectRow().invoke("View");
         Application.waitUntilVisible();

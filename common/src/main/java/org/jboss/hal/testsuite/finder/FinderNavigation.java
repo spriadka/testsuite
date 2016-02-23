@@ -105,17 +105,17 @@ public class FinderNavigation {
     }
 
     /**
-     * Adds an address to select a column.
+     * Adds navigation step of column selection.
      */
-    public FinderNavigation addAddress(String column) {
+    public FinderNavigation step(String column) {
         address.add(new AddressTuple(column, WILDCARD));
         return this;
     }
 
     /**
-     * Adds an address to select a row inside a column.
+     * Adds navigation step of selection of row inside a column.
      */
-    public FinderNavigation addAddress(String column, String row) {
+    public FinderNavigation step(String column, String row) {
         address.add(new AddressTuple(column, row));
         return this;
     }

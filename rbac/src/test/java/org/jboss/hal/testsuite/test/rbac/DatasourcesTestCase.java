@@ -87,10 +87,10 @@ public class DatasourcesTestCase {
     }
 
     public void checkButtons(boolean visible) {
-        navigation.addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
-                .addAddress(FinderNames.SUBSYSTEM, "Datasources")
-                .addAddress("Type", "Non-XA")
-                .addAddress("Datasource").selectColumn();
+        navigation.step(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
+                .step(FinderNames.SUBSYSTEM, "Datasources")
+                .step("Type", "Non-XA")
+                .step("Datasource").selectColumn();
 
         By selector = ByJQuery.selector(".btn.primary:contains('Add')");
         try {
@@ -122,7 +122,7 @@ public class DatasourcesTestCase {
     }
 
     private void removeDatasource() {
-        navigation.addAddress("Datasource", addressName).selectRow().invoke("Remove");
+        navigation.step("Datasource", addressName).selectRow().invoke("Remove");
         ConfirmationWindow window = Console.withBrowser(browser).openedWindow(ConfirmationWindow.class);
         window.confirmAndDismissReloadRequiredMessage().assertClosed();
     }

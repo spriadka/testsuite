@@ -79,11 +79,11 @@ public class SimpleWebserviceEndpointTestCase {
             managementClient.execute("/profile=full/subsystem=webservices:write-attribute(name=statistics-enabled,value=true)");
             verifier =  new ResourceVerifier(address, managementClient);
             navigation = new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
-                    .addAddress(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
-                    .addAddress(FinderNames.HOST, "master")
-                    .addAddress(FinderNames.SERVER, "server-one")
-                    .addAddress(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
-                    .addAddress(FinderNames.SUBSYSTEM, "Webservices");
+                    .step(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
+                    .step(FinderNames.HOST, "master")
+                    .step(FinderNames.SERVER, "server-one")
+                    .step(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
+                    .step(FinderNames.SUBSYSTEM, "Webservices");
 
             managementClient.apply(new DeployCommand.Builder(war).toAllGroups().name("test.war").build());
         } else {
@@ -92,9 +92,9 @@ public class SimpleWebserviceEndpointTestCase {
             verifier =  new ResourceVerifier(address, managementClient);
             managementClient.execute("/subsystem=webservices:write-attribute(name=statistics-enabled,value=true)");
             navigation = new FinderNavigation(browser, StandaloneRuntimeEntryPoint.class)
-                    .addAddress(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
-                    .addAddress(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
-                    .addAddress(FinderNames.SUBSYSTEM, "Webservices");
+                    .step(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
+                    .step(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
+                    .step(FinderNames.SUBSYSTEM, "Webservices");
 
             managementClient.apply(new DeployCommand.Builder(war).name("test.war").build());
         }

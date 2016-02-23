@@ -36,8 +36,8 @@ public class ScopedRoleTest {
     public void typeIsReadOnlyInEditMode() {
         Authentication.with(browser).authenticate(RbacRole.ADMINISTRATOR);
         navigation = new FinderNavigation(browser, RoleAssignmentPage.class)
-                .addAddress(FinderNames.BROWSE_BY, "Roles")
-                .addAddress("Role", "main-Monitor");
+                .step(FinderNames.BROWSE_BY, "Roles")
+                .step("Role", "main-Monitor");
 
         navigation.selectRow().invoke("Edit");
 

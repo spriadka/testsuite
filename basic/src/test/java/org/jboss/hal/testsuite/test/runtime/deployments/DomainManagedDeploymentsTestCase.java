@@ -66,7 +66,7 @@ public class DomainManagedDeploymentsTestCase {
     @InSequence(0)
     public void createDeployment() throws InterruptedException {
 
-        navigation.addAddress(FinderNames.BROWSE_BY, "Content Repository").addAddress("All Content");
+        navigation.step(FinderNames.BROWSE_BY, "Content Repository").step("All Content");
         navigation.selectColumn().invoke("Add");
         File deployment = new File(FILE_PATH + FILE_NAME);
 
@@ -88,9 +88,9 @@ public class DomainManagedDeploymentsTestCase {
     @InSequence(1)
     public void assignDeploymentToServerGroup() {
         navigation.resetNavigation();
-        navigation.addAddress(FinderNames.BROWSE_BY, "Server Groups")
-                .addAddress(FinderNames.SERVER_GROUP, "main-server-group")
-                .addAddress(FinderNames.DEPLOYMENT);
+        navigation.step(FinderNames.BROWSE_BY, "Server Groups")
+                .step(FinderNames.SERVER_GROUP, "main-server-group")
+                .step(FinderNames.DEPLOYMENT);
         navigation.selectColumn().invoke("Add");
 
         DeploymentWizard wizard = Console.withBrowser(browser).openedWizard(DeploymentWizard.class);
@@ -107,9 +107,9 @@ public class DomainManagedDeploymentsTestCase {
     @InSequence(2)
     public void enableDeployment() {
         navigation.resetNavigation();
-        navigation.addAddress(FinderNames.BROWSE_BY, "Server Groups")
-                .addAddress(FinderNames.SERVER_GROUP, "main-server-group")
-                .addAddress(FinderNames.DEPLOYMENT, NAME);
+        navigation.step(FinderNames.BROWSE_BY, "Server Groups")
+                .step(FinderNames.SERVER_GROUP, "main-server-group")
+                .step(FinderNames.DEPLOYMENT, NAME);
         navigation.selectRow().invoke("Enable");
 
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
@@ -123,9 +123,9 @@ public class DomainManagedDeploymentsTestCase {
     public void disableDeployment() {
 
         navigation.resetNavigation();
-        navigation.addAddress(FinderNames.BROWSE_BY, "Server Groups")
-                .addAddress(FinderNames.SERVER_GROUP, "main-server-group")
-                .addAddress(FinderNames.DEPLOYMENT, NAME);
+        navigation.step(FinderNames.BROWSE_BY, "Server Groups")
+                .step(FinderNames.SERVER_GROUP, "main-server-group")
+                .step(FinderNames.DEPLOYMENT, NAME);
         navigation.selectRow().invoke("Disable");
 
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
@@ -141,17 +141,17 @@ public class DomainManagedDeploymentsTestCase {
         Console.withBrowser(browser).waitUntilLoaded();
         Library.letsSleep(1000);
         navigation.resetNavigation();
-        navigation.addAddress(FinderNames.BROWSE_BY, "Server Groups")
-                .addAddress(FinderNames.SERVER_GROUP, "main-server-group")
-                .addAddress(FinderNames.DEPLOYMENT, NAME);
+        navigation.step(FinderNames.BROWSE_BY, "Server Groups")
+                .step(FinderNames.SERVER_GROUP, "main-server-group")
+                .step(FinderNames.DEPLOYMENT, NAME);
         navigation.selectRow().invoke("Unassign");
 
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
         Library.letsSleep(1000);
 
         navigation.resetNavigation();
-        navigation.addAddress(FinderNames.BROWSE_BY, "Unassigned Content")
-                .addAddress("Unassigned", NAME);
+        navigation.step(FinderNames.BROWSE_BY, "Unassigned Content")
+                .step("Unassigned", NAME);
         navigation.selectRow().invoke("Remove");
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
         Library.letsSleep(1000);
@@ -164,7 +164,7 @@ public class DomainManagedDeploymentsTestCase {
     public void checkAssingDeploymentName() {
         //create
         navigation.resetNavigation();
-        navigation.addAddress(FinderNames.BROWSE_BY, "Content Repository").addAddress("All Content");
+        navigation.step(FinderNames.BROWSE_BY, "Content Repository").step("All Content");
         navigation.selectColumn().invoke("Add");
         File deployment = new File(FILE_PATH + FILE_NAME);
         DeploymentWizard wizard = Console.withBrowser(browser).openedWizard(DeploymentWizard.class);
@@ -178,9 +178,9 @@ public class DomainManagedDeploymentsTestCase {
                 .finish();
         //assing
         navigation.resetNavigation();
-        navigation.addAddress(FinderNames.BROWSE_BY, "Server Groups")
-                .addAddress(FinderNames.SERVER_GROUP, "main-server-group")
-                .addAddress(FinderNames.DEPLOYMENT);
+        navigation.step(FinderNames.BROWSE_BY, "Server Groups")
+                .step(FinderNames.SERVER_GROUP, "main-server-group")
+                .step(FinderNames.DEPLOYMENT);
         navigation.selectColumn().invoke("Add");
 
         result = wizard.switchToRepository()
@@ -190,23 +190,23 @@ public class DomainManagedDeploymentsTestCase {
         Console.withBrowser(browser).waitUntilLoaded();
         Library.letsSleep(1000);
         Console.withBrowser(browser).refreshAndNavigate(DomainDeploymentPage.class);
-        navigation.addAddress(FinderNames.BROWSE_BY, "Server Groups")
-                .addAddress(FinderNames.SERVER_GROUP, "main-server-group")
-                .addAddress(FinderNames.DEPLOYMENT, NAME);
+        navigation.step(FinderNames.BROWSE_BY, "Server Groups")
+                .step(FinderNames.SERVER_GROUP, "main-server-group")
+                .step(FinderNames.DEPLOYMENT, NAME);
         navigation.selectRow().invoke("Unassign");
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
         Library.letsSleep(1000);
 
         navigation.resetNavigation();
-        navigation.addAddress(FinderNames.BROWSE_BY, "Unassigned Content")
-                .addAddress("Unassigned", NAME);
+        navigation.step(FinderNames.BROWSE_BY, "Unassigned Content")
+                .step("Unassigned", NAME);
         navigation.selectRow().invoke("Remove");
 
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
         Library.letsSleep(1000);
         //create 2nd
         navigation.resetNavigation();
-        navigation.addAddress(FinderNames.BROWSE_BY, "Content Repository").addAddress("All Content");
+        navigation.step(FinderNames.BROWSE_BY, "Content Repository").step("All Content");
         navigation.selectColumn().invoke("Add");
         deployment = new File(FILE_PATH + FILE_NAME);
 
@@ -220,18 +220,18 @@ public class DomainManagedDeploymentsTestCase {
         //assing 2nd
         Console.withBrowser(browser).refreshAndNavigate(DomainDeploymentPage.class);
         navigation.resetNavigation();
-        navigation.addAddress(FinderNames.BROWSE_BY, "Unassigned Content")
-                .addAddress("Unassigned", "testNew");
+        navigation.step(FinderNames.BROWSE_BY, "Unassigned Content")
+                .step("Unassigned", "testNew");
         navigation.selectRow().invoke("Assign");
 
         boolean checkNameResult = page.checkAssingDeploymentNameInAssingContent("testNew");
 
         assertTrue("Name in asssing content should be name of deployment", checkNameResult);
         //remove2nd
-        new FinderNavigation(browser, DomainDeploymentPage.class).addAddress(FinderNames.BROWSE_BY).selectColumn();
+        new FinderNavigation(browser, DomainDeploymentPage.class).step(FinderNames.BROWSE_BY).selectColumn();
         navigation.resetNavigation();
-        navigation.addAddress(FinderNames.BROWSE_BY, "Unassigned Content")
-                .addAddress("Unassigned", "testNew");
+        navigation.step(FinderNames.BROWSE_BY, "Unassigned Content")
+                .step("Unassigned", "testNew");
         navigation.selectRow().invoke("Remove");
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
         Library.letsSleep(1000);

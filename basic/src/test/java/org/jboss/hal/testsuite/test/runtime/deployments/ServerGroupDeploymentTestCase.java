@@ -47,9 +47,9 @@ public class ServerGroupDeploymentTestCase {
     @Before
     public void before() {
         navigation = new FinderNavigation(browser, DomainDeploymentPage.class)
-                .addAddress(FinderNames.BROWSE_BY, FinderNames.SERVER_GROUPS)
-                .addAddress(FinderNames.SERVER_GROUP, "main-server-group")
-                .addAddress(FinderNames.DEPLOYMENT);
+                .step(FinderNames.BROWSE_BY, FinderNames.SERVER_GROUPS)
+                .step(FinderNames.SERVER_GROUP, "main-server-group")
+                .step(FinderNames.DEPLOYMENT);
     }
 
     @Test

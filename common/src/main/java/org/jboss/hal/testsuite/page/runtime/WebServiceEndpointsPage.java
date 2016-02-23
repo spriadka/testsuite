@@ -28,15 +28,15 @@ public class WebServiceEndpointsPage extends MetricsPage {
     public void navigateInDeploymentsMenu() {
         if (ConfigUtils.isDomain()) {
             FinderNavigation deployNavigation = new FinderNavigation(browser, DomainDeploymentPage.class)
-                    .addAddress(FinderNames.BROWSE_BY, FinderNames.SERVER_GROUPS)
-                    .addAddress(FinderNames.SERVER_GROUP, "main-server-group")
-                    .addAddress(FinderNames.DEPLOYMENT, "test.war");
+                    .step(FinderNames.BROWSE_BY, FinderNames.SERVER_GROUPS)
+                    .step(FinderNames.SERVER_GROUP, "main-server-group")
+                    .step(FinderNames.DEPLOYMENT, "test.war");
             deployNavigation.selectRow().invoke(FinderNames.VIEW);
             Application.waitUntilVisible();
 
         } else {
             FinderNavigation deployNavigation = new FinderNavigation(browser, DeploymentPage.class)
-                    .addAddress(FinderNames.DEPLOYMENT, "test.war");
+                    .step(FinderNames.DEPLOYMENT, "test.war");
             deployNavigation.selectRow().invoke(FinderNames.VIEW);
             Application.waitUntilVisible();
         }

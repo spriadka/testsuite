@@ -33,13 +33,13 @@ public class CacheContainersPage extends ConfigurationPage implements Navigatabl
         FinderNavigation navigation;
         if (ConfigUtils.isDomain()) {
             navigation = new FinderNavigation(browser, DomainConfigEntryPoint.class)
-                    .addAddress(FinderNames.CONFIGURATION, FinderNames.PROFILES)
-                    .addAddress(FinderNames.PROFILE, "full");
+                    .step(FinderNames.CONFIGURATION, FinderNames.PROFILES)
+                    .step(FinderNames.PROFILE, "full");
         } else {
             navigation = new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
-                    .addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS);
+                    .step(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS);
         }
-        navigation.addAddress(FinderNames.SUBSYSTEM, "Infinispan");
+        navigation.step(FinderNames.SUBSYSTEM, "Infinispan");
         return navigation;
     }
 
@@ -48,7 +48,7 @@ public class CacheContainersPage extends ConfigurationPage implements Navigatabl
     }
 
     public FinderNavigation getNavigationToCacheContainer(String cacheContainer) {
-        return createBaseNavigation().addAddress("Cache Container", cacheContainer);
+        return createBaseNavigation().step("Cache Container", cacheContainer);
     }
 
     private Row selectCacheContainerRowAndDismissReloadRequiredWindow(String cacheContainer) {
@@ -70,7 +70,7 @@ public class CacheContainersPage extends ConfigurationPage implements Navigatabl
     }
 
     public CacheContainerWizard invokeAddCacheContainer() {
-        createBaseNavigation().addAddress("Cache Container").selectColumn();
+        createBaseNavigation().step("Cache Container").selectColumn();
         return getResourceManager().addResource(CacheContainerWizard.class);
     }
 

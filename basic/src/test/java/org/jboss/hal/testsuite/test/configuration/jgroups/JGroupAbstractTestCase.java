@@ -70,13 +70,13 @@ public class JGroupAbstractTestCase {
         FinderNavigation navigation;
         if (ConfigUtils.isDomain()) {
             navigation = new FinderNavigation(browser, DomainConfigEntryPoint.class)
-                    .addAddress(FinderNames.CONFIGURATION, FinderNames.PROFILES)
-                    .addAddress(FinderNames.PROFILE, "full-ha");
+                    .step(FinderNames.CONFIGURATION, FinderNames.PROFILES)
+                    .step(FinderNames.PROFILE, "full-ha");
         } else {
             navigation = new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
-                    .addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS);
+                    .step(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS);
         }
-        navigation.addAddress(FinderNames.SUBSYSTEM, "JGroups")
+        navigation.step(FinderNames.SUBSYSTEM, "JGroups")
                 .selectRow(true)
                 .invoke(FinderNames.VIEW);
         Application.waitUntilVisible();

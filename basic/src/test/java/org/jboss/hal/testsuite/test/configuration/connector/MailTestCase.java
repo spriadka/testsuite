@@ -104,8 +104,8 @@ public class MailTestCase {
     @Before
     public void before() {
         navi = new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
-            .addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
-            .addAddress(FinderNames.SUBSYSTEM, "Mail");
+            .step(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
+            .step(FinderNames.SUBSYSTEM, "Mail");
     }
 
     @AfterClass
@@ -225,13 +225,13 @@ public class MailTestCase {
     }
 
     private void invokeOperationOnMailSession(String operationName, String sessionName) {
-        Row row = navi.addAddress(MAIL_SESSION_LABEL, sessionName).selectRow();
+        Row row = navi.step(MAIL_SESSION_LABEL, sessionName).selectRow();
         Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
         row.invoke(operationName);
     }
 
     private void invokeOperationAddMailSession() {
-        Column column = navi.addAddress(MAIL_SESSION_LABEL).selectColumn();
+        Column column = navi.step(MAIL_SESSION_LABEL).selectColumn();
         Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
         column.invoke(FinderNames.ADD);
     }

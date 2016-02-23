@@ -61,33 +61,33 @@ public class ServerOperationsTestCase {
     @Before
     public void before() {
         navigationByHost = new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
-                .addAddress(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
-                .addAddress(FinderNames.HOST, "master");
+                .step(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
+                .step(FinderNames.HOST, "master");
 
         navigationByServerGroup = new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
-                .addAddress(FinderNames.BROWSE_DOMAIN_BY, FinderNames.SERVER_GROUPS)
-                .addAddress(FinderNames.SERVER_GROUP, "main-server-group");
+                .step(FinderNames.BROWSE_DOMAIN_BY, FinderNames.SERVER_GROUPS)
+                .step(FinderNames.SERVER_GROUP, "main-server-group");
     }
 
     @Test(expected = TimeoutException.class)  //NoSuchElementException.class - wainting until element is visible, so different exception
     public void wrongSelection() {
         new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
-                .addAddress(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
-                .addAddress(FinderNames.HOST, "master")
-                .addAddress(FinderNames.SERVER, "unknown")
+                .step(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
+                .step(FinderNames.HOST, "master")
+                .step(FinderNames.SERVER, "unknown")
                 .selectColumn();
     }
 
     @Test
     public void selectServerByHost() {
         // makes sure we can select a server by host
-        navigationByHost.addAddress(FinderNames.SERVER).selectColumn();
+        navigationByHost.step(FinderNames.SERVER).selectColumn();
     }
 
     @Test
     public void selectServerByServerGroup() {
         // makes sure we can select a server by server group
-        navigationByServerGroup.addAddress(FinderNames.SERVER).selectColumn();
+        navigationByServerGroup.step(FinderNames.SERVER).selectColumn();
     }
 
     @Test
@@ -95,7 +95,7 @@ public class ServerOperationsTestCase {
         String serverName = "ServerOperationsSrv_" + RandomStringUtils.randomAlphanumeric(8);
 
         try {
-            navigationByServerGroup.addAddress(FinderNames.SERVER).selectColumn().invoke("Add");
+            navigationByServerGroup.step(FinderNames.SERVER).selectColumn().invoke("Add");
 
             WindowFragment addServerDialog = Console.withBrowser(browser).openedWindow();
             addServerDialog.getEditor().text("name", serverName);
@@ -119,7 +119,7 @@ public class ServerOperationsTestCase {
                 new String[]{"group=main-server-group", "socket-binding-port-offset=999"}));
 
         try {
-            navigationByServerGroup.addAddress(FinderNames.SERVER, serverName).selectRow().invoke("Remove");
+            navigationByServerGroup.step(FinderNames.SERVER, serverName).selectRow().invoke("Remove");
 
             ConfirmationWindow window = Console.withBrowser(browser).openedWindow(ConfirmationWindow.class);
             window.confirm();

@@ -20,37 +20,37 @@ public class FederationPage extends ConfigurationPage {
         SERVICE_PROVIDER = "Service Provider";
 
     public WizardWindow addFederationWindow() {
-        getSubsystemNavigation(PICKETLINK).addAddress(FEDERATION).selectColumn().invoke(FinderNames.ADD);
+        getSubsystemNavigation(PICKETLINK).step(FEDERATION).selectColumn().invoke(FinderNames.ADD);
         return Console.withBrowser(browser).openedWizard();
     }
 
     public WindowState removeFederation(String federationName) {
-        getSubsystemNavigation(PICKETLINK).addAddress(FEDERATION, federationName).selectRow()
+        getSubsystemNavigation(PICKETLINK).step(FEDERATION, federationName).selectRow()
             .invoke(FinderNames.REMOVE);
         return Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
     }
 
     public FederationPage navigateToFederation(String federationName) {
-        getSubsystemNavigation(PICKETLINK).addAddress(FEDERATION, federationName).selectRow()
+        getSubsystemNavigation(PICKETLINK).step(FEDERATION, federationName).selectRow()
             .invoke(FinderNames.VIEW);
         Application.waitUntilVisible();
         return this;
     }
 
     public WizardWindow addSpWindow(String federationName) {
-        getSubsystemNavigation(PICKETLINK).addAddress(FEDERATION, federationName).addAddress(SERVICE_PROVIDER)
+        getSubsystemNavigation(PICKETLINK).step(FEDERATION, federationName).step(SERVICE_PROVIDER)
             .selectColumn().invoke(FinderNames.ADD);
         return Console.withBrowser(browser).openedWizard();
     }
 
     public WindowState removeSp(String federationName, String spName) {
-        getSubsystemNavigation(PICKETLINK).addAddress(FEDERATION, federationName).addAddress(SERVICE_PROVIDER, spName)
+        getSubsystemNavigation(PICKETLINK).step(FEDERATION, federationName).step(SERVICE_PROVIDER, spName)
             .selectRow().invoke(FinderNames.REMOVE);
         return Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
     }
 
     public FederationPage navigateToServiceProvider(String federationName, String spName) {
-        getSubsystemNavigation(PICKETLINK).addAddress(FEDERATION, federationName).addAddress(SERVICE_PROVIDER, spName)
+        getSubsystemNavigation(PICKETLINK).step(FEDERATION, federationName).step(SERVICE_PROVIDER, spName)
             .selectRow().invoke(FinderNames.VIEW);
         Application.waitUntilVisible();
         return this;

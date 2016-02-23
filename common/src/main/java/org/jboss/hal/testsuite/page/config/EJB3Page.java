@@ -40,13 +40,13 @@ public class EJB3Page extends ConfigPage implements Navigatable {
         FinderNavigation finderNavigation;
         if (ConfigUtils.isDomain()) {
             finderNavigation = new FinderNavigation(browser, DomainConfigurationPage.class)
-                    .addAddress(FinderNames.CONFIGURATION, FinderNames.PROFILES)
-                    .addAddress(FinderNames.PROFILE, "full")
-                    .addAddress(FinderNames.SUBSYSTEM, "EJB 3");
+                    .step(FinderNames.CONFIGURATION, FinderNames.PROFILES)
+                    .step(FinderNames.PROFILE, "full")
+                    .step(FinderNames.SUBSYSTEM, "EJB 3");
         } else {
             finderNavigation = new FinderNavigation(browser, StandaloneConfigurationPage.class)
-                    .addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
-                    .addAddress(FinderNames.SUBSYSTEM, "EJB 3");
+                    .step(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
+                    .step(FinderNames.SUBSYSTEM, "EJB 3");
         }
         finderNavigation.selectRow().invoke("View");
         Application.waitUntilVisible();

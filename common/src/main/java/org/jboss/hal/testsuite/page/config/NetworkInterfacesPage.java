@@ -25,7 +25,7 @@ public class NetworkInterfacesPage extends ConfigPage implements Navigatable {
     @Override
     public void navigate() {
         new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
-                .addAddress(FinderNames.CONFIGURATION, "Interfaces")
+                .step(FinderNames.CONFIGURATION, "Interfaces")
                 .selectRow().invoke(FinderNames.VIEW);
     }
 }

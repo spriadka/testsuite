@@ -25,13 +25,13 @@ public class EEServicesPage extends ConfigurationPage implements Navigatable {
         FinderNavigation navigation;
         if (ConfigUtils.isDomain()) {
             navigation = new FinderNavigation(browser, DomainConfigEntryPoint.class);
-            navigation.addAddress(FinderNames.CONFIGURATION, FinderNames.PROFILES)
-                    .addAddress(FinderNames.PROFILE, "full")
-                    .addAddress(FinderNames.SUBSYSTEM, "EE");
+            navigation.step(FinderNames.CONFIGURATION, FinderNames.PROFILES)
+                    .step(FinderNames.PROFILE, "full")
+                    .step(FinderNames.SUBSYSTEM, "EE");
         } else {
             navigation = new FinderNavigation(browser, StandaloneConfigEntryPoint.class);
-            navigation.addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
-                    .addAddress(FinderNames.SUBSYSTEM, "EE");
+            navigation.step(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
+                    .step(FinderNames.SUBSYSTEM, "EE");
         }
         navigation.selectRow().invoke(FinderNames.VIEW);
         Application.waitUntilVisible();

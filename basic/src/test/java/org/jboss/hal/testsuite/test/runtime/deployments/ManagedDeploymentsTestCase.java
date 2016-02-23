@@ -68,7 +68,7 @@ public class ManagedDeploymentsTestCase {
     @Test
     @InSequence(0)
     public void basicDeployment() throws InterruptedException {
-        navigation.addAddress(FinderNames.DEPLOYMENT).selectColumn().invoke("Add");
+        navigation.step(FinderNames.DEPLOYMENT).selectColumn().invoke("Add");
         File deployment = new File(FILE_PATH + FILE_NAME);
 
         DeploymentWizard wizard = Console.withBrowser(browser).openedWizard(DeploymentWizard.class);
@@ -89,7 +89,7 @@ public class ManagedDeploymentsTestCase {
     @InSequence(1)
     public void disableDeployment() {
 
-        navigation.addAddress(FinderNames.DEPLOYMENT, NAME).selectRow().invoke("Disable");
+        navigation.step(FinderNames.DEPLOYMENT, NAME).selectRow().invoke("Disable");
 
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
         Library.letsSleep(10000);
@@ -100,7 +100,7 @@ public class ManagedDeploymentsTestCase {
     @InSequence(2)
     public void enableDeployment() {
 
-        navigation.addAddress(FinderNames.DEPLOYMENT, NAME).selectRow().invoke("Enable");
+        navigation.step(FinderNames.DEPLOYMENT, NAME).selectRow().invoke("Enable");
 
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
         Library.letsSleep(10000);
@@ -113,7 +113,7 @@ public class ManagedDeploymentsTestCase {
     public void removeDeployment() {
         Console.withBrowser(browser).waitUntilLoaded();
         Library.letsSleep(1000);
-        navigation.addAddress(FinderNames.DEPLOYMENT, NAME).selectRow().invoke("Remove");
+        navigation.step(FinderNames.DEPLOYMENT, NAME).selectRow().invoke("Remove");
 
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
         Library.letsSleep(1000);
