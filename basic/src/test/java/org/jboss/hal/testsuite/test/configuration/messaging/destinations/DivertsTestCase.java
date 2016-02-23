@@ -5,9 +5,9 @@ import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
-import org.jboss.hal.testsuite.creaper.command.BackupAndRestoreAttributes;
 import org.jboss.hal.testsuite.page.config.MessagingPage;
 import org.jboss.hal.testsuite.test.configuration.messaging.AbstractMessagingTestCase;
+import org.jboss.hal.testsuite.util.ConfigChecker;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -34,8 +34,8 @@ public class DivertsTestCase extends AbstractMessagingTestCase {
     private static final Address DIVERT_TBA_ADDRESS = DEFAULT_MESSAGING_SERVER.and("divert", DIVERT_TBA);
     private static final Address DIVERT_TBR_ADDRESS = DEFAULT_MESSAGING_SERVER.and("divert", DIVERT_TBR);
 
-    private static final String DIVERT_ADDRESS_ARG = "divert";
-    private static final String FORWARD_ADDRESS_ARG = "forward";
+    private static final String DIVERT_ADDRESS_ARG = "127.0.0.1";
+    private static final String FORWARD_ADDRESS_ARG = "127.0.0.1";
 
 
     @BeforeClass
@@ -96,13 +96,14 @@ public class DivertsTestCase extends AbstractMessagingTestCase {
 
     @Test
     public void updateDivertsTransformerClass() throws Exception {
-        BackupAndRestoreAttributes backup = new BackupAndRestoreAttributes.Builder(DIVERT_ADDRESS)
-                .build();
         try {
-            client.apply(backup.backup());
-            editTextAndVerify(DIVERT_ADDRESS, "transformerClass", "transformer-class-name", "clazz");
+            new ConfigChecker.Builder(client, DIVERT_ADDRESS)
+                    .configFragment(page.getConfigFragment())
+                    .editAndSave(ConfigChecker.InputType.TEXT, "transformerClass", "clazz")
+                    .verifyFormSaved()
+                    .verifyAttribute("transformer-class-name", "clazz");
         } finally {
-            client.apply(backup.restore());
+            operations.undefineAttribute(DIVERT_ADDRESS, "transformer-class-name");
         }
     }
 
@@ -117,6 +118,7 @@ public class DivertsTestCase extends AbstractMessagingTestCase {
                 .and("divert-address", divertAddress)
                 .and("forwarding-address", forwardingAddress)
                 .and("routing-name", routingName));
-        new ResourceVerifier(address, client).verifyExists();
+        administration.reloadIfRequired();
+        new ResourceVerifier(address, client, 1000).verifyExists();
     }
 }

@@ -99,11 +99,11 @@ public class JournalTestCase extends AbstractMessagingTestCase {
 
     @Test
     public void updateJournalCompactPercentage() throws Exception {
-        editTextAndVerify(SERVER_ADDRESS, "journal-compact-percentage", 110);
+        editTextAndVerify(SERVER_ADDRESS, "journal-compact-percentage", 99);
     }
 
     @Test
     public void updateJournalFileSize() throws Exception {
-        editTextAndVerify(SERVER_ADDRESS, "journal-file-size", 110L);
+        editTextAndVerify(SERVER_ADDRESS, "journal-file-size", 4296L);
     }
 }

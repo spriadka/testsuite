@@ -8,6 +8,7 @@ import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.creaper.command.messaging.AddMessagingConnector;
 import org.jboss.hal.testsuite.page.config.MessagingPage;
 import org.jboss.hal.testsuite.test.configuration.messaging.AbstractMessagingTestCase;
+import org.jboss.hal.testsuite.util.ConfigChecker;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -91,8 +92,15 @@ public class GenericConnectorTestCase extends AbstractMessagingTestCase {
 
     @Test
     public void editFactoryClass() throws Exception {
-        editTextAndVerify(GENERIC_CONNECTOR_ADDRESS, "factoryClass", "factory-class", "fc");
-        editTextAndVerify(GENERIC_CONNECTOR_ADDRESS, "factoryClass", "factory-class", FACTORY_CLASS);
+        try {
+            new ConfigChecker.Builder(client, GENERIC_CONNECTOR_ADDRESS)
+                    .configFragment(page.getConfigFragment())
+                    .editAndSave(ConfigChecker.InputType.TEXT, "factoryClass", "fc")
+                    .verifyFormSaved()
+                    .verifyAttribute("factory-class", "fc");
+        } finally {
+            operations.writeAttribute(GENERIC_CONNECTOR_ADDRESS, "factory-class", FACTORY_CLASS);
+        }
     }
 
     @Test
