@@ -52,17 +52,17 @@ public class TransactionsMetricsTestCase {
     public void before() {
         if (ConfigUtils.isDomain()) {
             navigation = new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
-                .addAddress(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
-                .addAddress(FinderNames.HOST, "master")
-                .addAddress(FinderNames.SERVER, "server-one")
-                .addAddress(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
-                .addAddress(FinderNames.SUBSYSTEM, "Transactions");
+                .step(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
+                .step(FinderNames.HOST, "master")
+                .step(FinderNames.SERVER, "server-one")
+                .step(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
+                .step(FinderNames.SUBSYSTEM, "Transactions");
         }
         else {
             navigation = new FinderNavigation(browser, StandaloneRuntimeEntryPoint.class)
-                .addAddress(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
-                .addAddress(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
-                .addAddress(FinderNames.SUBSYSTEM, "Transactions");
+                .step(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
+                .step(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
+                .step(FinderNames.SUBSYSTEM, "Transactions");
         }
         navigation.selectRow().invoke("View");
         Application.waitUntilVisible();

@@ -141,8 +141,8 @@ public class HostScopedRoleTestCase {
         verifier.verifyResource(address, true, 300);
 
         navigation = new FinderNavigation(browser, RoleAssignmentPage.class)
-                .addAddress(FinderNames.BROWSE_BY, "Roles")
-                .addAddress("Role", NAME);
+                .step(FinderNames.BROWSE_BY, "Roles")
+                .step("Role", NAME);
         navigation.selectRow().invoke("Edit");
         page.getWindowFragment().getEditor().text("scope", "slave");
         page.getWindowFragment().clickButton("Save");
@@ -161,8 +161,8 @@ public class HostScopedRoleTestCase {
         verifier.verifyResource(address, true, 300);
 
         navigation = new FinderNavigation(browser, RoleAssignmentPage.class)
-                .addAddress(FinderNames.BROWSE_BY, "Roles")
-                .addAddress("Role", NAME);
+                .step(FinderNames.BROWSE_BY, "Roles")
+                .step("Role", NAME);
         navigation.selectRow().invoke("Edit");
         page.getWindowFragment().getEditor().checkbox("includeAll", true);
         page.getWindowFragment().clickButton("Save");
@@ -184,8 +184,8 @@ public class HostScopedRoleTestCase {
         verifier.verifyResource(address, true, 300);
 
         navigation = new FinderNavigation(browser, RoleAssignmentPage.class)
-                .addAddress(FinderNames.BROWSE_BY, "Roles")
-                .addAddress("Role", NAME);
+                .step(FinderNames.BROWSE_BY, "Roles")
+                .step("Role", NAME);
         navigation.selectRow().invoke("Edit");
         page.getWindowFragment().getEditor().select("baseRole", "Maintainer");
         page.getWindowFragment().clickButton("Save");
@@ -202,8 +202,8 @@ public class HostScopedRoleTestCase {
 
     public void removeRole() {
         navigation = new FinderNavigation(browser, RoleAssignmentPage.class)
-                .addAddress(FinderNames.BROWSE_BY, "Roles")
-                .addAddress("Role", NAME);
+                .step(FinderNames.BROWSE_BY, "Roles")
+                .step("Role", NAME);
         navigation.selectRow().invoke("Remove");
         try {
             Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
@@ -213,8 +213,8 @@ public class HostScopedRoleTestCase {
 
     public void addRole(String baseRole, String scope, boolean includeAll) {
         navigation = new FinderNavigation(browser, RoleAssignmentPage.class)
-                .addAddress(FinderNames.BROWSE_BY, "Roles")
-                .addAddress("Role");
+                .step(FinderNames.BROWSE_BY, "Roles")
+                .step("Role");
         navigation.selectColumn().invoke("Add");
 
         page.getWindowFragment().getEditor().text("name", NAME);
@@ -227,7 +227,7 @@ public class HostScopedRoleTestCase {
 
     public void refresh() {
         navigation = new FinderNavigation(browser, RoleAssignmentPage.class)
-                .addAddress(FinderNames.BROWSE_BY);
+                .step(FinderNames.BROWSE_BY);
         navigation.selectColumn().invoke("Refresh");
     }
 }

@@ -62,8 +62,8 @@ public class BootstrapContextsTestCase {
     @Before
     public void before() {
         navigation = new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
-                .addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
-                .addAddress(FinderNames.SUBSYSTEM, "JCA");
+                .step(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
+                .step(FinderNames.SUBSYSTEM, "JCA");
 
         navigation.selectRow().invoke("View");
         Application.waitUntilVisible();

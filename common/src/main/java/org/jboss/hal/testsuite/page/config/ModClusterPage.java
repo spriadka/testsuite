@@ -16,8 +16,8 @@ public class ModClusterPage extends ConfigPage implements Navigatable {
     @Override
     public void navigate() {
         new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
-                .addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
-                .addAddress(FinderNames.SUBSYSTEM, "ModCluster")
+                .step(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
+                .step(FinderNames.SUBSYSTEM, "ModCluster")
                 .selectRow().invoke(FinderNames.VIEW);
         Application.waitUntilVisible();
     }

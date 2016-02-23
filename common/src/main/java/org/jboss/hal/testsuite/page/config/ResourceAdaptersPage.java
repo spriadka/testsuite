@@ -28,7 +28,7 @@ public class ResourceAdaptersPage extends ConfigurationPage {
     }
 
     public ResourceAdaptersPage navigate2ra(String raName) {
-        Row row = getSubsystemNavigation(RA_SUBSYSTEM_LABEL).addAddress(RA_COLUMN_LABEL, raName).selectRow();
+        Row row = getSubsystemNavigation(RA_SUBSYSTEM_LABEL).step(RA_COLUMN_LABEL, raName).selectRow();
         Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
         row.invoke(FinderNames.VIEW);
         Application.waitUntilVisible();
@@ -36,14 +36,14 @@ public class ResourceAdaptersPage extends ConfigurationPage {
     }
 
     public ResourceAdapterWizard addResourceAdapter() {
-        Column column = getSubsystemNavigation(RA_SUBSYSTEM_LABEL).addAddress(RA_COLUMN_LABEL).selectColumn();
+        Column column = getSubsystemNavigation(RA_SUBSYSTEM_LABEL).step(RA_COLUMN_LABEL).selectColumn();
         Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
         column.invoke(FinderNames.ADD);
         return Console.withBrowser(browser).openedWizard(ResourceAdapterWizard.class);
     }
 
     public WindowState removeRa (String raName) {
-        Row row = getSubsystemNavigation(RA_SUBSYSTEM_LABEL).addAddress(RA_COLUMN_LABEL, raName).selectRow();
+        Row row = getSubsystemNavigation(RA_SUBSYSTEM_LABEL).step(RA_COLUMN_LABEL, raName).selectRow();
         Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
         row.invoke(FinderNames.REMOVE);
         return Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();

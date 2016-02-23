@@ -123,9 +123,9 @@ public class ServerManagementTestCase {
         boolean buttonVisibility = true;
         boolean serverVisibility = true;
         FinderNavigation navigation = new FinderNavigation(browser, DomainRuntimeEntryPoint.class, 100)
-                .addAddress(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
-                .addAddress(FinderNames.HOST, host)
-                .addAddress(FinderNames.SERVER, server);
+                .step(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
+                .step(FinderNames.HOST, host)
+                .step(FinderNames.SERVER, server);
 
         try {
            navigation.selectRow().invoke(serverState.uiOption);

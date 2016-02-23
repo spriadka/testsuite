@@ -44,8 +44,8 @@ public class RoleAssignmentPage extends BasePage {
 
     public void createGroup(String name, String realm, String role) {
         navigation = new FinderNavigation(browser, RoleAssignmentPage.class)
-                .addAddress(FinderNames.BROWSE_BY, "Groups")
-                .addAddress("Group");
+                .step(FinderNames.BROWSE_BY, "Groups")
+                .step("Group");
         navigation.selectColumn().invoke("Add");
 
         getWindowFragment().getEditor().text("name", name);
@@ -78,10 +78,10 @@ public class RoleAssignmentPage extends BasePage {
         sndAdd.click();
         selectRole(role); // try to fix */
         navigation = new FinderNavigation(browser, RoleAssignmentPage.class)
-                .addAddress(FinderNames.BROWSE_BY, "Roles")
-                .addAddress("Role", role)
-                .addAddress("Membership", "Include")
-                .addAddress("Member");
+                .step(FinderNames.BROWSE_BY, "Roles")
+                .step("Role", role)
+                .step("Membership", "Include")
+                .step("Member");
 
         navigation.selectColumn().invoke("Add");
         selectMember(name, realm);
@@ -90,10 +90,10 @@ public class RoleAssignmentPage extends BasePage {
 
     public void removeInclude(String name, String realm, String role) {
         navigation = new FinderNavigation(browser, RoleAssignmentPage.class)
-                .addAddress(FinderNames.BROWSE_BY, "Roles")
-                .addAddress("Role", role)
-                .addAddress("Membership", "Include")
-                .addAddress("Member", name + "@" + realm);
+                .step(FinderNames.BROWSE_BY, "Roles")
+                .step("Role", role)
+                .step("Membership", "Include")
+                .step("Member", name + "@" + realm);
 
         navigation.selectRow().invoke("Remove");
         try {
@@ -104,8 +104,8 @@ public class RoleAssignmentPage extends BasePage {
 
     public void removeGroup(String name, String realm) {
         navigation = new FinderNavigation(browser, RoleAssignmentPage.class)
-                .addAddress(FinderNames.BROWSE_BY, "Groups")
-                .addAddress("Group", name + "@" + realm);
+                .step(FinderNames.BROWSE_BY, "Groups")
+                .step("Group", name + "@" + realm);
         navigation.selectRow().invoke("Remove");
         try {
             Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
@@ -115,8 +115,8 @@ public class RoleAssignmentPage extends BasePage {
 
     public void addUser(String name, String realm, String role) {
         navigation = new FinderNavigation(browser, RoleAssignmentPage.class)
-                .addAddress(FinderNames.BROWSE_BY, "Users")
-                .addAddress("User");
+                .step(FinderNames.BROWSE_BY, "Users")
+                .step("User");
         navigation.selectColumn().invoke("Add");
 
         getWindowFragment().getEditor().text("name", name);
@@ -136,8 +136,8 @@ public class RoleAssignmentPage extends BasePage {
 
     public void removeUser(String name, String realm) {
         navigation = new FinderNavigation(browser, RoleAssignmentPage.class)
-                .addAddress(FinderNames.BROWSE_BY, "Users")
-                .addAddress("User", name + "@" + realm);
+                .step(FinderNames.BROWSE_BY, "Users")
+                .step("User", name + "@" + realm);
         navigation.selectRow().invoke("Remove");
         try {
             Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();

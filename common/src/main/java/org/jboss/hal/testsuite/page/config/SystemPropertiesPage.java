@@ -15,7 +15,7 @@ public class SystemPropertiesPage extends ConfigPage implements Navigatable {
     @Override
     public void navigate() {
         new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
-                .addAddress(FinderNames.CONFIGURATION, "System Properties")
+                .step(FinderNames.CONFIGURATION, "System Properties")
                 .selectRow().invoke(FinderNames.VIEW);
     }
 }

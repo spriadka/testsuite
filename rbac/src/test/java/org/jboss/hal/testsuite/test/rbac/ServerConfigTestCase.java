@@ -134,9 +134,9 @@ public class ServerConfigTestCase {
     public void checkStandardButtons(boolean visible, String host) {
         boolean unvisible = false;
         navigation = new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
-                .addAddress(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
-                .addAddress(FinderNames.HOST, host)
-                .addAddress("Server");
+                .step(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
+                .step(FinderNames.HOST, host)
+                .step("Server");
 
         try {
             navigation.selectColumn().invoke("Add");
@@ -150,9 +150,9 @@ public class ServerConfigTestCase {
     private void checkRemoveButtonForServer(String server, String host, boolean visible) {
         boolean unvisible = false;
         navigation = new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
-                .addAddress(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
-                .addAddress(FinderNames.HOST, host)
-                .addAddress(FinderNames.SERVER, server);
+                .step(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
+                .step(FinderNames.HOST, host)
+                .step(FinderNames.SERVER, server);
 
         try {
             navigation.selectRow().invoke("Remove");
@@ -168,8 +168,8 @@ public class ServerConfigTestCase {
     public void containsHost(String host, boolean visible) {
         boolean unvisible = false;
         navigation = new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
-                .addAddress(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
-                .addAddress(FinderNames.HOST, host);
+                .step(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
+                .step(FinderNames.HOST, host);
 
         try {
             navigation.selectRow();
@@ -184,9 +184,9 @@ public class ServerConfigTestCase {
     public void  addServerConfig(String host, String serverGroup, boolean shouldSucceed, String name) {
         boolean missingField = false;
         navigation = new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
-                .addAddress(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
-                .addAddress(FinderNames.HOST, host)
-                .addAddress("Server");
+                .step(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
+                .step(FinderNames.HOST, host)
+                .step("Server");
 
         navigation.selectColumn().invoke("Add");
 
@@ -208,9 +208,9 @@ public class ServerConfigTestCase {
             verifier.verifyResource(address, 400);
 
             navigation = new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
-                    .addAddress(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
-                    .addAddress(FinderNames.HOST, host)
-                    .addAddress("Server", name);
+                    .step(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
+                    .step(FinderNames.HOST, host)
+                    .step("Server", name);
 
             navigation.selectRow().invoke("Remove");
 

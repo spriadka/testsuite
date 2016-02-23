@@ -49,11 +49,11 @@ public class DataSourceRuntimeTestCase {
     @Before
     public void before() {
         navigation = new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
-                .addAddress(BROWSE_DOMAIN_BY, SERVER_GROUPS)
-                .addAddress(SERVER_GROUP, "main-server-group")
-                .addAddress(SERVER, "server-one")
-                .addAddress(MONITOR, "Subsystems")
-                .addAddress(SUBSYSTEM, "Datasources");
+                .step(BROWSE_DOMAIN_BY, SERVER_GROUPS)
+                .step(SERVER_GROUP, "main-server-group")
+                .step(SERVER, "server-one")
+                .step(MONITOR, "Subsystems")
+                .step(SUBSYSTEM, "Datasources");
     }
 
     @Test

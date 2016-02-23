@@ -44,13 +44,13 @@ public class BatchPage extends ConfigurationPage implements Navigatable {
         FinderNavigation navi;
         if (ConfigUtils.isDomain()) {
             navi = new FinderNavigation(browser, DomainConfigEntryPoint.class)
-                .addAddress(FinderNames.CONFIGURATION, FinderNames.PROFILES)
-                .addAddress(FinderNames.PROFILE, ConfigUtils.getDefaultProfile());
+                .step(FinderNames.CONFIGURATION, FinderNames.PROFILES)
+                .step(FinderNames.PROFILE, ConfigUtils.getDefaultProfile());
         } else {
             navi = new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
-                .addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS);
+                .step(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS);
         }
-        navi.addAddress(FinderNames.SUBSYSTEM, "Batch").selectRow().invoke(FinderNames.VIEW);
+        navi.step(FinderNames.SUBSYSTEM, "Batch").selectRow().invoke(FinderNames.VIEW);
         Application.waitUntilVisible();
     }
 

@@ -108,8 +108,8 @@ public class ServerGroupTestCase {
     public void checkStandardButtons(boolean visible) {
         boolean unvisible = false;
         navigation = new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
-                .addAddress(FinderNames.BROWSE_DOMAIN_BY, FinderNames.SERVER_GROUPS)
-                .addAddress(FinderNames.SERVER_GROUP);
+                .step(FinderNames.BROWSE_DOMAIN_BY, FinderNames.SERVER_GROUPS)
+                .step(FinderNames.SERVER_GROUP);
 
         try {
             navigation.selectColumn().invoke("Add");
@@ -122,8 +122,8 @@ public class ServerGroupTestCase {
     private void checkRemoveButtonForGroup(String group, boolean visible) {
         boolean unvisible = false;
         navigation = new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
-                .addAddress(FinderNames.BROWSE_DOMAIN_BY, FinderNames.SERVER_GROUPS)
-                .addAddress(FinderNames.SERVER_GROUP, group);
+                .step(FinderNames.BROWSE_DOMAIN_BY, FinderNames.SERVER_GROUPS)
+                .step(FinderNames.SERVER_GROUP, group);
 
         try {
             navigation.selectRow().invoke("Remove");
@@ -138,8 +138,8 @@ public class ServerGroupTestCase {
 
     public void addServerGroup(boolean shouldSucceed) {
         navigation = new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
-                .addAddress(FinderNames.BROWSE_DOMAIN_BY, FinderNames.SERVER_GROUPS)
-                .addAddress(FinderNames.SERVER_GROUP);
+                .step(FinderNames.BROWSE_DOMAIN_BY, FinderNames.SERVER_GROUPS)
+                .step(FinderNames.SERVER_GROUP);
 
         navigation.selectColumn().invoke("Add");
 
@@ -153,8 +153,8 @@ public class ServerGroupTestCase {
         verifier.verifyResource(address, shouldSucceed);
 
         navigation = new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
-                .addAddress(FinderNames.BROWSE_DOMAIN_BY, FinderNames.SERVER_GROUPS)
-                .addAddress(FinderNames.SERVER_GROUP, "my-server-group");
+                .step(FinderNames.BROWSE_DOMAIN_BY, FinderNames.SERVER_GROUPS)
+                .step(FinderNames.SERVER_GROUP, "my-server-group");
 
         navigation.selectRow().invoke("Remove");
 

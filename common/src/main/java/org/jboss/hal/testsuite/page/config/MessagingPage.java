@@ -46,43 +46,43 @@ public class MessagingPage extends ConfigPage implements Navigatable {
     public void navigateToMessaging() {
         if (ConfigUtils.isDomain()) {
             navigation = new FinderNavigation(browser, DomainConfigEntryPoint.class)
-                    .addAddress(FinderNames.CONFIGURATION, FinderNames.PROFILES)
-                    .addAddress(FinderNames.PROFILE, ConfigUtils.getDefaultProfile())
-                    .addAddress(FinderNames.SUBSYSTEM, "Messaging")
-                    .addAddress("Messaging Provider", "default");
+                    .step(FinderNames.CONFIGURATION, FinderNames.PROFILES)
+                    .step(FinderNames.PROFILE, ConfigUtils.getDefaultProfile())
+                    .step(FinderNames.SUBSYSTEM, "Messaging")
+                    .step("Messaging Provider", "default");
         } else {
             navigation = new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
-                    .addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
-                    .addAddress(FinderNames.SUBSYSTEM, "Messaging")
-                    .addAddress("Messaging Provider", "default");
+                    .step(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
+                    .step(FinderNames.SUBSYSTEM, "Messaging")
+                    .step("Messaging Provider", "default");
         }
     }
 
     public void navigateToMessagingProvider() {
         if (ConfigUtils.isDomain()) {
             navigation = new FinderNavigation(browser, DomainConfigEntryPoint.class)
-                    .addAddress(FinderNames.CONFIGURATION, FinderNames.PROFILES)
-                    .addAddress(FinderNames.PROFILE, ConfigUtils.getDefaultProfile())
-                    .addAddress(FinderNames.SUBSYSTEM, "Messaging");
+                    .step(FinderNames.CONFIGURATION, FinderNames.PROFILES)
+                    .step(FinderNames.PROFILE, ConfigUtils.getDefaultProfile())
+                    .step(FinderNames.SUBSYSTEM, "Messaging");
         } else {
             navigation = new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
-                    .addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
-                    .addAddress(FinderNames.SUBSYSTEM, "Messaging");
+                    .step(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
+                    .step(FinderNames.SUBSYSTEM, "Messaging");
         }
     }
 
     public void selectProvider(String provider) {
         if (ConfigUtils.isDomain()) {
             navigation = new FinderNavigation(browser, DomainConfigEntryPoint.class)
-                    .addAddress(FinderNames.CONFIGURATION, FinderNames.PROFILES)
-                    .addAddress(FinderNames.PROFILE, ConfigUtils.getDefaultProfile())
-                    .addAddress(FinderNames.SUBSYSTEM, "Messaging")
-                    .addAddress("Messaging Provider", provider);
+                    .step(FinderNames.CONFIGURATION, FinderNames.PROFILES)
+                    .step(FinderNames.PROFILE, ConfigUtils.getDefaultProfile())
+                    .step(FinderNames.SUBSYSTEM, "Messaging")
+                    .step("Messaging Provider", provider);
         } else {
             navigation = new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
-                    .addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
-                    .addAddress(FinderNames.SUBSYSTEM, "Messaging")
-                    .addAddress("Messaging Provider", provider);
+                    .step(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
+                    .step(FinderNames.SUBSYSTEM, "Messaging")
+                    .step("Messaging Provider", provider);
         }
     }
 

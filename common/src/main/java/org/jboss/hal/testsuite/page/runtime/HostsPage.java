@@ -23,13 +23,13 @@ public class HostsPage extends ConfigurationPage {
     @Override
     public void navigate() {
         navigation = new FinderNavigation(browser, HostsPage.class)
-                .addAddress("Browse Domain By", FinderNames.HOSTS)
-                .addAddress(FinderNames.HOST, ConfigUtils.getDefaultHost());
+                .step("Browse Domain By", FinderNames.HOSTS)
+                .step(FinderNames.HOST, ConfigUtils.getDefaultHost());
         defaultHostRow = navigation.selectRow();
     }
 
     public void viewServerConfiguration(String serverName) {
-        navigation.resetNavigation().addAddress(FinderNames.SERVER, serverName);
+        navigation.resetNavigation().step(FinderNames.SERVER, serverName);
         navigation.selectRow().invoke(FinderNames.VIEW);
         Application.waitUntilVisible();
     }

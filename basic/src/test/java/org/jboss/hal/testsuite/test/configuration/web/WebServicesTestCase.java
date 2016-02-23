@@ -51,8 +51,8 @@ public class WebServicesTestCase {
     @Before
     public void before() {
         new FinderNavigation(browser, StandaloneConfigurationPage.class)
-                .addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
-                .addAddress(FinderNames.SUBSYSTEM, "Web Services")
+                .step(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
+                .step(FinderNames.SUBSYSTEM, "Web Services")
                 .selectRow()
                 .invoke(FinderNames.VIEW);
         Application.waitUntilVisible();

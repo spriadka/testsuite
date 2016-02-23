@@ -18,14 +18,14 @@ public class UndertowHTTPPage extends UndertowPage implements Navigatable {
         FinderNavigation navigation;
         if (ConfigUtils.isDomain()) {
             navigation = new FinderNavigation(browser, DomainConfigEntryPoint.class)
-                    .addAddress(FinderNames.CONFIGURATION, FinderNames.PROFILES)
-                    .addAddress(FinderNames.PROFILE, "full");
+                    .step(FinderNames.CONFIGURATION, FinderNames.PROFILES)
+                    .step(FinderNames.PROFILE, "full");
         } else {
             navigation = new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
-                    .addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS);
+                    .step(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS);
         }
-        navigation.addAddress(FinderNames.SUBSYSTEM, "Undertow")
-                .addAddress("Settings", "HTTP")
+        navigation.step(FinderNames.SUBSYSTEM, "Undertow")
+                .step("Settings", "HTTP")
                 .selectRow().invoke(FinderNames.VIEW);
         Application.waitUntilVisible();
         switchTab("HTTP Server");

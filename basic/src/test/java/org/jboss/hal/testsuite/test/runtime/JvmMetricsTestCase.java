@@ -51,15 +51,15 @@ public class JvmMetricsTestCase {
     public void before() {
         if (ConfigUtils.isDomain()) {
             navigation = new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
-                    .addAddress(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
-                    .addAddress(FinderNames.HOST, "master")
-                    .addAddress(FinderNames.SERVER, "server-one")
-                    .addAddress(FinderNames.MONITOR, "JVM");
+                    .step(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
+                    .step(FinderNames.HOST, "master")
+                    .step(FinderNames.SERVER, "server-one")
+                    .step(FinderNames.MONITOR, "JVM");
         }
         else {
             navigation = new FinderNavigation(browser, StandaloneRuntimeEntryPoint.class)
-                    .addAddress(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
-                    .addAddress(FinderNames.MONITOR, "JVM");
+                    .step(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
+                    .step(FinderNames.MONITOR, "JVM");
         }
 
         navigation.selectRow().invoke("View");

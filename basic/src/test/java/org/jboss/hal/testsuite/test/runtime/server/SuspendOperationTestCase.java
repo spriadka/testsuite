@@ -171,20 +171,20 @@ public class SuspendOperationTestCase {
 
         FinderNavigation getServerNavigation() {
             return new FinderNavigation(browser, StandaloneRuntimeEntryPoint.class)
-                            .addAddress(FinderNames.SERVER, "Standalone Server");
+                            .step(FinderNames.SERVER, "Standalone Server");
         }
 
         FinderNavigation getGroupNavigation(String group) {
             return new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
-                            .addAddress(FinderNames.BROWSE_DOMAIN_BY, FinderNames.SERVER_GROUPS)
-                            .addAddress(FinderNames.SERVER_GROUP, group);
+                            .step(FinderNames.BROWSE_DOMAIN_BY, FinderNames.SERVER_GROUPS)
+                            .step(FinderNames.SERVER_GROUP, group);
         }
 
         FinderNavigation getServerByHostNavigation(String host, String server) {
             return new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
-                            .addAddress(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
-                            .addAddress(FinderNames.HOST, host)
-                            .addAddress(FinderNames.SERVER, server);
+                            .step(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
+                            .step(FinderNames.HOST, host)
+                            .step(FinderNames.SERVER, server);
         }
 
         void suspendServer(FinderNavigation navi, int timeout) {

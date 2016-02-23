@@ -28,14 +28,14 @@ public class SecurityPage extends ConfigurationPage implements Navigatable {
     public void navigate() {
         if (ConfigUtils.isDomain()) {
             navigation = new FinderNavigation(browser, DomainConfigEntryPoint.class)
-                    .addAddress(FinderNames.CONFIGURATION, FinderNames.PROFILES)
-                    .addAddress(FinderNames.PROFILE, ConfigUtils.getDefaultProfile());
+                    .step(FinderNames.CONFIGURATION, FinderNames.PROFILES)
+                    .step(FinderNames.PROFILE, ConfigUtils.getDefaultProfile());
         } else {
             navigation = new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
-                    .addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS);
+                    .step(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS);
         }
-        navigation.addAddress(FinderNames.SUBSYSTEM, "Security")
-                .addAddress(SECURITY_DOMAIN);
+        navigation.step(FinderNames.SUBSYSTEM, "Security")
+                .step(SECURITY_DOMAIN);
         navigation.selectColumn(true);
         Console.withBrowser(browser).waitUntilLoaded();
     }
@@ -53,12 +53,12 @@ public class SecurityPage extends ConfigurationPage implements Navigatable {
     }
 
     public SecurityDomainAddWizard addSecurityDomain() {
-        navigation.resetNavigation().addAddress(SECURITY_DOMAIN).selectColumn().invoke(FinderNames.ADD);
+        navigation.resetNavigation().step(SECURITY_DOMAIN).selectColumn().invoke(FinderNames.ADD);
         return Console.withBrowser(browser).openedWindow(SecurityDomainAddWizard.class);
     }
 
     public void viewSecurityDomain(String name) {
-        navigation.resetNavigation().addAddress(SECURITY_DOMAIN, name).selectRow().invoke(FinderNames.VIEW);
+        navigation.resetNavigation().step(SECURITY_DOMAIN, name).selectRow().invoke(FinderNames.VIEW);
         Application.waitUntilVisible();
     }
 
@@ -138,14 +138,14 @@ public class SecurityPage extends ConfigurationPage implements Navigatable {
 
     public void removeSecurityDomain(String name) {
         try {
-            navigation.resetNavigation().addAddress(SECURITY_DOMAIN, name).selectRow().invoke("Remove");
+            navigation.resetNavigation().step(SECURITY_DOMAIN, name).selectRow().invoke("Remove");
         } catch (TimeoutException ignored) {
         }
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
     }
 
     public boolean isDomainPresent(String name) {
-        return navigation.resetNavigation().addAddress(SECURITY_DOMAIN, name).selectColumn().rowIsPresent(name, 60L, navigation);
+        return navigation.resetNavigation().step(SECURITY_DOMAIN, name).selectColumn().rowIsPresent(name, 60L, navigation);
     }
 
     public void selectModule(String name) {

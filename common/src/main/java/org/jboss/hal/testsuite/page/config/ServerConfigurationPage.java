@@ -21,9 +21,9 @@ public class ServerConfigurationPage extends  ConfigurationPage {
     /* UTILS */
     public void goToServerProperties(String server) {
         FinderNavigation navigation = new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
-                .addAddress(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
-                .addAddress(FinderNames.HOST, ConfigUtils.getDefaultHost())
-                .addAddress(FinderNames.SERVER, server);
+                .step(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
+                .step(FinderNames.HOST, ConfigUtils.getDefaultHost())
+                .step(FinderNames.SERVER, server);
 
         navigation.selectRow().invoke("View");
         Application.waitUntilVisible();

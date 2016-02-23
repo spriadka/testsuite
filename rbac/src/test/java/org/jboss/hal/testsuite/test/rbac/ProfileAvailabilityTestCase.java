@@ -33,7 +33,7 @@ public class ProfileAvailabilityTestCase {
     @Before
     public void before() {
         navigation = new FinderNavigation(browser, DomainConfigEntryPoint.class)
-                .addAddress(FinderNames.CONFIGURATION, FinderNames.PROFILES);
+                .step(FinderNames.CONFIGURATION, FinderNames.PROFILES);
     }
 
     @Test
@@ -84,8 +84,8 @@ public class ProfileAvailabilityTestCase {
     private void pickProfile(String profile, boolean shouldBePresent) {
         navigation.clearNavigation();
         navigation = new FinderNavigation(browser, DomainConfigEntryPoint.class)
-                .addAddress(FinderNames.CONFIGURATION, FinderNames.PROFILES);
-        navigation.addAddress(FinderNames.PROFILE, profile);
+                .step(FinderNames.CONFIGURATION, FinderNames.PROFILES);
+        navigation.step(FinderNames.PROFILE, profile);
         try {
             navigation.selectRow(true);
         } catch (NoSuchElementException | TimeoutException ex) {

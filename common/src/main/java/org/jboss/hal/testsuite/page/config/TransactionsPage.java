@@ -18,13 +18,13 @@ public class TransactionsPage extends ConfigPage implements Navigatable {
         FinderNavigation navigation;
         if (ConfigUtils.isDomain()) {
             navigation = new FinderNavigation(browser, DomainConfigEntryPoint.class)
-                    .addAddress(FinderNames.CONFIGURATION, FinderNames.PROFILES)
-                    .addAddress(FinderNames.PROFILE, ConfigUtils.getDefaultProfile());
+                    .step(FinderNames.CONFIGURATION, FinderNames.PROFILES)
+                    .step(FinderNames.PROFILE, ConfigUtils.getDefaultProfile());
         } else {
             navigation = new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
-                    .addAddress(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS);
+                    .step(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS);
         }
-        navigation.addAddress(FinderNames.SUBSYSTEM, "Transactions");
+        navigation.step(FinderNames.SUBSYSTEM, "Transactions");
         navigation.selectRow().invoke(FinderNames.VIEW);
         Application.waitUntilVisible();
     }

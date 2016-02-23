@@ -139,11 +139,11 @@ public class DomainElementaryAccessControlTestCase {
 
 
     private void goToDatasource() {
-        navigation.addAddress(FinderNames.CONFIGURATION, FinderNames.PROFILES)
-                .addAddress(FinderNames.PROFILE, "default")
-                .addAddress(FinderNames.SUBSYSTEM, "Datasources")
-                .addAddress("Type", "Non-XA")
-                .addAddress("Datasource", addressName)
+        navigation.step(FinderNames.CONFIGURATION, FinderNames.PROFILES)
+                .step(FinderNames.PROFILE, "default")
+                .step(FinderNames.SUBSYSTEM, "Datasources")
+                .step("Type", "Non-XA")
+                .step("Datasource", addressName)
                 .selectRow().invoke("View");
     }
 
@@ -235,10 +235,10 @@ public class DomainElementaryAccessControlTestCase {
 
 
     private void accessRestrictedPage(boolean shouldSucceed) {
-        navigation.addAddress(FinderNames.CONFIGURATION, FinderNames.PROFILES)
-                .addAddress(FinderNames.PROFILE, "default")
-                .addAddress(FinderNames.SUBSYSTEM, "Security")
-                .addAddress("Security Domain", "other");
+        navigation.step(FinderNames.CONFIGURATION, FinderNames.PROFILES)
+                .step(FinderNames.PROFILE, "default")
+                .step(FinderNames.SUBSYSTEM, "Security")
+                .step("Security Domain", "other");
         boolean permissions = true;
         try {
             navigation.selectRow();
