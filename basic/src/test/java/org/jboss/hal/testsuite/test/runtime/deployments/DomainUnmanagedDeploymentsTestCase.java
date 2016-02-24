@@ -6,9 +6,7 @@ import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.junit.InSequence;
 import org.jboss.hal.testsuite.category.Domain;
-import org.jboss.hal.testsuite.cli.CliClient;
-import org.jboss.hal.testsuite.cli.CliClientFactory;
-import org.jboss.hal.testsuite.cli.Library;
+import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.fragment.runtime.DeploymentWizard;
@@ -17,14 +15,18 @@ import org.jboss.hal.testsuite.page.runtime.DomainDeploymentPage;
 import org.jboss.hal.testsuite.util.Console;
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
+import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
+import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -42,7 +44,7 @@ public class DomainUnmanagedDeploymentsTestCase {
     private static final String NAME = "n_" + RandomStringUtils.randomAlphanumeric(5) + ".war";
     private static final String RUNTIME_NAME = "rn_" + RandomStringUtils.randomAlphanumeric(5) + ".war";
 
-    private static CliClient client = CliClientFactory.getDomainClient("full-ha");
+    private static OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
     private static DeploymentsOperations ops = new DeploymentsOperations(client);
     private FinderNavigation navigation;
 
@@ -57,14 +59,23 @@ public class DomainUnmanagedDeploymentsTestCase {
         navigation = new FinderNavigation(browser, DomainDeploymentPage.class);
     }
 
+    @BeforeClass
+    public static void setUp() throws IOException, TimeoutException, InterruptedException {
+        new Administration(client).reloadIfRequired();
+    }
+
     @AfterClass
-    public static void cleanUp() {
-        ops.undeploy(NAME);
+    public static void cleanUp() throws IOException {
+        try {
+            ops.undeploy(NAME);
+        } finally {
+            client.close();
+        }
     }
 
     @Test
     @InSequence(0)
-    public void createDeployment() throws InterruptedException {
+    public void createDeployment() throws Exception {
         navigation.step(FinderNames.BROWSE_BY, "Content Repository").step("All Content");
         navigation.selectColumn().invoke("Add");
         File deployment = new File(FILE_PATH + FILE_NAME);
@@ -82,12 +93,12 @@ public class DomainUnmanagedDeploymentsTestCase {
         boolean result = wizard.isClosed();
 
         assertTrue("Deployment wizard should close", result);
-        assertTrue("Deployment should exist", ops.exists(NAME));
+        ops.verifyDeploymentExists(NAME);
     }
 
     @Test
     @InSequence(1)
-    public void assignDeploymentToServerGroup() {
+    public void assignDeploymentToServerGroup() throws Exception {
         navigation.resetNavigation();
         navigation.step(FinderNames.BROWSE_BY, "Server Groups")
                 .step(FinderNames.SERVER_GROUP, "main-server-group")
@@ -101,12 +112,12 @@ public class DomainUnmanagedDeploymentsTestCase {
 
 
         assertTrue("Deployment wizard should close", result);
-        assertTrue("Deployment should be assigned to server group.", ops.isAssignedToServerGroup(MAIN_SERVER_GROUP, NAME));
+        ops.verifyIsDeploymentAssignedToServerGroup(MAIN_SERVER_GROUP, NAME);
     }
 
     @Test
     @InSequence(2)
-    public void enableDeployment() {
+    public void enableDeployment() throws Exception {
 
         navigation.resetNavigation();
         navigation.step(FinderNames.BROWSE_BY, "Server Groups")
@@ -115,14 +126,14 @@ public class DomainUnmanagedDeploymentsTestCase {
         navigation.selectRow().invoke("Enable");
 
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
-        Library.letsSleep(10000);
-        assertTrue("Deployment should be enabled", ops.isEnabledInServerGroup(MAIN_SERVER_GROUP, NAME));
+
+        ops.verifyIsDeploymentEnabledInServerGroup(MAIN_SERVER_GROUP, NAME);
     }
 
 
     @Test
     @InSequence(3)
-    public void disableDeployment() {
+    public void disableDeployment() throws Exception {
 
         navigation.resetNavigation();
         navigation.step(FinderNames.BROWSE_BY, "Server Groups")
@@ -131,13 +142,13 @@ public class DomainUnmanagedDeploymentsTestCase {
         navigation.selectRow().invoke("Disable");
 
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
-        Library.letsSleep(10000);
-        assertFalse("Deployment should be enabled", ops.isEnabledInServerGroup(MAIN_SERVER_GROUP, NAME));
+
+        ops.verifyIsDeploymentDisabledInServerGroup(MAIN_SERVER_GROUP, NAME);
     }
 
     @Test
     @InSequence(4)
-    public void removeDeployment() {
+    public void removeDeployment() throws Exception {
         navigation.resetNavigation();
         navigation.step(FinderNames.BROWSE_BY, "Server Groups")
                 .step(FinderNames.SERVER_GROUP, "main-server-group")
@@ -145,15 +156,13 @@ public class DomainUnmanagedDeploymentsTestCase {
         navigation.selectRow().invoke("Unassign");
 
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
-        Library.letsSleep(1000);
 
         navigation.resetNavigation();
         navigation.step(FinderNames.BROWSE_BY, "Unassigned Content")
                 .step("Unassigned", NAME);
         navigation.selectRow().invoke("Remove");
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
-        Library.letsSleep(1000);
 
-        assertFalse("Deployment should not exist", ops.exists(NAME));
+        ops.verifyDeploymentDoesNotExist(NAME);
     }
 }

@@ -6,9 +6,8 @@ import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.junit.InSequence;
 import org.jboss.hal.testsuite.category.Standalone;
-import org.jboss.hal.testsuite.cli.CliClient;
-import org.jboss.hal.testsuite.cli.CliClientFactory;
 import org.jboss.hal.testsuite.cli.Library;
+import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.fragment.runtime.DeploymentWizard;
@@ -17,14 +16,18 @@ import org.jboss.hal.testsuite.page.runtime.DeploymentPage;
 import org.jboss.hal.testsuite.util.Console;
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
+import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
+import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -39,7 +42,7 @@ public class UnmanagedDeploymentsTestCase {
     private static final String NAME = "n_" + RandomStringUtils.randomAlphanumeric(5) + ".war";
     private static final String RUNTIME_NAME = "rn_" + RandomStringUtils.randomAlphanumeric(5) + ".war";
 
-    private static CliClient client = CliClientFactory.getClient();
+    private static OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
     private static DeploymentsOperations ops = new DeploymentsOperations(client);
     private FinderNavigation navigation;
 
@@ -49,19 +52,28 @@ public class UnmanagedDeploymentsTestCase {
     @Page
     private DeploymentPage page;
 
+    @BeforeClass
+    public static void setUp() throws IOException, TimeoutException, InterruptedException {
+        new Administration(client).reloadIfRequired();
+    }
+
     @Before
     public void before() {
         navigation = new FinderNavigation(browser, DeploymentPage.class);
     }
 
     @AfterClass
-    public static void cleanUp() {
-        ops.undeploy(NAME);
+    public static void cleanUp() throws IOException {
+        try {
+            ops.undeploy(NAME);
+        } finally {
+            client.close();
+        }
     }
 
     @Test
     @InSequence(0)
-    public void createDeployment() {
+    public void createDeployment() throws Exception {
         navigation.step(FinderNames.DEPLOYMENT).selectColumn().invoke("Add");
         File deployment = new File(FILE_PATH + FILE_NAME);
 
@@ -79,42 +91,41 @@ public class UnmanagedDeploymentsTestCase {
         boolean result = wizard.isClosed();
 
         assertTrue("Deployment wizard should close", result);
-        assertTrue("Deployment should exist", ops.exists(NAME));
+        ops.verifyDeploymentExists(NAME);
     }
 
     @Test
     @InSequence(1)
-    public void enableDeployment() {
+    public void enableDeployment() throws Exception {
 
         navigation.step(FinderNames.DEPLOYMENT, NAME).selectRow().invoke("Enable");
 
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
-        Library.letsSleep(10000);
-        assertTrue("Deployment should be enabled", ops.isEnabled(NAME));
+
+        ops.verifyIsDeploymentEnabled(NAME);
     }
 
     @Test
     @InSequence(2)
-    public void disableDeployment() {
+    public void disableDeployment() throws Exception {
 
         navigation.step(FinderNames.DEPLOYMENT, NAME).selectRow().invoke("Disable");
 
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
-        Library.letsSleep(10000);
-        assertFalse("Deployment should be disabled", ops.isEnabled(NAME));
+
+        ops.verifyIsDeploymentDisabled(NAME);
     }
 
     @Test
     @InSequence(3)
-    public void removeDeployment() {
+    public void removeDeployment() throws Exception {
         Console.withBrowser(browser).waitUntilLoaded();
         Library.letsSleep(1000);
         navigation.step(FinderNames.DEPLOYMENT, NAME).selectRow().invoke("Remove");
 
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
-        Library.letsSleep(1000);
 
-        assertFalse("Deployment should not exist", ops.exists(NAME));
+        ops.verifyDeploymentDoesNotExist(NAME);
     }
 
 }
