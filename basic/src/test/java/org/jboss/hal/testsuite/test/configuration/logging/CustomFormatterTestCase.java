@@ -4,6 +4,8 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.dmr.ModelNode;
+import org.jboss.dmr.Property;
 import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
@@ -89,12 +91,13 @@ public class CustomFormatterTestCase extends LoggingAbstractTestCase {
         editTextAndVerify(CUSTOM_FORMATTER_ADDRESS, "module", "org.jboss.logmanager");
     }
 
-    @Test //https://issues.jboss.org/browse/JBEAP-972
+    @Test
     public void updateCustomFormatterProperties() throws Exception {
         ConfigFragment config = page.getConfigFragment();
         config.editTextAndSave("class", "org.jboss.logmanager.formatters.PatternFormatter"); //need to set formatter class which has needed setter method
         config.editTextAndSave("properties", "pattern=%s%E%n");
-        new ResourceVerifier(CUSTOM_FORMATTER_ADDRESS, client).verifyAttribute("properties", "[(\"pattern\" => \"%s%E%n\")]");
+        ModelNode expected = new ModelNode().add(new Property("pattern", new ModelNode("%s%E%n")));
+        new ResourceVerifier(CUSTOM_FORMATTER_ADDRESS, client).verifyAttribute("properties", expected);
     }
 
     @Test
