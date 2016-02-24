@@ -6,7 +6,6 @@ import java.util.concurrent.TimeoutException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
-import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Standalone;
@@ -117,8 +116,8 @@ public class DatasourcesTestCase {
         editor.text("connectionUrl", "url");
         Assert.assertEquals(fillSensitive, editor.getText("username").isEnabled());
         Assert.assertEquals(fillSensitive, editor.getText("password").isEnabled());
+        wizard.next();
         wizard.finish();
-        Graphene.waitGui().until().element(wizard.getRoot()).is().not().present();
     }
 
     private void removeDatasource() {
