@@ -126,9 +126,9 @@ public class FileHandlerTestCase extends LoggingAbstractTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        new ResourceVerifier(FILE_HANDLER_ADDRESS, client, 500).verifyAttribute("named-formatter", "COLOR-PATTERN");
-        new ResourceVerifier(FILE_HANDLER_ADDRESS, client, 500).verifyAttribute("encoding", "undefined");
-        new ResourceVerifier(FILE_HANDLER_ADDRESS, client, 500).verifyAttribute("filter-spec", "undefined");
+        new ResourceVerifier(FILE_HANDLER_ADDRESS, client, 500).verifyAttributeIsUndefined("named-formatter");
+        new ResourceVerifier(FILE_HANDLER_ADDRESS, client, 500).verifyAttributeIsUndefined("encoding");
+        new ResourceVerifier(FILE_HANDLER_ADDRESS, client, 500).verifyAttributeIsUndefined("filter-spec");
         new ResourceVerifier(FILE_HANDLER_ADDRESS, client, 500).verifyAttribute("formatter", "%d{HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n");
         new ResourceVerifier(FILE_HANDLER_ADDRESS, client, 500).verifyAttribute("append", true);
         new ResourceVerifier(FILE_HANDLER_ADDRESS, client, 500).verifyAttribute("autoflush", true);
