@@ -88,7 +88,7 @@ public class ManagedDeploymentsTestCase {
 
         Library.letsSleep(1000);
         assertTrue("Deployment wizard should close", result);
-        ops.verifyExists(NAME);
+        ops.verifyDeploymentExists(NAME);
     }
 
     @Test
@@ -99,7 +99,7 @@ public class ManagedDeploymentsTestCase {
 
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
 
-        ops.verifyIsDisabled(NAME);
+        ops.verifyIsDeploymentDisabled(NAME);
     }
 
     @Test
@@ -110,7 +110,7 @@ public class ManagedDeploymentsTestCase {
 
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
 
-        ops.verifyIsEnabled(NAME);
+        ops.verifyIsDeploymentEnabled(NAME);
     }
 
 
@@ -123,7 +123,7 @@ public class ManagedDeploymentsTestCase {
 
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
 
-        ops.verifyDoesNotExist(NAME);
+        ops.verifyDeploymentDoesNotExist(NAME);
     }
 
 }

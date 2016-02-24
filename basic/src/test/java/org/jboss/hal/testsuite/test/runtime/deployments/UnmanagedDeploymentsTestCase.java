@@ -91,7 +91,7 @@ public class UnmanagedDeploymentsTestCase {
         boolean result = wizard.isClosed();
 
         assertTrue("Deployment wizard should close", result);
-        ops.verifyExists(NAME);
+        ops.verifyDeploymentExists(NAME);
     }
 
     @Test
@@ -102,7 +102,7 @@ public class UnmanagedDeploymentsTestCase {
 
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
 
-        ops.verifyIsEnabled(NAME);
+        ops.verifyIsDeploymentEnabled(NAME);
     }
 
     @Test
@@ -113,7 +113,7 @@ public class UnmanagedDeploymentsTestCase {
 
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
 
-        ops.verifyIsDisabled(NAME);
+        ops.verifyIsDeploymentDisabled(NAME);
     }
 
     @Test
@@ -125,7 +125,7 @@ public class UnmanagedDeploymentsTestCase {
 
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
 
-        ops.verifyDoesNotExist(NAME);
+        ops.verifyDeploymentDoesNotExist(NAME);
     }
 
 }

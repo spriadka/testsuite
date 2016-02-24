@@ -93,7 +93,7 @@ public class DomainManagedDeploymentsTestCase {
                 .finish();
 
         assertTrue("Deployment wizard should close", result);
-        ops.verifyExists(NAME);
+        ops.verifyDeploymentExists(NAME);
     }
 
     @Test
@@ -112,7 +112,7 @@ public class DomainManagedDeploymentsTestCase {
                 .finish();
 
         assertTrue("Deployment wizard should close", result);
-        ops.verifyIsAssignedToServerGroup(MAIN_SERVER_GROUP, NAME);
+        ops.verifyIsDeploymentAssignedToServerGroup(MAIN_SERVER_GROUP, NAME);
     }
 
     @Test
@@ -126,7 +126,7 @@ public class DomainManagedDeploymentsTestCase {
 
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
 
-        ops.verifyIsEnabledInServerGroup(MAIN_SERVER_GROUP, NAME);
+        ops.verifyIsDeploymentEnabledInServerGroup(MAIN_SERVER_GROUP, NAME);
     }
 
     @Test
@@ -141,7 +141,7 @@ public class DomainManagedDeploymentsTestCase {
 
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
 
-        ops.verifyIsDisabledInServerGroup(MAIN_SERVER_GROUP, NAME);
+        ops.verifyIsDeploymentDisabledInServerGroup(MAIN_SERVER_GROUP, NAME);
     }
 
     @Test
@@ -164,7 +164,7 @@ public class DomainManagedDeploymentsTestCase {
         navigation.selectRow().invoke("Remove");
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
 
-        ops.verifyDoesNotExist(NAME);
+        ops.verifyDeploymentDoesNotExist(NAME);
     }
 
     @Test

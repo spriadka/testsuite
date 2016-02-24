@@ -6,7 +6,6 @@ import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.junit.InSequence;
 import org.jboss.hal.testsuite.category.Domain;
-import org.jboss.hal.testsuite.cli.Library;
 import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
@@ -94,7 +93,7 @@ public class DomainUnmanagedDeploymentsTestCase {
         boolean result = wizard.isClosed();
 
         assertTrue("Deployment wizard should close", result);
-        ops.verifyExists(NAME);
+        ops.verifyDeploymentExists(NAME);
     }
 
     @Test
@@ -113,7 +112,7 @@ public class DomainUnmanagedDeploymentsTestCase {
 
 
         assertTrue("Deployment wizard should close", result);
-        ops.verifyIsAssignedToServerGroup(MAIN_SERVER_GROUP, NAME);
+        ops.verifyIsDeploymentAssignedToServerGroup(MAIN_SERVER_GROUP, NAME);
     }
 
     @Test
@@ -128,7 +127,7 @@ public class DomainUnmanagedDeploymentsTestCase {
 
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
 
-        ops.verifyIsEnabledInServerGroup(MAIN_SERVER_GROUP, NAME);
+        ops.verifyIsDeploymentEnabledInServerGroup(MAIN_SERVER_GROUP, NAME);
     }
 
 
@@ -144,7 +143,7 @@ public class DomainUnmanagedDeploymentsTestCase {
 
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
 
-        ops.verifyIsDisabledInServerGroup(MAIN_SERVER_GROUP, NAME);
+        ops.verifyIsDeploymentDisabledInServerGroup(MAIN_SERVER_GROUP, NAME);
     }
 
     @Test
@@ -164,6 +163,6 @@ public class DomainUnmanagedDeploymentsTestCase {
         navigation.selectRow().invoke("Remove");
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
 
-        ops.verifyDoesNotExist(NAME);
+        ops.verifyDeploymentDoesNotExist(NAME);
     }
 }
