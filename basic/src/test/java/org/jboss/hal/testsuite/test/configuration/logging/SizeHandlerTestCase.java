@@ -74,7 +74,7 @@ public class SizeHandlerTestCase extends LoggingAbstractTestCase {
 
     @Test
     public void addSizeHandler() throws Exception {
-        page.addFileHandler(SIZE_HANDLER_TBA);
+        page.addFileHandler(SIZE_HANDLER_TBA, getTmpDirPath("logs"));
         new ResourceVerifier(SIZE_HANDLER_TBA_ADDRESS, client).verifyExists();
     }
 

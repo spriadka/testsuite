@@ -68,7 +68,7 @@ public class PeriodicSizeTestCase extends LoggingAbstractTestCase {
 
     @Test
     public void addPeriodicSizeHandler() throws Exception {
-        page.addPeriodicSizeHandler(PERIODIC_SIZE_HANDLER_TBA, ".yyyy-MM-dd,HH:mm");
+        page.addPeriodicSizeHandler(PERIODIC_SIZE_HANDLER_TBA, ".yyyy-MM-dd,HH:mm", getTmpDirPath("logs"));
 
         new ResourceVerifier(PERIODIC_SIZE_HANDLER_TBA_ADDRESS, client).verifyExists();
     }

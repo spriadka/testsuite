@@ -82,11 +82,11 @@ public class LoggingPage extends ConfigurationPage implements Navigatable {
         getWindowFragment().clickButton("Save");
     }
 
-    public void addFileHandler(String name) {
+    public void addFileHandler(String name, String path) {
         clickButton("Add");
         getWindowFragment().getEditor().text("name", name);
         getWindowFragment().clickButton("Next");
-        getWindowFragment().getEditor().text("path", "/logs/");
+        getWindowFragment().getEditor().text("path", path);
         getWindowFragment().getEditor().clickButton("Finish");
     }
 
@@ -103,12 +103,12 @@ public class LoggingPage extends ConfigurationPage implements Navigatable {
         getWindowFragment().clickButton("Save");
     }
 
-    public void addPeriodicSizeHandler(String name, String suffix) {
+    public void addPeriodicSizeHandler(String name, String suffix, String path) {
         clickButton("Add");
         getWindowFragment().getEditor().text("name", name);
         getWindowFragment().getEditor().text("suffix", suffix);
         getWindowFragment().clickButton("Next");
-        getWindowFragment().getEditor().text("path", "/logs/");
+        getWindowFragment().getEditor().text("path", path);
         getWindowFragment().getEditor().clickButton("Finish");
     }
 

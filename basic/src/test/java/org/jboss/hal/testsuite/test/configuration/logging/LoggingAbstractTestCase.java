@@ -18,8 +18,8 @@ import org.wildfly.extras.creaper.core.online.operations.Operations;
 import org.wildfly.extras.creaper.core.online.operations.Values;
 import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
 
+import java.io.File;
 import java.io.IOException;
-
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -112,5 +112,9 @@ public abstract class LoggingAbstractTestCase {
         config.editTextAndSave(identifier, value);
         Assert.assertTrue(config.isErrorShownInForm());
         config.cancel();
+    }
+
+    protected final String getTmpDirPath(String subdir) {
+        return new File(System.getProperty("java.io.tmpdir"), subdir).getAbsolutePath();
     }
 }
