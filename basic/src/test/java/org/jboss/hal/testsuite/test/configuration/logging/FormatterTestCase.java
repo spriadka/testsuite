@@ -84,8 +84,7 @@ public class FormatterTestCase extends LoggingAbstractTestCase {
 
     @Test
     public void removeFormatter() throws Exception {
-        page.selectFormatter(FORMATTER_TO_BE_REMOVED);
-        page.remove();
+        page.removeInTable(FORMATTER_TO_BE_REMOVED);
 
         administration.reloadIfRequired();
 

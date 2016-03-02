@@ -2,24 +2,25 @@ package org.jboss.hal.testsuite.page.config;
 
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.ByJQuery;
-import org.jboss.hal.testsuite.cli.TimeoutException;
 import org.jboss.hal.testsuite.finder.Application;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.finder.Row;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
+import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
 import org.jboss.hal.testsuite.page.Navigatable;
 import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.PropUtils;
-import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.openqa.selenium.By;
+import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
 
 public class LoggingPage extends ConfigurationPage implements Navigatable {
+
     private FinderNavigation navigation;
 
     public void navigateToLogging() {
@@ -59,6 +60,12 @@ public class LoggingPage extends ConfigurationPage implements Navigatable {
             Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
         } catch (TimeoutException ignored) {
         }
+    }
+
+    public void removeInTable(String name) {
+        getResourceManager().getResourceTable().selectRowByText(0, name);
+        clickButton("Remove");
+        Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirmAndDismissReloadRequiredMessage();
     }
 
     public void addLogger(String name, String category, String level) {

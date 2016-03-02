@@ -102,8 +102,7 @@ public class ConsoleHandlerTestCase extends LoggingAbstractTestCase {
 
     @Test
     public void removeConsoleHandler() throws Exception {
-        page.selectHandler(CONSOLE_HANDLER_TB_REMOVED);
-        page.remove();
+        page.removeInTable(CONSOLE_HANDLER_TB_REMOVED);
 
         new ResourceVerifier(C_HANDLER_TB_REMOVED_ADDRESS, client).verifyDoesNotExist();
     }
