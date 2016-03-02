@@ -8,6 +8,7 @@ import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.finder.Row;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
+import org.jboss.hal.testsuite.fragment.WindowFragment;
 import org.jboss.hal.testsuite.fragment.config.messaging.MessagingConfigArea;
 import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConfigPropertiesFragment;
 import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConfigPropertyWizard;
@@ -262,10 +263,12 @@ public class MessagingPage extends ConfigPage implements Navigatable {
 
     public void addDiverts(String name, String divert, String forward) {
         clickButton("Add");
-        getWindowFragment().getEditor().text("routingName", name);
-        getWindowFragment().getEditor().text("divertAddress", divert);
-        getWindowFragment().getEditor().text("forwardingAddress", forward);
-        getWindowFragment().clickButton("Save");
+        WindowFragment window = Console.withBrowser(browser).openedWindow();
+        Editor editor = window.getEditor();
+        editor.text("routingName", name);
+        editor.text("divertAddress", divert);
+        editor.text("forwardingAddress", forward);
+        window.clickButton("Save");
     }
 
     public void addConnetorServices(String name, String factoryClass) {
