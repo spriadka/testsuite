@@ -14,35 +14,11 @@ import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.PropUtils;
 import org.openqa.selenium.By;
-import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
 
 public class LoggingPage extends ConfigurationPage implements Navigatable {
-
-    private FinderNavigation navigation;
-
-    public void navigateToLogging() {
-        if (ConfigUtils.isDomain()) {
-            navigation = new FinderNavigation(browser, DomainConfigEntryPoint.class)
-                    .step(FinderNames.CONFIGURATION, FinderNames.PROFILES)
-                    .step(FinderNames.PROFILE, "default")
-                    .step(FinderNames.SUBSYSTEM, "Logging");
-
-            navigation.selectRow().invoke(FinderNames.VIEW);
-            Application.waitUntilVisible();
-
-        } else {
-            navigation = new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
-                    .step(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
-                    .step(FinderNames.SUBSYSTEM, "Logging");
-            Row row = navigation.selectRow();
-            Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
-            row.invoke(FinderNames.VIEW);
-            Application.waitUntilVisible();
-        }
-    }
 
     public ConfigFragment getConfigFragment() {
         WebElement editPanel = browser.findElement(By.className("default-tabpanel"));
@@ -52,14 +28,6 @@ public class LoggingPage extends ConfigurationPage implements Navigatable {
     public ConfigFragment getWindowFragment() {
         WebElement editPanel = browser.findElement(By.className("default-window-content"));
         return  Graphene.createPageFragment(ConfigFragment.class, editPanel);
-    }
-
-    public void remove() {
-        clickButton("Remove");
-        try {
-            Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
-        } catch (TimeoutException ignored) {
-        }
     }
 
     public void removeInTable(String name) {
