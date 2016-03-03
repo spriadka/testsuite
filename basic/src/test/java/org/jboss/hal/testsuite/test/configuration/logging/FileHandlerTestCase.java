@@ -138,8 +138,7 @@ public class FileHandlerTestCase extends LoggingAbstractTestCase {
 
     @Test
     public void removeFileHandler() throws Exception {
-        page.selectHandler(FILE_HANDLER_TO_BE_REMOVED);
-        page.remove();
+        page.removeInTable(FILE_HANDLER_TO_BE_REMOVED);
 
         administration.reloadIfRequired();
 

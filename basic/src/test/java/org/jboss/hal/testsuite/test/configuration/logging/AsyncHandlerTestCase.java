@@ -112,8 +112,8 @@ public class AsyncHandlerTestCase extends LoggingAbstractTestCase {
 
     @Test
     public void removeAsyncHandler() throws Exception {
-        page.selectHandler(ASYNCHANDLER_TBR);
-        page.remove();
+        page.removeInTable(ASYNCHANDLER_TBR);
+
         new ResourceVerifier(ASYNCHANDLER_ADDRESS_TBR, client).verifyDoesNotExist();
     }
 }

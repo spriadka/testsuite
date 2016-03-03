@@ -168,8 +168,7 @@ public class SizeHandlerTestCase extends LoggingAbstractTestCase {
 
     @Test
     public void removeSizeHandler() throws Exception {
-        page.selectHandler(SIZE_HANDLER_TBR);
-        page.remove();
+        page.removeInTable(SIZE_HANDLER_TBR);
 
         new ResourceVerifier(SIZE_HANDLER_TBR_ADDRESS, client).verifyDoesNotExist();
     }

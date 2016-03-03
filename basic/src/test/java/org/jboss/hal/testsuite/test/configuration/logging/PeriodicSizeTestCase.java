@@ -125,8 +125,7 @@ public class PeriodicSizeTestCase extends LoggingAbstractTestCase {
 
     @Test
     public void removePeriodicSizeHandler() throws Exception {
-        page.selectHandler(PERIODIC_SIZE_HANDLER_TBR);
-        page.remove();
+        page.removeInTable(PERIODIC_SIZE_HANDLER_TBR);
 
         new ResourceVerifier(PERIODIC_SIZE_HANDLER_TBR_ADDRESS, client).verifyDoesNotExist();
     }

@@ -2,46 +2,23 @@ package org.jboss.hal.testsuite.page.config;
 
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.ByJQuery;
-import org.jboss.hal.testsuite.cli.TimeoutException;
 import org.jboss.hal.testsuite.finder.Application;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.finder.Row;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
+import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
 import org.jboss.hal.testsuite.page.Navigatable;
 import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.PropUtils;
-import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
 
 public class LoggingPage extends ConfigurationPage implements Navigatable {
-    private FinderNavigation navigation;
-
-    public void navigateToLogging() {
-        if (ConfigUtils.isDomain()) {
-            navigation = new FinderNavigation(browser, DomainConfigEntryPoint.class)
-                    .step(FinderNames.CONFIGURATION, FinderNames.PROFILES)
-                    .step(FinderNames.PROFILE, "default")
-                    .step(FinderNames.SUBSYSTEM, "Logging");
-
-            navigation.selectRow().invoke(FinderNames.VIEW);
-            Application.waitUntilVisible();
-
-        } else {
-            navigation = new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
-                    .step(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
-                    .step(FinderNames.SUBSYSTEM, "Logging");
-            Row row = navigation.selectRow();
-            Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
-            row.invoke(FinderNames.VIEW);
-            Application.waitUntilVisible();
-        }
-    }
 
     public ConfigFragment getConfigFragment() {
         WebElement editPanel = browser.findElement(By.className("default-tabpanel"));
@@ -53,12 +30,10 @@ public class LoggingPage extends ConfigurationPage implements Navigatable {
         return  Graphene.createPageFragment(ConfigFragment.class, editPanel);
     }
 
-    public void remove() {
+    public void removeInTable(String name) {
+        getResourceManager().getResourceTable().selectRowByText(0, name);
         clickButton("Remove");
-        try {
-            Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
-        } catch (TimeoutException ignored) {
-        }
+        Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirmAndDismissReloadRequiredMessage();
     }
 
     public void addLogger(String name, String category, String level) {

@@ -102,8 +102,7 @@ public class CustomFormatterTestCase extends LoggingAbstractTestCase {
 
     @Test
     public void removeCustomFormatter() throws Exception {
-        page.selectFormatter(CUSTOM_FORMATTER_TBR);
-        page.remove();
+        page.removeInTable(CUSTOM_FORMATTER_TBR);
 
         new ResourceVerifier(CUSTOM_FORMATTER_TBR_ADDRESS, client).verifyDoesNotExist();
     }

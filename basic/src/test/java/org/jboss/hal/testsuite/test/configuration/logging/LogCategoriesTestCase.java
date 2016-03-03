@@ -88,8 +88,7 @@ public class LogCategoriesTestCase extends LoggingAbstractTestCase {
 
     @Test
     public void removeLoggerHandler() throws Exception {
-        page.selectLogger(LOGGER_TO_BE_REMOVED);
-        page.remove();
+        page.removeInTable(LOGGER_TO_BE_REMOVED);
 
         administration.reloadIfRequired();
 

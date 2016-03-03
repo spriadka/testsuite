@@ -99,8 +99,7 @@ public class SyslogTestCase extends LoggingAbstractTestCase {
 
     @Test
     public void removeSyslogHandler() throws Exception {
-        page.selectHandler(SYSLOG_HANDLER_TBR);
-        page.remove();
+        page.removeInTable(SYSLOG_HANDLER_TBR);
 
         new ResourceVerifier(SYSLOG_HANDLER_TBR_ADDRESS, client).verifyDoesNotExist();
     }
