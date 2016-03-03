@@ -4,8 +4,7 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Shared;
-import org.jboss.hal.testsuite.dmr.AddressTemplate;
-import org.jboss.hal.testsuite.dmr.ResourceAddress;
+import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
@@ -17,16 +16,15 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
+import org.wildfly.extras.creaper.commands.undertow.AddUndertowListener;
+import org.wildfly.extras.creaper.commands.undertow.SslVerifyClient;
 import org.wildfly.extras.creaper.core.CommandFailedException;
+import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.OperationException;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
-/**
- * @author Jan Kasik <jkasik@redhat.com>
- *         Created on 15.9.15.
- */
 @RunWith(Arquillian.class)
 @Category(Shared.class)
 public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
@@ -35,208 +33,192 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
     private UndertowHTTPPage page;
 
     //identifiers
-    private final String ALLOW_ENCODED_SLASH = "allow-encoded-slash";
-    private final String ALLOW_EQUALS_IN_COOKIE_VALUE = "allow-equals-in-cookie-value";
-    private final String ALWAYS_SET_KEEP_ALIVE = "always-set-keep-alive";
-    private final String BUFFER_PIPELINED_DATA = "buffer-pipelined-data";
-    private final String BUFFER_POOL = "buffer-pool";
-    private final String DECODE_URL = "decode-url";
-    private final String ENABLE_HTTP2 = "enable-http2";
-    private final String ENABLE_SPDY = "enable-spdy";
-    private final String ENABLED = "enabled";
-    private final String ENABLED_CIPHER_SUITES = "enabled-cipher-suites";
-    private final String ENABLED_PROTOCOLS = "enabled-protocols";
-    private final String MAX_BUFFERED_REQUEST_SIZE = "max-buffered-request-size";
-    private final String MAX_CONNECTIONS = "max-connections";
-    private final String MAX_COOKIES = "max-cookies";
-    private final String MAX_HEADER_SIZE = "max-header-size";
-    private final String MAX_HEADERS = "max-headers";
-    private final String MAX_PARAMETERS = "max-parameters";
-    private final String MAX_POST_SIZE = "max-post-size";
-    private final String NO_REQUEST_TIMEOUT = "no-request-timeout";
-    private final String READ_TIMEOUT = "read-timeout";
-    private final String RECEIVE_BUFFER = "receive-buffer";
-    private final String RECORD_REQUEST_START_TIME = "record-request-start-time";
-    private final String REQUEST_PARSE_TIMEOUT = "request-parse-timeout";
-    private final String RESOLVE_PEER_ADDRESS = "resolve-peer-address";
-    private final String SECURITY_REALM = "security-realm";
-    private final String SEND_BUFFER = "send-buffer";
-    private final String SOCKET_BINDING = "socket-binding";
-    private final String SSL_SESSION_CACHE_SIZE = "ssl-session-cache-size";
-    private final String SSL_SESSION_TIMEOUT = "ssl-session-timeout";
-    private final String TCP_BACKLOG = "tcp-backlog";
-    private final String TCP_KEEP_ALIVE = "tcp-keep-alive";
-    private final String VERIFY_CLIENT = "verify-client";
-    private final String URL_CHARSET = "url-charset";
-    private final String WORKER = "worker";
-    private final String WRITE_TIMEOUT = "write-timeout";
-
-    //attribute names
-    private final String ALLOW_ENCODED_SLASH_ATTR = "allow-encoded-slash";
-    private final String ALLOW_EQUALS_IN_COOKIE_VALUE_ATTR = "allow-equals-in-cookie-value";
-    private final String ALWAYS_SET_KEEP_ALIVE_ATTR = "always-set-keep-alive";
-    private final String BUFFER_PIPELINED_DATA_ATTR = "buffer-pipelined-data";
-    private final String BUFFER_POOL_ATTR = "buffer-pool";
-    private final String DECODE_URL_ATTR = "decode-url";
-    private final String ENABLE_HTTP2_ATTR = "enable-http2";
-    private final String ENABLE_SPDY_ATTR = "enable-spdy";
-    private final String ENABLED_ATTR = "enabled";
-    private final String ENABLED_CIPHER_SUITES_ATTR = "enabled-cipher-suites";
-    private final String ENABLED_PROTOCOLS_ATTR = "enabled-protocols";
-    private final String MAX_BUFFERED_REQUEST_SIZE_ATTR = "max-buffered-request-size";
-    private final String MAX_CONNECTIONS_ATTR = "max-connections";
-    private final String MAX_COOKIES_ATTR = "max-cookies";
-    private final String MAX_HEADER_SIZE_ATTR = "max-header-size";
-    private final String MAX_HEADERS_ATTR = "max-headers";
-    private final String MAX_PARAMETERS_ATTR = "max-parameters";
-    private final String MAX_POST_SIZE_ATTR = "max-post-size";
-    private final String NO_REQUEST_TIMEOUT_ATTR = "no-request-timeout";
-    private final String READ_TIMEOUT_ATTR = "read-timeout";
-    private final String RECEIVE_BUFFER_ATTR = "receive-buffer";
-    private final String RECORD_REQUEST_START_TIME_ATTR = "record-request-start-time";
-    private final String REQUEST_PARSE_TIMEOUT_ATTR = "request-parse-timeout";
-    private final String RESOLVE_PEER_ADDRESS_ATTR = "resolve-peer-address";
-    private final String SECURITY_REALM_ATTR = "security-realm";
-    private final String SEND_BUFFER_ATTR = "send-buffer";
-    private final String SOCKET_BINDING_ATTR = "socket-binding";
-    private final String SSL_SESSION_CACHE_SIZE_ATTR = "ssl-session-cache-size";
-    private final String SSL_SESSION_TIMEOUT_ATTR = "ssl-session-timeout";
-    private final String TCP_BACKLOG_ATTR = "tcp-backlog";
-    private final String TCP_KEEP_ALIVE_ATTR = "tcp-keep-alive";
-    private final String VERIFY_CLIENT_ATTR = "verify-client";
-    private final String URL_CHARSET_ATTR = "url-charset";
-    private final String WORKER_ATTR = "worker";
-    private final String WRITE_TIMEOUT_ATTR = "write-timeout";
+    private static final String ALLOW_ENCODED_SLASH = "allow-encoded-slash";
+    private static final String ALLOW_EQUALS_IN_COOKIE_VALUE = "allow-equals-in-cookie-value";
+    private static final String ALWAYS_SET_KEEP_ALIVE = "always-set-keep-alive";
+    private static final String BUFFER_PIPELINED_DATA = "buffer-pipelined-data";
+    private static final String BUFFER_POOL = "buffer-pool";
+    private static final String DECODE_URL = "decode-url";
+    private static final String ENABLE_HTTP2 = "enable-http2";
+    private static final String ENABLE_SPDY = "enable-spdy";
+    private static final String ENABLED = "enabled";
+    private static final String ENABLED_CIPHER_SUITES = "enabled-cipher-suites";
+    private static final String ENABLED_PROTOCOLS = "enabled-protocols";
+    private static final String MAX_BUFFERED_REQUEST_SIZE = "max-buffered-request-size";
+    private static final String MAX_CONNECTIONS = "max-connections";
+    private static final String MAX_COOKIES = "max-cookies";
+    private static final String MAX_HEADER_SIZE = "max-header-size";
+    private static final String MAX_HEADERS = "max-headers";
+    private static final String MAX_PARAMETERS = "max-parameters";
+    private static final String MAX_POST_SIZE = "max-post-size";
+    private static final String NO_REQUEST_TIMEOUT = "no-request-timeout";
+    private static final String READ_TIMEOUT = "read-timeout";
+    private static final String RECEIVE_BUFFER = "receive-buffer";
+    private static final String RECORD_REQUEST_START_TIME = "record-request-start-time";
+    private static final String REQUEST_PARSE_TIMEOUT = "request-parse-timeout";
+    private static final String RESOLVE_PEER_ADDRESS = "resolve-peer-address";
+    private static final String SECURITY_REALM = "security-realm";
+    private static final String SEND_BUFFER = "send-buffer";
+    private static final String SOCKET_BINDING = "socket-binding";
+    private static final String SSL_SESSION_CACHE_SIZE = "ssl-session-cache-size";
+    private static final String SSL_SESSION_TIMEOUT = "ssl-session-timeout";
+    private static final String TCP_BACKLOG = "tcp-backlog";
+    private static final String TCP_KEEP_ALIVE = "tcp-keep-alive";
+    private static final String VERIFY_CLIENT = "verify-client";
+    private static final String URL_CHARSET = "url-charset";
+    private static final String WORKER = "worker";
+    private static final String WRITE_TIMEOUT = "write-timeout";
 
     //values
-    private final String NUMERIC_VALID = "25";
-    private final String NUMERIC_INVALID = "25fazf";
-    private final String VERIFY_CLIENT_VALUE = "REQUIRED";
-    private final String SECURITY_REALM_VALUE = "ApplicationRealm";
+    private static final String VERIFY_CLIENT_VALUE = "REQUIRED";
+    private static final String CIPHER_SUITE = "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256";
 
-    private static AddressTemplate httpsListenerTemplate = httpServerTemplate.append("/https-listener=*");
-    private static String httpServer;
-    private static String httpsListener;
-    private static String httpsListenerToBeRemoved;
-    private static ResourceAddress address;
+    private static final String HTTP_SERVER = "undertow-http-server-https-listener_" + RandomStringUtils.randomAlphanumeric(5);
+
+    private static final String HTTPS_LISTENER = "https-listener_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String HTTPS_LISTENER_TBR = "https-listener-btr_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String HTTPS_LISTENER_TBA = "https-listener-tba_" + RandomStringUtils.randomAlphanumeric(5);
+
+    private static final Address HTTP_SERVER_ADDRESS = UNDERTOW_ADDRESS.and("server", HTTP_SERVER);
+
+    private static final Address HTTPS_LISTENER_ADDRESS = HTTP_SERVER_ADDRESS.and("https-listener", HTTPS_LISTENER);
+    private static final Address HTTPS_LISTENER_TBR_ADDRESS = HTTP_SERVER_ADDRESS.and("https-listener", HTTPS_LISTENER_TBR);
+    private static final Address HTTPS_LISTENER_TBA_ADDRESS = HTTP_SERVER_ADDRESS.and("https-listener", HTTPS_LISTENER_TBA);
 
     @BeforeClass
     public static void setUp() throws IOException, CommandFailedException, TimeoutException, InterruptedException, OperationException {
-        httpServer = operations.createHTTPServer();
-        httpsListener = operations.createHTTPSListener(httpServer);
-        httpsListenerToBeRemoved = operations.createHTTPSListener(httpServer);
-        address = httpsListenerTemplate.resolve(context, httpServer, httpsListener);
+        operations.add(HTTP_SERVER_ADDRESS);
+        administration.reloadIfRequired();
+        client.apply(new AddUndertowListener.HttpsBuilder(HTTPS_LISTENER, HTTP_SERVER,
+                        undertowOps.createSocketBindingWithoutReference())
+                .securityRealm(undertowOps.createSecurityRealm())
+                .verifyClient(SslVerifyClient.NOT_REQUESTED)
+                .enabled(true)
+                .build());
+        client.apply(new AddUndertowListener.HttpsBuilder(HTTPS_LISTENER_TBR, HTTP_SERVER,
+                        undertowOps.createSocketBindingWithoutReference())
+                .securityRealm(undertowOps.createSecurityRealm())
+                .verifyClient(SslVerifyClient.NOT_REQUESTED)
+                .enabled(true)
+                .build());
+        administration.reloadIfRequired();
     }
 
     @Before
     public void before() {
-        navigate2httpsListener();
+        page.navigate();
+        page.viewHTTPServer(HTTP_SERVER)
+                .switchToHTTPSListeners()
+                .selectItemInTableByText(HTTPS_LISTENER);
     }
 
     @AfterClass
-    public static void tearDown() throws InterruptedException, CommandFailedException, TimeoutException, IOException {
-        operations.removeHTTPSListener(httpServer, httpsListener);
-        operations.removeHTTPServer(httpServer);
+    public static void tearDown() throws InterruptedException, CommandFailedException, TimeoutException, IOException, OperationException {
+        operations.removeIfExists(HTTPS_LISTENER_ADDRESS);
+        operations.removeIfExists(HTTPS_LISTENER_TBA_ADDRESS);
+        operations.removeIfExists(HTTPS_LISTENER_TBR_ADDRESS);
+        operations.removeIfExists(HTTP_SERVER_ADDRESS);
+        administration.reloadIfRequired();
     }
 
     @Test
-    public void setAllowEncodedSlashToTrue() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, ALLOW_ENCODED_SLASH, ALLOW_ENCODED_SLASH_ATTR, true);
+    public void setAllowEncodedSlashToTrue() throws Exception {
+        editCheckboxAndVerify(HTTPS_LISTENER_ADDRESS, ALLOW_ENCODED_SLASH, true);
     }
 
     @Test
-    public void setAllowEncodedSlashToFalse() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, ALLOW_ENCODED_SLASH, ALLOW_ENCODED_SLASH_ATTR, false);
+    public void setAllowEncodedSlashToFalse() throws Exception {
+        editCheckboxAndVerify(HTTPS_LISTENER_ADDRESS, ALLOW_ENCODED_SLASH, false);
     }
 
     @Test
-    public void setAllowEqualsInCookieValueToTrue() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, ALLOW_EQUALS_IN_COOKIE_VALUE, ALLOW_EQUALS_IN_COOKIE_VALUE_ATTR, true);
+    public void setAllowEqualsInCookieValueToTrue() throws Exception {
+        editCheckboxAndVerify(HTTPS_LISTENER_ADDRESS, ALLOW_EQUALS_IN_COOKIE_VALUE, true);
     }
 
     @Test
-    public void setAllowEqualsInCookieValueToFalse() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, ALLOW_EQUALS_IN_COOKIE_VALUE, ALLOW_EQUALS_IN_COOKIE_VALUE_ATTR, false);
+    public void setAllowEqualsInCookieValueToFalse() throws Exception {
+        editCheckboxAndVerify(HTTPS_LISTENER_ADDRESS, ALLOW_EQUALS_IN_COOKIE_VALUE, false);
     }
 
     @Test
-    public void setAlwaysSetKeepAliveToTrue() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, ALWAYS_SET_KEEP_ALIVE, ALWAYS_SET_KEEP_ALIVE_ATTR, true);
+    public void setAlwaysSetKeepAliveToTrue() throws Exception {
+        editCheckboxAndVerify(HTTPS_LISTENER_ADDRESS, ALWAYS_SET_KEEP_ALIVE, true);
     }
 
     @Test
-    public void setAlwaysSetKeepAliveToFalse() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, ALWAYS_SET_KEEP_ALIVE, ALWAYS_SET_KEEP_ALIVE_ATTR, false);
+    public void setAlwaysSetKeepAliveToFalse() throws Exception {
+        editCheckboxAndVerify(HTTPS_LISTENER_ADDRESS, ALWAYS_SET_KEEP_ALIVE, false);
     }
 
     @Test
-    public void setBufferPipelinedDataToTrue() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, BUFFER_PIPELINED_DATA, BUFFER_PIPELINED_DATA_ATTR, true);
+    public void setBufferPipelinedDataToTrue() throws Exception {
+        editCheckboxAndVerify(HTTPS_LISTENER_ADDRESS, BUFFER_PIPELINED_DATA, true);
     }
 
     @Test
-    public void setBufferPipelinedDataToFalse() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, BUFFER_PIPELINED_DATA, BUFFER_PIPELINED_DATA_ATTR, false);
+    public void setBufferPipelinedDataToFalse() throws Exception {
+        editCheckboxAndVerify(HTTPS_LISTENER_ADDRESS, BUFFER_PIPELINED_DATA, false);
     }
 
     @Test
-    public void editBufferPool() throws IOException, InterruptedException, TimeoutException {
-        editTextAndVerify(address, BUFFER_POOL, BUFFER_POOL_ATTR, BUFFER_POOL_VALUE_VALID);
+    public void editBufferPool() throws Exception {
+        editTextAndVerify(HTTPS_LISTENER_ADDRESS, BUFFER_POOL, undertowOps.createBufferPool());
     }
 
     @Test
-    public void setDecodeURLToTrue() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, DECODE_URL, DECODE_URL_ATTR, true);
+    public void setDecodeURLToTrue() throws Exception {
+        editCheckboxAndVerify(HTTPS_LISTENER_ADDRESS, DECODE_URL, true);
     }
 
     @Test
-    public void setDecodeURLToFalse() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, DECODE_URL, DECODE_URL_ATTR, false);
+    public void setDecodeURLToFalse() throws Exception {
+        editCheckboxAndVerify(HTTPS_LISTENER_ADDRESS, DECODE_URL, false);
     }
 
     @Test
-    public void setEnableHTTP2ToTrue() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, ENABLE_HTTP2, ENABLE_HTTP2_ATTR, true);
+    public void setEnableHTTP2ToTrue() throws Exception {
+        editCheckboxAndVerify(HTTPS_LISTENER_ADDRESS, ENABLE_HTTP2, true);
     }
 
     @Test
-    public void setEnableHTTP2ToFalse() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, ENABLE_HTTP2, ENABLE_HTTP2_ATTR, false);
+    public void setEnableHTTP2ToFalse() throws Exception {
+        editCheckboxAndVerify(HTTPS_LISTENER_ADDRESS, ENABLE_HTTP2, false);
     }
 
     @Test
-    public void setEnableSPDYToTrue() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, ENABLE_SPDY, ENABLE_SPDY_ATTR, true);
+    public void setEnableSPDYToTrue() throws Exception {
+        editCheckboxAndVerify(HTTPS_LISTENER_ADDRESS, ENABLE_SPDY, true);
     }
 
     @Test
-    public void setEnableSPDYToFalse() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, ENABLE_SPDY, ENABLE_SPDY_ATTR, false);
+    public void setEnableSPDYToFalse() throws Exception {
+        editCheckboxAndVerify(HTTPS_LISTENER_ADDRESS, ENABLE_SPDY, false);
     }
 
     @Test
-    public void setEnabledToTrue() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, ENABLED, ENABLED_ATTR, true);
+    public void setEnabledToTrue() throws Exception {
+        editCheckboxAndVerify(HTTPS_LISTENER_ADDRESS, ENABLED, true);
     }
 
     @Test
-    public void setEnabledToFalse() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, ENABLED, ENABLED_ATTR, false);
+    public void setEnabledToFalse() throws Exception {
+        editCheckboxAndVerify(HTTPS_LISTENER_ADDRESS, ENABLED, false);
     }
 
     @Test
-    public void editEnabledCipherSuits() throws IOException, InterruptedException, TimeoutException {
-        editTextAndVerify(address, ENABLED_CIPHER_SUITES, ENABLED_CIPHER_SUITES_ATTR);
+    public void editEnabledCipherSuites() throws Exception {
+        editTextAndVerify(HTTPS_LISTENER_ADDRESS, ENABLED_CIPHER_SUITES, CIPHER_SUITE);
     }
 
     @Test
-    public void editEnabledProtocols() throws IOException, InterruptedException, TimeoutException {
-        editTextAndVerify(address, ENABLED_PROTOCOLS, ENABLED_PROTOCOLS_ATTR);
+    public void editEnabledProtocols() throws Exception {
+        editTextAndVerify(HTTPS_LISTENER_ADDRESS, ENABLED_PROTOCOLS);
     }
 
     @Test
-    public void editMaxBufferedRequestSize() throws IOException, InterruptedException, TimeoutException {
-        editTextAndVerify(address, MAX_BUFFERED_REQUEST_SIZE, MAX_BUFFERED_REQUEST_SIZE_ATTR, NUMERIC_VALID);
+    public void editMaxBufferedRequestSize() throws Exception {
+        editTextAndVerify(HTTPS_LISTENER_ADDRESS, MAX_BUFFERED_REQUEST_SIZE, NUMERIC_VALID);
     }
 
     @Test
@@ -245,8 +227,8 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
     }
 
     @Test
-    public void editMaxConnections() throws IOException, InterruptedException, TimeoutException {
-        editTextAndVerify(address, MAX_CONNECTIONS, MAX_CONNECTIONS_ATTR, NUMERIC_VALID);
+    public void editMaxConnections() throws Exception {
+        editTextAndVerify(HTTPS_LISTENER_ADDRESS, MAX_CONNECTIONS, NUMERIC_VALID);
     }
 
     @Test
@@ -255,8 +237,8 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
     }
 
     @Test
-    public void editMaxCookies() throws IOException, InterruptedException, TimeoutException {
-        editTextAndVerify(address, MAX_COOKIES, MAX_COOKIES_ATTR, NUMERIC_VALID);
+    public void editMaxCookies() throws Exception {
+        editTextAndVerify(HTTPS_LISTENER_ADDRESS, MAX_COOKIES, NUMERIC_VALID);
     }
 
     @Test
@@ -265,8 +247,8 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
     }
 
     @Test
-    public void editMaxHeaderSize() throws IOException, InterruptedException, TimeoutException {
-        editTextAndVerify(address, MAX_HEADER_SIZE, MAX_HEADER_SIZE_ATTR, NUMERIC_VALID);
+    public void editMaxHeaderSize() throws Exception {
+        editTextAndVerify(HTTPS_LISTENER_ADDRESS, MAX_HEADER_SIZE, NUMERIC_VALID);
     }
 
     @Test
@@ -275,8 +257,8 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
     }
 
     @Test
-    public void editMaxHeaders() throws IOException, InterruptedException, TimeoutException {
-        editTextAndVerify(address, MAX_HEADERS, MAX_HEADERS_ATTR, NUMERIC_VALID);
+    public void editMaxHeaders() throws Exception {
+        editTextAndVerify(HTTPS_LISTENER_ADDRESS, MAX_HEADERS, NUMERIC_VALID);
     }
 
     @Test
@@ -285,8 +267,8 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
     }
 
     @Test
-    public void editMaxParameters() throws IOException, InterruptedException, TimeoutException {
-        editTextAndVerify(address, MAX_PARAMETERS, MAX_PARAMETERS_ATTR, NUMERIC_VALID);
+    public void editMaxParameters() throws Exception {
+        editTextAndVerify(HTTPS_LISTENER_ADDRESS, MAX_PARAMETERS, NUMERIC_VALID);
     }
 
     @Test
@@ -295,8 +277,8 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
     }
 
     @Test
-    public void editMaxPostSize() throws IOException, InterruptedException, TimeoutException {
-        editTextAndVerify(address, MAX_POST_SIZE, MAX_POST_SIZE_ATTR, NUMERIC_VALID);
+    public void editMaxPostSize() throws Exception {
+        editTextAndVerify(HTTPS_LISTENER_ADDRESS, MAX_POST_SIZE, NUMERIC_VALID_LONG);
     }
 
     @Test
@@ -305,8 +287,8 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
     }
 
     @Test
-    public void editNoRequestTimeout() throws IOException, InterruptedException, TimeoutException {
-        editTextAndVerify(address, NO_REQUEST_TIMEOUT, NO_REQUEST_TIMEOUT_ATTR, NUMERIC_VALID);
+    public void editNoRequestTimeout() throws Exception {
+        editTextAndVerify(HTTPS_LISTENER_ADDRESS, NO_REQUEST_TIMEOUT, NUMERIC_VALID);
     }
 
     @Test
@@ -315,18 +297,18 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
     }
 
     @Test
-    public void editReadTimeout() throws IOException, InterruptedException, TimeoutException {
-        editTextAndVerify(address, READ_TIMEOUT, READ_TIMEOUT_ATTR, NUMERIC_VALID);
+    public void editReadTimeout() throws Exception {
+        editTextAndVerify(HTTPS_LISTENER_ADDRESS, READ_TIMEOUT, NUMERIC_VALID);
     }
 
     @Test
-    public void editReadTimeoutInvalid() throws IOException, InterruptedException, TimeoutException {
+    public void editReadTimeoutInvalid() throws Exception {
         verifyIfErrorAppears(READ_TIMEOUT, NUMERIC_INVALID);
     }
 
     @Test
-    public void editReceiveBuffer() throws IOException, InterruptedException, TimeoutException {
-        editTextAndVerify(address, RECEIVE_BUFFER, RECEIVE_BUFFER_ATTR, NUMERIC_VALID);
+    public void editReceiveBuffer() throws Exception {
+        editTextAndVerify(HTTPS_LISTENER_ADDRESS, RECEIVE_BUFFER, NUMERIC_VALID);
     }
 
     @Test
@@ -335,78 +317,78 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
     }
 
     @Test
-    public void setRecordRequestStartTimeToTrue() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, RECORD_REQUEST_START_TIME, RECORD_REQUEST_START_TIME_ATTR, true);
+    public void setRecordRequestStartTimeToTrue() throws Exception {
+        editCheckboxAndVerify(HTTPS_LISTENER_ADDRESS, RECORD_REQUEST_START_TIME, true);
     }
 
     @Test
-    public void setRecordRequestStartTimeToFalse() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, RECORD_REQUEST_START_TIME, RECORD_REQUEST_START_TIME_ATTR, false);
+    public void setRecordRequestStartTimeToFalse() throws Exception {
+        editCheckboxAndVerify(HTTPS_LISTENER_ADDRESS, RECORD_REQUEST_START_TIME, false);
     }
 
     @Test
-    public void editRequestParseTimeout() throws IOException, InterruptedException, TimeoutException {
-        editTextAndVerify(address, REQUEST_PARSE_TIMEOUT, REQUEST_PARSE_TIMEOUT_ATTR, NUMERIC_VALID);
+    public void editRequestParseTimeout() throws Exception {
+        editTextAndVerify(HTTPS_LISTENER_ADDRESS, REQUEST_PARSE_TIMEOUT, NUMERIC_VALID);
     }
 
     @Test
-    public void editRequestParseTimeoutInvalid() throws IOException, InterruptedException, TimeoutException {
+    public void editRequestParseTimeoutInvalid() throws Exception {
         verifyIfErrorAppears(REQUEST_PARSE_TIMEOUT, NUMERIC_INVALID);
     }
 
     @Test
-    public void setResolvePeerAddressToTrue() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, RESOLVE_PEER_ADDRESS, RESOLVE_PEER_ADDRESS_ATTR, true);
+    public void setResolvePeerAddressToTrue() throws Exception {
+        editCheckboxAndVerify(HTTPS_LISTENER_ADDRESS, RESOLVE_PEER_ADDRESS, true);
     }
 
     @Test
-    public void setResolvePeerAddressToFalse() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, RESOLVE_PEER_ADDRESS, RESOLVE_PEER_ADDRESS_ATTR, false);
+    public void setResolvePeerAddressToFalse() throws Exception {
+        editCheckboxAndVerify(HTTPS_LISTENER_ADDRESS, RESOLVE_PEER_ADDRESS, false);
     }
 
     @Test
-    public void editSecurityRealm() throws IOException, InterruptedException, TimeoutException {
-        editTextAndVerify(address, SECURITY_REALM, SECURITY_REALM_ATTR, SECURITY_REALM_VALUE);
+    public void editSecurityRealm() throws Exception {
+        editTextAndVerify(HTTPS_LISTENER_ADDRESS, SECURITY_REALM, undertowOps.createSecurityRealm());
     }
 
     @Test
-    public void editSendBuffer() throws IOException, InterruptedException, TimeoutException {
-        editTextAndVerify(address, SEND_BUFFER, SEND_BUFFER_ATTR, NUMERIC_VALID);
+    public void editSendBuffer() throws Exception {
+        editTextAndVerify(HTTPS_LISTENER_ADDRESS, SEND_BUFFER, NUMERIC_VALID);
     }
 
     @Test
-    public void editSendBufferInvalid() throws IOException, InterruptedException, TimeoutException {
+    public void editSendBufferInvalid() throws Exception {
         verifyIfErrorAppears(SEND_BUFFER, NUMERIC_INVALID);
     }
 
     @Test
-    public void editSocketBinding() throws IOException, InterruptedException, TimeoutException {
-        editTextAndVerify(address, SOCKET_BINDING, SOCKET_BINDING_ATTR, SOCKET_BINDING_VALUE_VALID);
+    public void editSocketBinding() throws Exception {
+        editTextAndVerify(HTTPS_LISTENER_ADDRESS, SOCKET_BINDING, undertowOps.createSocketBindingWithoutReference());
     }
 
     @Test
-    public void editSSLSessionCacheSize() throws IOException, InterruptedException, TimeoutException {
-        editTextAndVerify(address, SSL_SESSION_CACHE_SIZE, SSL_SESSION_CACHE_SIZE_ATTR, NUMERIC_VALID);
+    public void editSSLSessionCacheSize() throws Exception {
+        editTextAndVerify(HTTPS_LISTENER_ADDRESS, SSL_SESSION_CACHE_SIZE, NUMERIC_VALID);
     }
 
     @Test
-    public void editSSLSessionCacheSizeInvalid() throws IOException, InterruptedException, TimeoutException {
+    public void editSSLSessionCacheSizeInvalid() throws Exception {
         verifyIfErrorAppears(SSL_SESSION_CACHE_SIZE, NUMERIC_INVALID);
     }
 
     @Test
-    public void editSSLSessionTimeout() throws IOException, InterruptedException, TimeoutException {
-        editTextAndVerify(address, SSL_SESSION_TIMEOUT, SSL_SESSION_TIMEOUT_ATTR, NUMERIC_VALID);
+    public void editSSLSessionTimeout() throws Exception {
+        editTextAndVerify(HTTPS_LISTENER_ADDRESS, SSL_SESSION_TIMEOUT, NUMERIC_VALID);
     }
 
     @Test
-    public void editSSLSessionTimeoutInvalid() throws IOException, InterruptedException, TimeoutException {
+    public void editSSLSessionTimeoutInvalid() throws Exception {
         verifyIfErrorAppears(SSL_SESSION_TIMEOUT, NUMERIC_INVALID);
     }
 
     @Test
-    public void editTCPBacklog() throws IOException, InterruptedException, TimeoutException {
-        editTextAndVerify(address, TCP_BACKLOG, TCP_BACKLOG_ATTR, NUMERIC_VALID);
+    public void editTCPBacklog() throws Exception {
+        editTextAndVerify(HTTPS_LISTENER_ADDRESS, TCP_BACKLOG, NUMERIC_VALID);
     }
 
     @Test
@@ -415,85 +397,75 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
     }
 
     @Test
-    public void setTCPKeepAliveToTrue() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, TCP_KEEP_ALIVE, TCP_KEEP_ALIVE_ATTR, true);
+    public void setTCPKeepAliveToTrue() throws Exception {
+        editCheckboxAndVerify(HTTPS_LISTENER_ADDRESS, TCP_KEEP_ALIVE, true);
     }
 
     @Test
-    public void setTCPKeepAliveToFalse() throws IOException, InterruptedException, TimeoutException {
-        operations.writeAttribute(address, TCP_KEEP_ALIVE_ATTR, true);
-        operations.reloadIfRequiredAndWaitForRunning();
-        navigate2httpsListener();
-        editCheckboxAndVerify(address, TCP_KEEP_ALIVE, TCP_KEEP_ALIVE_ATTR, false);
+    public void setTCPKeepAliveToFalse() throws Exception {
+        operations.writeAttribute(HTTPS_LISTENER_ADDRESS, TCP_KEEP_ALIVE, true);
+        administration.reloadIfRequired();
+        page.navigate();
+        page.viewHTTPServer(HTTP_SERVER)
+                .switchToHTTPSListeners()
+                .selectItemInTableByText(HTTPS_LISTENER);
+        editCheckboxAndVerify(HTTPS_LISTENER_ADDRESS, TCP_KEEP_ALIVE, false);
     }
 
     @Test
-    public void selectVerifyClient() throws IOException, InterruptedException, TimeoutException {
-        selectOptionAndVerify(address, VERIFY_CLIENT, VERIFY_CLIENT_ATTR, VERIFY_CLIENT_VALUE);
+    public void selectVerifyClient() throws Exception {
+        selectOptionAndVerify(HTTPS_LISTENER_ADDRESS, VERIFY_CLIENT, VERIFY_CLIENT_VALUE);
     }
 
     @Test
-    public void editURLCharset() throws IOException, InterruptedException, TimeoutException {
-        editTextAndVerify(address, URL_CHARSET, URL_CHARSET_ATTR);
+    public void editURLCharset() throws Exception {
+        editTextAndVerify(HTTPS_LISTENER_ADDRESS, URL_CHARSET);
     }
 
     @Test
-    public void editWorker() throws IOException, InterruptedException, TimeoutException {
-        editTextAndVerify(address, WORKER, WORKER_ATTR, WORKER_VALUE_VALID);
+    public void editWorker() throws Exception {
+        editTextAndVerify(HTTPS_LISTENER_ADDRESS, WORKER, undertowOps.createWorker());
     }
 
     @Test
-    public void editWriteTimeout() throws IOException, InterruptedException, TimeoutException {
-        editTextAndVerify(address, WRITE_TIMEOUT, WRITE_TIMEOUT_ATTR, NUMERIC_VALID);
+    public void editWriteTimeout() throws Exception {
+        editTextAndVerify(HTTPS_LISTENER_ADDRESS, WRITE_TIMEOUT, NUMERIC_VALID);
     }
 
     @Test
-    public void editWriteTimeoutInvalid() throws IOException, InterruptedException, TimeoutException {
+    public void editWriteTimeoutInvalid() throws Exception {
         verifyIfErrorAppears(WRITE_TIMEOUT, NUMERIC_INVALID);
     }
 
     @Test
-    public void addHTTPSListenerInGUI() throws IOException, CommandFailedException, InterruptedException,
-            TimeoutException {
-        String name = "HTTPSListener_" + RandomStringUtils.randomAlphanumeric(6);
-        String socketBinding = operations.createSocketBinding();
+    public void addHTTPSListenerInGUI() throws Exception {
+        String socketBinding = undertowOps.createSocketBinding();
+        String securityRealm = undertowOps.createSecurityRealm();
         ConfigFragment config = page.getConfigFragment();
         WizardWindow wizard = config.getResourceManager().addResource();
-        String securityRealmValue = operations.createSecurityRealm();
 
-        try {
-            Editor editor = wizard.getEditor();
-            editor.text("name", name);
-            editor.text(SECURITY_REALM, securityRealmValue);
-            editor.text(SOCKET_BINDING, socketBinding);
-            boolean result = wizard.finish();
+        Editor editor = wizard.getEditor();
+        editor.text("name", HTTPS_LISTENER_TBA);
+        editor.text(SECURITY_REALM, securityRealm);
+        editor.text(SOCKET_BINDING, socketBinding);
+        boolean result = wizard.finish();
 
-            Assert.assertTrue("Window should be closed", result);
-            Assert.assertTrue("HTTPS listener should be present in table", config.resourceIsPresent(name));
-            ResourceAddress address = httpsListenerTemplate.resolve(context, httpServer, name);
-            verifier.verifyResource(address, true);
-            verifier.verifyAttribute(address, SOCKET_BINDING, socketBinding);
-            verifier.verifyAttribute(address, SECURITY_REALM, securityRealmValue);
-        } finally {
-            operations.removeSecurityRealm(securityRealmValue);
-        }
-    }
+        Assert.assertTrue("Window should be closed", result);
+        Assert.assertTrue("HTTPS listener should be present in table", config.resourceIsPresent(HTTPS_LISTENER_TBA));
+        ResourceVerifier verifier = new ResourceVerifier(HTTPS_LISTENER_TBA_ADDRESS, client);
+        verifier.verifyAttribute(SOCKET_BINDING, socketBinding);
+        verifier.verifyAttribute(SECURITY_REALM, securityRealm);
+}
 
     @Test
-    public void removeHTTPSListenerInGUI() {
+    public void removeHTTPSListenerInGUI() throws Exception {
         ConfigFragment config = page.getConfigFragment();
         config.getResourceManager()
-                .removeResource(httpsListenerToBeRemoved)
+                .removeResource(HTTPS_LISTENER_TBR)
                 .confirmAndDismissReloadRequiredMessage();
 
-        ResourceAddress address = httpsListenerTemplate.resolve(context, httpServer, httpsListenerToBeRemoved);
-        Assert.assertFalse("HTTPS listener host should not be present in table", config.resourceIsPresent(httpsListenerToBeRemoved));
-        verifier.verifyResource(address, false); //HTTP server host should not be present on the server
-    }
-
-    private void navigate2httpsListener() {
-        page.navigate();
-        page.viewHTTPServer(httpServer).switchToHTTPSListeners();
+        Assert.assertFalse("HTTPS listener host should not be present in table", config.resourceIsPresent(HTTPS_LISTENER_TBR));
+        new ResourceVerifier(HTTPS_LISTENER_TBR_ADDRESS, client).verifyDoesNotExist(); //HTTP server host should not be present on the server
     }
 
 }

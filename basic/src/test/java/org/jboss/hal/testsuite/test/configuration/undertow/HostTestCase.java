@@ -4,8 +4,7 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Shared;
-import org.jboss.hal.testsuite.dmr.AddressTemplate;
-import org.jboss.hal.testsuite.dmr.ResourceAddress;
+import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
@@ -17,14 +16,12 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
+import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.OperationException;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
-/**
- * @author Jan Kasik <jkasik@redhat.com>
- *         Created on 15.9.15.
- */
 @RunWith(Arquillian.class)
 @Category(Shared.class)
 public class HostTestCase extends UndertowTestCaseAbstract {
@@ -32,105 +29,108 @@ public class HostTestCase extends UndertowTestCaseAbstract {
     @Page
     UndertowHTTPPage page;
 
-    private final String ALIAS = "alias";
-    private final String DEFAULT_RESPONSE_CODE = "default-response-code";
-    private final String DEFAULT_WEB_MODULE = "default-web-module";
-    private final String DISABLE_CONSOLE_REDIRECT = "disable-console-redirect";
-
-    private final String ALIAS_ATTR = "alias";
-    private final String DEFAULT_RESPONSE_CODE_ATTR = "default-response-code";
-    private final String DEFAULT_WEB_MODULE_ATTR = "default-web-module";
-    private final String DISABLE_CONSOLE_REDIRECT_ATTR = "disable-console-redirect";
+    private static final String ALIAS = "alias";
+    private static final String DEFAULT_RESPONSE_CODE = "default-response-code";
+    private static final String DEFAULT_WEB_MODULE = "default-web-module";
+    private static final String DISABLE_CONSOLE_REDIRECT = "disable-console-redirect";
 
     //values
-    private final String[] ALIAS_VALUES = new String[]{"localhost", "test", "example"};
-    private final String DEFAULT_RESPONSE_CODE_VALUE = "500";
+    private static final String[] ALIAS_VALUES = new String[]{"localhost", "test", "example"};
+    private static final int DEFAULT_RESPONSE_CODE_VALUE = 500;
 
-    private static AddressTemplate hostTemplate = httpServerTemplate.append("/host=*");
-    private static String httpServer;
-    private static String httpServerHost;
-    private static String httpServerHostToBeRemoved;
-    private static ResourceAddress address;
+    private static final String HTTP_SERVER = "undertow-http-server-host_" + RandomStringUtils.randomAlphanumeric(5);
+
+    private static final String HOST = "host_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String HOST_TBR = "host-btr_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String HOST_TBA = "host-tba_" + RandomStringUtils.randomAlphanumeric(5);
+
+    private static final Address HTTP_SERVER_ADDRESS = UNDERTOW_ADDRESS.and("server", HTTP_SERVER);
+
+    private static final Address HOST_ADDRESS = HTTP_SERVER_ADDRESS.and("host", HOST);
+    private static final Address HOST_TBR_ADDRESS = HTTP_SERVER_ADDRESS.and("host", HOST_TBR);
+    private static final Address HOST_TBA_ADDRESS = HTTP_SERVER_ADDRESS.and("host", HOST_TBA);
+
 
     @BeforeClass
     public static void setUp() throws InterruptedException, TimeoutException, IOException {
-        httpServer = operations.createHTTPServer();
-        httpServerHost = operations.createHTTPServerHost(httpServer);
-        httpServerHostToBeRemoved = operations.createHTTPServerHost(httpServer);
-        address = hostTemplate.resolve(context, httpServer, httpServerHost);
+        operations.add(HTTP_SERVER_ADDRESS);
+        operations.add(HOST_ADDRESS);
+        operations.add(HOST_TBR_ADDRESS);
+        administration.reloadIfRequired();
     }
 
     @Before
     public void before() {
         page.navigate();
-        page.viewHTTPServer(httpServer).switchToHosts().selectItemInTableByText(httpServerHost);
+        page.viewHTTPServer(HTTP_SERVER)
+                .switchToHosts()
+                .selectItemInTableByText(HOST);
     }
 
     @AfterClass
-    public static void tearDown() throws InterruptedException, IOException, TimeoutException {
-        operations.removeHTTPServerHostIfExists(httpServer, httpServerHost);
-        operations.removeHTTPServer(httpServer);
+    public static void tearDown() throws InterruptedException, IOException, TimeoutException, OperationException {
+        operations.removeIfExists(HOST_ADDRESS);
+        operations.removeIfExists(HOST_TBA_ADDRESS);
+        operations.removeIfExists(HOST_TBR_ADDRESS);
+        operations.removeIfExists(HTTP_SERVER_ADDRESS);
     }
 
     @Test
-    public void editAliases() throws IOException, InterruptedException, TimeoutException {
-        editTextAreaAndVerify(address, ALIAS, ALIAS_ATTR, ALIAS_VALUES);
+    public void editAliases() throws Exception {
+        editTextAreaAndVerify(HOST_ADDRESS, ALIAS, ALIAS_VALUES);
     }
 
     @Test
-    public void editDefaultResponseCode() throws IOException, InterruptedException, TimeoutException {
-        editTextAndVerify(address, DEFAULT_RESPONSE_CODE, DEFAULT_RESPONSE_CODE_ATTR, DEFAULT_RESPONSE_CODE_VALUE);
+    public void editDefaultResponseCode() throws Exception {
+        editTextAndVerify(HOST_ADDRESS, DEFAULT_RESPONSE_CODE, DEFAULT_RESPONSE_CODE_VALUE);
     }
 
     @Test
-    public void editDefaultWebModule() throws IOException, InterruptedException, TimeoutException {
-        editTextAndVerify(address, DEFAULT_WEB_MODULE, DEFAULT_WEB_MODULE_ATTR);
+    public void editDefaultWebModule() throws Exception {
+        editTextAndVerify(HOST_ADDRESS, DEFAULT_WEB_MODULE);
     }
 
     @Test
-    public void setDisableConsoleRedirectToTrue() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, DISABLE_CONSOLE_REDIRECT, DISABLE_CONSOLE_REDIRECT_ATTR, true);
+    public void setDisableConsoleRedirectToTrue() throws Exception {
+        editCheckboxAndVerify(HOST_ADDRESS, DISABLE_CONSOLE_REDIRECT, true);
     }
 
     @Test
-    public void setDisableConsoleRedirectToFalse() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, DISABLE_CONSOLE_REDIRECT, DISABLE_CONSOLE_REDIRECT_ATTR, false);
+    public void setDisableConsoleRedirectToFalse() throws Exception {
+        editCheckboxAndVerify(HOST_ADDRESS, DISABLE_CONSOLE_REDIRECT, false);
     }
 
     @Test
-    public void addHTTPServerHostInGUI() {
-        String name = "httpServer_" + RandomStringUtils.randomAlphanumeric(6);
+    public void addHTTPServerHostInGUI() throws Exception {
         String webModule = "webModule_" + RandomStringUtils.randomAlphanumeric(6);
         ConfigFragment config = page.getConfigFragment();
         WizardWindow wizard = config.getResourceManager().addResource();
 
         Editor editor = wizard.getEditor();
-        editor.text("name", name);
+        editor.text("name", HOST_TBA);
         editor.text(ALIAS, String.join("\n", ALIAS_VALUES));
-        editor.text(DEFAULT_RESPONSE_CODE, DEFAULT_RESPONSE_CODE_VALUE);
+        editor.text(DEFAULT_RESPONSE_CODE, String.valueOf(DEFAULT_RESPONSE_CODE_VALUE));
         editor.text(DEFAULT_WEB_MODULE, webModule);
         editor.checkbox(DISABLE_CONSOLE_REDIRECT, true);
         boolean result = wizard.finish();
 
         Assert.assertTrue("Window should be closed", result);
-        Assert.assertTrue("HTTP server host should be present in table", config.resourceIsPresent(name));
-        ResourceAddress address = hostTemplate.resolve(context, httpServer, name);
-        verifier.verifyResource(address, true);
-        verifier.verifyAttribute(address, ALIAS_ATTR, ALIAS_VALUES);
-        verifier.verifyAttribute(address, DEFAULT_RESPONSE_CODE_ATTR, DEFAULT_RESPONSE_CODE_VALUE);
-        verifier.verifyAttribute(address, DEFAULT_WEB_MODULE_ATTR, webModule);
-        verifier.verifyAttribute(address, DISABLE_CONSOLE_REDIRECT, true);
+        Assert.assertTrue("HTTP server host should be present in table", config.resourceIsPresent(HOST_TBA));
+        ResourceVerifier verifier = new ResourceVerifier(HOST_TBA_ADDRESS, client);
+        verifier.verifyExists();
+        verifier.verifyAttribute(DEFAULT_RESPONSE_CODE, DEFAULT_RESPONSE_CODE_VALUE);
+        verifier.verifyAttribute(DEFAULT_WEB_MODULE, webModule);
+        verifier.verifyAttribute(DISABLE_CONSOLE_REDIRECT, true);
     }
 
     @Test
-    public void removeHTTPServerHostInGUI() {
+    public void removeHTTPServerHostInGUI() throws Exception {
         ConfigFragment config = page.getConfigFragment();
         config.getResourceManager()
-                .removeResource(httpServerHostToBeRemoved)
+                .removeResource(HOST_TBR)
                 .confirm();
 
-        ResourceAddress address = hostTemplate.resolve(context, httpServer, httpServerHostToBeRemoved);
-        Assert.assertFalse("Host server host should not be present in table", config.resourceIsPresent(httpServerHostToBeRemoved));
-        verifier.verifyResource(address, false); //HTTP server host should not be present on the server
+        Assert.assertFalse("Host server host should not be present in table", config.resourceIsPresent(HOST_TBR));
+        new ResourceVerifier(HOST_TBR_ADDRESS, client).verifyDoesNotExist(); //HTTP server host should not be present on the server
     }
 }

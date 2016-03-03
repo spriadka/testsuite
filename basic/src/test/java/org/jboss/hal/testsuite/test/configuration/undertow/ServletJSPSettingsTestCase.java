@@ -1,9 +1,9 @@
 package org.jboss.hal.testsuite.test.configuration.undertow;
 
+import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Shared;
-import org.jboss.hal.testsuite.dmr.ResourceAddress;
 import org.jboss.hal.testsuite.page.config.UndertowServletPage;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -11,14 +11,11 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
+import org.wildfly.extras.creaper.core.online.operations.Address;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
-/**
- * @author Jan Kasik <jkasik@redhat.com>
- *         Created on 17.9.15.
- */
 @RunWith(Arquillian.class)
 @Category(Shared.class)
 public class ServletJSPSettingsTestCase extends UndertowTestCaseAbstract {
@@ -27,253 +24,231 @@ public class ServletJSPSettingsTestCase extends UndertowTestCaseAbstract {
     private UndertowServletPage page;
 
     //identifiers
-    private final String DISABLED = "disabled";
-    private final String DUMP_SMAP = "dump-smap";
-    private final String GENERATE_STRINGS_AS_CHAR_ARRAYS = "generate-strings-as-char-arrays";
-    private final String JAVA_ENCODING = "java-encoding";
-    private final String MAPPED_FILE = "mapped-file";
-    private final String SCRATCH_DIR = "scratch-dir";
-    private final String SMAP = "_smap";
-    private final String SOURCE_VM = "source-vm";
-    private final String TAG_POOLING = "tag-pooling";
-    private final String TARGET_VM = "target-vm";
-    private final String TRIM_SPACES = "trim-spaces";
-    private final String X_POWERED_BY = "x-powered-by";
+    private static final String DISABLED = "disabled";
+    private static final String DUMP_SMAP = "dump-smap";
+    private static final String GENERATE_STRINGS_AS_CHAR_ARRAYS = "generate-strings-as-char-arrays";
+    private static final String JAVA_ENCODING = "java-encoding";
+    private static final String MAPPED_FILE = "mapped-file";
+    private static final String SCRATCH_DIR = "scratch-dir";
+    //it is important to distinguish UI and model identifier for smap because of similarity with dump-smap UI identifier
+    private static final String SMAP_ATTR = "smap";
+    private static final String SMAP = "_smap";
+    private static final String SOURCE_VM = "source-vm";
+    private static final String TAG_POOLING = "tag-pooling";
+    private static final String TARGET_VM = "target-vm";
+    private static final String TRIM_SPACES = "trim-spaces";
+    private static final String X_POWERED_BY = "x-powered-by";
 
-    private final String DEVELOPMENT = "development";
-    private final String KEEP_GENERATED = "keep-generated";
-    private final String MODIFICATION_TEST_INTERVAL = "modification-test-interval";
-    private final String RECOMPILE_ON_FAIL = "recompile-on-fail";
-    private final String ERROR_ON_USE_BEAN_INVALID_CLASS_ATTRIBUTE = "error-on-use-bean-invalid-class-attribute";
-    private final String DISPLAY_SOURCE_FRAGMENT = "display-source-fragment";
-    private final String CHECK_INTERVAL = "check-interval";
+    private static final String DEVELOPMENT = "development";
+    private static final String KEEP_GENERATED = "keep-generated";
+    private static final String MODIFICATION_TEST_INTERVAL = "modification-test-interval";
+    private static final String RECOMPILE_ON_FAIL = "recompile-on-fail";
+    private static final String ERROR_ON_USE_BEAN_INVALID_CLASS_ATTRIBUTE = "error-on-use-bean-invalid-class-attribute";
+    private static final String DISPLAY_SOURCE_FRAGMENT = "display-source-fragment";
+    private static final String CHECK_INTERVAL = "check-interval";
 
-    //attribute names
-    private final String DISABLED_ATTR = "disabled";
-    private final String DUMP_SMAP_ATTR = "dump-smap";
-    private final String GENERATE_STRINGS_AS_CHAR_ARRAYS_ATTR = "generate-strings-as-char-arrays";
-    private final String JAVA_ENCODING_ATTR = "java-encoding";
-    private final String MAPPED_FILE_ATTR = "mapped-file";
-    private final String SCRATCH_DIR_ATTR = "scratch-dir";
-    private final String SMAP_ATTR = "smap";
-    private final String SOURCE_VM_ATTR = "source-vm";
-    private final String TAG_POOLING_ATTR = "tag-pooling";
-    private final String TARGET_VM_ATTR = "target-vm";
-    private final String TRIM_SPACES_ATTR = "trim-spaces";
-    private final String X_POWERED_BY_ATTR = "x-powered-by";
-
-    private final String DEVELOPMENT_ATTR = "development";
-    private final String KEEP_GENERATED_ATTR = "keep-generated";
-    private final String MODIFICATION_TEST_INTERVAL_ATTR = "modification-test-interval";
-    private final String RECOMPILE_ON_FAIL_ATTR = "recompile-on-fail";
-    private final String ERROR_ON_USE_BEAN_INVALID_CLASS_ATTRIBUTE_ATTR = "error-on-use-bean-invalid-class-attribute";
-    private final String DISPLAY_SOURCE_FRAGMENT_ATTR = "display-source-fragment";
-    private final String CHECK_INTERVAL_ATTR = "check-interval";
-
-    //values
-    private final String NUMERIC_VALID = "24";
-    private final String NUMERIC_INVALID = "24d";
-
-    private static String servletContainer;
-    private static ResourceAddress address;
+    private static final String SERVLET_CONTAINER = "servlet-container_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final Address SERVLET_CONTAINER_ADDRESS = UNDERTOW_ADDRESS.and("servlet-container", SERVLET_CONTAINER);
+    private static final Address SERVLET_JSP_ADDRESS = SERVLET_CONTAINER_ADDRESS.and("setting", "jsp");
 
     @BeforeClass
     public static void setUp() throws InterruptedException, IOException, TimeoutException {
-        servletContainer = operations.createServletContainer();
-        address = servletContainerTemplate.append("/setting=jsp").resolve(context, servletContainer);
+        operations.add(SERVLET_CONTAINER_ADDRESS);
     }
 
     @Before
     public void before() {
         page.navigate();
-        page.viewServletContainer(servletContainer).switchToJSP();
+        page.viewServletContainer(SERVLET_CONTAINER).switchToJSP();
     }
 
     @AfterClass
     public static void tearDown() throws InterruptedException, IOException, TimeoutException {
-        operations.removeServletContainer(servletContainer);
+        operations.remove(SERVLET_CONTAINER_ADDRESS);
+        administration.restartIfRequired();
+        administration.reloadIfRequired();
     }
 
     @Test
-    public void setDisabledToTrue() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, DISABLED, DISABLED_ATTR, true);
+    public void setDisabledToTrue() throws Exception {
+        editCheckboxAndVerify(SERVLET_JSP_ADDRESS, DISABLED, true);
     }
 
     @Test
-    public void setDisabledToFalse() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, DISABLED, DISABLED_ATTR, false);
+    public void setDisabledToFalse() throws Exception {
+        editCheckboxAndVerify(SERVLET_JSP_ADDRESS, DISABLED, false);
     }
 
     @Test
-    public void setDumpSmapToTrue() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, DUMP_SMAP, DUMP_SMAP_ATTR, true);
+    public void setDumpSmapToTrue() throws Exception {
+        editCheckboxAndVerify(SERVLET_JSP_ADDRESS, DUMP_SMAP, true);
     }
 
     @Test
-    public void setDumpSmapToFalse() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, DUMP_SMAP, DUMP_SMAP_ATTR, false);
+    public void setDumpSmapToFalse() throws Exception {
+        editCheckboxAndVerify(SERVLET_JSP_ADDRESS, DUMP_SMAP, false);
     }
 
     @Test
-    public void setGenerateStringsAsCharArraysToTrue() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, GENERATE_STRINGS_AS_CHAR_ARRAYS, GENERATE_STRINGS_AS_CHAR_ARRAYS_ATTR, true);
+    public void setGenerateStringsAsCharArraysToTrue() throws Exception {
+        editCheckboxAndVerify(SERVLET_JSP_ADDRESS, GENERATE_STRINGS_AS_CHAR_ARRAYS, true);
     }
 
     @Test
-    public void setGenerateStringsAsCharArraysToFalse() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, GENERATE_STRINGS_AS_CHAR_ARRAYS, GENERATE_STRINGS_AS_CHAR_ARRAYS_ATTR, false);
+    public void setGenerateStringsAsCharArraysToFalse() throws Exception {
+        editCheckboxAndVerify(SERVLET_JSP_ADDRESS, GENERATE_STRINGS_AS_CHAR_ARRAYS, false);
     }
 
     @Test
-    public void setJavaEncoding() throws IOException, InterruptedException, TimeoutException {
-        editTextAndVerify(address, JAVA_ENCODING, JAVA_ENCODING_ATTR);
+    public void setJavaEncoding() throws Exception {
+        editTextAndVerify(SERVLET_JSP_ADDRESS, JAVA_ENCODING);
     }
 
     @Test
-    public void setMappedFileToTrue() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, MAPPED_FILE, MAPPED_FILE_ATTR, true);
+    public void setMappedFileToTrue() throws Exception {
+        editCheckboxAndVerify(SERVLET_JSP_ADDRESS, MAPPED_FILE, true);
     }
 
     @Test
-    public void setMappedFileToFalse() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, MAPPED_FILE, MAPPED_FILE_ATTR, false);
+    public void setMappedFileToFalse() throws Exception {
+        editCheckboxAndVerify(SERVLET_JSP_ADDRESS, MAPPED_FILE, false);
     }
 
     @Test
-    public void editScratchDir() throws IOException, InterruptedException, TimeoutException {
-        editTextAndVerify(address, SCRATCH_DIR, SCRATCH_DIR_ATTR);
+    public void editScratchDir() throws Exception {
+        editTextAndVerify(SERVLET_JSP_ADDRESS, SCRATCH_DIR);
     }
 
     @Test
-    public void setSmapToTrue() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, SMAP, SMAP_ATTR, true);
+    public void setSmapToTrue() throws Exception {
+        editCheckboxAndVerify(SERVLET_JSP_ADDRESS, SMAP, SMAP_ATTR, true);
     }
 
     @Test
-    public void setSmapToFalse() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, SMAP, SMAP_ATTR, false);
+    public void setSmapToFalse() throws Exception {
+        editCheckboxAndVerify(SERVLET_JSP_ADDRESS, SMAP, SMAP_ATTR, false);
     }
 
     @Test
-    public void editSourceVM() throws IOException, InterruptedException, TimeoutException {
-        editTextAndVerify(address, SOURCE_VM, SOURCE_VM_ATTR);
+    public void editSourceVM() throws Exception {
+        editTextAndVerify(SERVLET_JSP_ADDRESS, SOURCE_VM);
     }
 
     @Test
-    public void setTagPoolingToTrue() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, TAG_POOLING, TAG_POOLING_ATTR, true);
+    public void setTagPoolingToTrue() throws Exception {
+        editCheckboxAndVerify(SERVLET_JSP_ADDRESS, TAG_POOLING, true);
     }
 
     @Test
-    public void setTagPoolingToFalse() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, TAG_POOLING, TAG_POOLING_ATTR, false);
+    public void setTagPoolingToFalse() throws Exception {
+        editCheckboxAndVerify(SERVLET_JSP_ADDRESS, TAG_POOLING, false);
     }
 
     @Test
-    public void editTargetVM() throws IOException, InterruptedException, TimeoutException {
-        editTextAndVerify(address, TARGET_VM, TARGET_VM_ATTR);
+    public void editTargetVM() throws Exception {
+        editTextAndVerify(SERVLET_JSP_ADDRESS, TARGET_VM);
     }
 
     @Test
-    public void setTrimSpacesToTrue() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, TRIM_SPACES, TRIM_SPACES_ATTR, true);
+    public void setTrimSpacesToTrue() throws Exception {
+        editCheckboxAndVerify(SERVLET_JSP_ADDRESS, TRIM_SPACES, true);
     }
 
     @Test
-    public void setTrimSpacesToFalse() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, TRIM_SPACES, TRIM_SPACES_ATTR, false);
+    public void setTrimSpacesToFalse() throws Exception {
+        editCheckboxAndVerify(SERVLET_JSP_ADDRESS, TRIM_SPACES, false);
     }
 
     @Test
-    public void setXPoweredByToTrue() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, X_POWERED_BY, X_POWERED_BY_ATTR, true);
+    public void setXPoweredByToTrue() throws Exception {
+        editCheckboxAndVerify(SERVLET_JSP_ADDRESS, X_POWERED_BY, true);
     }
 
     @Test
-    public void setXPoweredByToFalse() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, X_POWERED_BY, X_POWERED_BY_ATTR, false);
+    public void setXPoweredByToFalse() throws Exception {
+        editCheckboxAndVerify(SERVLET_JSP_ADDRESS, X_POWERED_BY, false);
     }
 
     @Test
-    public void setDevelopmentToTrue() throws IOException, InterruptedException, TimeoutException {
+    public void setDevelopmentToTrue() throws Exception {
         page.switchToJSPDevelopment();
-        editCheckboxAndVerify(address, DEVELOPMENT, DEVELOPMENT_ATTR, true);
+        editCheckboxAndVerify(SERVLET_JSP_ADDRESS, DEVELOPMENT, true);
     }
 
     @Test
-    public void setDevelopmentToFalse() throws IOException, InterruptedException, TimeoutException {
+    public void setDevelopmentToFalse() throws Exception {
         page.switchToJSPDevelopment();
-        editCheckboxAndVerify(address, DEVELOPMENT, DEVELOPMENT_ATTR, false);
+        editCheckboxAndVerify(SERVLET_JSP_ADDRESS, DEVELOPMENT, false);
     }
 
     @Test
-    public void setKeepGeneratedToTrue() throws IOException, InterruptedException, TimeoutException {
+    public void setKeepGeneratedToTrue() throws Exception {
         page.switchToJSPDevelopment();
-        editCheckboxAndVerify(address, KEEP_GENERATED, KEEP_GENERATED_ATTR, true);
+        editCheckboxAndVerify(SERVLET_JSP_ADDRESS, KEEP_GENERATED, true);
     }
 
     @Test
-    public void setKeepGeneratedToFalse() throws IOException, InterruptedException, TimeoutException {
+    public void setKeepGeneratedToFalse() throws Exception {
         page.switchToJSPDevelopment();
-        editCheckboxAndVerify(address, KEEP_GENERATED, KEEP_GENERATED_ATTR, false);
+        editCheckboxAndVerify(SERVLET_JSP_ADDRESS, KEEP_GENERATED, false);
     }
 
     @Test
-    public void editModificationTestInterval() throws IOException, InterruptedException, TimeoutException {
+    public void editModificationTestInterval() throws Exception {
         page.switchToJSPDevelopment();
-        editTextAndVerify(address, MODIFICATION_TEST_INTERVAL, MODIFICATION_TEST_INTERVAL_ATTR, NUMERIC_VALID);
+        editTextAndVerify(SERVLET_JSP_ADDRESS, MODIFICATION_TEST_INTERVAL, NUMERIC_VALID);
     }
 
     @Test
-    public void editModificationTestIntervalInvalid() throws IOException, InterruptedException, TimeoutException {
+    public void editModificationTestIntervalInvalid() throws Exception {
         page.switchToJSPDevelopment();
         verifyIfErrorAppears(MODIFICATION_TEST_INTERVAL, NUMERIC_INVALID);
     }
 
     @Test
-    public void setRecompileOnFailToTrue() throws IOException, InterruptedException, TimeoutException {
+    public void setRecompileOnFailToTrue() throws Exception {
         page.switchToJSPDevelopment();
-        editCheckboxAndVerify(address, RECOMPILE_ON_FAIL, RECOMPILE_ON_FAIL_ATTR, true);
+        editCheckboxAndVerify(SERVLET_JSP_ADDRESS, RECOMPILE_ON_FAIL, true);
     }
 
     @Test
-    public void setRecompileOnFailToFalse() throws IOException, InterruptedException, TimeoutException {
+    public void setRecompileOnFailToFalse() throws Exception {
         page.switchToJSPDevelopment();
-        editCheckboxAndVerify(address, RECOMPILE_ON_FAIL, RECOMPILE_ON_FAIL_ATTR, false);
+        editCheckboxAndVerify(SERVLET_JSP_ADDRESS, RECOMPILE_ON_FAIL, false);
     }
 
     @Test
-    public void setErrorOnUseBeanInvalidToTrue() throws IOException, InterruptedException, TimeoutException {
+    public void setErrorOnUseBeanInvalidToTrue() throws Exception {
         page.switchToJSPDevelopment();
-        editCheckboxAndVerify(address, ERROR_ON_USE_BEAN_INVALID_CLASS_ATTRIBUTE, ERROR_ON_USE_BEAN_INVALID_CLASS_ATTRIBUTE_ATTR, true);
+        editCheckboxAndVerify(SERVLET_JSP_ADDRESS, ERROR_ON_USE_BEAN_INVALID_CLASS_ATTRIBUTE, true);
     }
 
     @Test
-    public void setErrorOnUseBeanInvalidToFalse() throws IOException, InterruptedException, TimeoutException {
+    public void setErrorOnUseBeanInvalidToFalse() throws Exception {
         page.switchToJSPDevelopment();
-        editCheckboxAndVerify(address, ERROR_ON_USE_BEAN_INVALID_CLASS_ATTRIBUTE, ERROR_ON_USE_BEAN_INVALID_CLASS_ATTRIBUTE_ATTR, false);
+        editCheckboxAndVerify(SERVLET_JSP_ADDRESS, ERROR_ON_USE_BEAN_INVALID_CLASS_ATTRIBUTE, false);
     }
 
     @Test
-    public void setDisplaySourceFragmentToTrue() throws IOException, InterruptedException, TimeoutException {
+    public void setDisplaySourceFragmentToTrue() throws Exception {
         page.switchToJSPDevelopment();
-        editCheckboxAndVerify(address, DISPLAY_SOURCE_FRAGMENT, DISPLAY_SOURCE_FRAGMENT_ATTR, true);
+        editCheckboxAndVerify(SERVLET_JSP_ADDRESS, DISPLAY_SOURCE_FRAGMENT, true);
     }
 
     @Test
-    public void setDisplaySourceFragmentToFalse() throws IOException, InterruptedException, TimeoutException {
+    public void setDisplaySourceFragmentToFalse() throws Exception {
         page.switchToJSPDevelopment();
-        editCheckboxAndVerify(address, DISPLAY_SOURCE_FRAGMENT, DISPLAY_SOURCE_FRAGMENT_ATTR, false);
+        editCheckboxAndVerify(SERVLET_JSP_ADDRESS, DISPLAY_SOURCE_FRAGMENT, false);
     }
 
     @Test
-    public void editCheckInterval() throws IOException, InterruptedException, TimeoutException {
+    public void editCheckInterval() throws Exception {
         page.switchToJSPDevelopment();
-        editTextAndVerify(address, CHECK_INTERVAL, CHECK_INTERVAL_ATTR, NUMERIC_VALID);
+        editTextAndVerify(SERVLET_JSP_ADDRESS, CHECK_INTERVAL, NUMERIC_VALID);
     }
 
     @Test
-    public void editCheckIntervalInvalid() throws IOException, InterruptedException, TimeoutException {
+    public void editCheckIntervalInvalid() throws Exception {
         page.switchToJSPDevelopment();
         verifyIfErrorAppears(CHECK_INTERVAL, NUMERIC_INVALID);
     }
