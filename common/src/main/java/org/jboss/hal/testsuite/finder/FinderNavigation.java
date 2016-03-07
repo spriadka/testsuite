@@ -28,6 +28,7 @@ import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.Find;
 import org.jboss.hal.testsuite.util.PropUtils;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -182,6 +183,9 @@ public class FinderNavigation {
             if (!WILDCARD.equals(tuple.row)) {
                 By rowSelector = exactRowText ? rowSelectorEquals(tuple.row) : rowSelector(tuple.row);
                 columnRow[1] = new Find().elementWithGuiTimeout(columnRow[0], rowSelector);
+                if (!columnRow[1].isDisplayed()) {
+                    ((JavascriptExecutor) browser).executeScript("arguments[0].scrollIntoView(true);", columnRow[1]);
+                }
                 columnRow[1].click();
                 hook.performAfterRowClick();
                 Graphene.waitModel().until().element(columnRow[0], rowSelector).attribute("class")
