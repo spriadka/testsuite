@@ -39,7 +39,7 @@ public class DeploymentsOperations {
     private void verifyDeploymentEnabled(String deploymentName, boolean isEnabled) throws Exception {
         String status = isEnabled ? "enabled" : "disabled";
         Address address = Address.of("deployment", deploymentName);
-        new ResourceVerifier(address, client, 10000).verifyAttribute("enabled", isEnabled,
+        new ResourceVerifier(address, client, 20000).verifyAttribute("enabled", isEnabled,
                 "Deployment should be " + status);
     }
 
@@ -60,7 +60,7 @@ public class DeploymentsOperations {
             throws Exception {
         String status = isEnabled ? "enabled" : "disabled";
         Address address = Address.of("server-group", serverGroup).and("deployment", deploymentName);
-        new ResourceVerifier(address, client, 10000).verifyAttribute("enabled", isEnabled,
+        new ResourceVerifier(address, client, 20000).verifyAttribute("enabled", isEnabled,
                 "Deployment should be " + status);
     }
 

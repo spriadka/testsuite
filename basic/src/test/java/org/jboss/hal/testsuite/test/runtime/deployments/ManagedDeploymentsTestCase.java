@@ -8,8 +8,10 @@ import org.jboss.arquillian.junit.InSequence;
 import org.jboss.hal.testsuite.category.Standalone;
 import org.jboss.hal.testsuite.cli.Library;
 import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
+import org.jboss.hal.testsuite.finder.Column;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
+import org.jboss.hal.testsuite.finder.Row;
 import org.jboss.hal.testsuite.fragment.runtime.DeploymentWizard;
 import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
 import org.jboss.hal.testsuite.page.runtime.DeploymentPage;
@@ -42,8 +44,9 @@ public class ManagedDeploymentsTestCase {
     private static final String NAME = "n_" + RandomStringUtils.randomAlphanumeric(5) + ".war";
     private static final String RUNTIME_NAME = "rn_" + RandomStringUtils.randomAlphanumeric(5) + ".war";
 
-    private static OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
-    private static DeploymentsOperations ops = new DeploymentsOperations(client);
+    private static final OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
+    private static final Administration administration = new Administration(client);
+    private static final DeploymentsOperations ops = new DeploymentsOperations(client);
     private FinderNavigation navigation;
 
     @Drone
@@ -63,9 +66,11 @@ public class ManagedDeploymentsTestCase {
     }
 
     @AfterClass
-    public static void cleanUp() throws IOException {
+    public static void cleanUp() throws IOException, TimeoutException, InterruptedException {
         try {
             ops.undeploy(NAME);
+            administration.reloadIfRequired();
+            administration.restartIfRequired();
         } finally {
             client.close();
         }
@@ -74,7 +79,9 @@ public class ManagedDeploymentsTestCase {
     @Test
     @InSequence(0)
     public void basicDeployment() throws Exception {
-        navigation.step(FinderNames.DEPLOYMENT).selectColumn().invoke("Add");
+        Column column = navigation.step(FinderNames.DEPLOYMENT).selectColumn();
+        Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
+        column.invoke("Add");
         File deployment = new File(FILE_PATH + FILE_NAME);
 
         DeploymentWizard wizard = Console.withBrowser(browser).openedWizard(DeploymentWizard.class);
@@ -95,7 +102,9 @@ public class ManagedDeploymentsTestCase {
     @InSequence(1)
     public void disableDeployment() throws Exception {
 
-        navigation.step(FinderNames.DEPLOYMENT, NAME).selectRow().invoke("Disable");
+        Row row = navigation.step(FinderNames.DEPLOYMENT, NAME).selectRow();
+        Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
+        row.invoke("Disable");
 
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
 
@@ -106,7 +115,9 @@ public class ManagedDeploymentsTestCase {
     @InSequence(2)
     public void enableDeployment() throws Exception {
 
-        navigation.step(FinderNames.DEPLOYMENT, NAME).selectRow().invoke("Enable");
+        Row row = navigation.step(FinderNames.DEPLOYMENT, NAME).selectRow();
+        Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
+        row.invoke("Enable");
 
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
 
@@ -119,7 +130,9 @@ public class ManagedDeploymentsTestCase {
     public void removeDeployment() throws Exception {
         Console.withBrowser(browser).waitUntilLoaded();
         Library.letsSleep(1000);
-        navigation.step(FinderNames.DEPLOYMENT, NAME).selectRow().invoke("Remove");
+        Row row = navigation.step(FinderNames.DEPLOYMENT, NAME).selectRow();
+        Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
+        row.invoke("Remove");
 
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
 
