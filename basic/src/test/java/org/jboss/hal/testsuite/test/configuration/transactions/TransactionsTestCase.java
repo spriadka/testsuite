@@ -2,32 +2,20 @@ package org.jboss.hal.testsuite.test.configuration.transactions;
 
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Shared;
+import org.jboss.hal.testsuite.creaper.command.RemoveSocketBinding;
 import org.jboss.hal.testsuite.page.config.TransactionsPage;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
-import org.wildfly.extras.creaper.core.CommandFailedException;
-
-import java.io.IOException;
 /**
  * @author mkrajcov <mkrajcov@redhat.com>
  */
 @RunWith(Arquillian.class)
 @Category(Shared.class)
 public class TransactionsTestCase extends TransactionsTestCaseAbstract {
-
-    private final String DEFAULT_TIMEOUT = "default-timeout";
-    private final String ENABLE_TSM_STATUS = "enable-tsm-status";
-    private final String JTS = "jts";
-    private final String NODE_IDENTIFIER = "node-identifier";
-    private final String STATISTICS_ENABLED = "statistics-enabled";
-    private final String SOCKET_BINDING = "socket-binding";
-    private final String STATUS_SOCKET_BINDING = "status-socket-binding";
-    private final String RECOVERY_LISTENER = "recovery-listener";
-    private final String OBJECT_STORE_PATH = "object-store-path";
-    private final String OBJECT_STORE_RELATIVE_TO = "object-store-relative-to";
 
     private final String DEFAULT_TIMEOUT_ATTR = "default-timeout";
     private final String ENABLE_TSM_STATUS_ATTR = "enable-tsm-status";
@@ -49,96 +37,109 @@ public class TransactionsTestCase extends TransactionsTestCaseAbstract {
     }
 
     @Test
-    public void setStatisticsToTrue() throws IOException, InterruptedException {
-        editCheckboxAndVerify(address, STATISTICS_ENABLED, STATISTICS_ENABLED_ATTR, true);
+    public void setStatisticsToTrue() throws Exception {
+        editCheckboxAndVerify(TRANSACTIONS_ADDRESS, STATISTICS_ENABLED_ATTR, true);
     }
 
     @Test
-    public void setStatisticsToFalse() throws IOException, InterruptedException {
-        editCheckboxAndVerify(address, STATISTICS_ENABLED, STATISTICS_ENABLED_ATTR, true);
+    public void setStatisticsToFalse() throws Exception {
+        editCheckboxAndVerify(TRANSACTIONS_ADDRESS, STATISTICS_ENABLED_ATTR, true);
     }
 
     @Test
-    public void setJTSToTrue() throws IOException, InterruptedException {
-        editCheckboxAndVerify(address, JTS, JTS_ATTR, true);
+    public void setJTSToTrue() throws Exception {
+        editCheckboxAndVerify(TRANSACTIONS_ADDRESS, JTS_ATTR, true);
     }
 
     @Test
-    public void setJTSToFalse() throws IOException, InterruptedException {
-        editCheckboxAndVerify(address, JTS, JTS_ATTR, false);
+    public void setJTSToFalse() throws Exception {
+        editCheckboxAndVerify(TRANSACTIONS_ADDRESS, JTS_ATTR, false);
     }
 
     @Test
-    public void setTSMStatusToTrue() throws IOException, InterruptedException {
-        editCheckboxAndVerify(address, ENABLE_TSM_STATUS, ENABLE_TSM_STATUS_ATTR, true);
+    public void setTSMStatusToTrue() throws Exception {
+        editCheckboxAndVerify(TRANSACTIONS_ADDRESS, ENABLE_TSM_STATUS_ATTR, true);
     }
 
     @Test
-    public void setTSMStatusToFalse() throws IOException, InterruptedException {
-        editCheckboxAndVerify(address, ENABLE_TSM_STATUS, ENABLE_TSM_STATUS_ATTR, false);
+    public void setTSMStatusToFalse() throws Exception {
+        editCheckboxAndVerify(TRANSACTIONS_ADDRESS, ENABLE_TSM_STATUS_ATTR, false);
     }
 
     @Test
-    public void editNodeIdentifier() throws IOException, InterruptedException {
-        editTextAndVerify(address, NODE_IDENTIFIER, NODE_IDENTIFIER_ATTR, "TransactionsNodeIdentifier");
+    public void editNodeIdentifier() throws Exception {
+        editTextAndVerify(TRANSACTIONS_ADDRESS, NODE_IDENTIFIER_ATTR, "NodeIdentifier");
     }
 
     @Test
-    public void editDefaultTimeout() throws IOException, InterruptedException {
-        editTextAndVerify(address, DEFAULT_TIMEOUT, DEFAULT_TIMEOUT_ATTR, "500");
+    public void editDefaultTimeout() throws Exception {
+        editTextAndVerify(TRANSACTIONS_ADDRESS, DEFAULT_TIMEOUT_ATTR, 500);
     }
 
     @Test
     public void editDefaultTimeoutNegative() {
-        verifyIfErrorAppears(DEFAULT_TIMEOUT, "-500");
+        verifyIfErrorAppears(DEFAULT_TIMEOUT_ATTR, "-500");
     }
     @Test
     public void editDefaultTimeoutInvalid() {
-        verifyIfErrorAppears(DEFAULT_TIMEOUT, "asdf");
+        verifyIfErrorAppears(DEFAULT_TIMEOUT_ATTR, "foobar");
     }
 
 
 
     @Test
-    public void editSocketBinding() throws IOException, InterruptedException, CommandFailedException {
-        String socketBinding = operations.createSocketBinding();
+    public void editSocketBinding() throws Exception {
+        String socketBinding = transactionsOps.createSocketBinding();
+        ModelNode value = operations.readAttribute(TRANSACTIONS_ADDRESS, SOCKET_BINDING_ATTR).value();
+        try {
+            page.getConfig().switchTo("Recovery");
+            editTextAndVerify(TRANSACTIONS_ADDRESS, SOCKET_BINDING_ATTR, socketBinding);
+        } finally {
+            operations.writeAttribute(TRANSACTIONS_ADDRESS, SOCKET_BINDING_ATTR, value);
+            client.apply(new RemoveSocketBinding(socketBinding));
+        }
+    }
+
+    @Test
+    public void editStatusSocketBinding() throws Exception {
+        String socketBinding = transactionsOps.createSocketBinding();
+        ModelNode value = operations.readAttribute(TRANSACTIONS_ADDRESS, STATUS_SOCKET_BINDING_ATTR).value();
+        try {
+            page.getConfig().switchTo("Recovery");
+            editTextAndVerify(TRANSACTIONS_ADDRESS, STATUS_SOCKET_BINDING_ATTR, socketBinding);
+        } finally {
+            operations.writeAttribute(TRANSACTIONS_ADDRESS, STATUS_SOCKET_BINDING_ATTR, value);
+            client.apply(new RemoveSocketBinding(socketBinding));
+        }
+    }
+
+    @Test
+    public void setRecoveryListenerToTrue() throws Exception {
         page.getConfig().switchTo("Recovery");
-        editTextAndVerify(address, SOCKET_BINDING, SOCKET_BINDING_ATTR, socketBinding);
+        editCheckboxAndVerify(TRANSACTIONS_ADDRESS, RECOVERY_LISTENER_ATTR, true);
     }
 
     @Test
-    public void editStatusSocketBinding() throws IOException, InterruptedException, CommandFailedException {
-        String socketBinding = operations.createSocketBinding();
+    public void setRecoveryListenerToFalse() throws Exception {
         page.getConfig().switchTo("Recovery");
-        editTextAndVerify(address, STATUS_SOCKET_BINDING, STATUS_SOCKET_BINDING_ATTR, socketBinding);
+        editCheckboxAndVerify(TRANSACTIONS_ADDRESS, RECOVERY_LISTENER_ATTR, false);
     }
 
     @Test
-    public void setRecoveryListenerToTrue() throws IOException, InterruptedException {
-        page.getConfig().switchTo("Recovery");
-        editCheckboxAndVerify(address, RECOVERY_LISTENER, RECOVERY_LISTENER_ATTR, true);
-    }
-
-    @Test
-    public void setRecoveryListenerToFalse() throws IOException, InterruptedException {
-        page.getConfig().switchTo("Recovery");
-        editCheckboxAndVerify(address, RECOVERY_LISTENER, RECOVERY_LISTENER_ATTR, false);
-    }
-
-    @Test
-    public void editObjectStorePath() throws IOException, InterruptedException {
+    public void editObjectStorePath() throws Exception {
         page.getConfig().switchTo("Path");
-        editTextAndVerify(address, OBJECT_STORE_PATH, OBJECT_STORE_PATH_ATTR);
+        ModelNode defValue = operations.readAttribute(TRANSACTIONS_ADDRESS, OBJECT_STORE_PATH_ATTR).value();
+        try {
+            editTextAndVerify(TRANSACTIONS_ADDRESS, OBJECT_STORE_PATH_ATTR, "test");
+        } finally {
+            operations.writeAttribute(TRANSACTIONS_ADDRESS, OBJECT_STORE_PATH_ATTR, defValue);
+        }
     }
 
     @Test
-    public void editObjectStoreRelativeTo() throws IOException, InterruptedException {
+    public void editObjectStoreRelativeTo() throws Exception {
         page.getConfig().switchTo("Path");
-        editTextAndVerify(address, OBJECT_STORE_RELATIVE_TO, OBJECT_STORE_RELATIVE_TO_ATTR);
+        editTextAndVerify(TRANSACTIONS_ADDRESS, OBJECT_STORE_RELATIVE_TO_ATTR, "jboss.server.base.dir");
     }
-
-
-
-
 
 }

@@ -2,8 +2,7 @@ package org.jboss.hal.testsuite.test.configuration.transactions;
 
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Shared;
-import org.jboss.hal.testsuite.dmr.Composite;
-import org.jboss.hal.testsuite.dmr.Operation;
+import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.junit.Before;
@@ -12,18 +11,11 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.wildfly.extras.creaper.core.CommandFailedException;
+import org.wildfly.extras.creaper.core.online.operations.Batch;
 
 import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
-import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.NAME;
-import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.UNDEFINE_ATTRIBUTE_OPERATION;
-import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.VALUE;
-import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.WRITE_ATTRIBUTE_OPERATION;
-
-/**
- * @author Jan Kasik <jkasik@redhat.com>
- *         Created on 12.10.15.
- */
 @RunWith(Arquillian.class)
 @Category(Shared.class)
 public class ProcessIDTestCase extends TransactionsTestCaseAbstract {
@@ -40,63 +32,53 @@ public class ProcessIDTestCase extends TransactionsTestCaseAbstract {
 
     @BeforeClass
     public static void setUp() throws IOException, CommandFailedException {
-        socketBinding = operations.createSocketBinding();
+        socketBinding = transactionsOps.createSocketBinding();
     }
 
     @Before
-    public void before() {
+    public void before() throws IOException, TimeoutException, InterruptedException {
         prepareProcessIDConfiguration("", true);
-        TransactionsOperations.reloadIfRequiredAndWaitForRunning();
+        administration.reloadIfRequired();
         page.navigate();
         page.getConfig().switchTo("Process ID");
     }
 
     @Test
-    public void setProcessIDUUIDToTrue() throws IOException, InterruptedException {
+    public void setProcessIDUUIDToTrue() throws Exception {
         editAndVerifyUUIDAndSocketBinding(true, "");
     }
 
     @Test
-    public void setProcessIDUUIDToFalse() throws IOException, InterruptedException {
+    public void setProcessIDUUIDToFalse() throws Exception {
         editAndVerifyUUIDAndSocketBinding(false, socketBinding);
     }
 
     @Test
-    public void editProcessIDSocketBinding() throws IOException, InterruptedException {
+    public void editProcessIDSocketBinding() throws Exception {
         editAndVerifyUUIDAndSocketBinding(false, socketBinding);
     }
 
-    //Failing due to JBEAP-1357
     @Test
-    public void editProcessIDSocketMaxPorts() throws IOException, InterruptedException {
+    public void editProcessIDSocketMaxPorts() throws Exception {
         prepareProcessIDConfiguration(socketBinding, false);
         page.navigate();
         page.getConfig().switchTo("Process ID");
-        editTextAndVerify(address, PROCESS_ID_SOCKET_MAX_PORTS, PROCESS_ID_SOCKET_MAX_PORTS_ATTR, "15");
+        editTextAndVerify(TRANSACTIONS_ADDRESS, PROCESS_ID_SOCKET_MAX_PORTS_ATTR, 15);
     }
 
     @Test
     public void editProcessIDSocketMaxPortsInvalid() throws IOException, InterruptedException {
-        verifyIfErrorAppears(PROCESS_ID_SOCKET_MAX_PORTS, "adfs");
+        verifyIfErrorAppears(PROCESS_ID_SOCKET_MAX_PORTS, "foobar");
     }
 
-    private void prepareProcessIDConfiguration(String socketBinding, boolean enableProcessUUID) {
+    private void prepareProcessIDConfiguration(String socketBinding, boolean enableProcessUUID) throws IOException {
         if (enableProcessUUID) {
-            Operation setEnable = new Operation.Builder(WRITE_ATTRIBUTE_OPERATION, address)
-                    .param(NAME, PROCESS_ID_UUID_ATTR)
-                    .param(VALUE, true)
-                    .build();
-            dispatcher.execute(setEnable);
+            operations.writeAttribute(TRANSACTIONS_ADDRESS, PROCESS_ID_UUID_ATTR, true);
         } else {
-            Operation undefineUUID = new Operation.Builder(UNDEFINE_ATTRIBUTE_OPERATION, address)
-                    .param(NAME, PROCESS_ID_UUID_ATTR)
-                    .build();
-            Operation setSocketBinding = new Operation.Builder(WRITE_ATTRIBUTE_OPERATION, address)
-                    .param(NAME, PROCESS_ID_SOCKET_BINDING_ATTR)
-                    .param(VALUE, socketBinding)
-                    .build();
-            Composite composite = new Composite(undefineUUID, setSocketBinding);
-            dispatcher.execute(composite);
+            Batch batch = new Batch()
+                    .undefineAttribute(TRANSACTIONS_ADDRESS, PROCESS_ID_UUID_ATTR)
+                    .writeAttribute(TRANSACTIONS_ADDRESS, PROCESS_ID_SOCKET_BINDING_ATTR, socketBinding);
+            operations.batch(batch);
         }
     }
 
@@ -108,11 +90,15 @@ public class ProcessIDTestCase extends TransactionsTestCaseAbstract {
         config.save();
     }
 
-    private void editAndVerifyUUIDAndSocketBinding(boolean enableUUID, String socketBinding) {
+    private void editAndVerifyUUIDAndSocketBinding(boolean enableUUID, String socketBinding) throws Exception {
         editUUIDAndSocketBinding(enableUUID, socketBinding);
-        TransactionsOperations.reloadIfRequiredAndWaitForRunning();
-        String expected = enableUUID ? "undefined" : socketBinding;
-        verifier.verifyAttribute(address, PROCESS_ID_SOCKET_BINDING_ATTR, expected);
-        verifier.verifyAttribute(address, PROCESS_ID_UUID_ATTR, enableUUID);
+        administration.reloadIfRequired();
+        ResourceVerifier resourceVerifier = new ResourceVerifier(TRANSACTIONS_ADDRESS, client)
+                .verifyAttribute(PROCESS_ID_UUID_ATTR, enableUUID);
+        if (enableUUID) {
+            resourceVerifier.verifyAttributeIsUndefined(PROCESS_ID_SOCKET_BINDING_ATTR);
+        } else {
+            resourceVerifier.verifyAttribute(PROCESS_ID_SOCKET_BINDING_ATTR, socketBinding);
+        }
     }
 }
