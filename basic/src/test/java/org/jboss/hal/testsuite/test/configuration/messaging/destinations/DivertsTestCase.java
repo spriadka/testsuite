@@ -71,7 +71,7 @@ public class DivertsTestCase extends AbstractMessagingTestCase {
     @Test
     public void addDiverts() throws Exception {
         page.addDiverts(DIVERT_TBA, DIVERT_ADDRESS_ARG, FORWARD_ADDRESS_ARG);
-        new ResourceVerifier(DIVERT_TBA_ADDRESS, client).verifyExists();
+        new ResourceVerifier(DIVERT_TBA_ADDRESS, client, 3000).verifyExists();
     }
 
     @Test
@@ -119,6 +119,6 @@ public class DivertsTestCase extends AbstractMessagingTestCase {
                 .and("forwarding-address", forwardingAddress)
                 .and("routing-name", routingName));
         administration.reloadIfRequired();
-        new ResourceVerifier(address, client, 1000).verifyExists();
+        new ResourceVerifier(address, client, 3000).verifyExists();
     }
 }

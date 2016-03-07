@@ -210,13 +210,13 @@ public class MessagingPage extends ConfigPage implements Navigatable {
 
     public void addBridge(String name, String queue, String address, String connector) {
         clickButton("Add");
-        ConfigFragment windowFragment = getWindowFragment();
-        Editor editor = windowFragment.getEditor();
+        WindowFragment window = Console.withBrowser(browser).openedWindow();
+        Editor editor = window.getEditor();
         editor.text("name", name);
         editor.text("queueName", queue);
         editor.text("forwardingAddress", address);
         editor.text("staticConnectors", connector);
-        windowFragment.clickButton("Save");
+        window.clickButton("Save");
     }
 
     public void addBroadcastGroup(String name, String binding) {
