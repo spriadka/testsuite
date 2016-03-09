@@ -199,7 +199,7 @@ public class ManagedDeploymentTestCase {
                 .step("All Content", NAME);
         navigation.selectRow().invoke("Unassign");
         ConfirmationWindow window = Console.withBrowser(browser).openedWindow(ConfirmationWindow.class);
-        window.clickButton("Assign");
+        window.clickButton("Unassign");
         Graphene.waitGui().until().element(window.getRoot()).is().not().present();
     }
 
