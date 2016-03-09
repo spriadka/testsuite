@@ -1,5 +1,6 @@
 package org.jboss.hal.testsuite.test.configuration.logging;
 
+import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
@@ -20,6 +21,7 @@ import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
 
 import java.io.File;
 import java.io.IOException;
+
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -116,5 +118,21 @@ public abstract class LoggingAbstractTestCase {
 
     protected final String getTmpDirPath(String subdir) {
         return new File(System.getProperty("java.io.tmpdir"), subdir).getAbsolutePath();
+    }
+
+    protected void addHandlers(Address address, String attributeName) throws Exception {
+        String handler_one = "log-cat-test-handler_" + RandomStringUtils.randomAlphanumeric(5);
+        String handler_two = "log-cat-test-handler_" + RandomStringUtils.randomAlphanumeric(5);
+        client.apply(Logging.handler().console().add(handler_one).build(),
+                Logging.handler().console().add(handler_two).build());
+        administration.reloadIfRequired();
+        try {
+            editTextAreaAndVerify(address, attributeName, new String[]{handler_one, handler_two});
+        } finally {
+            operations.undefineAttribute(address, attributeName);
+            client.apply(Logging.handler().console().remove(handler_one),
+                    Logging.handler().console().remove(handler_two));
+            administration.reloadIfRequired();
+        }
     }
 }

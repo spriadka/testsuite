@@ -95,7 +95,7 @@ public class AsyncHandlerTestCase extends LoggingAbstractTestCase {
 
     @Test
     public void addAsyncHandlerSubhandlers() throws Exception {
-        editTextAreaAndVerify(ASYNCHANDLER_ADDRESS, "subhandlers", new String[]{"CONSOLE", "FILE"});
+        addHandlers(ASYNCHANDLER_ADDRESS, "subhandlers");
     }
 
     @Test
