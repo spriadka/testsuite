@@ -31,6 +31,7 @@ Can be one of those:
 * `-Pbasic,domain` ... run basic tests against domain mode
 * `-Prbac,standalone` ... run RBAC related tests against standalone mode
 * `-Prbac,domain` ... run RBAC related tests against domain mode
+* `-P[basic,rbac],[domain,standalone],snapshots` ... run tests against given mode and take snapshot of server xml configuration file at the end of every test class run
 
 ### Required jboss.dist parameter
 
