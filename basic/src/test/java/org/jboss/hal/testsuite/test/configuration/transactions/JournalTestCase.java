@@ -1,34 +1,34 @@
 package org.jboss.hal.testsuite.test.configuration.transactions;
 
 import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Shared;
-import org.jboss.hal.testsuite.dmr.Composite;
-import org.jboss.hal.testsuite.dmr.Operation;
+import org.jboss.hal.testsuite.creaper.ResourceVerifier;
+import org.jboss.hal.testsuite.util.Console;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
+import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.Batch;
 
 import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
-import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.NAME;
-import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.VALUE;
-import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.WRITE_ATTRIBUTE_OPERATION;
-
-/**
- * @author Jan Kasik <jkasik@redhat.com>
- *         Created on 12.10.15.
- */
 @RunWith(Arquillian.class)
 @Category(Shared.class)
-//Some test might fail due to the HAL-883
 public class JournalTestCase extends TransactionsTestCaseAbstract {
 
-    //TODO prepare for JournalStore Config
     @BeforeClass
-    public static void setUp() {
-        prepareForJournalConfiguration();
+    public static void prepareForJournalConfiguration() throws IOException, TimeoutException, InterruptedException {
+        Address address = Address.subsystem("transactions");
+        Batch batch = new Batch();
+        batch.writeAttribute(address, USE_JOURNAL_STORE_ATTR, true);
+        batch.writeAttribute(address, USE_JDBC_STORE_ATTR, false);
+        operations.batch(batch);
+        administration.restartIfRequired();
+        administration.reloadIfRequired();
     }
 
     @Before
@@ -37,35 +37,26 @@ public class JournalTestCase extends TransactionsTestCaseAbstract {
     }
 
     @Test
-    public void setUseJournalStoreToTrue() throws IOException, InterruptedException {
-        editCheckboxAndVerify(address, USE_JOURNAL_STORE, USE_JOURNAL_STORE_ATTR, true);
+    public void toggleUseJournalStore() throws Exception {
+        ModelNode value = operations.readAttribute(TRANSACTIONS_ADDRESS, USE_JOURNAL_STORE_ATTR);
+        try {
+            page.getConfigFragment().editCheckboxAndSave(USE_JOURNAL_STORE_ATTR, true);
+            new ResourceVerifier(TRANSACTIONS_ADDRESS, client).verifyAttribute(USE_JOURNAL_STORE_ATTR, true);
+            Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
+            page.getConfigFragment().editCheckboxAndSave(USE_JOURNAL_STORE_ATTR, false);
+            new ResourceVerifier(TRANSACTIONS_ADDRESS, client).verifyAttribute(USE_JOURNAL_STORE_ATTR, false);
+        } finally {
+            operations.writeAttribute(TRANSACTIONS_ADDRESS, USE_JOURNAL_STORE_ATTR, value);
+        }
     }
 
     @Test
-    public void setUseJournalStoreToFalse() throws IOException, InterruptedException {
-        editCheckboxAndVerify(address, USE_JOURNAL_STORE, USE_JOURNAL_STORE_ATTR, false);
-    }
-
-    @Test
-    public void setJournalStoreEnableAsyncIOToTrue() throws IOException, InterruptedException {
-        editCheckboxAndVerify(address, JOURNAL_STORE_ENABLE_ASYNC_IO, JOURNAL_STORE_ENABLE_ASYNC_IO_ATTR, true);
-    }
-
-    @Test
-    public void setJournalStoreEnableAsyncIOToFalse() throws IOException, InterruptedException {
-        editCheckboxAndVerify(address, JOURNAL_STORE_ENABLE_ASYNC_IO, JOURNAL_STORE_ENABLE_ASYNC_IO_ATTR, false);
-    }
-
-    private static void prepareForJournalConfiguration() {
-        Operation undefineUseJournalStore = new Operation.Builder(WRITE_ATTRIBUTE_OPERATION, address)
-                .param(NAME, USE_JOURNAL_STORE_ATTR)
-                .param(VALUE, true)
-                .build();
-        Operation enableUseJDBCStore = new Operation.Builder(WRITE_ATTRIBUTE_OPERATION, address)
-                .param(NAME, USE_JDBC_STORE_ATTR)
-                .param(VALUE, false)
-                .build();
-        dispatcher.execute(new Composite(undefineUseJournalStore, enableUseJDBCStore));
+    public void toggleJournalStoreEnableAsyncIO() throws Exception {
+        page.getConfigFragment().editCheckboxAndSave(JOURNAL_STORE_ENABLE_ASYNC_IO_ATTR, true);
+        new ResourceVerifier(TRANSACTIONS_ADDRESS, client).verifyAttribute(JOURNAL_STORE_ENABLE_ASYNC_IO_ATTR, true);
+        Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
+        page.getConfigFragment().editCheckboxAndSave(JOURNAL_STORE_ENABLE_ASYNC_IO_ATTR, false);
+        new ResourceVerifier(TRANSACTIONS_ADDRESS, client).verifyAttribute(JOURNAL_STORE_ENABLE_ASYNC_IO_ATTR, false);
     }
 
 }
