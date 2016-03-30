@@ -4,8 +4,7 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Shared;
-import org.jboss.hal.testsuite.dmr.AddressTemplate;
-import org.jboss.hal.testsuite.dmr.ResourceAddress;
+import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
@@ -17,15 +16,14 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
+import org.wildfly.extras.creaper.commands.undertow.AddUndertowListener;
 import org.wildfly.extras.creaper.core.CommandFailedException;
+import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.OperationException;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
-/**
- * @author Jan Kasik <jkasik@redhat.com>
- *         Created on 15.9.15.
- */
 @RunWith(Arquillian.class)
 @Category(Shared.class)
 public class AJPListenerTestCase extends UndertowTestCaseAbstract {
@@ -34,166 +32,157 @@ public class AJPListenerTestCase extends UndertowTestCaseAbstract {
     private UndertowHTTPPage page;
 
     //identifiers
-    private final String ALLOW_ENCODED_SLASH = "allow-encoded-slash";
-    private final String ALLOW_EQUALS_IN_COOKIE_VALUE = "allow-equals-in-cookie-value";
-    private final String ALWAYS_SET_KEEP_ALIVE = "always-set-keep-alive";
-    private final String BUFFER_PIPELINED_DATA = "buffer-pipelined-data";
-    private final String BUFFER_POOL = "buffer-pool";
-    private final String DECODE_URL = "decode-url";
-    private final String ENABLED = "enabled";
-    private final String MAX_BUFFERED_REQUEST_SIZE = "max-buffered-request-size";
-    private final String MAX_CONNECTIONS = "max-connections";
-    private final String MAX_COOKIES = "max-cookies";
-    private final String MAX_HEADER_SIZE = "max-header-size";
-    private final String MAX_HEADERS = "max-headers";
-    private final String MAX_PARAMETERS = "max-parameters";
-    private final String MAX_POST_SIZE = "max-post-size";
-    private final String NO_REQUEST_TIMEOUT = "no-request-timeout";
-    private final String READ_TIMEOUT = "read-timeout";
-    private final String RECEIVE_BUFFER = "receive-buffer";
-    private final String RECORD_REQUEST_START_TIME = "record-request-start-time";
-    private final String REDIRECT_SOCKET = "redirect-socket";
-    private final String REQUEST_PARSE_TIMEOUT = "request-parse-timeout";
-    private final String RESOLVE_PEER_ADDRESS = "resolve-peer-address";
-    private final String SCHEME = "scheme";
-    private final String SEND_BUFFER = "send-buffer";
-    private final String SOCKET_BINDING = "socket-binding";
-    private final String TCP_BACKLOG = "tcp-backlog";
-    private final String TCP_KEEP_ALIVE = "tcp-keep-alive";
-    private final String URL_CHARSET = "url-charset";
-    private final String WORKER = "worker";
-    private final String WRITE_TIMEOUT = "write-timeout";
-
-    //attribute names
-    private final String ALLOW_ENCODED_SLASH_ATTR = "allow-encoded-slash";
-    private final String ALLOW_EQUALS_IN_COOKIE_VALUE_ATTR = "allow-equals-in-cookie-value";
-    private final String ALWAYS_SET_KEEP_ALIVE_ATTR = "always-set-keep-alive";
-    private final String BUFFER_PIPELINED_DATA_ATTR = "buffer-pipelined-data";
-    private final String BUFFER_POOL_ATTR = "buffer-pool";
-    private final String DECODE_URL_ATTR = "decode-url";
-    private final String ENABLED_ATTR = "enabled";
-    private final String MAX_BUFFERED_REQUEST_SIZE_ATTR = "max-buffered-request-size";
-    private final String MAX_CONNECTIONS_ATTR = "max-connections";
-    private final String MAX_COOKIES_ATTR = "max-cookies";
-    private final String MAX_HEADER_SIZE_ATTR = "max-header-size";
-    private final String MAX_HEADERS_ATTR = "max-headers";
-    private final String MAX_PARAMETERS_ATTR = "max-parameters";
-    private final String MAX_POST_SIZE_ATTR = "max-post-size";
-    private final String NO_REQUEST_TIMEOUT_ATTR = "no-request-timeout";
-    private final String READ_TIMEOUT_ATTR = "read-timeout";
-    private final String RECEIVE_BUFFER_ATTR = "receive-buffer";
-    private final String RECORD_REQUEST_START_TIME_ATTR = "record-request-start-time";
-    private final String REDIRECT_SOCKET_ATTR = "redirect-socket";
-    private final String REQUEST_PARSE_TIMEOUT_ATTR = "request-parse-timeout";
-    private final String RESOLVE_PEER_ADDRESS_ATTR = "resolve-peer-address";
-    private final String SCHEME_ATTR = "scheme";
-    private final String SEND_BUFFER_ATTR = "send-buffer";
-    private final String SOCKET_BINDING_ATTR = "socket-binding";
-    private final String TCP_BACKLOG_ATTR = "tcp-backlog";
-    private final String TCP_KEEP_ALIVE_ATTR = "tcp-keep-alive";
-    private final String URL_CHARSET_ATTR = "url-charset";
-    private final String WORKER_ATTR = "worker";
-    private final String WRITE_TIMEOUT_ATTR = "write-timeout";
+    private static final String ALLOW_ENCODED_SLASH = "allow-encoded-slash";
+    private static final String ALLOW_EQUALS_IN_COOKIE_VALUE = "allow-equals-in-cookie-value";
+    private static final String ALWAYS_SET_KEEP_ALIVE = "always-set-keep-alive";
+    private static final String BUFFER_PIPELINED_DATA = "buffer-pipelined-data";
+    private static final String BUFFER_POOL = "buffer-pool";
+    private static final String DECODE_URL = "decode-url";
+    private static final String ENABLED = "enabled";
+    private static final String MAX_BUFFERED_REQUEST_SIZE = "max-buffered-request-size";
+    private static final String MAX_CONNECTIONS = "max-connections";
+    private static final String MAX_COOKIES = "max-cookies";
+    private static final String MAX_HEADER_SIZE = "max-header-size";
+    private static final String MAX_HEADERS = "max-headers";
+    private static final String MAX_PARAMETERS = "max-parameters";
+    private static final String MAX_POST_SIZE = "max-post-size";
+    private static final String NO_REQUEST_TIMEOUT = "no-request-timeout";
+    private static final String READ_TIMEOUT = "read-timeout";
+    private static final String RECEIVE_BUFFER = "receive-buffer";
+    private static final String RECORD_REQUEST_START_TIME = "record-request-start-time";
+    private static final String REDIRECT_SOCKET = "redirect-socket";
+    private static final String REQUEST_PARSE_TIMEOUT = "request-parse-timeout";
+    private static final String RESOLVE_PEER_ADDRESS = "resolve-peer-address";
+    private static final String SCHEME = "scheme";
+    private static final String SEND_BUFFER = "send-buffer";
+    private static final String SOCKET_BINDING = "socket-binding";
+    private static final String TCP_BACKLOG = "tcp-backlog";
+    private static final String TCP_KEEP_ALIVE = "tcp-keep-alive";
+    private static final String URL_CHARSET = "url-charset";
+    private static final String WORKER = "worker";
+    private static final String WRITE_TIMEOUT = "write-timeout";
 
     //values
-    private final String NUMERIC_VALID = "25";
-    private final String NUMERIC_INVALID = "25fazf";
+    private static final String HTTP_SERVER = "undertow-http-server-ajp_" + RandomStringUtils.randomAlphanumeric(5);
 
-    private static AddressTemplate ajpListenerTemplate = httpServerTemplate.append("/ajp-listener=*");
-    private static String httpServer;
-    private static String ajpListener;
-    private static String ajpListenerToBeRemoved;
-    private static ResourceAddress address;
+    private static final String AJP_LISTENER = "ajp-listener_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String AJP_LISTENER_TBR = "ajp-listener-tbr_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String AJP_LISTENER_TBA = "ajp-listener-tba_" + RandomStringUtils.randomAlphanumeric(5);
+
+    private static final Address HTTP_SERVER_ADDRESS = UNDERTOW_ADDRESS.and("server", HTTP_SERVER);
+
+    private static final Address AJP_LISTENER_ADDRESS = HTTP_SERVER_ADDRESS.and("ajp-listener", AJP_LISTENER);
+    private static final Address AJP_LISTENER_ADDRESS_TBR = HTTP_SERVER_ADDRESS.and("ajp-listener", AJP_LISTENER_TBR);
+    private static final Address AJP_LISTENER_ADDRESS_TBA = HTTP_SERVER_ADDRESS.and("ajp-listener", AJP_LISTENER_TBA);
 
     @BeforeClass
-    public static void setUp() throws IOException, CommandFailedException, TimeoutException, InterruptedException {
-        httpServer = operations.createHTTPServer();
-        ajpListener = operations.createAJPListener(httpServer);
-        ajpListenerToBeRemoved = operations.createAJPListener(httpServer);
-        address = ajpListenerTemplate.resolve(context, httpServer, ajpListener);
+    public static void setUp() throws Exception {
+        //add http server
+        operations.add(HTTP_SERVER_ADDRESS);
+        administration.reloadIfRequired();
+        //add ajp listeners which will be used
+        client.apply(new AddUndertowListener.AjpBuilder(AJP_LISTENER, HTTP_SERVER,
+                        undertowOps.createSocketBindingWithoutReference())
+                .enabled(true)
+                .build());
+        client.apply(new AddUndertowListener.AjpBuilder(AJP_LISTENER_TBR, HTTP_SERVER,
+                        undertowOps.createSocketBindingWithoutReference())
+                .enabled(true)
+                .build());
+
+        administration.reloadIfRequired();
     }
 
     @Before
     public void before() {
-        navigate2ajpListener();
+        page.navigate();
+        page.viewHTTPServer(HTTP_SERVER)
+                .switchToAJPListeners()
+                .selectItemInTableByText(AJP_LISTENER);
     }
 
     @AfterClass
-    public static void tearDown() throws InterruptedException, CommandFailedException, TimeoutException, IOException {
-        operations.removeAJPListener(httpServer, ajpListener);
-        operations.removeHTTPServer(httpServer);
+    public static void tearDown() throws InterruptedException, CommandFailedException, TimeoutException, IOException, OperationException {
+        operations.removeIfExists(AJP_LISTENER_ADDRESS);
+        operations.removeIfExists(AJP_LISTENER_ADDRESS_TBA);
+        operations.removeIfExists(AJP_LISTENER_ADDRESS_TBR);
+        //remove used http server
+        operations.removeIfExists(HTTP_SERVER_ADDRESS);
+        //servers should not be in reload or restart required after test case ends
+        administration.restartIfRequired();
+        administration.reloadIfRequired();
     }
 
     @Test
-    public void setAllowEncodedSlashToTrue() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, ALLOW_ENCODED_SLASH, ALLOW_ENCODED_SLASH_ATTR, true);
+    public void setAllowEncodedSlashToTrue() throws Exception {
+        editCheckboxAndVerify(AJP_LISTENER_ADDRESS, ALLOW_ENCODED_SLASH, true);
     }
 
     @Test
-    public void setAllowEncodedSlashToFalse() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, ALLOW_ENCODED_SLASH, ALLOW_ENCODED_SLASH_ATTR, false);
+    public void setAllowEncodedSlashToFalse() throws Exception {
+        editCheckboxAndVerify(AJP_LISTENER_ADDRESS, ALLOW_ENCODED_SLASH, false);
     }
 
     @Test
-    public void setAllowEqualsInCookieValueToTrue() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, ALLOW_EQUALS_IN_COOKIE_VALUE, ALLOW_EQUALS_IN_COOKIE_VALUE_ATTR, true);
+    public void setAllowEqualsInCookieValueToTrue() throws Exception {
+        editCheckboxAndVerify(AJP_LISTENER_ADDRESS, ALLOW_EQUALS_IN_COOKIE_VALUE, true);
     }
 
     @Test
-    public void setAllowEqualsInCookieValueToFalse() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, ALLOW_EQUALS_IN_COOKIE_VALUE, ALLOW_EQUALS_IN_COOKIE_VALUE_ATTR, false);
+    public void setAllowEqualsInCookieValueToFalse() throws Exception {
+        editCheckboxAndVerify(AJP_LISTENER_ADDRESS, ALLOW_EQUALS_IN_COOKIE_VALUE, false);
     }
 
     @Test
-    public void setAlwaysSetKeepAliveToTrue() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, ALWAYS_SET_KEEP_ALIVE, ALWAYS_SET_KEEP_ALIVE_ATTR, true);
+    public void setAlwaysSetKeepAliveToTrue() throws Exception {
+        editCheckboxAndVerify(AJP_LISTENER_ADDRESS, ALWAYS_SET_KEEP_ALIVE, true);
     }
 
     @Test
-    public void setAlwaysSetKeepAliveToFalse() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, ALWAYS_SET_KEEP_ALIVE, ALWAYS_SET_KEEP_ALIVE_ATTR, false);
+    public void setAlwaysSetKeepAliveToFalse() throws Exception {
+        editCheckboxAndVerify(AJP_LISTENER_ADDRESS, ALWAYS_SET_KEEP_ALIVE, false);
     }
 
     @Test
-    public void setBufferPipelinedDataToTrue() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, BUFFER_PIPELINED_DATA, BUFFER_PIPELINED_DATA_ATTR, true);
+    public void setBufferPipelinedDataToTrue() throws Exception {
+        editCheckboxAndVerify(AJP_LISTENER_ADDRESS, BUFFER_PIPELINED_DATA, true);
     }
 
     @Test
-    public void setBufferPipelinedDataToFalse() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, BUFFER_PIPELINED_DATA, BUFFER_PIPELINED_DATA_ATTR, false);
+    public void setBufferPipelinedDataToFalse() throws Exception {
+        editCheckboxAndVerify(AJP_LISTENER_ADDRESS, BUFFER_PIPELINED_DATA, false);
     }
 
     @Test
-    public void editBufferPool() throws IOException, InterruptedException, TimeoutException {
-        editTextAndVerify(address, BUFFER_POOL, BUFFER_POOL_ATTR, BUFFER_POOL_VALUE_VALID);
+    public void editBufferPool() throws Exception {
+        editTextAndVerify(AJP_LISTENER_ADDRESS, BUFFER_POOL, undertowOps.createBufferPool());
     }
 
     @Test
-    public void setDecodeURLToTrue() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, DECODE_URL, DECODE_URL_ATTR, true);
+    public void setDecodeURLToTrue() throws Exception {
+        editCheckboxAndVerify(AJP_LISTENER_ADDRESS, DECODE_URL, true);
     }
 
     @Test
-    public void setDecodeURLToFalse() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, DECODE_URL, DECODE_URL_ATTR, false);
+    public void setDecodeURLToFalse() throws Exception {
+        editCheckboxAndVerify(AJP_LISTENER_ADDRESS, DECODE_URL, false);
     }
 
     //@Test
 
     @Test
-    public void setEnabledToTrue() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, ENABLED, ENABLED_ATTR, true);
+    public void setEnabledToTrue() throws Exception {
+        editCheckboxAndVerify(AJP_LISTENER_ADDRESS, ENABLED, true);
     }
 
     @Test
-    public void setEnabledToFalse() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, ENABLED, ENABLED_ATTR, false);
+    public void setEnabledToFalse() throws Exception {
+        editCheckboxAndVerify(AJP_LISTENER_ADDRESS, ENABLED, false);
     }
 
     @Test
-    public void editMaxBufferedRequestSize() throws IOException, InterruptedException, TimeoutException {
-        editTextAndVerify(address, MAX_BUFFERED_REQUEST_SIZE, MAX_BUFFERED_REQUEST_SIZE_ATTR, NUMERIC_VALID);
+    public void editMaxBufferedRequestSize() throws Exception {
+        editTextAndVerify(AJP_LISTENER_ADDRESS, MAX_BUFFERED_REQUEST_SIZE, NUMERIC_VALID);
     }
 
     @Test
@@ -202,8 +191,8 @@ public class AJPListenerTestCase extends UndertowTestCaseAbstract {
     }
 
     @Test
-    public void editMaxConnections() throws IOException, InterruptedException, TimeoutException {
-        editTextAndVerify(address, MAX_CONNECTIONS, MAX_CONNECTIONS_ATTR, NUMERIC_VALID);
+    public void editMaxConnections() throws Exception {
+        editTextAndVerify(AJP_LISTENER_ADDRESS, MAX_CONNECTIONS, NUMERIC_VALID);
     }
 
     @Test
@@ -212,8 +201,8 @@ public class AJPListenerTestCase extends UndertowTestCaseAbstract {
     }
 
     @Test
-    public void editMaxCookies() throws IOException, InterruptedException, TimeoutException {
-        editTextAndVerify(address, MAX_COOKIES, MAX_COOKIES_ATTR, NUMERIC_VALID);
+    public void editMaxCookies() throws Exception {
+        editTextAndVerify(AJP_LISTENER_ADDRESS, MAX_COOKIES, NUMERIC_VALID);
     }
 
     @Test
@@ -222,8 +211,8 @@ public class AJPListenerTestCase extends UndertowTestCaseAbstract {
     }
 
     @Test
-    public void editMaxHeaderSize() throws IOException, InterruptedException, TimeoutException {
-        editTextAndVerify(address, MAX_HEADER_SIZE, MAX_HEADER_SIZE_ATTR, NUMERIC_VALID);
+    public void editMaxHeaderSize() throws Exception {
+        editTextAndVerify(AJP_LISTENER_ADDRESS, MAX_HEADER_SIZE, NUMERIC_VALID);
     }
 
     @Test
@@ -232,8 +221,8 @@ public class AJPListenerTestCase extends UndertowTestCaseAbstract {
     }
 
     @Test
-    public void editMaxHeaders() throws IOException, InterruptedException, TimeoutException {
-        editTextAndVerify(address, MAX_HEADERS, MAX_HEADERS_ATTR, NUMERIC_VALID);
+    public void editMaxHeaders() throws Exception {
+        editTextAndVerify(AJP_LISTENER_ADDRESS, MAX_HEADERS, NUMERIC_VALID);
     }
 
     @Test
@@ -242,8 +231,8 @@ public class AJPListenerTestCase extends UndertowTestCaseAbstract {
     }
 
     @Test
-    public void editMaxParameters() throws IOException, InterruptedException, TimeoutException {
-        editTextAndVerify(address, MAX_PARAMETERS, MAX_PARAMETERS_ATTR, NUMERIC_VALID);
+    public void editMaxParameters() throws Exception {
+        editTextAndVerify(AJP_LISTENER_ADDRESS, MAX_PARAMETERS, NUMERIC_VALID);
     }
 
     @Test
@@ -252,8 +241,8 @@ public class AJPListenerTestCase extends UndertowTestCaseAbstract {
     }
 
     @Test
-    public void editMaxPostSize() throws IOException, InterruptedException, TimeoutException {
-        editTextAndVerify(address, MAX_POST_SIZE, MAX_POST_SIZE_ATTR, NUMERIC_VALID);
+    public void editMaxPostSize() throws Exception {
+        editTextAndVerify(AJP_LISTENER_ADDRESS, MAX_POST_SIZE, NUMERIC_VALID_LONG);
     }
 
     @Test
@@ -262,8 +251,8 @@ public class AJPListenerTestCase extends UndertowTestCaseAbstract {
     }
 
     @Test
-    public void editNoRequestTimeout() throws IOException, InterruptedException, TimeoutException {
-        editTextAndVerify(address, NO_REQUEST_TIMEOUT, NO_REQUEST_TIMEOUT_ATTR, NUMERIC_VALID);
+    public void editNoRequestTimeout() throws Exception {
+        editTextAndVerify(AJP_LISTENER_ADDRESS, NO_REQUEST_TIMEOUT, NUMERIC_VALID);
     }
 
     @Test
@@ -272,8 +261,8 @@ public class AJPListenerTestCase extends UndertowTestCaseAbstract {
     }
 
     @Test
-    public void editReadTimeout() throws IOException, InterruptedException, TimeoutException {
-        editTextAndVerify(address, READ_TIMEOUT, READ_TIMEOUT_ATTR, NUMERIC_VALID);
+    public void editReadTimeout() throws Exception {
+        editTextAndVerify(AJP_LISTENER_ADDRESS, READ_TIMEOUT, NUMERIC_VALID);
     }
 
     @Test
@@ -282,8 +271,8 @@ public class AJPListenerTestCase extends UndertowTestCaseAbstract {
     }
 
     @Test
-    public void editReceiveBuffer() throws IOException, InterruptedException, TimeoutException {
-        editTextAndVerify(address, RECEIVE_BUFFER, RECEIVE_BUFFER_ATTR, NUMERIC_VALID);
+    public void editReceiveBuffer() throws Exception {
+        editTextAndVerify(AJP_LISTENER_ADDRESS, RECEIVE_BUFFER, NUMERIC_VALID);
     }
 
     @Test
@@ -292,23 +281,23 @@ public class AJPListenerTestCase extends UndertowTestCaseAbstract {
     }
 
     @Test
-    public void setRecordRequestStartTimeToTrue() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, RECORD_REQUEST_START_TIME, RECORD_REQUEST_START_TIME_ATTR, true);
+    public void setRecordRequestStartTimeToTrue() throws Exception {
+        editCheckboxAndVerify(AJP_LISTENER_ADDRESS, RECORD_REQUEST_START_TIME, true);
     }
 
     @Test
-    public void setRecordRequestStartTimeToFalse() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, RECORD_REQUEST_START_TIME, RECORD_REQUEST_START_TIME_ATTR, false);
+    public void setRecordRequestStartTimeToFalse() throws Exception {
+        editCheckboxAndVerify(AJP_LISTENER_ADDRESS, RECORD_REQUEST_START_TIME, false);
     }
 
     @Test
-    public void editRedirectSocket() throws IOException, InterruptedException, TimeoutException {
-        editTextAndVerify(address, REDIRECT_SOCKET, REDIRECT_SOCKET_ATTR);
+    public void editRedirectSocket() throws Exception {
+        editTextAndVerify(AJP_LISTENER_ADDRESS, REDIRECT_SOCKET, undertowOps.createSocketBinding());
     }
 
     @Test
-    public void editRequestParseTimeout() throws IOException, InterruptedException, TimeoutException {
-        editTextAndVerify(address, REQUEST_PARSE_TIMEOUT, REQUEST_PARSE_TIMEOUT_ATTR, NUMERIC_VALID);
+    public void editRequestParseTimeout() throws Exception {
+        editTextAndVerify(AJP_LISTENER_ADDRESS, REQUEST_PARSE_TIMEOUT, NUMERIC_VALID);
     }
 
     @Test
@@ -317,23 +306,23 @@ public class AJPListenerTestCase extends UndertowTestCaseAbstract {
     }
 
     @Test
-    public void setResolvePeerAddressToTrue() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, RESOLVE_PEER_ADDRESS, RESOLVE_PEER_ADDRESS_ATTR, true);
+    public void setResolvePeerAddressToTrue() throws Exception {
+        editCheckboxAndVerify(AJP_LISTENER_ADDRESS, RESOLVE_PEER_ADDRESS, true);
     }
 
     @Test
-    public void setResolvePeerAddressToFalse() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, RESOLVE_PEER_ADDRESS, RESOLVE_PEER_ADDRESS_ATTR, false);
+    public void setResolvePeerAddressToFalse() throws Exception {
+        editCheckboxAndVerify(AJP_LISTENER_ADDRESS, RESOLVE_PEER_ADDRESS, false);
     }
 
     @Test
-    public void editScheme() throws IOException, InterruptedException, TimeoutException {
-        editTextAndVerify(address, SCHEME, SCHEME_ATTR);
+    public void editScheme() throws Exception {
+        editTextAndVerify(AJP_LISTENER_ADDRESS, SCHEME);
     }
 
     @Test
-    public void editSendBuffer() throws IOException, InterruptedException, TimeoutException {
-        editTextAndVerify(address, SEND_BUFFER, SEND_BUFFER_ATTR, NUMERIC_VALID);
+    public void editSendBuffer() throws Exception {
+        editTextAndVerify(AJP_LISTENER_ADDRESS, SEND_BUFFER, NUMERIC_VALID);
     }
 
     @Test
@@ -342,13 +331,13 @@ public class AJPListenerTestCase extends UndertowTestCaseAbstract {
     }
 
     @Test
-    public void editSocketBinding() throws IOException, InterruptedException, TimeoutException {
-        editTextAndVerify(address, SOCKET_BINDING, SOCKET_BINDING_ATTR, SOCKET_BINDING_VALUE_VALID);
+    public void editSocketBinding() throws Exception {
+        editTextAndVerify(AJP_LISTENER_ADDRESS, SOCKET_BINDING, undertowOps.createSocketBinding());
     }
 
     @Test
-    public void editTCPBacklog() throws IOException, InterruptedException, TimeoutException {
-        editTextAndVerify(address, TCP_BACKLOG, TCP_BACKLOG_ATTR, NUMERIC_VALID);
+    public void editTCPBacklog() throws Exception {
+        editTextAndVerify(AJP_LISTENER_ADDRESS, TCP_BACKLOG, NUMERIC_VALID);
     }
 
     @Test
@@ -357,31 +346,32 @@ public class AJPListenerTestCase extends UndertowTestCaseAbstract {
     }
 
     @Test
-    public void setTCPKeepAliveToTrue() throws IOException, InterruptedException, TimeoutException {
-        editCheckboxAndVerify(address, TCP_KEEP_ALIVE, TCP_KEEP_ALIVE_ATTR, true);
+    public void setTCPKeepAliveToTrue() throws Exception {
+        editCheckboxAndVerify(AJP_LISTENER_ADDRESS, TCP_KEEP_ALIVE, true);
     }
 
     @Test
-    public void setTCPKeepAliveToFalse() throws IOException, InterruptedException, TimeoutException {
-        operations.writeAttribute(address, TCP_KEEP_ALIVE_ATTR, true);
-        operations.reloadIfRequiredAndWaitForRunning();
-        navigate2ajpListener();
-        editCheckboxAndVerify(address, TCP_KEEP_ALIVE, TCP_KEEP_ALIVE_ATTR, false);
+    public void setTCPKeepAliveToFalse() throws Exception {
+        operations.writeAttribute(AJP_LISTENER_ADDRESS, TCP_KEEP_ALIVE, true);
+        administration.reloadIfRequired();
+        page.navigate();
+        page.viewHTTPServer(HTTP_SERVER).switchToAJPListeners().selectItemInTableByText(AJP_LISTENER);
+        editCheckboxAndVerify(AJP_LISTENER_ADDRESS, TCP_KEEP_ALIVE, false);
     }
 
     @Test
-    public void editURLCharset() throws IOException, InterruptedException, TimeoutException {
-        editTextAndVerify(address, URL_CHARSET, URL_CHARSET_ATTR);
+    public void editURLCharset() throws Exception {
+        editTextAndVerify(AJP_LISTENER_ADDRESS, URL_CHARSET);
     }
 
     @Test
-    public void editWorker() throws IOException, InterruptedException, TimeoutException {
-        editTextAndVerify(address, WORKER, WORKER_ATTR, WORKER_VALUE_VALID);
+    public void editWorker() throws Exception {
+        editTextAndVerify(AJP_LISTENER_ADDRESS, WORKER, undertowOps.createWorker());
     }
 
     @Test
-    public void editWriteTimeout() throws IOException, InterruptedException, TimeoutException {
-        editTextAndVerify(address, WRITE_TIMEOUT, WRITE_TIMEOUT_ATTR, NUMERIC_VALID);
+    public void editWriteTimeout() throws Exception {
+        editTextAndVerify(AJP_LISTENER_ADDRESS, WRITE_TIMEOUT, NUMERIC_VALID);
     }
 
     @Test
@@ -390,39 +380,31 @@ public class AJPListenerTestCase extends UndertowTestCaseAbstract {
     }
 
     @Test
-    public void addAJPListenerInGUI() throws IOException, CommandFailedException {
-        String name = "ajpGUI_" + RandomStringUtils.randomAlphanumeric(6);
-        String socketBinding = operations.createSocketBinding();
+    public void addAJPListenerInGUI() throws Exception {
         ConfigFragment config = page.getConfigFragment();
+        String socketBinding = undertowOps.createSocketBinding();
         WizardWindow wizard = config.getResourceManager().addResource();
-
         Editor editor = wizard.getEditor();
-        editor.text("name", name);
+        editor.text("name", AJP_LISTENER_TBA);
         editor.text(SOCKET_BINDING, socketBinding);
-        boolean result = wizard.finish();
+        boolean result = wizard.finishAndDismissReloadRequiredWindow();
 
         Assert.assertTrue("Window should be closed", result);
-        Assert.assertTrue("AJP listener should be present in table", config.resourceIsPresent(name));
-        ResourceAddress address = ajpListenerTemplate.resolve(context, httpServer, name);
-        verifier.verifyResource(address, true);
-        verifier.verifyAttribute(address, SOCKET_BINDING, socketBinding);
+        Assert.assertTrue("AJP listener should be present in table", config.resourceIsPresent(AJP_LISTENER_TBA));
+        new ResourceVerifier(AJP_LISTENER_ADDRESS_TBA, client)
+                .verifyExists()
+                .verifyAttribute(SOCKET_BINDING, socketBinding);
     }
 
     @Test
-    public void removeAJPListenerInGUI() {
+    public void removeAJPListenerInGUI() throws Exception {
         ConfigFragment config = page.getConfigFragment();
         config.getResourceManager()
-                .removeResource(ajpListenerToBeRemoved)
+                .removeResource(AJP_LISTENER_TBR)
                 .confirmAndDismissReloadRequiredMessage();
 
-        ResourceAddress address = ajpListenerTemplate.resolve(context, httpServer, ajpListenerToBeRemoved);
-        Assert.assertFalse("AJP listener host should not be present in table", config.resourceIsPresent(ajpListenerToBeRemoved));
-        verifier.verifyResource(address, false); //HTTP server host should not be present on the server
-    }
-
-    private void navigate2ajpListener() {
-        page.navigate();
-        page.viewHTTPServer(httpServer).switchToAJPListeners();
+        Assert.assertFalse("AJP listener host should not be present in table", config.resourceIsPresent(AJP_LISTENER_TBR));
+        new ResourceVerifier(AJP_LISTENER_ADDRESS_TBR, client).verifyDoesNotExist(); //HTTP server host should not be present on the server
     }
 
 }

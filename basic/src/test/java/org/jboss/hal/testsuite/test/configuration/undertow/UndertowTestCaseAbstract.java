@@ -3,13 +3,9 @@ package org.jboss.hal.testsuite.test.configuration.undertow;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
+import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
-import org.jboss.hal.testsuite.dmr.AddressTemplate;
-import org.jboss.hal.testsuite.dmr.DefaultContext;
-import org.jboss.hal.testsuite.dmr.Dispatcher;
-import org.jboss.hal.testsuite.dmr.ResourceAddress;
-import org.jboss.hal.testsuite.dmr.ResourceVerifier;
-import org.jboss.hal.testsuite.dmr.StatementContext;
+import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.fragment.config.undertow.UndertowFragment;
 import org.jboss.hal.testsuite.page.config.UndertowPage;
 import org.junit.AfterClass;
@@ -17,30 +13,29 @@ import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.openqa.selenium.WebDriver;
 import org.wildfly.extras.creaper.core.CommandFailedException;
+import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
+import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.OperationException;
+import org.wildfly.extras.creaper.core.online.operations.Operations;
+import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
-/**
- * @author Jan Kasik <jkasik@redhat.com>
- *         Created on 15.9.15.
- */
 public abstract class UndertowTestCaseAbstract {
 
-    protected static Dispatcher dispatcher;
-    protected static ResourceVerifier verifier;
-    protected static UndertowOperations operations;
-    protected static StatementContext context = new DefaultContext();
-    protected static AddressTemplate undertowAddressTemplate = AddressTemplate.of("{default.profile}/subsystem=undertow");
-    protected static AddressTemplate httpServerTemplate = undertowAddressTemplate.append("/server=*");
-    protected static AddressTemplate servletContainerTemplate = undertowAddressTemplate.append("/servlet-container=*");
+    protected static OnlineManagementClient client;
+    protected static UndertowOperations undertowOps;
+    protected static Operations operations;
+    protected static Administration administration;
+
+    protected static final Address UNDERTOW_ADDRESS = Address.subsystem("undertow");
 
     //shared valid values
-    protected static String WORKER_VALUE_VALID;
-    protected static String BUFFER_POOL_VALUE_VALID;
-    protected static String SOCKET_BINDING_VALUE_VALID;
-    protected String NUMERIC_VALID = "25";
-    protected String NUMERIC_INVALID = "25dfs";
+    protected static final int NUMERIC_VALID = 25;
+    protected static final long NUMERIC_VALID_LONG = 25L;
+    protected static final String NUMERIC_INVALID = "25fazf";
+
 
     @Drone
     protected WebDriver browser;
@@ -50,47 +45,64 @@ public abstract class UndertowTestCaseAbstract {
 
     @BeforeClass
     public static void mainSetUp() throws IOException, CommandFailedException, TimeoutException, InterruptedException {
-        dispatcher = new Dispatcher();
-        verifier = new ResourceVerifier(dispatcher);
-        operations = new UndertowOperations(ManagementClientProvider.createOnlineManagementClient());
-        WORKER_VALUE_VALID = operations.createWorker();
-        BUFFER_POOL_VALUE_VALID = operations.createBufferPool();
-        SOCKET_BINDING_VALUE_VALID = operations.createSocketBinding();
+        client = ManagementClientProvider.createOnlineManagementClient();
+        operations = new Operations(client);
+        administration = new Administration(client);
+        undertowOps = new UndertowOperations(client);
     }
 
     @AfterClass
-    public static void mainTearDown() throws InterruptedException, IOException, TimeoutException {
-        operations.removeWorker(WORKER_VALUE_VALID);
-        operations.removeBufferPool(BUFFER_POOL_VALUE_VALID);
-        dispatcher.close();
+    public static void mainTearDown() throws InterruptedException, IOException, TimeoutException, OperationException, CommandFailedException {
+        try {
+            undertowOps.close();
+            administration.restartIfRequired();
+            administration.reloadIfRequired();
+        } finally {
+            client.close();
+        }
     }
 
-    protected void editTextAndVerify(ResourceAddress address, String identifier, String attributeName, String value) throws IOException, InterruptedException, TimeoutException {
-        page.getConfigFragment().editTextAndSave(identifier, value);
-        operations.reloadIfRequiredAndWaitForRunning();
-        verifier.verifyAttribute(address, attributeName, value);
+    protected void editTextAndVerify(Address address, String attributeName, String value) throws Exception {
+        page.getConfigFragment().editTextAndSave(attributeName, value);
+        new ResourceVerifier(address, client).verifyAttribute(attributeName, value);
     }
 
-    protected void editTextAndVerify(ResourceAddress address, String identifier, String attributeName) throws IOException, InterruptedException, TimeoutException {
-        editTextAndVerify(address, identifier, attributeName, "undertow_" + attributeName + RandomStringUtils.randomAlphabetic(4));
+    protected void editTextAndVerify(Address address, String attributeName, int value) throws Exception {
+        page.getConfigFragment().editTextAndSave(attributeName, String.valueOf(value));
+        new ResourceVerifier(address, client).verifyAttribute(attributeName, value);
     }
 
-    protected void editCheckboxAndVerify(ResourceAddress address, String identifier, String attributeName, Boolean value) throws IOException, InterruptedException, TimeoutException {
+    protected void editTextAndVerify(Address address, String attributeName, long value) throws Exception {
+        page.getConfigFragment().editTextAndSave(attributeName, String.valueOf(value));
+        new ResourceVerifier(address, client).verifyAttribute(attributeName, value);
+    }
+
+    protected void editTextAndVerify(Address address, String attributeName) throws Exception {
+        editTextAndVerify(address, attributeName, "undertow_" + attributeName + RandomStringUtils.randomAlphabetic(4));
+    }
+
+    protected void editCheckboxAndVerify(Address address, String attributeName, Boolean value) throws Exception {
+        page.getConfigFragment().editCheckboxAndSave(attributeName, value);
+        new ResourceVerifier(address, client).verifyAttribute(attributeName, value);
+    }
+
+    protected void editCheckboxAndVerify(Address address, String identifier, String attributeName, Boolean value) throws Exception {
         page.getConfigFragment().editCheckboxAndSave(identifier, value);
-        operations.reloadIfRequiredAndWaitForRunning();
-        verifier.verifyAttribute(address, attributeName, value.toString());
+        new ResourceVerifier(address, client).verifyAttribute(attributeName, value);
     }
 
-    public void selectOptionAndVerify(ResourceAddress address, String identifier, String attributeName, String value) throws IOException, InterruptedException, TimeoutException {
-        page.getConfigFragment().selectOptionAndSave(identifier, value);
-        operations.reloadIfRequiredAndWaitForRunning();
-        verifier.verifyAttribute(address, attributeName, value);
+    public void selectOptionAndVerify(Address address, String attributeName, String value) throws Exception {
+        page.getConfigFragment().selectOptionAndSave(attributeName, value);
+        new ResourceVerifier(address, client).verifyAttribute(attributeName, value);
     }
 
-    public void editTextAreaAndVerify(ResourceAddress address, String identifier, String attributeName, String[] values) throws IOException, InterruptedException, TimeoutException {
-        page.getConfigFragment().editTextAndSave(identifier, String.join("\n", values));
-        operations.reloadIfRequiredAndWaitForRunning();
-        verifier.verifyAttribute(address, attributeName, values);
+    public void editTextAreaAndVerify(Address address, String attributeName, String[] values) throws Exception {
+        page.getConfigFragment().editTextAndSave(attributeName, String.join("\n", values));
+        ModelNode expected = new ModelNode();
+        for (String value : values) {
+            expected.add(value);
+        }
+        new ResourceVerifier(address, client).verifyAttribute(attributeName, expected);
     }
 
     protected void verifyIfErrorAppears(String identifier, String value) {
@@ -99,7 +111,5 @@ public abstract class UndertowTestCaseAbstract {
         Assert.assertTrue(config.isErrorShowedInForm());
         config.cancel();
     }
-
-
 
 }

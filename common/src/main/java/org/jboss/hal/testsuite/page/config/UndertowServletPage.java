@@ -28,6 +28,7 @@ public class UndertowServletPage extends UndertowPage implements Navigatable {
                 .step("Settings", "Servlet/JSP")
                 .selectRow().invoke(FinderNames.VIEW);
         Application.waitUntilVisible();
+        Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
     }
 
     public UndertowServletPage selectServletContainer(String containerName) {
