@@ -29,7 +29,9 @@ public class UndertowHTTPPage extends UndertowPage implements Navigatable {
                 .selectRow().invoke(FinderNames.VIEW);
         Application.waitUntilVisible();
         switchTab("HTTP Server");
-        Console.withBrowser(browser).waitUntilLoaded();
+        Console.withBrowser(browser)
+                .waitUntilLoaded()
+                .dismissReloadRequiredWindowIfPresent();
     }
 
     public UndertowHTTPPage selectHTTPServer(String serverName) {
