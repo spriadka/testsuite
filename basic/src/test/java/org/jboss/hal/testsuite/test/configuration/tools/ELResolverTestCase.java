@@ -5,15 +5,19 @@ import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Domain;
-import org.jboss.hal.testsuite.finder.Application;
-import org.jboss.hal.testsuite.finder.FinderNames;
-import org.jboss.hal.testsuite.finder.FinderNavigation;
-import org.jboss.hal.testsuite.page.config.DomainConfigEntryPoint;
+import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
+import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.page.config.ServerConfigurationPage;
+import org.jboss.hal.testsuite.util.Console;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
+import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
+import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.Operations;
+import org.wildfly.extras.creaper.core.online.operations.Values;
 
 import static org.junit.Assert.assertEquals;
 
@@ -27,99 +31,96 @@ public class ELResolverTestCase {
     private static final String NAME = "pr_" + RandomStringUtils.randomAlphanumeric(5);
     private static final String VALUE = "val_" + RandomStringUtils.randomAlphanumeric(5);
 
+    private static final OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
+    private static final Operations operations = new Operations(client);
+
     @Drone
     private WebDriver browser;
 
     @Page
     private ServerConfigurationPage page;
 
+    @Before
+    public void before() {
+        page.navigate();
+        Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
+    }
+
     @Test
     public void resolveSystemPropertyValue() throws Exception {
-        FinderNavigation navigation = new FinderNavigation(browser, DomainConfigEntryPoint.class)
-                .step(FinderNames.CONFIGURATION, "System Properties");
+        operations.add(Address.root().and("system-property", NAME), Values.of("value", VALUE));
 
-        navigation.selectRow().invoke("View");
-        Application.waitUntilVisible();
-
-        page.addProperty(NAME, VALUE);
-
-        page.clickExpressionResolver();
-        page.getWindowFragment().getEditor().text("input", "${" + NAME + ":default_value}");
-        page.getWindowFragment().clickButton("Resolve");
-
-        String output = page.getWindowFragment().getEditor().text("output");
-        page.getWindowFragment().clickButton("Done");
-        String expected = "server-one=" + VALUE + "\nserver-two=" + VALUE + "\n";
-        assertEquals(expected, output);
-
-        page.removeProperty(NAME);
+        try {
+            page.openExpressionResolver();
+            String output = page.resolveSystemProperty(NAME);
+            String expected = "server-one=" + VALUE + "\nserver-two=" + VALUE + "\n";
+            assertEquals(expected, output);
+        } finally {
+            operations.remove(Address.root().and("system-property", NAME));
+        }
     }
 
     @Test
     public void resolveServerPropertyWithSameValue() throws Exception {
-        page.goToServerProperties("server-one");
-        page.addProperty(NAME, VALUE);
-
-        page.goToServerProperties("server-two");
-        page.addProperty(NAME, VALUE);
-
-        page.clickExpressionResolver();
-        page.getWindowFragment().getEditor().text("input", "${" + NAME + ":default_value}");
-        page.getWindowFragment().clickButton("Resolve");
-
-        String output = page.getWindowFragment().getEditor().text("output");
-        page.getWindowFragment().clickButton("Done");
-        String expected = "server-one=" + VALUE + "\nserver-two=" + VALUE + "\n";
-        assertEquals(expected, output);
-
-        page.goToServerProperties("server-one");
-        page.removeProperty(NAME);
-
-        page.goToServerProperties("server-two");
-        page.removeProperty(NAME);
+        addServerProperty(NAME, VALUE, "server-one");
+        addServerProperty(NAME, VALUE, "server-two");
+        try {
+            page.openExpressionResolver();
+            String output = page.resolveSystemProperty(NAME);
+            String expected = "server-one=" + VALUE + "\nserver-two=" + VALUE + "\n";
+            assertEquals(expected, output);
+        } finally {
+            removeServerProperty(NAME, "server-one");
+            removeServerProperty(NAME, "server-two");
+        }
     }
 
     @Test
     public void resolveServerPropertyWithDifferentValue() throws Exception {
         String reverseValue = new StringBuilder(VALUE).reverse().toString();
 
-        page.goToServerProperties("server-one");
-        page.addProperty(NAME, VALUE);
-
-        page.goToServerProperties("server-two");
-        page.addProperty(NAME, reverseValue);
-
-        page.clickExpressionResolver();
-        page.getWindowFragment().getEditor().text("input", "${" + NAME + ":default_value}");
-        page.getWindowFragment().clickButton("Resolve");
-
-        String output = page.getWindowFragment().getEditor().text("output");
-        page.getWindowFragment().clickButton("Done");
-        String expected = "server-one=" + VALUE + "\nserver-two=" + reverseValue + "\n";
-        assertEquals(expected, output);
-
-        page.goToServerProperties("server-one");
-        page.removeProperty(NAME);
-
-        page.goToServerProperties("server-two");
-        page.removeProperty(NAME);
+        addServerProperty(NAME, VALUE, "server-one");
+        addServerProperty(NAME, reverseValue, "server-two");
+        try {
+            page.openExpressionResolver();
+            String output = page.resolveSystemProperty(NAME);
+            String expected = "server-one=" + VALUE + "\nserver-two=" + reverseValue + "\n";
+            assertEquals(expected, output);
+        } finally {
+            removeServerProperty(NAME, "server-one");
+            removeServerProperty(NAME, "server-two");
+        }
     }
 
     @Test
     public void resolveServerPropertyDefinedOnOneServer() throws Exception {
-        page.goToServerProperties("server-one");
-        page.addProperty(NAME, VALUE);
+        addServerProperty(NAME, VALUE, "server-one");
+        try {
+            page.openExpressionResolver();
+            String output = page.resolveSystemProperty(NAME);
+            String expected = "server-one=" + VALUE + "\nserver-two=default_value\n";
+            assertEquals(expected, output);
 
-        page.clickExpressionResolver();
-        page.getWindowFragment().getEditor().text("input", "${" + NAME + ":default_value}");
-        page.getWindowFragment().clickButton("Resolve");
+        } finally {
+            removeServerProperty(NAME, "server-one");
+        }
+    }
 
-        String output = page.getWindowFragment().getEditor().text("output");
-        page.getWindowFragment().clickButton("Done");
-        String expected = "server-one=" + VALUE + "\nserver-two=default_value\n";
-        assertEquals(expected, output);
+    private void addServerProperty(String name, String value, String server) throws Exception {
+        Address address = getServerPropertyAddress(name, server);
+        operations.add(address, Values.of("value", value));
+        new ResourceVerifier(address, client, 500).verifyExists();
+    }
 
-        page.goToServerProperties("server-one");
-        page.removeProperty(NAME);
+    private void removeServerProperty(String name, String server) throws Exception {
+        Address address = getServerPropertyAddress(name, server);
+        operations.remove(address);
+        new ResourceVerifier(address, client, 500).verifyDoesNotExist();
+    }
+
+    private Address getServerPropertyAddress(String name, String server) {
+        return Address.host(client.options().defaultHost)
+                .and("server-config", server)
+                .and("system-property", name);
     }
 }
