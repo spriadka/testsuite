@@ -7,7 +7,7 @@ import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Domain;
 import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
-import org.jboss.hal.testsuite.page.config.ServerConfigurationPage;
+import org.jboss.hal.testsuite.page.config.ELResolverPage;
 import org.jboss.hal.testsuite.util.Console;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,7 +38,7 @@ public class ELResolverTestCase {
     private WebDriver browser;
 
     @Page
-    private ServerConfigurationPage page;
+    private ELResolverPage page;
 
     @Before
     public void before() {
