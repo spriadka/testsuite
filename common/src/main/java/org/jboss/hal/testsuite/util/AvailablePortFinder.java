@@ -8,7 +8,7 @@ import java.util.Set;
 import java.util.TreeSet;
 
 /**
- * Finds currently available server ports.
+ * Finds currently unused server ports.
  *
  * @author <a href="http://mina.apache.org">Apache MINA Project</a>
  * @see <a href="http://www.iana.org/assignments/port-numbers">IANA.org</a>
@@ -25,100 +25,75 @@ public class AvailablePortFinder {
     public static final int MAX_PORT_NUMBER = 49151;
 
     /**
-     * Creates a new instance.
+     * Prevents creating a new instance.
      */
     private AvailablePortFinder() {
         // Do nothing
     }
 
     /**
-     * Returns the {@link Set} of currently available port numbers
+     * Returns the {@link Set} of currently unused port numbers
      * ({@link Integer}).  This method is identical to
-     * <code>getAvailablePorts(MIN_PORT_NUMBER, MAX_PORT_NUMBER)</code>.
+     * <code>getAvailableTCPPorts(MIN_PORT_NUMBER, MAX_PORT_NUMBER)</code>.
      *
      * WARNING: this can take a very long time.
      */
-    private static Set<Integer> getAvailablePorts() {
-        return getAvailablePorts(MIN_PORT_NUMBER, MAX_PORT_NUMBER);
+    private static Set<Integer> getAvailableTCPPorts() {
+        return getAvailableTCPPorts(MIN_PORT_NUMBER, MAX_PORT_NUMBER);
     }
 
     /**
-     * Gets an available port, selected by the system.
+     * Gets an unused port, selected by the system.
      *
-     * @throws NoSuchElementException if there are no ports available
+     * @throws NoSuchElementException if all ports are used
      */
-    private static int getNextAvailable() {
-        ServerSocket serverSocket = null;
-
-        try {
-            // Here, we simply return an available port found by the system
-            serverSocket = new ServerSocket(0);
-            int port = serverSocket.getLocalPort();
-
-            // Don't forget to close the socket...
-            serverSocket.close();
-
-            return port;
+    private static int getNextAvailableTCPPort() {
+        // Here, we simply return an unused port found by the system
+        try (ServerSocket serverSocket = new ServerSocket(0)) {
+            return serverSocket.getLocalPort();
         } catch (IOException ioe) {
             throw new NoSuchElementException(ioe.getMessage());
         }
     }
 
     /**
-     * Gets the next available port starting at a port.
+     * Gets the next unused port starting at a port.
      *
-     * @param fromPort the port to scan for availability
-     * @throws NoSuchElementException if there are no ports available
+     * @param fromPort the port to scan for usage
+     * @throws NoSuchElementException if all ports are used
      */
-    private static int getNextAvailable(int fromPort) {
+    private static int getNextAvailableTCPPort(int fromPort) {
         if (fromPort < MIN_PORT_NUMBER || fromPort > MAX_PORT_NUMBER) {
             throw new IllegalArgumentException("Invalid start port: " + fromPort);
         }
 
         for (int i = fromPort; i <= MAX_PORT_NUMBER; i++) {
-            if (available(i)) {
+            if (isPortFreeToUse(i)) {
                 return i;
             }
         }
 
-        throw new NoSuchElementException("Could not find an available port " + "above " + fromPort);
+        throw new NoSuchElementException("Could not find an unused port " + "above " + fromPort);
     }
 
     /**
-     * Checks to see if a specific port is available.
+     * Checks to see if a specific port is not currently used.
      *
-     * @param port the port to check for availability
+     * @param port the port to check for usage
      */
-    private static boolean available(int port) {
+    private static boolean isPortFreeToUse(int port) {
         if (port < MIN_PORT_NUMBER || port > MAX_PORT_NUMBER) {
             throw new IllegalArgumentException("Invalid start port: " + port);
         }
 
-        ServerSocket ss = null;
-        DatagramSocket ds = null;
-
-        try {
-            ss = new ServerSocket(port);
+        try (ServerSocket ss = new ServerSocket(port);
+             DatagramSocket ds = new DatagramSocket(port)) {
             ss.setReuseAddress(true);
-            ds = new DatagramSocket(port);
             ds.setReuseAddress(true);
             return true;
         } catch (IOException e) {
             // Do nothing
-        } finally {
-            if (ds != null) {
-                ds.close();
-            }
-
-            if (ss != null) {
-                try {
-                    ss.close();
-                } catch (IOException e) {
-                    /* should not be thrown */
-                }
-            }
         }
-
         return false;
     }
 
@@ -130,44 +105,32 @@ public class AvailablePortFinder {
      * {@link #MIN_PORT_NUMBER} and {@link #MAX_PORT_NUMBER} or
      * <code>fromPort</code> if greater than <code>toPort</code>.
      */
-    private static Set<Integer> getAvailablePorts(int fromPort, int toPort) {
+    private static Set<Integer> getAvailableTCPPorts(int fromPort, int toPort) {
         if (fromPort < MIN_PORT_NUMBER || toPort > MAX_PORT_NUMBER || fromPort > toPort) {
             throw new IllegalArgumentException("Invalid port range: " + fromPort + " ~ " + toPort);
         }
 
-        Set<Integer> result = new TreeSet<Integer>();
+        Set<Integer> result = new TreeSet<>();
 
         for (int i = fromPort; i <= toPort; i++) {
-            ServerSocket s = null;
-
-            try {
-                s = new ServerSocket(i);
-                result.add(Integer.valueOf(i));
+            try (ServerSocket ignored = new ServerSocket(i)) {
+                result.add(i);
             } catch (IOException e) {
                 // Do nothing
-            } finally {
-                if (s != null) {
-                    try {
-                        s.close();
-                    } catch (IOException e) {
-                        /* should not be thrown */
-                    }
-                }
             }
         }
-
         return result;
     }
 
     /**
-     * Gets an available user port.
+     * Gets an not used user port.
      */
     public static int getNextAvailableUserPort() {
-        int port = getNextAvailable();
-        if (available(port)) {
+        int port = getNextAvailableTCPPort();
+        if (isPortFreeToUse(port)) {
             return port;
         } else {
-            return getNextAvailable(MIN_PORT_NUMBER);
+            return getNextAvailableTCPPort(MIN_PORT_NUMBER);
         }
     }
 }
