@@ -15,11 +15,6 @@
       <groupId>org.jboss.as</groupId>
       <artifactId>hal-testsuite-common</artifactId>
     </dependency>
-
-    <dependency>
-      <groupId>org.apache.mina</groupId>
-      <artifactId>mina-core</artifactId>
-    </dependency>
   </dependencies>
 
 </project>

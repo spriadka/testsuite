@@ -1,7 +1,6 @@
 package org.jboss.hal.testsuite.test.configuration.connector;
 
 import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.mina.util.AvailablePortFinder;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
@@ -20,6 +19,7 @@ import org.jboss.hal.testsuite.fragment.config.mail.MailSessionWizard;
 import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
 import org.jboss.hal.testsuite.page.config.MailSessionsPage;
 import org.jboss.hal.testsuite.page.config.StandaloneConfigEntryPoint;
+import org.jboss.hal.testsuite.util.AvailablePortFinder;
 import org.jboss.hal.testsuite.util.Console;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -39,7 +39,6 @@ import org.wildfly.extras.creaper.core.online.operations.Values;
 import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
 
 import java.io.IOException;
-import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeoutException;
 
 import static org.junit.Assert.assertFalse;
@@ -243,7 +242,7 @@ public class MailTestCase {
 
     private static String createSocketBinding(String name) throws IOException, CommandFailedException {
         try (OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient()) {
-            int port = AvailablePortFinder.getNextAvailable(ThreadLocalRandom.current().nextInt(1024, 65000));
+            int port = AvailablePortFinder.getNextAvailableUserPort();
             log.info("Obtained port for socket binding '" + name + "' is " + port);
             client.apply(new AddSocketBinding.Builder(name)
                     .port(port)

@@ -1,9 +1,9 @@
 package org.jboss.hal.testsuite.test.configuration.undertow;
 
 import org.apache.commons.lang.RandomStringUtils;
-import org.apache.mina.util.AvailablePortFinder;
 import org.jboss.hal.testsuite.creaper.command.AddSocketBinding;
 import org.jboss.hal.testsuite.creaper.command.RemoveSocketBinding;
+import org.jboss.hal.testsuite.util.AvailablePortFinder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wildfly.extras.creaper.commands.undertow.AddHttpsSecurityRealm;
@@ -88,7 +88,7 @@ public final class UndertowOperations implements AutoCloseable {
 
     public String createSocketBindingWithoutReference() throws IOException, CommandFailedException {
         String name = "UndertowSocketBinding_" + RandomStringUtils.randomAlphanumeric(6);
-        int port = AvailablePortFinder.getNextAvailable();
+        int port = AvailablePortFinder.getNextAvailableUserPort();
         log.info("Obtained port for socket binding '{}' is '{}'.", name, port);
         client.apply(new AddSocketBinding.Builder(name)
                 .port(port)

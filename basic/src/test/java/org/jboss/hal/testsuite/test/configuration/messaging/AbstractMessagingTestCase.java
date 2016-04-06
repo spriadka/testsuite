@@ -1,7 +1,6 @@
 package org.jboss.hal.testsuite.test.configuration.messaging;
 
 import org.apache.commons.lang.RandomStringUtils;
-import org.apache.mina.util.AvailablePortFinder;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.dmr.ModelNode;
@@ -11,6 +10,7 @@ import org.jboss.hal.testsuite.creaper.command.AddSocketBinding;
 import org.jboss.hal.testsuite.creaper.command.RemoveSocketBinding;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.page.config.MessagingPage;
+import org.jboss.hal.testsuite.util.AvailablePortFinder;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -151,7 +151,7 @@ public abstract class AbstractMessagingTestCase {
 
     protected static String createSocketBinding(String name) throws CommandFailedException {
         client.apply(new AddSocketBinding.Builder(name)
-                .port(AvailablePortFinder.getNextAvailable())
+                .port(AvailablePortFinder.getNextAvailableUserPort())
                 .build());
         addSocketBindingToList(name);
         return name;

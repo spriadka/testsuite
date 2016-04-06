@@ -36,7 +36,6 @@
     <arq.managementPort>${as.managementPort}</arq.managementPort>
     <take.screenshot.after.each.test>false</take.screenshot.after.each.test>
     <version.org.wildfly.extras.creaper>0.9.4</version.org.wildfly.extras.creaper>
-    <version.org.apache.mina>2.0.9</version.org.apache.mina>
     <version.org.jgrapht>0.9.1</version.org.jgrapht>
   </properties>
 
@@ -91,12 +90,6 @@
         <groupId>org.jboss.as</groupId>
         <artifactId>hal-testsuite-common</artifactId>
         <version>${project.version}</version>
-      </dependency>
-
-      <dependency>
-        <groupId>org.apache.mina</groupId>
-        <artifactId>mina-core</artifactId>
-        <version>${version.org.apache.mina}</version>
       </dependency>
 
       <dependency>
