@@ -1,9 +1,9 @@
 package org.jboss.hal.testsuite.page.config;
 
-import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.ByJQuery;
-import org.jboss.hal.testsuite.fragment.ConfigFragment;
+import org.jboss.hal.testsuite.fragment.WindowFragment;
 import org.jboss.hal.testsuite.page.home.HomePage;
+import org.jboss.hal.testsuite.util.Console;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
@@ -18,13 +18,8 @@ public class ELResolverPage extends HomePage {
         browser.findElement(By.xpath("//div[@class='popupContent']//a[contains(text(), 'Expression Resolver')]")).click();
     }
 
-    public ConfigFragment getWindowFragment() {
-        WebElement editPanel = browser.findElement(By.className("default-window-content"));
-        return  Graphene.createPageFragment(ConfigFragment.class, editPanel);
-    }
-
     public String resolveSystemProperty(String name) {
-        ConfigFragment configFragment = getWindowFragment();
+        WindowFragment configFragment = Console.withBrowser(browser).openedWindow();
         configFragment.getEditor().text("input", "${" + name + ":default_value}");
         configFragment.clickButton("Resolve");
 
