@@ -22,7 +22,7 @@ public class AvailablePortFinder {
     /**
      * The maximum number of user port number.
      */
-    public static final int MAX_PORT_NUMBER = 49151;
+    public static final int MAX_PORT_NUMBER = 65535;
 
     /**
      * Prevents creating a new instance.
@@ -151,7 +151,7 @@ public class AvailablePortFinder {
     /**
      * Gets a port which is not used in both TCP and UDP.
      */
-    public static int getNextAvailableUserPort() {
+    public static int getNextAvailableNonPrivilegedPort() {
         int port = getNextAvailableTCPPort();
         if (isUDPPortFreeToUse(port)) {
             return port;

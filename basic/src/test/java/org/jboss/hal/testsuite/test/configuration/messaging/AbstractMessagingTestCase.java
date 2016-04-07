@@ -151,7 +151,7 @@ public abstract class AbstractMessagingTestCase {
 
     protected static String createSocketBinding(String name) throws CommandFailedException {
         client.apply(new AddSocketBinding.Builder(name)
-                .port(AvailablePortFinder.getNextAvailableUserPort())
+                .port(AvailablePortFinder.getNextAvailableNonPrivilegedPort())
                 .build());
         addSocketBindingToList(name);
         return name;

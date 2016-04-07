@@ -51,7 +51,7 @@ class JGroupsOperations {
     public String createSocketBinding(String name) throws IOException, CommandFailedException {
         //editing on full-ha profile in domain
         String socketBindingGroup = client.options().isDomain ? "full-ha-sockets" : "standard-sockets";
-        int port = AvailablePortFinder.getNextAvailableUserPort();
+        int port = AvailablePortFinder.getNextAvailableNonPrivilegedPort();
         logger.info("Obtained port for socket binding '" + name + "' is " + port);
         client.apply(new AddSocketBinding.Builder(name, socketBindingGroup)
                 .port(port)
