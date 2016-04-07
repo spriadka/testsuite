@@ -1,10 +1,10 @@
 package org.jboss.hal.testsuite.test.configuration.jgroups;
 
 import org.apache.commons.lang.RandomStringUtils;
-import org.apache.mina.util.AvailablePortFinder;
 import org.jboss.dmr.ModelNode;
 import org.jboss.dmr.Property;
 import org.jboss.hal.testsuite.creaper.command.AddSocketBinding;
+import org.jboss.hal.testsuite.util.AvailablePortFinder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wildfly.extras.creaper.core.CommandFailedException;
@@ -51,7 +51,7 @@ class JGroupsOperations {
     public String createSocketBinding(String name) throws IOException, CommandFailedException {
         //editing on full-ha profile in domain
         String socketBindingGroup = client.options().isDomain ? "full-ha-sockets" : "standard-sockets";
-        int port = AvailablePortFinder.getNextAvailable();
+        int port = AvailablePortFinder.getNextAvailableUserPort();
         logger.info("Obtained port for socket binding '" + name + "' is " + port);
         client.apply(new AddSocketBinding.Builder(name, socketBindingGroup)
                 .port(port)

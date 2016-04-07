@@ -1,7 +1,6 @@
 package org.jboss.hal.testsuite.test.configuration.web;
 
 import org.apache.commons.lang3.RandomStringUtils;
-import org.apache.mina.util.AvailablePortFinder;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
@@ -12,6 +11,7 @@ import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.creaper.command.AddSocketBinding;
 import org.jboss.hal.testsuite.page.config.ModClusterPage;
 import org.jboss.hal.testsuite.test.util.ConfigAreaChecker;
+import org.jboss.hal.testsuite.util.AvailablePortFinder;
 import org.jboss.hal.testsuite.util.ResourceVerifier;
 import org.junit.After;
 import org.junit.Before;
@@ -96,8 +96,8 @@ public class ModClusterTestCase {
     @BeforeClass
     public static void beforeClass() throws IOException, CommandFailedException {
         try (OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient()) {
-            int port = AvailablePortFinder.getNextAvailable(1024);
-            int multicastPort = AvailablePortFinder.getNextAvailable(1024);
+            int port = AvailablePortFinder.getNextAvailableUserPort();
+            int multicastPort = AvailablePortFinder.getNextAvailableUserPort();
             log.info("Obtained port for socket binding '" + ADVERTISE_SOCKET_VALUE + "' is " + port +
                     ", multicast port is " + multicastPort);
             client.apply(new AddSocketBinding.Builder(ADVERTISE_SOCKET_VALUE)
