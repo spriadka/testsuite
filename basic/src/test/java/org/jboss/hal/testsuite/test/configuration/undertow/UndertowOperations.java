@@ -88,7 +88,7 @@ public final class UndertowOperations implements AutoCloseable {
 
     public String createSocketBindingWithoutReference() throws IOException, CommandFailedException {
         String name = "UndertowSocketBinding_" + RandomStringUtils.randomAlphanumeric(6);
-        int port = AvailablePortFinder.getNextAvailableUserPort();
+        int port = AvailablePortFinder.getNextAvailableNonPrivilegedPort();
         log.info("Obtained port for socket binding '{}' is '{}'.", name, port);
         client.apply(new AddSocketBinding.Builder(name)
                 .port(port)

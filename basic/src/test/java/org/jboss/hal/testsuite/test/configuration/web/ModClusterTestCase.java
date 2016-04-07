@@ -96,8 +96,8 @@ public class ModClusterTestCase {
     @BeforeClass
     public static void beforeClass() throws IOException, CommandFailedException {
         try (OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient()) {
-            int port = AvailablePortFinder.getNextAvailableUserPort();
-            int multicastPort = AvailablePortFinder.getNextAvailableUserPort();
+            int port = AvailablePortFinder.getNextAvailableNonPrivilegedPort();
+            int multicastPort = AvailablePortFinder.getNextAvailableNonPrivilegedPort();
             log.info("Obtained port for socket binding '" + ADVERTISE_SOCKET_VALUE + "' is " + port +
                     ", multicast port is " + multicastPort);
             client.apply(new AddSocketBinding.Builder(ADVERTISE_SOCKET_VALUE)

@@ -22,7 +22,7 @@ public class TransactionsOperations {
 
     public String createSocketBinding() throws CommandFailedException, IOException {
         String name = "TransactionsOpsSB_" + RandomStringUtils.randomAlphanumeric(6);
-        int port = AvailablePortFinder.getNextAvailableUserPort();
+        int port = AvailablePortFinder.getNextAvailableNonPrivilegedPort();
         log.info("Obtained port for socket binding '" + name + "' is " + port);
         client.apply(new AddSocketBinding.Builder(name)
                 .port(port)

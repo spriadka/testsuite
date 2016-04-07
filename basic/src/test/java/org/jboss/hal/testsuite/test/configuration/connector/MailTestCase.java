@@ -242,7 +242,7 @@ public class MailTestCase {
 
     private static String createSocketBinding(String name) throws IOException, CommandFailedException {
         try (OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient()) {
-            int port = AvailablePortFinder.getNextAvailableUserPort();
+            int port = AvailablePortFinder.getNextAvailableNonPrivilegedPort();
             log.info("Obtained port for socket binding '" + name + "' is " + port);
             client.apply(new AddSocketBinding.Builder(name)
                     .port(port)
