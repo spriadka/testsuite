@@ -57,12 +57,12 @@ public class AvailablePortFinder {
     }
 
     /**
-     * Gets the next unused port starting at a port.
+     * Gets the next unused (TCP and UDP) port starting at a port.
      *
      * @param fromPort the port to scan for usage
      * @throws NoSuchElementException if all ports are used
      */
-    private static int getNextAvailableTCPPort(int fromPort) {
+    private static int getNextAvailablePort(int fromPort) {
         if (fromPort < MIN_PORT_NUMBER || fromPort > MAX_PORT_NUMBER) {
             throw new IllegalArgumentException("Invalid start port: " + fromPort);
         }
@@ -77,18 +77,25 @@ public class AvailablePortFinder {
     }
 
     /**
-     * Checks to see if a specific port is not currently used.
+     * Checks to see if a specific port is not currently used for both TCP and UDP.
      *
      * @param port the port to check for usage
      */
     private static boolean isPortFreeToUse(int port) {
+        return isUDPPortFreeToUse(port) && isTCPPortFreeToUse(port);
+    }
+
+    /**
+     * Checks to see if a specific port is not currently used UDP.
+     *
+     * @param port the port to check for usage
+     */
+    private static boolean isUDPPortFreeToUse(int port) {
         if (port < MIN_PORT_NUMBER || port > MAX_PORT_NUMBER) {
             throw new IllegalArgumentException("Invalid start port: " + port);
         }
 
-        try (ServerSocket ss = new ServerSocket(port);
-             DatagramSocket ds = new DatagramSocket(port)) {
-            ss.setReuseAddress(true);
+        try (DatagramSocket ds = new DatagramSocket(port)) {
             ds.setReuseAddress(true);
             return true;
         } catch (IOException e) {
@@ -98,7 +105,26 @@ public class AvailablePortFinder {
     }
 
     /**
-     * Returns the {@link Set} of currently avaliable port numbers ({@link Integer})
+     * Checks to see if a specific port is not currently used for TCP.
+     *
+     * @param port the port to check for usage
+     */
+    private static boolean isTCPPortFreeToUse(int port) {
+        if (port < MIN_PORT_NUMBER || port > MAX_PORT_NUMBER) {
+            throw new IllegalArgumentException("Invalid start port: " + port);
+        }
+
+        try (ServerSocket ss = new ServerSocket(port)) {
+            ss.setReuseAddress(true);
+            return true;
+        } catch (IOException e) {
+            // Do nothing
+        }
+        return false;
+    }
+
+    /**
+     * Returns the {@link Set} of currently not used port numbers ({@link Integer})
      * between the specified port range.
      *
      * @throws IllegalArgumentException if port range is not between
@@ -123,14 +149,14 @@ public class AvailablePortFinder {
     }
 
     /**
-     * Gets an not used user port.
+     * Gets a port which is not used in both TCP and UDP.
      */
     public static int getNextAvailableUserPort() {
         int port = getNextAvailableTCPPort();
-        if (isPortFreeToUse(port)) {
+        if (isUDPPortFreeToUse(port)) {
             return port;
         } else {
-            return getNextAvailableTCPPort(MIN_PORT_NUMBER);
+            return getNextAvailablePort(MIN_PORT_NUMBER);
         }
     }
 }
