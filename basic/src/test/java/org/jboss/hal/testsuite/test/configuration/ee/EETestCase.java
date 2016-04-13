@@ -3,19 +3,19 @@ package org.jboss.hal.testsuite.test.configuration.ee;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Standalone;
-import org.jboss.hal.testsuite.cli.CliClient;
-import org.jboss.hal.testsuite.cli.CliClientFactory;
-import org.jboss.hal.testsuite.cli.CliConstants;
+import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.page.config.EEPage;
-import org.jboss.hal.testsuite.test.util.ConfigAreaChecker;
-import org.jboss.hal.testsuite.util.Console;
-import org.jboss.hal.testsuite.util.ResourceVerifier;
+import org.jboss.hal.testsuite.util.ConfigChecker;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
+import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
+import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.Operations;
 
 /**
  * @author mkrajcov <mkrajcov@redhat.com>
@@ -24,9 +24,9 @@ import org.openqa.selenium.WebDriver;
 @Category(Standalone.class)
 public class EETestCase {
 
-    private CliClient client = CliClientFactory.getClient();
-    private ResourceVerifier verifier = new ResourceVerifier(CliConstants.EE_SUBSYSTEM_ADDRESS, client);
-    private ConfigAreaChecker checker = new ConfigAreaChecker(verifier);
+    private final OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
+    private final Operations operations = new Operations(client);
+    private final Address eeAddress = Address.subsystem("ee");
 
     @Drone
     public WebDriver browser;
@@ -36,12 +36,26 @@ public class EETestCase {
 
     @Before
     public void before() {
-        Console.withBrowser(browser).refreshAndNavigate(EEPage.class);
+        page.navigate();
     }
 
     @Test
-    public void toggleIsolatedDeployments() {
-        checker.editCheckboxAndAssert(page, "ear-subdeployments-isolated", true).invoke();
-        checker.editCheckboxAndAssert(page, "ear-subdeployments-isolated", false).invoke();
+    public void toggleIsolatedDeployments() throws Exception {
+        ModelNode value = operations.readAttribute(eeAddress, "ear-subdeployments-isolated");
+        try {
+            new ConfigChecker.Builder(client, eeAddress)
+                    .configFragment(page.getConfigFragment())
+                    .editAndSave(ConfigChecker.InputType.CHECKBOX, "ear-subdeployments-isolated", true)
+                    .verifyFormSaved()
+                    .verifyAttribute("ear-subdeployments-isolated", true);
+
+            new ConfigChecker.Builder(client, eeAddress)
+                    .configFragment(page.getConfigFragment())
+                    .editAndSave(ConfigChecker.InputType.CHECKBOX, "ear-subdeployments-isolated", false)
+                    .verifyFormSaved()
+                    .verifyAttribute("ear-subdeployments-isolated", false);
+        } finally {
+            operations.writeAttribute(eeAddress, "ear-subdeployments-isolated", value);
+        }
     }
 }
