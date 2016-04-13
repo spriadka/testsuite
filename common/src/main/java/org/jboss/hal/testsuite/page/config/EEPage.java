@@ -14,16 +14,16 @@ public class EEPage extends ConfigurationPage implements Navigatable {
     public void navigate() {
         FinderNavigation navigation;
         if (ConfigUtils.isDomain()) {
-            navigation = new FinderNavigation(browser, DomainConfigEntryPoint.class);
-            navigation.step(FinderNames.CONFIGURATION, FinderNames.PROFILES)
-                    .step(FinderNames.PROFILE, ConfigUtils.getDefaultProfile())
-                    .step(FinderNames.SUBSYSTEM, "EE");
+            navigation = new FinderNavigation(browser, DomainConfigEntryPoint.class)
+                    .step(FinderNames.CONFIGURATION, FinderNames.PROFILES)
+                    .step(FinderNames.PROFILE, ConfigUtils.getDefaultProfile());
         } else {
-            navigation = new FinderNavigation(browser, StandaloneConfigEntryPoint.class);
-            navigation.step(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
-                    .step(FinderNames.SUBSYSTEM, "EE");
+            navigation = new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
+                    .step(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS);
         }
-        navigation.selectRow().invoke(FinderNames.VIEW);
+        navigation.step(FinderNames.SUBSYSTEM, "EE")
+                .selectRow()
+                .invoke(FinderNames.VIEW);
         Application.waitUntilVisible();
     }
 }
