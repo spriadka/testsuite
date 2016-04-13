@@ -15,4 +15,8 @@ public class NetworkInterfaceContentFragment extends ConfigFragment {
         getResourceManager().removeResourceAndConfirm(interfaceName);
     }
 
+    public void selectInterface(String interfaceName) {
+        getResourceManager().selectByName(interfaceName);
+    }
+
 }

@@ -7,6 +7,7 @@ import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.fragment.config.interfaces.NetworkInterfaceContentFragment;
 import org.jboss.hal.testsuite.page.ConfigPage;
 import org.jboss.hal.testsuite.page.Navigatable;
+import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.PropUtils;
 import org.openqa.selenium.By;
 
@@ -27,5 +28,6 @@ public class NetworkInterfacesPage extends ConfigPage implements Navigatable {
         new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
                 .step(FinderNames.CONFIGURATION, "Interfaces")
                 .selectRow().invoke(FinderNames.VIEW);
+        Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
     }
 }
