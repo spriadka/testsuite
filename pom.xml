@@ -28,7 +28,7 @@
     <jboss.home>${jboss.dist}</jboss.home>
     <maven.compiler.target>1.8</maven.compiler.target>
     <maven.compiler.source>1.8</maven.compiler.source>
-    <version.arquillian.container.wildfly>1.0.0.CR1</version.arquillian.container.wildfly>
+    <version.arquillian.container.wildfly>1.0.2.Final</version.arquillian.container.wildfly>
     <!-- TODO change -DskipTests to something like -PsmokeTests -->
     <arguments>-Pjboss-release -DskipTests</arguments>
     <as.managementAddress>127.0.0.1</as.managementAddress>
@@ -213,6 +213,28 @@
     </profile>
 
     <profile>
+      <id>snapshots</id>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <configuration>
+              <properties>
+                <property>
+                  <name>listener</name>
+                  <value>org.jboss.hal.testsuite.testlistener.TestListener</value>
+                </property>
+              </properties>
+              <forkCount>1</forkCount>
+              <reuseForks>false</reuseForks>
+            </configuration>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
       <id>standalone</id>
       <properties>
         <arquillian.launch>server</arquillian.launch>
@@ -247,7 +269,7 @@
       <dependencies>
         <dependency>
           <groupId>org.wildfly.arquillian</groupId>
-          <artifactId>wildfly-arquillian-container-domain-managed</artifactId>
+          <artifactId>wildfly-arquillian-container-domain-remote</artifactId>
           <version>${version.arquillian.container.wildfly}</version>
         </dependency>
       </dependencies>
