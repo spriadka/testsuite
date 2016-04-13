@@ -10,6 +10,7 @@ import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.config.socketbindings.InboundSocketBindingFragment;
 import org.jboss.hal.testsuite.page.ConfigPage;
 import org.jboss.hal.testsuite.page.Navigatable;
+import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.PropUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -49,6 +50,7 @@ public class StandardSocketBindingsPage extends ConfigPage implements Navigatabl
                 .step(FinderNames.CONFIGURATION, "Socket Binding")
                 .selectRow().invoke(FinderNames.VIEW);
         Application.waitUntilVisible();
+        Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
         getResourceManager().viewByName("standard-sockets");
     }
 }
