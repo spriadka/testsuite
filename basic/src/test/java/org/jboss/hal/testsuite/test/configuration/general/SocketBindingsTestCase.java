@@ -101,14 +101,19 @@ public class SocketBindingsTestCase {
 
     @AfterClass
     public static void cleanUp() throws IOException, OperationException, TimeoutException, InterruptedException {
-        operations.removeIfExists(DMR_INBOUND);
-        operations.removeIfExists(DMR_INBOUND_TBA);
-        operations.removeIfExists(DMR_INBOUND_TBR);
-        operations.removeIfExists(DMR_OUTBOUND_REMOTE);
-        operations.removeIfExists(DMR_OUTBOUND_LOCAL);
+        try {
+            operations.removeIfExists(DMR_INBOUND);
+            operations.removeIfExists(DMR_INBOUND_TBA);
+            operations.removeIfExists(DMR_INBOUND_TBR);
+            operations.removeIfExists(DMR_OUTBOUND_REMOTE);
+            operations.removeIfExists(DMR_OUTBOUND_LOCAL);
 
-        administration.restartIfRequired();
-        administration.reloadIfRequired();
+            administration.restartIfRequired();
+            administration.reloadIfRequired();
+        } finally {
+            client.close();
+        }
+
     }
 
     @Test
