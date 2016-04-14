@@ -1,17 +1,29 @@
 #!/bin/bash
 
+usage="$(basename "$0") [-h] [-r|-i FILE]  -- creates a user friendly report file from snapshots taken with enabled snapshots profile.
+
+where:
+    -h  show this help text
+    -r  sets target path for generating report file
+    -i  sets path to initial server configuration which will be used to create diff from first snapshot taken after first test class, otherwise the first taken snapshot will be omitted"
+
+
 REPORT_FILE="snapshot_report.txt"
 INITIAL_FILE=""
 CANONICAL_FILE_SUFFIX="_canonical"
 FILES=(??:??:??_*/*.xml);
 
-while getopts 'r:i:' flag; do
+while getopts 'hr:i:' flag; do
     case "${flag}" in
+        h) echo "$usage"; exit 1;;
         r) REPORT_FILE="${OPTARG}" ;;
         i) INITIAL_FILE="${OPTARG}" ;;
-        *) echo "Unexpected option ${flag}"; exit 1;;
+        *) echo "$usage"; exit 1;;
     esac
 done
+
+# No parameters were passed
+if [ $OPTIND -eq 1 ]; then echo "$usage"; exit; fi
 
 saveDiffToReportFile () {
     PREVIOUS_PATH=$1
