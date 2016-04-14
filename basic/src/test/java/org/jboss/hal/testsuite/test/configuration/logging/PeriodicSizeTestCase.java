@@ -27,9 +27,9 @@ import java.io.IOException;
 @Category(Shared.class)
 public class PeriodicSizeTestCase extends LoggingAbstractTestCase {
 
-    private static final String PERIODIC_SIZE_HANDLER = "Periodic_Size_HANDLER" + RandomStringUtils.randomAlphanumeric(5);
-    private static final String PERIODIC_SIZE_HANDLER_TBR = "Periodic_Size_HANDLER" + RandomStringUtils.randomAlphanumeric(5);
-    private static final String PERIODIC_SIZE_HANDLER_TBA = "Periodic_Size_HANDLER" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String PERIODIC_SIZE_HANDLER = "PeriodicSizeHandler" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String PERIODIC_SIZE_HANDLER_TBR = "PeriodicSizeHandler-tbr" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String PERIODIC_SIZE_HANDLER_TBA = "PeriodicSizeHandler-tba" + RandomStringUtils.randomAlphanumeric(5);
 
     private static final Address PERIODIC_SIZE_HANDLER_ADDRESS = LOGGING_SUBSYSTEM
             .and("periodic-size-rotating-file-handler", PERIODIC_SIZE_HANDLER);
@@ -50,6 +50,7 @@ public class PeriodicSizeTestCase extends LoggingAbstractTestCase {
     @AfterClass
     public static void tearDown() throws IOException, OperationException {
         operations.removeIfExists(PERIODIC_SIZE_HANDLER_ADDRESS);
+        operations.removeIfExists(PERIODIC_SIZE_HANDLER_TBA_ADDRESS);
         operations.removeIfExists(PERIODIC_SIZE_HANDLER_TBR_ADDRESS);
     }
 
