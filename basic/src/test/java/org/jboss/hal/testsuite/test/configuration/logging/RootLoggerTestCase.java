@@ -19,6 +19,7 @@ import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
 import org.wildfly.extras.creaper.commands.logging.Logging;
 import org.wildfly.extras.creaper.core.CommandFailedException;
+import org.wildfly.extras.creaper.core.online.ModelNodeResult;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 
 import static org.junit.Assert.assertTrue;
@@ -64,12 +65,18 @@ public class RootLoggerTestCase extends LoggingAbstractTestCase {
     @Test
     public void editHandlers() throws Exception {
         String handler = "testHandler_" + RandomStringUtils.randomAlphanumeric(5);
+        ModelNodeResult defaultValue = operations.readAttribute(ROOT_LOGGER_ADDRESS, "handlers");
         client.apply(Logging.handler()
                 .console()
                 .add(handler)
                 .build());
-        administration.reloadIfRequired();
-        editTextAreaAndVerify(ROOT_LOGGER_ADDRESS, "handlers", new String[]{handler});
+        try {
+            editTextAreaAndVerify(ROOT_LOGGER_ADDRESS, "handlers", new String[]{handler});
+        } finally {
+            operations.writeAttribute(ROOT_LOGGER_ADDRESS, "handlers", defaultValue.value());
+            new ResourceVerifier(ROOT_LOGGER_ADDRESS, client, 4000).verifyAttribute("handlers", defaultValue.value());
+            client.apply(Logging.handler().console().remove(handler));
+        }
     }
 
     @Test
