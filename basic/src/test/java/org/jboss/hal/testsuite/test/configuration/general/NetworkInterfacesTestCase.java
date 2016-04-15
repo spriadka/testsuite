@@ -98,16 +98,21 @@ public class NetworkInterfacesTestCase {
 
     @AfterClass
     public static void cleanUp() throws IOException, OperationException, TimeoutException, InterruptedException {
-        operations.removeIfExists(DMR_INTERFACE_TBA);
-        operations.removeIfExists(DMR_INTERFACE_TBR);
-        operations.removeIfExists(DMR_INTERFACE);
-        operations.removeIfExists(DMR_INTERFACE_ANY);
-        operations.removeIfExists(DMR_INTERFACE_NO_ADDRESS);
-        operations.removeIfExists(DMR_INTERFACE_ANY_IP4);
-        operations.removeIfExists(DMR_INTERFACE_ANY_IP6);
+        try {
+            operations.removeIfExists(DMR_INTERFACE_TBA);
+            operations.removeIfExists(DMR_INTERFACE_TBR);
+            operations.removeIfExists(DMR_INTERFACE);
+            operations.removeIfExists(DMR_INTERFACE_ANY);
+            operations.removeIfExists(DMR_INTERFACE_NO_ADDRESS);
+            operations.removeIfExists(DMR_INTERFACE_ANY_IP4);
+            operations.removeIfExists(DMR_INTERFACE_ANY_IP6);
 
-        administration.restartIfRequired();
-        administration.reloadIfRequired();
+            administration.restartIfRequired();
+            administration.reloadIfRequired();
+        } finally {
+            client.close();
+        }
+
     }
 
     @Test

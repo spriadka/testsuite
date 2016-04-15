@@ -71,13 +71,17 @@ public class SystemPropertiesTestCase {
 
     @AfterClass
     public static void cleanUp() throws IOException, OperationException, TimeoutException, InterruptedException {
-        operations.removeIfExists(DMR_KEY_INVALID);
-        operations.removeIfExists(DMR_KEY_TBR);
-        operations.removeIfExists(DMR_KEY_TBA);
-        operations.removeIfExists(DMR_KEY2);
+        try {
+            operations.removeIfExists(DMR_KEY_INVALID);
+            operations.removeIfExists(DMR_KEY_TBR);
+            operations.removeIfExists(DMR_KEY_TBA);
+            operations.removeIfExists(DMR_KEY2);
 
-        administration.restartIfRequired();
-        administration.reloadIfRequired();
+            administration.restartIfRequired();
+            administration.reloadIfRequired();
+        } finally {
+            client.close();
+        }
     }
 
     @Test

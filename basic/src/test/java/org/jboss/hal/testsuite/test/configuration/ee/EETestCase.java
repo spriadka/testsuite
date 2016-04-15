@@ -8,6 +8,7 @@ import org.jboss.hal.testsuite.category.Standalone;
 import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.page.config.EEPage;
 import org.jboss.hal.testsuite.util.ConfigChecker;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -17,6 +18,8 @@ import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.Operations;
 
+import java.io.IOException;
+
 /**
  * @author mkrajcov <mkrajcov@redhat.com>
  */
@@ -24,7 +27,7 @@ import org.wildfly.extras.creaper.core.online.operations.Operations;
 @Category(Standalone.class)
 public class EETestCase {
 
-    private final OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
+    private static final OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
     private final Operations operations = new Operations(client);
     private final Address eeAddress = Address.subsystem("ee");
 
@@ -37,6 +40,11 @@ public class EETestCase {
     @Before
     public void before() {
         page.navigate();
+    }
+
+    @AfterClass
+    public static void afterClass() throws IOException {
+        client.close();
     }
 
     @Test
