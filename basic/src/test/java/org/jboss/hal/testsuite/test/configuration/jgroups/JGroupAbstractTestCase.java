@@ -8,6 +8,7 @@ import org.jboss.arquillian.junit.InSequence;
 import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
+import org.jboss.hal.testsuite.creaper.command.RemoveSocketBinding;
 import org.jboss.hal.testsuite.finder.Application;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
@@ -23,14 +24,17 @@ import org.jboss.hal.testsuite.util.Console;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.openqa.selenium.WebDriver;
+import org.wildfly.extras.creaper.core.CommandFailedException;
 import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.OperationException;
 import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
 
 import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -60,11 +64,22 @@ public class JGroupAbstractTestCase {
     protected static final Address JGROUPS_ADDRESS = client.options().isStandalone ? Address.subsystem("jgroups") :
             Address.of("profile", "full-ha").and("subsystem", "jgroups");
 
+    private static String socketBinding;
+    private static String diagnosticSocketBinding;
+
+    //private static final
+
     @Drone
     public WebDriver browser;
 
     @Page
     public JGroupsPage page;
+
+    @BeforeClass
+    public static void beforeClass() throws IOException, CommandFailedException {
+        socketBinding = jGroupsOperations.createSocketBinding();
+        diagnosticSocketBinding = jGroupsOperations.createSocketBinding();
+    }
 
     @Before
     public void before() {
@@ -91,7 +106,7 @@ public class JGroupAbstractTestCase {
     }
 
     @AfterClass
-    public static void tearDown() throws IOException, OperationException {
+    public static void tearDown() throws IOException, OperationException, TimeoutException, InterruptedException, CommandFailedException {
         try {
             jGroupsOperations.removeProperty(TRANSPORT_ADDRESS, TRANSPORT_PROPERTY_TBR);
             jGroupsOperations.removeProperty(PROTOCOL_ADDRESS, PROTOCOL_PROPERTY_TBR);
@@ -100,6 +115,10 @@ public class JGroupAbstractTestCase {
             jGroupsOperations.removeProperty(TRANSPORT_ADDRESS, PROPERTY_NAME_P);
             jGroupsOperations.removeProperty(PROTOCOL_ADDRESS, PROPERTY_NAME);
             jGroupsOperations.removeProperty(PROTOCOL_ADDRESS, PROPERTY_NAME_P);
+            client.apply(new RemoveSocketBinding(socketBinding));
+            client.apply(new RemoveSocketBinding(diagnosticSocketBinding));
+            administration.restartIfRequired();
+            administration.reloadIfRequired();
         } finally {
             IOUtils.closeQuietly(client);
         }
