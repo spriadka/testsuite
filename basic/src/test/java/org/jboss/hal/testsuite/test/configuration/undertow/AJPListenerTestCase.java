@@ -82,11 +82,11 @@ public class AJPListenerTestCase extends UndertowTestCaseAbstract {
         administration.reloadIfRequired();
         //add ajp listeners which will be used
         client.apply(new AddUndertowListener.AjpBuilder(AJP_LISTENER, HTTP_SERVER,
-                        undertowOps.createSocketBindingWithoutReference())
+                        undertowOps.createSocketBinding())
                 .enabled(true)
                 .build());
         client.apply(new AddUndertowListener.AjpBuilder(AJP_LISTENER_TBR, HTTP_SERVER,
-                        undertowOps.createSocketBindingWithoutReference())
+                        undertowOps.createSocketBinding())
                 .enabled(true)
                 .build());
 
