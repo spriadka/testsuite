@@ -31,11 +31,14 @@ public class SecuritySettingTestCase extends AbstractMessagingTestCase {
     private static final String PATTERN_TBA = "test-pattern-TBA_" + RandomStringUtils.randomAlphanumeric(5);
     private static final String PATTERN_TBR = "test-pattern-TBR_" + RandomStringUtils.randomAlphanumeric(5);
 
-    private static final Address PATTERN_ADDRESS = DEFAULT_MESSAGING_SERVER.and("security-setting", PATTERN)
+    private static final Address SECURITY_SETTINGS_ADDRESS = DEFAULT_MESSAGING_SERVER.and("security-setting", PATTERN);
+    private static final Address ROLE_ADDRESS = DEFAULT_MESSAGING_SERVER.and("security-setting", PATTERN)
             .and("role", ROLE);
-    private static final Address PATTERN_TBA_ADDRESS = DEFAULT_MESSAGING_SERVER.and("security-setting", PATTERN_TBA)
+    private static final Address SECURITY_SETTINGS_TBA_ADDRESS = DEFAULT_MESSAGING_SERVER.and("security-setting", PATTERN_TBA);
+    private static final Address ROLE_TBA_ADDRESS = DEFAULT_MESSAGING_SERVER.and("security-setting", PATTERN_TBA)
             .and("role", ROLE);
-    private static final Address PATTERN_TBR_ADDRESS = DEFAULT_MESSAGING_SERVER.and("security-setting", PATTERN_TBR)
+    private static final Address SECURITY_SETTINGS_TBR_ADDRESS = DEFAULT_MESSAGING_SERVER.and("security-setting", PATTERN_TBR);
+    private static final Address ROLE_TBR_ADDRESS = DEFAULT_MESSAGING_SERVER.and("security-setting", PATTERN_TBR)
             .and("role", ROLE);
 
     @BeforeClass
@@ -47,9 +50,12 @@ public class SecuritySettingTestCase extends AbstractMessagingTestCase {
 
     @AfterClass
     public static void tearDown() throws IOException, OperationException {
-        operations.removeIfExists(PATTERN_ADDRESS);
-        operations.removeIfExists(PATTERN_TBA_ADDRESS);
-        operations.removeIfExists(PATTERN_TBR_ADDRESS);
+        operations.removeIfExists(ROLE_ADDRESS);
+        operations.removeIfExists(SECURITY_SETTINGS_ADDRESS);
+        operations.removeIfExists(ROLE_TBA_ADDRESS);
+        operations.removeIfExists(SECURITY_SETTINGS_TBA_ADDRESS);
+        operations.removeIfExists(ROLE_TBR_ADDRESS);
+        operations.removeIfExists(SECURITY_SETTINGS_TBR_ADDRESS);
     }
 
     @Page
@@ -71,55 +77,55 @@ public class SecuritySettingTestCase extends AbstractMessagingTestCase {
     @Test
     public void addSecuritySetting() throws Exception {
         page.addSecuritySettings(PATTERN_TBA, ROLE);
-        new ResourceVerifier(PATTERN_TBA_ADDRESS, client).verifyExists();
+        new ResourceVerifier(ROLE_TBA_ADDRESS, client).verifyExists();
     }
 
     @Test
     public void updateSendSecuritySetting() throws Exception {
-        editCheckboxAndVerify(PATTERN_ADDRESS, "send", true);
-        editCheckboxAndVerify(PATTERN_ADDRESS, "send", false);
+        editCheckboxAndVerify(ROLE_ADDRESS, "send", true);
+        editCheckboxAndVerify(ROLE_ADDRESS, "send", false);
    }
 
     @Test
     public void updateConsumeSecuritySetting() throws Exception {
-        editCheckboxAndVerify(PATTERN_ADDRESS, "consume", true);
-        editCheckboxAndVerify(PATTERN_ADDRESS, "consume", false);
+        editCheckboxAndVerify(ROLE_ADDRESS, "consume", true);
+        editCheckboxAndVerify(ROLE_ADDRESS, "consume", false);
     }
 
     @Test
     public void updateManageSecuritySetting() throws Exception {
-        editCheckboxAndVerify(PATTERN_ADDRESS, "manage", true);
-        editCheckboxAndVerify(PATTERN_ADDRESS, "manage", false);
+        editCheckboxAndVerify(ROLE_ADDRESS, "manage", true);
+        editCheckboxAndVerify(ROLE_ADDRESS, "manage", false);
     }
 
     @Test
     public void updateCreateDurableSecuritySetting() throws Exception {
         page.clickAdvanced();
-        editCheckboxAndVerify(PATTERN_ADDRESS, "createDurableQueue", "create-durable-queue", true);
+        editCheckboxAndVerify(ROLE_ADDRESS, "createDurableQueue", "create-durable-queue", true);
     }
 
     @Test
     public void updateDeleteDurableSecuritySetting() throws Exception {
         page.clickAdvanced();
-        editCheckboxAndVerify(PATTERN_ADDRESS, "deleteDurableQueue", "delete-durable-queue", true);
+        editCheckboxAndVerify(ROLE_ADDRESS, "deleteDurableQueue", "delete-durable-queue", true);
     }
 
     @Test
     public void updateCreateNonDurableSecuritySetting() throws Exception {
         page.clickAdvanced();
-        editCheckboxAndVerify(PATTERN_ADDRESS, "createNonDurableQueue", "create-non-durable-queue", true);
+        editCheckboxAndVerify(ROLE_ADDRESS, "createNonDurableQueue", "create-non-durable-queue", true);
     }
 
     @Test
     public void updateDeleteNonDurableSecuritySetting() throws Exception {
         page.clickAdvanced();
-        editCheckboxAndVerify(PATTERN_ADDRESS, "deleteNonDurableQueue", "delete-non-durable-queue", true);
+        editCheckboxAndVerify(ROLE_ADDRESS, "deleteNonDurableQueue", "delete-non-durable-queue", true);
     }
 
     @Test
     public void removeSecuritySetting() throws Exception {
         page.remove(PATTERN_TBR);
-        new ResourceVerifier(PATTERN_TBR_ADDRESS, client).verifyDoesNotExist();
+        new ResourceVerifier(ROLE_TBR_ADDRESS, client).verifyDoesNotExist();
     }
 
     private static void addSecuritySettings(String pattern, String role) throws IOException {
