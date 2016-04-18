@@ -9,6 +9,7 @@ import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
 import org.jboss.hal.testsuite.page.config.UndertowHTTPPage;
+import org.jboss.hal.testsuite.util.ConfigChecker;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
@@ -19,6 +20,7 @@ import org.junit.runner.RunWith;
 import org.wildfly.extras.creaper.commands.undertow.AddUndertowListener;
 import org.wildfly.extras.creaper.commands.undertow.SslVerifyClient;
 import org.wildfly.extras.creaper.core.CommandFailedException;
+import org.wildfly.extras.creaper.core.online.ModelNodeResult;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.OperationException;
 
@@ -90,13 +92,13 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
         operations.add(HTTP_SERVER_ADDRESS);
         administration.reloadIfRequired();
         client.apply(new AddUndertowListener.HttpsBuilder(HTTPS_LISTENER, HTTP_SERVER,
-                        undertowOps.createSocketBindingWithoutReference())
+                        undertowOps.createSocketBinding())
                 .securityRealm(undertowOps.createSecurityRealm())
                 .verifyClient(SslVerifyClient.NOT_REQUESTED)
                 .enabled(true)
                 .build());
         client.apply(new AddUndertowListener.HttpsBuilder(HTTPS_LISTENER_TBR, HTTP_SERVER,
-                        undertowOps.createSocketBindingWithoutReference())
+                        undertowOps.createSocketBinding())
                 .securityRealm(undertowOps.createSecurityRealm())
                 .verifyClient(SslVerifyClient.NOT_REQUESTED)
                 .enabled(true)
@@ -363,7 +365,17 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
 
     @Test
     public void editSocketBinding() throws Exception {
-        editTextAndVerify(HTTPS_LISTENER_ADDRESS, SOCKET_BINDING, undertowOps.createSocketBindingWithoutReference());
+        String socketBinding = undertowOps.createSocketBinding();
+        ModelNodeResult result = operations.readAttribute(HTTPS_LISTENER_ADDRESS, SOCKET_BINDING);
+        try {
+            new ConfigChecker.Builder(client, HTTPS_LISTENER_ADDRESS)
+                    .configFragment(page.getConfigFragment())
+                    .editAndSave(ConfigChecker.InputType.TEXT, SOCKET_BINDING, socketBinding)
+                    .verifyFormSaved()
+                    .verifyAttribute(SOCKET_BINDING, socketBinding);
+        } finally {
+            operations.writeAttribute(HTTPS_LISTENER_ADDRESS, SOCKET_BINDING, result.value());
+        }
     }
 
     @Test
