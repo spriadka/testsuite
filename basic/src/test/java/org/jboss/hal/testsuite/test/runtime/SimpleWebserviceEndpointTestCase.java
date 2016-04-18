@@ -10,37 +10,34 @@ import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.creaper.command.DeployCommand;
 import org.jboss.hal.testsuite.creaper.command.UndeployCommand;
-import org.jboss.hal.testsuite.finder.Application;
-import org.jboss.hal.testsuite.finder.FinderNames;
-import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.fragment.MetricsAreaFragment;
 import org.jboss.hal.testsuite.fragment.MetricsFragment;
 import org.jboss.hal.testsuite.mbui.MbuiNavigation;
-import org.jboss.hal.testsuite.page.runtime.DomainRuntimeEntryPoint;
-import org.jboss.hal.testsuite.page.runtime.StandaloneRuntimeEntryPoint;
 import org.jboss.hal.testsuite.page.runtime.WebServiceEndpointsPage;
-import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.exporter.ZipExporter;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.After;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
+import org.wildfly.extras.creaper.core.CommandFailedException;
 import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
 import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.Operations;
 import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.Service;
 import javax.xml.ws.WebServiceException;
-
 import java.io.File;
+import java.io.IOException;
 import java.net.URL;
-
+import java.util.concurrent.TimeoutException;
 
 import static junit.framework.TestCase.assertEquals;
 
@@ -51,17 +48,21 @@ import static junit.framework.TestCase.assertEquals;
 @RunAsClient
 @Category(Shared.class)
 public class SimpleWebserviceEndpointTestCase {
-    public static final String RESPONSES = "Responses";
-    public static final String NUMBER_OF_REQUEST = "Number of request";
-    public static final String FAULTS = "Faults";
-    public static final int DELTA = 3;
+    private static final String RESPONSES = "Responses";
+    private static final String NUMBER_OF_REQUEST = "Number of request";
+    private static final String FAULTS = "Faults";
+    private static final int DELTA = 3;
 
-    private FinderNavigation navigation;
     private MbuiNavigation mbuiNavigation;
+    private static final OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
+    private static final Operations operations = new Operations(client);
+    private static final Administration administration = new Administration(client);
+    private static ResourceVerifier verifier;
+    private static Address address = Address.root();
 
-    private static OnlineManagementClient managementClient = ManagementClientProvider.createOnlineManagementClient();
-    private ResourceVerifier verifier;
-    private Address address = Address.root();
+    private static final Address WEBSERVICES_ADDRESS = Address.subsystem("webservices");
+    private static final String DEPLOYMENT_FILE_NAME = "test.war";
+    private static final File DEPLOYMENT_FILE = new File("src/test/resources/" + DEPLOYMENT_FILE_NAME);
 
     @Drone
     private WebDriver browser;
@@ -69,58 +70,55 @@ public class SimpleWebserviceEndpointTestCase {
     @Page
     private WebServiceEndpointsPage wsePage;
 
-    @Before
-    public void before() throws Exception {
-        mbuiNavigation = new MbuiNavigation(browser);
-        File war = new File("src/test/resources/test.war");
-        createDeployment().as(ZipExporter.class).exportTo((war), true);
-        if (ConfigUtils.isDomain()) {
-
-            address = address.and("host", "master").and("server", "server-one")
-                    .and("deployment", "test.war").and("subsystem", "webservices").and("endpoint", "test%3ATestService");
-            managementClient.execute("/profile=full/subsystem=webservices:write-attribute(name=statistics-enabled,value=true)");
-            verifier =  new ResourceVerifier(address, managementClient);
-            navigation = new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
-                    .step(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
-                    .step(FinderNames.HOST, "master")
-                    .step(FinderNames.SERVER, "server-one")
-                    .step(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
-                    .step(FinderNames.SUBSYSTEM, "Webservices");
-
-            managementClient.apply(new DeployCommand.Builder(war).toAllGroups().name("test.war").build());
-        } else {
-            address = address.and("deployment", "test.war").and("subsystem", "webservices").and("endpoint", "test%3ATestService");
-
-            verifier =  new ResourceVerifier(address, managementClient);
-            managementClient.execute("/subsystem=webservices:write-attribute(name=statistics-enabled,value=true)");
-            navigation = new FinderNavigation(browser, StandaloneRuntimeEntryPoint.class)
-                    .step(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
-                    .step(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
-                    .step(FinderNames.SUBSYSTEM, "Webservices");
-
-            managementClient.apply(new DeployCommand.Builder(war).name("test.war").build());
+    @BeforeClass
+    public static void beforeClass() throws IOException, CommandFailedException {
+        operations.writeAttribute(WEBSERVICES_ADDRESS, "statistics-enabled", true);
+        if (client.options().isDomain) {
+            address = Address.host(client.options().defaultHost)
+                    .and("server", "server-one");
         }
-        navigation.selectRow().invoke("View");
-        Application.waitUntilVisible();
+        address = address.and("deployment", DEPLOYMENT_FILE_NAME)
+                .and("subsystem", "webservices")
+                .and("endpoint", "test%3ATestService");
+        verifier =  new ResourceVerifier(address, client);
+    }
+
+    @Before
+    public void before() throws IOException, CommandFailedException {
+        createDeployment().as(ZipExporter.class).exportTo((DEPLOYMENT_FILE), true);
+
+        DeployCommand.Builder deployBuilder = new DeployCommand.Builder(DEPLOYMENT_FILE);
+        if (client.options().isDomain) {
+            deployBuilder.toAllGroups();
+        }
+        client.apply(deployBuilder.name(DEPLOYMENT_FILE_NAME).build());
+
+        mbuiNavigation = new MbuiNavigation(browser);
+        wsePage.navigate();
     }
 
     @After
     public void after() throws Exception {
-        if (ConfigUtils.isDomain()) {
-            managementClient.apply(new UndeployCommand.Builder("test.war").fromAllGroups().build());
-        } else {
-            managementClient.apply(new UndeployCommand.Builder("test.war").build());
+        UndeployCommand.Builder undeployBuilder = new UndeployCommand.Builder(DEPLOYMENT_FILE_NAME);
+        if (client.options().isDomain) {
+            undeployBuilder.fromAllGroups();
         }
-        File war = new File("src/test/resources/test.war");
-        war.delete();
+        client.apply(undeployBuilder.build());
 
-        Administration administration = new Administration(managementClient);
-        administration.reload();
+        DEPLOYMENT_FILE.delete();
+
+        administration.reloadIfRequired();
     }
 
     @AfterClass
-    public static void cleanup() {
-        IOUtils.closeQuietly(managementClient);
+    public static void afterClass() throws IOException, TimeoutException, InterruptedException {
+        try {
+            operations.undefineAttribute(WEBSERVICES_ADDRESS, "statistics-enabled");
+            administration.restartIfRequired();
+            administration.reloadIfRequired();
+        } finally {
+            IOUtils.closeQuietly(client);
+        }
     }
 
     @Test
@@ -213,8 +211,8 @@ public class SimpleWebserviceEndpointTestCase {
     }
 
     //Utils
-    private WebArchive createDeployment() {
-        WebArchive war = ShrinkWrap.create(WebArchive.class, "test.war");
+    private static WebArchive createDeployment() {
+        WebArchive war = ShrinkWrap.create(WebArchive.class, DEPLOYMENT_FILE_NAME);
         war.addPackage(SimpleWebserviceEndpointImpl.class.getPackage());
         war.addClass(SimpleWebserviceEndpointImpl.class);
         war.addAsWebInfResource("web.xml", "web.xml");
@@ -229,12 +227,12 @@ public class SimpleWebserviceEndpointTestCase {
             wsdlURL = new URL("http", "localhost", 8080, "/test/SimpleService?wsdl/string");
         else
             wsdlURL = new URL("http", "localhost", 8080, "/test/SimpleService?wsdl");
-        Service service = null;
+        Service service;
         try {
             service = Service.create(wsdlURL, serviceName);
             final SimpleWebserviceEndpointIface port = service.getPort(SimpleWebserviceEndpointIface.class);
             port.echo("hello");
-        } catch (WebServiceException | NullPointerException ex) {
+        } catch (WebServiceException | NullPointerException ignored) {
         }
     }
 
