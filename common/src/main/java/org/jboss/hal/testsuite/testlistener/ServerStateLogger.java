@@ -41,10 +41,10 @@ import org.slf4j.LoggerFactory;
  * </ul>
  * Created by pjelinek on Apr 18, 2016
  */
-public class ServerStateListener extends RunListener {
+public class ServerStateLogger extends RunListener {
 
-    private static final Logger log = LoggerFactory.getLogger(ServerStateListener.class);
-    private final ServerStateListenerOperations ops = new ServerStateListenerOperations();
+    private static final Logger log = LoggerFactory.getLogger(ServerStateLogger.class);
+    private final ServerStateLoggerOperations ops = new ServerStateLoggerOperations();
     private Map<String, Map<String, String>> initServerStateMap;
 
     @Override

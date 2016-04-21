@@ -213,7 +213,7 @@
     </profile>
 
     <profile>
-      <id>snapshots</id>
+      <id>serverCheck</id>
       <build>
         <plugins>
           <plugin>
@@ -223,7 +223,7 @@
               <properties>
                 <property>
                   <name>listener</name>
-                  <value>org.jboss.hal.testsuite.testlistener.TestListener</value>
+                  <value>org.jboss.hal.testsuite.testlistener.ConfigSnapshotTaker,org.jboss.hal.testsuite.testlistener.ServerStateLogger</value>
                 </property>
               </properties>
               <forkCount>1</forkCount>
