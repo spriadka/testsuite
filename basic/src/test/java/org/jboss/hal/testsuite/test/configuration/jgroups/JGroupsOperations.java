@@ -35,10 +35,8 @@ class JGroupsOperations {
     }
 
     public void removeProperty(Address address, String name) throws IOException, OperationException {
-        try {
-            operations.removeIfExists(address.and("property", name));
-        } catch (OperationException ignored) {
-            //operation fails if resource does not exists
+        if (operations.exists(address.and("property", name))) {
+            operations.remove(address.and("property", name));
         }
     }
 

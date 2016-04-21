@@ -51,8 +51,12 @@ public class JGroupAbstractTestCase {
     protected static final String PROPERTY_VALUE_P = "url1";
     protected static final String DEFAULT_PROTOCOL = "UNICAST3";
 
-    protected static final String  PROTOCOL_PROPERTY_TBR = "protocolProperty_" + RandomStringUtils.randomAlphanumeric(3);
-    protected static final String  PROTOCOL_PROPERTY_TBR_VALUE = RandomStringUtils.randomAlphanumeric(3);
+    /**
+     * Only valid properties have to be added! https://issues.jboss.org/browse/JBEAP-4279
+     * See http://www.jgroups.org/manual-3.x/html/protlist.html#UNICAST3
+     */
+    protected static final String  PROTOCOL_PROPERTY_TBR = "conn_close_timeout";
+    protected static final String  PROTOCOL_PROPERTY_TBR_VALUE = String.valueOf(60000);
     protected static final String  TRANSPORT_PROPERTY_TBR = "protocolProperty_" + RandomStringUtils.randomAlphanumeric(3);
     protected static final String  TRANSPORT_PROPERTY_TBR_VALUE = RandomStringUtils.randomAlphanumeric(3);
 
