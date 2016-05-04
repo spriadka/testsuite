@@ -3,10 +3,8 @@ package org.jboss.hal.testsuite.test.configuration.transactions;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
-import org.jboss.hal.testsuite.creaper.command.RemoveSocketBinding;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
-import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -43,11 +41,6 @@ public class ProcessIDTestCase extends TransactionsTestCaseAbstract {
         administration.reloadIfRequired();
         page.navigate();
         page.getConfig().switchTo("Process ID");
-    }
-
-    @AfterClass
-    public static void afterClass() throws CommandFailedException {
-        client.apply(new RemoveSocketBinding(socketBinding));
     }
 
     @Test

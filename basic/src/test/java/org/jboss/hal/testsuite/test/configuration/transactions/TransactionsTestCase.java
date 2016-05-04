@@ -4,7 +4,6 @@ import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Shared;
-import org.jboss.hal.testsuite.creaper.command.RemoveSocketBinding;
 import org.jboss.hal.testsuite.page.config.TransactionsPage;
 import org.jboss.hal.testsuite.util.ConfigChecker;
 import org.junit.Before;
@@ -102,7 +101,6 @@ public class TransactionsTestCase extends TransactionsTestCaseAbstract {
 
         } finally {
             operations.writeAttribute(TRANSACTIONS_ADDRESS, SOCKET_BINDING_ATTR, value);
-            client.apply(new RemoveSocketBinding(socketBinding));
         }
     }
 
@@ -119,7 +117,6 @@ public class TransactionsTestCase extends TransactionsTestCaseAbstract {
                     .verifyAttribute(STATUS_SOCKET_BINDING_ATTR, socketBinding);
         } finally {
             operations.writeAttribute(TRANSACTIONS_ADDRESS, STATUS_SOCKET_BINDING_ATTR, value);
-            client.apply(new RemoveSocketBinding(socketBinding));
         }
     }
 
