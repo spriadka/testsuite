@@ -37,12 +37,16 @@ public class DeployCommand implements OnlineCommand {
     private final boolean toAllGroups;
     private final String particularGroup;
     private final String deploymentName;
+    private final String runtimeName;
+    private final boolean disabled;
 
     private DeployCommand(Builder builder) {
         this.path = builder.path;
         this.toAllGroups = builder.toAllGroups;
         this.particularGroup = builder.particularGroup;
         this.deploymentName = builder.deploymentName;
+        this.runtimeName = builder.runtimeName;
+        this.disabled = builder.disabled;
     }
 
     @Override
@@ -58,6 +62,12 @@ public class DeployCommand implements OnlineCommand {
         if (deploymentName != null) {
             cmd.append(" --name=").append(deploymentName);
         }
+        if (runtimeName != null) {
+            cmd.append(" --runtime-name=").append(runtimeName);
+        }
+        if (disabled) {
+            cmd.append(" --disabled");
+        }
         ctx.client.executeCli(cmd.toString());
     }
 
@@ -66,6 +76,8 @@ public class DeployCommand implements OnlineCommand {
         private boolean toAllGroups = false;
         private String particularGroup;
         private String deploymentName;
+        private String runtimeName;
+        private boolean disabled = false;
 
         public Builder(String path) {
             if (!new File(path).exists()) {
@@ -112,6 +124,24 @@ public class DeployCommand implements OnlineCommand {
                 throw new IllegalArgumentException("Deployment name should be neither empty nor whitespace!");
             }
             this.deploymentName = deploymentName;
+            return this;
+        }
+
+        /**
+         * Optional, if not set, deploymentName will be used, if it is set. If not, filename will be used.
+         * @param runtimeName should be neither empty nor whitespace
+         * @return
+         */
+        public Builder runtimeName(String runtimeName) {
+            if (runtimeName != null && runtimeName.trim().isEmpty()) {
+                throw new IllegalArgumentException("Runtime name should be neither empty nor whitespace!");
+            }
+            this.runtimeName = runtimeName;
+            return this;
+        }
+
+        public Builder disabled() {
+            this.disabled = true;
             return this;
         }
 
