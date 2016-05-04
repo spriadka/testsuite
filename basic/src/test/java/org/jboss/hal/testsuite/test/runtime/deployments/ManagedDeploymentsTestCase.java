@@ -4,10 +4,9 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.arquillian.junit.InSequence;
 import org.jboss.hal.testsuite.category.Standalone;
-import org.jboss.hal.testsuite.cli.Library;
 import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
+import org.jboss.hal.testsuite.creaper.command.DeployCommand;
 import org.jboss.hal.testsuite.finder.Column;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
@@ -23,7 +22,9 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
+import org.wildfly.extras.creaper.core.CommandFailedException;
 import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
+import org.wildfly.extras.creaper.core.online.operations.OperationException;
 import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
 
 import java.io.File;
@@ -44,6 +45,17 @@ public class ManagedDeploymentsTestCase {
     private static final String NAME = "n_" + RandomStringUtils.randomAlphanumeric(5) + ".war";
     private static final String RUNTIME_NAME = "rn_" + RandomStringUtils.randomAlphanumeric(5) + ".war";
 
+    private static final String DEPLOYMENT_TBR_NAME = "n-tbr_" + RandomStringUtils.randomAlphanumeric(5) + ".war";
+    private static final String DEPLOYMENT_TBR_RUNTIME_NAME = "rn-tbr_" + RandomStringUtils.randomAlphanumeric(5) + ".war";
+
+    private static final String DEPLOYMENT_DISABLED_NAME = "n-disabled_" + RandomStringUtils.randomAlphanumeric(5) + ".war";
+    private static final String DEPLOYMENT_DISABLED_RUNTIME_NAME = "rn-disabled_" + RandomStringUtils.randomAlphanumeric(5) + ".war";
+
+    private static final String DEPLOYMENT_ENABLED_NAME = "n-enabled_" + RandomStringUtils.randomAlphanumeric(5) + ".war";
+    private static final String DEPLOYMENT_ENABLED_RUNTIME_NAME = "rn-enabled_" + RandomStringUtils.randomAlphanumeric(5) + ".war";
+
+
+
     private static final OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
     private static final Administration administration = new Administration(client);
     private static final DeploymentsOperations ops = new DeploymentsOperations(client);
@@ -61,23 +73,41 @@ public class ManagedDeploymentsTestCase {
     }
 
     @BeforeClass
-    public static void setUp() throws IOException, TimeoutException, InterruptedException {
+    public static void setUp() throws IOException, TimeoutException, InterruptedException, CommandFailedException {
         new Administration(client).reloadIfRequired();
+
+        client.apply(new DeployCommand.Builder(FILE_PATH + FILE_NAME)
+                .name(DEPLOYMENT_TBR_NAME)
+                .runtimeName(DEPLOYMENT_TBR_RUNTIME_NAME)
+                .build());
+
+        client.apply(new DeployCommand.Builder(FILE_PATH + FILE_NAME)
+                .name(DEPLOYMENT_DISABLED_NAME)
+                .runtimeName(DEPLOYMENT_DISABLED_RUNTIME_NAME)
+                .disabled()
+                .build());
+
+        client.apply(new DeployCommand.Builder(FILE_PATH + FILE_NAME)
+                .name(DEPLOYMENT_ENABLED_NAME)
+                .runtimeName(DEPLOYMENT_ENABLED_RUNTIME_NAME)
+                .build());
     }
 
     @AfterClass
-    public static void cleanUp() throws IOException, TimeoutException, InterruptedException {
+    public static void cleanUp() throws IOException, TimeoutException, InterruptedException, CommandFailedException, OperationException {
         try {
             ops.undeploy(NAME);
-            administration.reloadIfRequired();
+            ops.undeploy(DEPLOYMENT_DISABLED_NAME);
+            ops.undeploy(DEPLOYMENT_ENABLED_NAME);
+            ops.undeployIfExists(DEPLOYMENT_TBR_NAME);
             administration.restartIfRequired();
+            administration.reloadIfRequired();
         } finally {
             client.close();
         }
     }
 
     @Test
-    @InSequence(0)
     public void basicDeployment() throws Exception {
         Column column = navigation.step(FinderNames.DEPLOYMENT).selectColumn();
         Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
@@ -93,50 +123,42 @@ public class ManagedDeploymentsTestCase {
                 .runtimeName(RUNTIME_NAME)
                 .finish();
 
-        Library.letsSleep(1000);
         assertTrue("Deployment wizard should close", result);
         ops.verifyDeploymentExists(NAME);
     }
 
     @Test
-    @InSequence(1)
     public void disableDeployment() throws Exception {
-
-        Row row = navigation.step(FinderNames.DEPLOYMENT, NAME).selectRow();
+        Row row = navigation.step(FinderNames.DEPLOYMENT, DEPLOYMENT_ENABLED_NAME).selectRow();
         Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
         row.invoke("Disable");
 
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
 
-        ops.verifyIsDeploymentDisabled(NAME);
+        ops.verifyIsDeploymentDisabled(DEPLOYMENT_ENABLED_NAME);
     }
 
     @Test
-    @InSequence(2)
     public void enableDeployment() throws Exception {
-
-        Row row = navigation.step(FinderNames.DEPLOYMENT, NAME).selectRow();
+        Row row = navigation.step(FinderNames.DEPLOYMENT, DEPLOYMENT_DISABLED_NAME).selectRow();
         Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
         row.invoke("Enable");
 
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
 
-        ops.verifyIsDeploymentEnabled(NAME);
+        ops.verifyIsDeploymentEnabled(DEPLOYMENT_DISABLED_NAME);
     }
 
 
     @Test
-    @InSequence(3)
     public void removeDeployment() throws Exception {
-        Console.withBrowser(browser).waitUntilLoaded();
-        Library.letsSleep(1000);
-        Row row = navigation.step(FinderNames.DEPLOYMENT, NAME).selectRow();
+        Row row = navigation.step(FinderNames.DEPLOYMENT, DEPLOYMENT_TBR_NAME).selectRow();
         Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
-        row.invoke("Remove");
+        row.invoke(FinderNames.REMOVE);
 
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
 
-        ops.verifyDeploymentDoesNotExist(NAME);
+        ops.verifyDeploymentDoesNotExist(DEPLOYMENT_TBR_NAME);
     }
 
 }
