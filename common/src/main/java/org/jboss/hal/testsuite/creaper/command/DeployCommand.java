@@ -52,7 +52,7 @@ public class DeployCommand implements OnlineCommand {
     @Override
     public void apply(OnlineCommandContext ctx) throws Exception {
         StringBuilder cmd = new StringBuilder("deploy ").append(path);
-        if (ctx.options.isDomain) {
+        if (ctx.options.isDomain && !disabled) {
             if (toAllGroups) {
                 cmd.append(" --all-server-groups");
             } else {
@@ -147,7 +147,7 @@ public class DeployCommand implements OnlineCommand {
 
         public DeployCommand build() {
             if (ConfigUtils.isDomain()) {
-                if (toAllGroups == (particularGroup != null)) {
+                if (!disabled && toAllGroups == (particularGroup != null)) {
                     throw new IllegalArgumentException("In domain mode either nonempty particularGroup XOR toAllGroups should be specified!");
                 }
             } else {

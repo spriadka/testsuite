@@ -4,24 +4,24 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.arquillian.junit.InSequence;
 import org.jboss.hal.testsuite.category.Domain;
-import org.jboss.hal.testsuite.cli.Library;
 import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
-import org.jboss.hal.testsuite.finder.FinderNames;
-import org.jboss.hal.testsuite.finder.FinderNavigation;
+import org.jboss.hal.testsuite.creaper.command.DeployCommand;
 import org.jboss.hal.testsuite.fragment.runtime.DeploymentWizard;
 import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
 import org.jboss.hal.testsuite.page.runtime.DomainDeploymentPage;
 import org.jboss.hal.testsuite.util.Console;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
+import org.wildfly.extras.creaper.core.CommandFailedException;
 import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
+import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.OperationException;
+import org.wildfly.extras.creaper.core.online.operations.Operations;
 import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
 
 import java.io.File;
@@ -42,12 +42,30 @@ public class DomainManagedDeploymentsTestCase {
 
     private static final String FILE_PATH = "src/test/resources/";
     private static final String FILE_NAME = "mockWar.war";
+
     private static final String NAME = "n_" + RandomStringUtils.randomAlphanumeric(5) + ".war";
     private static final String RUNTIME_NAME = "rn_" + RandomStringUtils.randomAlphanumeric(5) + ".war";
 
+    private static final String DEPLOYMENT_ASSIGN_NAME = "an_" + RandomStringUtils.randomAlphanumeric(5) + ".war";
+    private static final String DEPLOYMENT_ASSIGN_RUNTIME_NAME = "arn_" + RandomStringUtils.randomAlphanumeric(5) + ".war";
+
+    private static final String DEPLOYMENT_ASSIGN_CHECK_NAME = "acn_" + RandomStringUtils.randomAlphanumeric(5) + ".war";
+    private static final String DEPLOYMENT_ASSIGN_CHECK_RUNTIME_NAME = "acrn_" + RandomStringUtils.randomAlphanumeric(5) + ".war";
+
+    private static final String DEPLOYMENT_TBR_NAME = "n-tbr_" + RandomStringUtils.randomAlphanumeric(5) + ".war";
+    private static final String DEPLOYMENT_TBR_RUNTIME_NAME = "rn-tbr_" + RandomStringUtils.randomAlphanumeric(5) + ".war";
+
+    private static final String DEPLOYMENT_DISABLED_NAME = "n-disabled_" + RandomStringUtils.randomAlphanumeric(5) + ".war";
+    private static final String DEPLOYMENT_DISABLED_RUNTIME_NAME = "rn-disabled_" + RandomStringUtils.randomAlphanumeric(5) + ".war";
+
+    private static final String DEPLOYMENT_ENABLED_NAME = "n-enabled_" + RandomStringUtils.randomAlphanumeric(5) + ".war";
+    private static final String DEPLOYMENT_ENABLED_RUNTIME_NAME = "rn-enabled_" + RandomStringUtils.randomAlphanumeric(5) + ".war";
+
+
     private static OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
+    private static Operations operations = new Operations(client);
+    private static Administration administration = new Administration(client);
     private static DeploymentsOperations ops = new DeploymentsOperations(client);
-    private FinderNavigation navigation;
 
     @Drone
     WebDriver browser;
@@ -56,30 +74,53 @@ public class DomainManagedDeploymentsTestCase {
     DomainDeploymentPage page;
 
     @AfterClass
-    public static void cleanUp() throws IOException {
+    public static void cleanUp() throws IOException, CommandFailedException, OperationException, TimeoutException, InterruptedException {
         try {
-            ops.undeploy(NAME);
+            ops.undeployIfExists(NAME);
+            ops.undeployIfExists(DEPLOYMENT_DISABLED_NAME);
+            ops.undeployIfExists(DEPLOYMENT_ENABLED_NAME);
+            ops.undeployIfExists(DEPLOYMENT_ASSIGN_NAME);
+            ops.undeployIfExists(DEPLOYMENT_ASSIGN_CHECK_NAME);
+            ops.undeployIfExists(DEPLOYMENT_TBR_NAME);
+            administration.restartIfRequired();
+            administration.reloadIfRequired();
         } finally {
             client.close();
         }
     }
 
     @BeforeClass
-    public static void setUp() throws IOException, TimeoutException, InterruptedException {
-        new Administration(client).reloadIfRequired();
-    }
+    public static void setUp() throws IOException, TimeoutException, InterruptedException, CommandFailedException {
+        administration.reloadIfRequired();
 
-    @Before
-    public void before() {
-        navigation = new FinderNavigation(browser, DomainDeploymentPage.class);
+        client.apply(new DeployCommand.Builder(FILE_PATH + FILE_NAME)
+                .name(DEPLOYMENT_TBR_NAME)
+                .runtimeName(DEPLOYMENT_TBR_RUNTIME_NAME)
+                .particularGroup(MAIN_SERVER_GROUP)
+                .build());
+
+        client.apply(new DeployCommand.Builder(FILE_PATH + FILE_NAME)
+                .name(DEPLOYMENT_DISABLED_NAME)
+                .runtimeName(DEPLOYMENT_DISABLED_RUNTIME_NAME)
+                .particularGroup(MAIN_SERVER_GROUP)
+                .build());
+
+        client.apply(new DeployCommand.Builder(FILE_PATH + FILE_NAME)
+                .name(DEPLOYMENT_ENABLED_NAME)
+                .runtimeName(DEPLOYMENT_ENABLED_RUNTIME_NAME)
+                .particularGroup(MAIN_SERVER_GROUP)
+                .build());
+
+        client.apply(new DeployCommand.Builder(FILE_PATH + FILE_NAME)
+                .name(DEPLOYMENT_ASSIGN_NAME)
+                .runtimeName(DEPLOYMENT_ASSIGN_RUNTIME_NAME)
+                .particularGroup(OTHER_SERVER_GROUP)
+                .build());
     }
 
     @Test
-    @InSequence(0)
     public void createDeployment() throws Exception {
-
-        navigation.step(FinderNames.BROWSE_BY, "Content Repository").step("All Content");
-        navigation.selectColumn().invoke("Add");
+        page.navigateToColumnInContentRepository().invoke("Add");
         File deployment = new File(FILE_PATH + FILE_NAME);
 
         DeploymentWizard wizard = Console.withBrowser(browser).openedWizard(DeploymentWizard.class);
@@ -97,151 +138,105 @@ public class DomainManagedDeploymentsTestCase {
     }
 
     @Test
-    @InSequence(1)
     public void assignDeploymentToServerGroup() throws Exception {
-        navigation.resetNavigation();
-        navigation.step(FinderNames.BROWSE_BY, "Server Groups")
-                .step(FinderNames.SERVER_GROUP, "main-server-group")
-                .step(FinderNames.DEPLOYMENT);
-        navigation.selectColumn().invoke("Add");
+        page.navigateToDeploymentColumnInServerGroup(MAIN_SERVER_GROUP).invoke("Add");
 
         DeploymentWizard wizard = Console.withBrowser(browser).openedWizard(DeploymentWizard.class);
 
         boolean result = wizard.switchToRepository()
                 .nextFluent()
+                .enableDeploymentInGroup(DEPLOYMENT_ASSIGN_NAME)
                 .finish();
 
         assertTrue("Deployment wizard should close", result);
-        ops.verifyIsDeploymentAssignedToServerGroup(MAIN_SERVER_GROUP, NAME);
+        ops.verifyIsDeploymentAssignedToServerGroup(MAIN_SERVER_GROUP, DEPLOYMENT_ASSIGN_NAME);
     }
 
     @Test
-    @InSequence(2)
     public void enableDeployment() throws Exception {
-        navigation.resetNavigation();
-        navigation.step(FinderNames.BROWSE_BY, "Server Groups")
-                .step(FinderNames.SERVER_GROUP, "main-server-group")
-                .step(FinderNames.DEPLOYMENT, NAME);
-        navigation.selectRow().invoke("Enable");
+        //disable deployment first in server group, so it can be enabled in test
+        operations.invoke("undeploy", Address.of("server-group", MAIN_SERVER_GROUP)
+                .and("deployment", DEPLOYMENT_DISABLED_NAME))
+                .assertSuccess();
+
+        page.navigateToRowInServerGroup(MAIN_SERVER_GROUP, DEPLOYMENT_DISABLED_NAME).invoke("Enable");
 
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
 
-        ops.verifyIsDeploymentEnabledInServerGroup(MAIN_SERVER_GROUP, NAME);
+        ops.verifyIsDeploymentEnabledInServerGroup(MAIN_SERVER_GROUP, DEPLOYMENT_DISABLED_NAME);
     }
 
     @Test
-    @InSequence(3)
     public void disableDeployment() throws Exception {
-
-        navigation.resetNavigation();
-        navigation.step(FinderNames.BROWSE_BY, "Server Groups")
-                .step(FinderNames.SERVER_GROUP, "main-server-group")
-                .step(FinderNames.DEPLOYMENT, NAME);
-        navigation.selectRow().invoke("Disable");
+        page.navigateToRowInServerGroup(MAIN_SERVER_GROUP, DEPLOYMENT_ENABLED_NAME).invoke("Disable");
 
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
 
-        ops.verifyIsDeploymentDisabledInServerGroup(MAIN_SERVER_GROUP, NAME);
+        ops.verifyIsDeploymentDisabledInServerGroup(MAIN_SERVER_GROUP, DEPLOYMENT_ENABLED_NAME);
     }
 
     @Test
-    @InSequence(4)
     public void removeDeployment() throws Exception {
-        Console.withBrowser(browser).waitUntilLoaded();
-        Library.letsSleep(1000);
-        navigation.resetNavigation();
-        navigation.step(FinderNames.BROWSE_BY, "Server Groups")
-                .step(FinderNames.SERVER_GROUP, "main-server-group")
-                .step(FinderNames.DEPLOYMENT, NAME);
-        navigation.selectRow().invoke("Unassign");
+        page.navigateToRowInServerGroup(MAIN_SERVER_GROUP, DEPLOYMENT_TBR_NAME)
+                .invoke("Unassign");
+        Console.withBrowser(browser).openedWindow(ConfirmationWindow.class)
+                .confirm();
 
-        Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
-        Library.letsSleep(1000);
+        page.navigateToRowInUnassignedContent(DEPLOYMENT_TBR_NAME)
+                .invoke("Remove");
+        Console.withBrowser(browser).openedWindow(ConfirmationWindow.class)
+                .confirm();
 
-        navigation.resetNavigation();
-        navigation.step(FinderNames.BROWSE_BY, "Unassigned Content")
-                .step("Unassigned", NAME);
-        navigation.selectRow().invoke("Remove");
-        Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
-
-        ops.verifyDeploymentDoesNotExist(NAME);
+        ops.verifyDeploymentDoesNotExist(DEPLOYMENT_TBR_NAME);
     }
 
     @Test
-    @InSequence(5)
-    public void checkAssingDeploymentName() {
+    public void checkAssignDeploymentName() {
         //create
-        navigation.resetNavigation();
-        navigation.step(FinderNames.BROWSE_BY, "Content Repository").step("All Content");
-        navigation.selectColumn().invoke("Add");
-        File deployment = new File(FILE_PATH + FILE_NAME);
-        DeploymentWizard wizard = Console.withBrowser(browser).openedWizard(DeploymentWizard.class);
-
-        boolean result = wizard.switchToManaged()
+        page.navigateToColumnInContentRepository().invoke("Add");
+        Console.withBrowser(browser).openedWizard(DeploymentWizard.class)
+                .switchToManaged()
                 .nextFluent()
-                .uploadDeployment(deployment)
+                .uploadDeployment(new File(FILE_PATH + FILE_NAME))
                 .nextFluent()
-                .name(NAME)
-                .runtimeName(RUNTIME_NAME)
+                .name(DEPLOYMENT_ASSIGN_CHECK_NAME)
+                .runtimeName(DEPLOYMENT_ASSIGN_CHECK_RUNTIME_NAME)
                 .finish();
-        //assing
-        navigation.resetNavigation();
-        navigation.step(FinderNames.BROWSE_BY, "Server Groups")
-                .step(FinderNames.SERVER_GROUP, "main-server-group")
-                .step(FinderNames.DEPLOYMENT);
-        navigation.selectColumn().invoke("Add");
 
-        result = wizard.switchToRepository()
+        //assign
+        page.navigateToDeploymentColumnInServerGroup(MAIN_SERVER_GROUP).invoke("Add");
+        Console.withBrowser(browser).openedWizard(DeploymentWizard.class)
+                .switchToRepository()
                 .nextFluent()
+                .enableDeploymentInGroup(DEPLOYMENT_ASSIGN_CHECK_NAME)
                 .finish();
-        //unassing and remove
-        Console.withBrowser(browser).waitUntilLoaded();
-        Library.letsSleep(1000);
-        Console.withBrowser(browser).refreshAndNavigate(DomainDeploymentPage.class);
-        navigation.step(FinderNames.BROWSE_BY, "Server Groups")
-                .step(FinderNames.SERVER_GROUP, "main-server-group")
-                .step(FinderNames.DEPLOYMENT, NAME);
-        navigation.selectRow().invoke("Unassign");
-        Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
-        Library.letsSleep(1000);
 
-        navigation.resetNavigation();
-        navigation.step(FinderNames.BROWSE_BY, "Unassigned Content")
-                .step("Unassigned", NAME);
-        navigation.selectRow().invoke("Remove");
-
+        //unassign and remove
+        page.navigateToRowInServerGroup(MAIN_SERVER_GROUP, DEPLOYMENT_ASSIGN_CHECK_NAME).invoke("Unassign");
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
-        Library.letsSleep(1000);
+
+        page.navigateToRowInUnassignedContent(DEPLOYMENT_ASSIGN_CHECK_NAME).invoke("Remove");
+        Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
+
         //create 2nd
-        navigation.resetNavigation();
-        navigation.step(FinderNames.BROWSE_BY, "Content Repository").step("All Content");
-        navigation.selectColumn().invoke("Add");
-        deployment = new File(FILE_PATH + FILE_NAME);
-
-        result = wizard.switchToManaged()
+        page.navigateToColumnInContentRepository().invoke("Add");
+        Console.withBrowser(browser).openedWizard(DeploymentWizard.class)
+                .switchToManaged()
                 .nextFluent()
-                .uploadDeployment(deployment)
+                .uploadDeployment(new File(FILE_PATH + FILE_NAME))
                 .nextFluent()
                 .name("testNew")
-                .runtimeName(RUNTIME_NAME)
+                .runtimeName("testNew")
                 .finish();
+
         //assing 2nd
-        Console.withBrowser(browser).refreshAndNavigate(DomainDeploymentPage.class);
-        navigation.resetNavigation();
-        navigation.step(FinderNames.BROWSE_BY, "Unassigned Content")
-                .step("Unassigned", "testNew");
-        navigation.selectRow().invoke("Assign");
+        page.navigateToRowInUnassignedContent("testNew").invoke("Assign");
 
-        boolean checkNameResult = page.checkAssingDeploymentNameInAssingContent("testNew");
+        boolean checkNameResult = page.checkAssignDeploymentNameInAssignContent("testNew");
+        assertTrue("Name in assign content should be name of deployment", checkNameResult);
 
-        assertTrue("Name in asssing content should be name of deployment", checkNameResult);
         //remove2nd
-        new FinderNavigation(browser, DomainDeploymentPage.class).step(FinderNames.BROWSE_BY).selectColumn();
-        navigation.resetNavigation();
-        navigation.step(FinderNames.BROWSE_BY, "Unassigned Content")
-                .step("Unassigned", "testNew");
-        navigation.selectRow().invoke("Remove");
+        page.navigateToRowInUnassignedContent("testNew").invoke("Remove");
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
-        Library.letsSleep(1000);
     }
 }

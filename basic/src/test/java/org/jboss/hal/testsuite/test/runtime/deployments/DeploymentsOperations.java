@@ -36,7 +36,11 @@ public class DeploymentsOperations {
     }
 
     public void undeploy(String deploymentName) throws IOException, CommandFailedException {
-        client.apply(new UndeployCommand.Builder(deploymentName).build());
+        UndeployCommand.Builder builder = new UndeployCommand.Builder(deploymentName);
+        if (client.options().isDomain) {
+            builder.fromAllGroups();
+        }
+        client.apply(builder.build());
     }
 
     public void undeployIfExists(String deploymentName) throws IOException, OperationException, CommandFailedException {
