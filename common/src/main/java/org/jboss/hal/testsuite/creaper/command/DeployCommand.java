@@ -39,6 +39,7 @@ public class DeployCommand implements OnlineCommand {
     private final String deploymentName;
     private final String runtimeName;
     private final boolean disabled;
+    private final boolean unmanaged;
 
     private DeployCommand(Builder builder) {
         this.path = builder.path;
@@ -47,6 +48,7 @@ public class DeployCommand implements OnlineCommand {
         this.deploymentName = builder.deploymentName;
         this.runtimeName = builder.runtimeName;
         this.disabled = builder.disabled;
+        this.unmanaged = builder.unmanaged;
     }
 
     @Override
@@ -68,6 +70,9 @@ public class DeployCommand implements OnlineCommand {
         if (disabled) {
             cmd.append(" --disabled");
         }
+        if (unmanaged) {
+            cmd.append(" --unmanaged");
+        }
         ctx.client.executeCli(cmd.toString());
     }
 
@@ -78,6 +83,7 @@ public class DeployCommand implements OnlineCommand {
         private String deploymentName;
         private String runtimeName;
         private boolean disabled = false;
+        private boolean unmanaged;
 
         public Builder(String path) {
             if (!new File(path).exists()) {
@@ -142,6 +148,11 @@ public class DeployCommand implements OnlineCommand {
 
         public Builder disabled() {
             this.disabled = true;
+            return this;
+        }
+
+        public Builder unmanaged() {
+            this.unmanaged = true;
             return this;
         }
 
