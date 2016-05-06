@@ -17,11 +17,11 @@ import java.io.File;
 import java.io.IOException;
 import java.time.LocalTime;
 
-public class TestListener extends RunListener {
+public class ConfigSnapshotTaker extends RunListener {
 
     private static final String XML_SNAPSHOT_DIRECTORY = PropUtils.get("snapshots.target.directory.name");
 
-    private static final Logger log = LoggerFactory.getLogger(TestListener.class);
+    private static final Logger log = LoggerFactory.getLogger(ConfigSnapshotTaker.class);
 
     private Class<?> testClazz;
     private boolean testRunStarted;

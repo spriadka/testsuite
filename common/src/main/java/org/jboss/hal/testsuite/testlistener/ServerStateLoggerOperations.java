@@ -42,10 +42,10 @@ import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
 import org.wildfly.extras.creaper.core.online.operations.Operations;
 
 /**
- * Helper class to read server state informations from model for {@link ServerStateListener}. <br />
+ * Helper class to read server state informations from model for {@link ServerStateLogger}. <br />
  * Created by pjelinek on Apr 19, 2016
  */
-public class ServerStateListenerOperations {
+public class ServerStateLoggerOperations {
 
     public Map<String, Map<String, String>> getServerStateMap() throws IOException {
         return tryWithClient(client -> {

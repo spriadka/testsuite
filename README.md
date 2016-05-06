@@ -31,7 +31,10 @@ Can be one of those:
 * `-Pbasic,domain` ... run basic tests against domain mode
 * `-Prbac,standalone` ... run RBAC related tests against standalone mode
 * `-Prbac,domain` ... run RBAC related tests against domain mode
-* `-P[basic,rbac],[domain,standalone],snapshots` ... run tests against given mode and take snapshot of server xml configuration file at the end of every test class run
+* `-P[basic,rbac],[domain,standalone],serverCheck` ... run tests against given mode and at the end of every test class run
+    * take snapshot of server xml configuration file
+    * check if server requires reload or restart
+    * in domain mode check if running states of servers don't change after test class run
 
 ### Required jboss.dist parameter
 
