@@ -22,11 +22,6 @@
 
 package org.jboss.hal.testsuite.test.configuration.picketlink.federation;
 
-import static org.jboss.hal.testsuite.test.configuration.picketlink.federation.UtilFedName.*;
-
-import java.io.IOException;
-import java.util.concurrent.TimeoutException;
-
 import org.apache.commons.io.IOUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
@@ -41,6 +36,12 @@ import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.OperationException;
 import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
+
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
+
+import static org.jboss.hal.testsuite.test.configuration.picketlink.federation.UtilFedName.Key;
+import static org.jboss.hal.testsuite.test.configuration.picketlink.federation.UtilFedName.SD_OTHER;
 
 /**
  * Created by pjelinek on Nov 18, 2015
@@ -67,12 +68,15 @@ public abstract class AbstractFederationTestCase {
 
     @AfterClass
     public static final void afterClass() throws IOException, InterruptedException, TimeoutException {
-        if (changeSubsystem()) {
-            federationOps.removeSubsystem();
-        } else {
-            adminOps.reloadIfRequired();
+        try {
+            if (changeSubsystem()) {
+                federationOps.removeSubsystem();
+            } else {
+                adminOps.reloadIfRequired();
+            }
+        } finally {
+            IOUtils.closeQuietly(client);
         }
-        IOUtils.closeQuietly(client);
     }
 
     protected final void setupFederation() throws IOException, OperationException {

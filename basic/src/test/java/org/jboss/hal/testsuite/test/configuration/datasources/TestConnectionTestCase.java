@@ -1,5 +1,6 @@
 package org.jboss.hal.testsuite.test.configuration.datasources;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.junit.Arquillian;
@@ -61,10 +62,14 @@ public class TestConnectionTestCase extends AbstractTestConnectionTestCase {
 
     @AfterClass
     public static void tearDown() throws CommandFailedException { // remove datasources when finished
-        dsOps.removeDataSource(dsNameValid);
-        dsOps.removeDataSource(dsNameInvalid);
-        dsOps.removeXADataSource(xaDsNameValid);
-        dsOps.removeXADataSource(xaDsNameInvalid);
+        try {
+            dsOps.removeDataSource(dsNameValid);
+            dsOps.removeDataSource(dsNameInvalid);
+            dsOps.removeXADataSource(xaDsNameValid);
+            dsOps.removeXADataSource(xaDsNameInvalid);
+        } finally {
+            IOUtils.closeQuietly(client);
+        }
     }
 
     @Before

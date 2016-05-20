@@ -1,5 +1,6 @@
 package org.jboss.hal.testsuite.test.runtime;
 
+import org.apache.commons.io.IOUtils;
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
@@ -22,6 +23,7 @@ import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.exporter.ZipExporter;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.After;
 import org.junit.Test;
@@ -114,6 +116,11 @@ public class SimpleWebserviceEndpointTestCase {
 
         Administration administration = new Administration(managementClient);
         administration.reload();
+    }
+
+    @AfterClass
+    public static void cleanup() {
+        IOUtils.closeQuietly(managementClient);
     }
 
     @Test
