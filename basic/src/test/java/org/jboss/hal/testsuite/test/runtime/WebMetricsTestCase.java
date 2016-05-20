@@ -1,18 +1,12 @@
 package org.jboss.hal.testsuite.test.runtime;
 
+import org.apache.commons.io.IOUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.as.controller.descriptions.ModelDescriptionConstants;
+import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Shared;
-import org.jboss.hal.testsuite.cli.CliClient;
-import org.jboss.hal.testsuite.cli.CliClientFactory;
-import org.jboss.hal.testsuite.cli.DomainManager;
-import org.jboss.hal.testsuite.dmr.AddressTemplate;
-import org.jboss.hal.testsuite.dmr.DefaultContext;
-import org.jboss.hal.testsuite.dmr.Dispatcher;
-import org.jboss.hal.testsuite.dmr.Operation;
-import org.jboss.hal.testsuite.dmr.ResourceAddress;
+import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.finder.Application;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
@@ -25,11 +19,15 @@ import org.jboss.hal.testsuite.util.Console;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
+import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
+import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.Operations;
+import org.wildfly.extras.creaper.core.online.operations.ReadAttributeOption;
+import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
@@ -46,15 +44,17 @@ public class WebMetricsTestCase {
     public static final String NUMBER_OF_REQUESTS = "Request Count";
     public static final String ERRORS = "Error Count";
 
-    static final AddressTemplate ADDRESS_TEMPLATE = AddressTemplate
-            .of("{default.profile}/subsystem=undertow/server=default-server/http-listener=default");
-    static final AddressTemplate ADDRESS_TEMPLATE_STATISTICS = AddressTemplate
-            .of("{default.profile}/subsystem=undertow");
+    private static final Address UNDERTOW_SUBSYSTEM_ADDR = Address.subsystem("undertow");
+    private static final Address DEFAULT_HTTP_LISTENER_ADDR = UNDERTOW_SUBSYSTEM_ADDR
+            .and("server", "default-server")
+            .and("http-listener", "default");
 
-    private CliClient cliClient = CliClientFactory.getClient();
+    private static final OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
+    private static final Operations ops = new Operations(client);
+    private static final Administration admin = new Administration(client);
     private FinderNavigation navigation;
-    private DefaultContext statementContext;
-    private static Dispatcher dispatcher;
+
+    private ModelNode undertowStatsEnabledOrigValue;
 
     @Drone
     private WebDriver browser;
@@ -66,32 +66,25 @@ public class WebMetricsTestCase {
     @Page
     private DomainRuntimeEntryPoint domainPage;
 
-    @BeforeClass
-    public static void setUp() {
-        dispatcher = new Dispatcher();
-    }
-
     @AfterClass
     public static void tearDown() {
-        dispatcher.close();
+        IOUtils.closeQuietly(client);
     }
 
     @Before
     public void before() throws IOException, TimeoutException, InterruptedException {
-        statementContext = new DefaultContext();
-        ResourceAddress addressStats = ADDRESS_TEMPLATE_STATISTICS.resolve(statementContext);
-        dispatcher.execute(new Operation.Builder(ModelDescriptionConstants.WRITE_ATTRIBUTE_OPERATION, addressStats).param("name", "statistics-enabled").param("value", "true").build());
+        undertowStatsEnabledOrigValue = ops.readAttribute(UNDERTOW_SUBSYSTEM_ADDR, "statistics-enabled", ReadAttributeOption.NOT_INCLUDE_DEFAULTS).value();
+        ops.writeAttribute(UNDERTOW_SUBSYSTEM_ADDR, "statistics-enabled", true);
 
         if (ConfigUtils.isDomain()) {
-            new DomainManager(cliClient).reloadAndWaitUntilRunning(60000);
+            admin.reload();
             navigation = new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
                     .step(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
                     .step(FinderNames.HOST, "master")
                     .step(FinderNames.SERVER, "server-one")
                     .step(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
                     .step(FinderNames.SUBSYSTEM, "Undertow");
-        }
-        else {
+        } else {
             navigation = new FinderNavigation(browser, StandaloneRuntimeEntryPoint.class)
                     .step(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
                     .step(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
@@ -106,16 +99,16 @@ public class WebMetricsTestCase {
 
     @After
     public void after() throws IOException, TimeoutException, InterruptedException {
-        ResourceAddress addressStats = ADDRESS_TEMPLATE_STATISTICS.resolve(statementContext);
-        dispatcher.execute(new Operation.Builder(ModelDescriptionConstants.WRITE_ATTRIBUTE_OPERATION, addressStats).param("name", "statistics-enabled").param("value", "false").build());
-        cliClient.reload();
+        if (undertowStatsEnabledOrigValue != null) {
+            ops.writeAttribute(UNDERTOW_SUBSYSTEM_ADDR, "statistics-enabled", undertowStatsEnabledOrigValue);
+        }
+        admin.reloadIfRequired();
     }
 
     @Test
-    public void requestPerConnectorMetrics() {
-        ResourceAddress address = ADDRESS_TEMPLATE.resolve(statementContext);
-        long expectedRequests = dispatcher.execute(new Operation.Builder(ModelDescriptionConstants.READ_ATTRIBUTE_OPERATION, address).param("name", "request-count").build()).payload().asLong();
-        long expectedErrors = dispatcher.execute(new Operation.Builder(ModelDescriptionConstants.READ_ATTRIBUTE_OPERATION, address).param("name", "error-count").build()).payload().asLong();
+    public void requestPerConnectorMetrics() throws IOException {
+        long expectedRequests = ops.readAttribute(DEFAULT_HTTP_LISTENER_ADDR, "request-count").longValue();
+        long expectedErrors = ops.readAttribute(DEFAULT_HTTP_LISTENER_ADDR, "error-count").longValue();
 
         Console.withBrowser(browser).waitUntilLoaded();
         MetricsAreaFragment rpcMetricsArea = wmPage.getRequestPerConnectorMetricsArea();
