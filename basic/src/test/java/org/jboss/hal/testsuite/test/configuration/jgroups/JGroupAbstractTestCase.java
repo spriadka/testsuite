@@ -1,5 +1,6 @@
 package org.jboss.hal.testsuite.test.configuration.jgroups;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
@@ -91,13 +92,17 @@ public class JGroupAbstractTestCase {
 
     @AfterClass
     public static void tearDown() throws IOException, OperationException {
-        jGroupsOperations.removeProperty(TRANSPORT_ADDRESS, TRANSPORT_PROPERTY_TBR);
-        jGroupsOperations.removeProperty(PROTOCOL_ADDRESS, PROTOCOL_PROPERTY_TBR);
-        jGroupsOperations.removeProperty(TRANSPORT_ADDRESS, PROPERTY_NAME);
-        jGroupsOperations.removeProperty(TRANSPORT_ADDRESS, PROPERTY_NAME);
-        jGroupsOperations.removeProperty(TRANSPORT_ADDRESS, PROPERTY_NAME_P);
-        jGroupsOperations.removeProperty(PROTOCOL_ADDRESS, PROPERTY_NAME);
-        jGroupsOperations.removeProperty(PROTOCOL_ADDRESS, PROPERTY_NAME_P);
+        try {
+            jGroupsOperations.removeProperty(TRANSPORT_ADDRESS, TRANSPORT_PROPERTY_TBR);
+            jGroupsOperations.removeProperty(PROTOCOL_ADDRESS, PROTOCOL_PROPERTY_TBR);
+            jGroupsOperations.removeProperty(TRANSPORT_ADDRESS, PROPERTY_NAME);
+            jGroupsOperations.removeProperty(TRANSPORT_ADDRESS, PROPERTY_NAME);
+            jGroupsOperations.removeProperty(TRANSPORT_ADDRESS, PROPERTY_NAME_P);
+            jGroupsOperations.removeProperty(PROTOCOL_ADDRESS, PROPERTY_NAME);
+            jGroupsOperations.removeProperty(PROTOCOL_ADDRESS, PROPERTY_NAME_P);
+        } finally {
+            IOUtils.closeQuietly(client);
+        }
     }
 
     @Test

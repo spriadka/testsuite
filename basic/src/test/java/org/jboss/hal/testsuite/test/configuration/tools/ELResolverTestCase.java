@@ -1,5 +1,6 @@
 package org.jboss.hal.testsuite.test.configuration.tools;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
@@ -9,6 +10,7 @@ import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.page.config.ELResolverPage;
 import org.jboss.hal.testsuite.util.Console;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -44,6 +46,11 @@ public class ELResolverTestCase {
     public void before() {
         page.navigate();
         Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
+    }
+
+    @AfterClass
+    public static void tearDown() {
+        IOUtils.closeQuietly(client);
     }
 
     @Test
