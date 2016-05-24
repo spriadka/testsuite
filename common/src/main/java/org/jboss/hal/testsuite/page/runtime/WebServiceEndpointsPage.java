@@ -1,14 +1,11 @@
 package org.jboss.hal.testsuite.page.runtime;
 
-import org.jboss.hal.testsuite.cli.Library;
 import org.jboss.hal.testsuite.finder.Application;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.fragment.MetricsAreaFragment;
 import org.jboss.hal.testsuite.page.MetricsPage;
 import org.jboss.hal.testsuite.util.ConfigUtils;
-import org.openqa.selenium.By;
-import org.openqa.selenium.WebElement;
 
 /**
  * Created by mkrajcov on 4/10/15.
@@ -16,13 +13,6 @@ import org.openqa.selenium.WebElement;
 public class WebServiceEndpointsPage extends MetricsPage {
     public MetricsAreaFragment getWebServiceRequestMetricsArea() {
         return getMetricsArea("Web Service Requests");
-    }
-
-    public void refreshStats() {
-        WebElement viewPanel = browser.findElement(By.className("rhs-content-panel"));
-        WebElement refreshLink = viewPanel.findElement(By.className("html-link"));
-        refreshLink.click();
-        Library.letsSleep(500);
     }
 
     public void navigateInDeploymentsMenu() {
