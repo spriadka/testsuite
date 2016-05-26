@@ -23,6 +23,8 @@
 package org.jboss.hal.testsuite.category;
 
 /**
+ * <p>Intended to be used only as a JUnit Category designation parameter
+ * in&nbsp;{@link org.junit.experimental.categories.Category} annotation</p>
  * Created by pjelinek on Mar 31, 2015
  */
 public interface Domain {
