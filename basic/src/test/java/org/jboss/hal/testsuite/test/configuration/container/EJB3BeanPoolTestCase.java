@@ -61,11 +61,12 @@ public class EJB3BeanPoolTestCase {
     }
 
     @AfterClass
-    public static void afterClass() throws IOException, OperationException {
+    public static void afterClass() throws IOException, OperationException, InterruptedException, TimeoutException {
         try {
             operations.removeIfExists(BEAN_POOL_ADDRESS);
             operations.removeIfExists(BEAN_POOL_TBA_ADDRESS);
             operations.removeIfExists(BEAN_POOL_TBR_ADDRESS);
+            administration.reloadIfRequired(); // reload after removal of pools is needed
         } finally {
             client.close();
         }
