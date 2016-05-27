@@ -1,6 +1,8 @@
 package org.jboss.hal.testsuite.page;
 
 import org.jboss.arquillian.graphene.Graphene;
+import org.jboss.hal.testsuite.cli.Library;
+import org.jboss.hal.testsuite.finder.Application;
 import org.jboss.hal.testsuite.fragment.MetricsAreaFragment;
 import org.jboss.hal.testsuite.util.PropUtils;
 import org.openqa.selenium.By;
@@ -35,5 +37,14 @@ public abstract class MetricsPage extends BasePage {
         area.setMetricGrid(metricGrid);
 
         return area;
+    }
+
+    public void refreshStats() {
+        WebElement viewPanel = browser.findElements(Application.APPLICATION_PANEL)
+                .stream().filter(p -> p.isDisplayed()).findFirst().get();
+
+        WebElement refreshLink = viewPanel.findElement(By.className("html-link"));
+        refreshLink.click();
+        Library.letsSleep(500);
     }
 }

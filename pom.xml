@@ -35,7 +35,7 @@
     <as.managementPort>9990</as.managementPort>
     <arq.managementPort>${as.managementPort}</arq.managementPort>
     <take.screenshot.after.each.test>false</take.screenshot.after.each.test>
-    <version.org.wildfly.extras.creaper>0.9.4</version.org.wildfly.extras.creaper>
+    <version.org.wildfly.extras.creaper>0.9.6</version.org.wildfly.extras.creaper>
     <version.org.jgrapht>0.9.1</version.org.jgrapht>
   </properties>
 
@@ -96,6 +96,14 @@
         <groupId>org.jgrapht</groupId>
         <artifactId>jgrapht-core</artifactId>
         <version>${version.org.jgrapht}</version>
+      </dependency>
+
+      <!-- servlet dependencies -->
+      <dependency>
+        <groupId>org.jboss.spec.javax.servlet</groupId>
+        <artifactId>jboss-servlet-api_3.1_spec</artifactId>
+        <version>1.0.0.Final</version>
+        <scope>provided</scope>
       </dependency>
 
     </dependencies>
