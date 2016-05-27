@@ -64,7 +64,7 @@ public class WebMetricsTestCase {
 
     private static final Logger log = LoggerFactory.getLogger(WebMetricsTestCase.class);
 
-    private static final String DEPLOYMENT_NAME = WebMetricsTestCase.class.getSimpleName()+"_servlets";
+    private static final String DEPLOYMENT_NAME = WebMetricsTestCase.class.getSimpleName() + "_servlets";
 
     public static final String NUMBER_OF_REQUESTS = "Request Count";
     public static final String ERRORS = "Error Count";
