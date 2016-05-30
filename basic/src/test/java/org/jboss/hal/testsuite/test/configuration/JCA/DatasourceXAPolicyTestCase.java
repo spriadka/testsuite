@@ -1,16 +1,18 @@
 package org.jboss.hal.testsuite.test.configuration.JCA;
 
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
+
+import org.apache.commons.io.IOUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.arquillian.junit.InSequence;
 import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Standalone;
-import org.jboss.hal.testsuite.cli.CliClient;
-import org.jboss.hal.testsuite.cli.CliClientFactory;
-import org.jboss.hal.testsuite.dmr.Dispatcher;
-import org.jboss.hal.testsuite.dmr.ResourceAddress;
-import org.jboss.hal.testsuite.dmr.ResourceVerifier;
+import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
+import org.jboss.hal.testsuite.creaper.ResourceVerifier;
+import org.jboss.hal.testsuite.dmr.ModelNodeGenerator;
 import org.jboss.hal.testsuite.finder.Application;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
@@ -25,6 +27,12 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
+import org.wildfly.extras.creaper.commands.datasources.AddXADataSource;
+import org.wildfly.extras.creaper.commands.datasources.RemoveXADataSource;
+import org.wildfly.extras.creaper.core.CommandFailedException;
+import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
+import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
 
 import static org.junit.Assert.assertTrue;
 
@@ -34,39 +42,34 @@ import static org.junit.Assert.assertTrue;
 @RunWith(Arquillian.class)
 @Category(Standalone.class)
 public class DatasourceXAPolicyTestCase {
-    private static final String SIZE = "Size=7";
-    private static final String WATERMARK = "Watermark=9";
-    private static final String XANAME = "XA-ExampleDS";
+
+    private static final OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
+    private static final Administration adminOps = new Administration(client);
+
+    private static final String DATASOURCE_NAME = "DatasourceXAPolicyTestCase-DS";
 
     private FinderNavigation navigation;
-    private static String profile = "";
 
-    private ModelNode path = new ModelNode("/subsystem=datasources/xa-data-source=XA-ExampleDS");
-    private ResourceAddress address = new ResourceAddress(path);
-    private static Dispatcher dispatcher;
-    private static ResourceVerifier verifier;
-    private static  CliClient cliClient = CliClientFactory.getClient();
+    private final Address datasourceAddress = Address.subsystem("datasources").and("xa-data-source", DATASOURCE_NAME);
+    private final ResourceVerifier verifier = new ResourceVerifier(datasourceAddress, client);
+    private final ModelNodeGenerator nodeGenerator = new ModelNodeGenerator();
 
     @BeforeClass
-    public static void setUp() {
-        dispatcher = new Dispatcher();
-        verifier  = new ResourceVerifier(dispatcher);
-        String command = "xa-data-source add" +
-                profile +
-                " --name=" + XANAME +
-                " --jndi-name=java:/xa-datasources/" + XANAME +
-                " --driver-name=h2" +
-                " --enabled=false" ;
-        cliClient.executeCommand(command);
+    public static void setUpDatasource() throws CommandFailedException {
+        client.apply(new AddXADataSource.Builder<>(DATASOURCE_NAME)
+                .jndiName("java:/xa-datasources/" + DATASOURCE_NAME)
+                .driverName("h2")
+                .build());
     }
 
     @AfterClass
-    public static void tearDown() {
-        dispatcher.close();
-        String command = "xa-data-source remove" +
-                profile +
-                " --name=" + XANAME;
-        cliClient.executeCommand(command);
+    public static void tearDown() throws CommandFailedException, IOException, InterruptedException, TimeoutException {
+        try {
+            client.apply(new RemoveXADataSource(DATASOURCE_NAME));
+            adminOps.reloadIfRequired();
+        } finally {
+            IOUtils.closeQuietly(client);
+        }
     }
 
     @Drone
@@ -80,7 +83,7 @@ public class DatasourceXAPolicyTestCase {
                 .step(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
                 .step(FinderNames.SUBSYSTEM, "Datasources")
                 .step("Type", "XA")
-                .step("XA Datasource", XANAME);
+                .step("XA Datasource", DATASOURCE_NAME);
 
         navigation.selectRow(true).invoke(FinderNames.VIEW);
         Application.waitUntilVisible();
@@ -91,97 +94,103 @@ public class DatasourceXAPolicyTestCase {
 
     @Test
     @InSequence(0)
-    public void setDecrementerClass() {
+    public void setDecrementerClass() throws Exception {
         ConfigFragment editPanelFragment = jcaPage.getConfigFragment();
         editPanelFragment.getEditor(). select("capacityDecrementerClass", "org.jboss.jca.core.connectionmanager.pool.capacity.WatermarkDecrementer");
 
         boolean finished = editPanelFragment.save();
         assertTrue("Config should be saved and closed.", finished);
 
-        verifier.verifyAttribute(address, "capacity-decrementer-class", "org.jboss.jca.core.connectionmanager.pool.capacity.WatermarkDecrementer", 500);
+        verifier.verifyAttribute("capacity-decrementer-class", "org.jboss.jca.core.connectionmanager.pool.capacity.WatermarkDecrementer");
     }
 
     @Test //property is not saved for next test .. https://issues.jboss.org/browse/HAL-809
     @InSequence(1)
-    public void setDecrementerProperty() {
+    public void setDecrementerProperty() throws Exception {
+        final String propertyKey = "Watermark", propertyValue = "9";
+
         ConfigFragment editPanelFragment = jcaPage.getConfigFragment();
-        editPanelFragment.getEditor().text("capacityDecrementerProperties", WATERMARK);
+        editPanelFragment.getEditor().text("capacityDecrementerProperties", propertyKey + "=" + propertyValue);
 
         boolean finished = editPanelFragment.save();
         assertTrue("Config should be saved and closed.", finished);
 
-        verifier.verifyAttribute(address, "capacity-decrementer-properties", "{\"Watermark\" => \"9\"}", 500);
+        ModelNode expectedPropertiesNode = nodeGenerator.createObjectNodeWithPropertyChild(propertyKey, propertyValue);
+        verifier.verifyAttribute("capacity-decrementer-properties", expectedPropertiesNode);
     }
 
     @Test
     @InSequence(2)
-    public void unsetDecrementerProperty() {
+    public void unsetDecrementerProperty() throws Exception {
         ConfigFragment editPanelFragment = jcaPage.getConfigFragment();
         editPanelFragment.getEditor().text("capacityDecrementerProperties", "");
 
         boolean finished = editPanelFragment.save();
         assertTrue("Config should be saved and closed.", finished);
 
-        verifier.verifyAttribute(address, "capacity-decrementer-properties", "undefined", 500);
+        verifier.verifyAttributeIsUndefined("capacity-decrementer-properties");
     }
 
     @Test
     @InSequence(3)
-    public void unsetDecrementerClass() {
+    public void unsetDecrementerClass() throws Exception {
         ConfigFragment editPanelFragment = jcaPage.getConfigFragment();
         editPanelFragment.getEditor().select("capacityDecrementerClass", "");
 
         boolean finished = editPanelFragment.save();
         assertTrue("Config should be saved and closed.", finished);
 
-        verifier.verifyAttribute(address, "capacity-decrementer-class", "undefined", 500);
+        verifier.verifyAttributeIsUndefined("capacity-decrementer-class");
     }
 
     @Test
     @InSequence(4)
-    public void setIncrementerClass() {
+    public void setIncrementerClass() throws Exception {
         ConfigFragment editPanelFragment = jcaPage.getConfigFragment();
         editPanelFragment.getEditor(). select("capacityIncrementerClass", "org.jboss.jca.core.connectionmanager.pool.capacity.SizeIncrementer");
 
         boolean finished = editPanelFragment.save();
         assertTrue("Config should be saved and closed.", finished);
 
-        verifier.verifyAttribute(address, "capacity-incrementer-class", "org.jboss.jca.core.connectionmanager.pool.capacity.SizeIncrementer", 500);
+        verifier.verifyAttribute("capacity-incrementer-class", "org.jboss.jca.core.connectionmanager.pool.capacity.SizeIncrementer");
     }
 
     @Test //property is not saved for next test .. https://issues.jboss.org/browse/HAL-809
     @InSequence(5)
-    public void setIncrementerProperty() {
+    public void setIncrementerProperty() throws Exception {
+        final String propertyKey = "Size", propertyValue = "7";
+
         ConfigFragment editPanelFragment = jcaPage.getConfigFragment();
-        editPanelFragment.getEditor().text("capacityIncrementerProperties", SIZE);
+        editPanelFragment.getEditor().text("capacityIncrementerProperties",  propertyKey + "=" + propertyValue);
 
         boolean finished = editPanelFragment.save();
         assertTrue("Config should be saved and closed.", finished);
 
-        verifier.verifyAttribute(address, "capacity-incrementer-properties", "{\"Size\" => \"7\"}", 500);
+        ModelNode expectedPropertiesNode = nodeGenerator.createObjectNodeWithPropertyChild(propertyKey, propertyValue);
+        verifier.verifyAttribute("capacity-incrementer-properties", expectedPropertiesNode);
     }
 
     @Test
     @InSequence(6)
-    public void unsetIncrementerProperty() {
+    public void unsetIncrementerProperty() throws Exception {
         ConfigFragment editPanelFragment = jcaPage.getConfigFragment();
         editPanelFragment.getEditor().text("capacityIncrementerProperties", "");
 
         boolean finished = editPanelFragment.save();
         assertTrue("Config should be saved and closed.", finished);
 
-        verifier.verifyAttribute(address, "capacity-incrementer-properties", "undefined", 500);
+        verifier.verifyAttributeIsUndefined("capacity-incrementer-properties");
     }
 
     @Test
     @InSequence(7)
-    public void unsetIncrementerClass() {
+    public void unsetIncrementerClass() throws Exception {
         ConfigFragment editPanelFragment = jcaPage.getConfigFragment();
         editPanelFragment.getEditor().select("capacityIncrementerClass", "");
 
         boolean finished = editPanelFragment.save();
         assertTrue("Config should be saved and closed.", finished);
 
-        verifier.verifyAttribute(address, "capacity-incrementer-class", "undefined", 500);
+        verifier.verifyAttributeIsUndefined("capacity-incrementer-class");
     }
 }
