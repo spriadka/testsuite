@@ -26,8 +26,6 @@ import java.io.IOException;
 import java.util.Map;
 
 import org.jboss.hal.testsuite.util.ConfigUtils;
-import org.junit.runner.Description;
-import org.junit.runner.Result;
 import org.junit.runner.notification.RunListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,21 +39,21 @@ import org.slf4j.LoggerFactory;
  * </ul>
  * Created by pjelinek on Apr 18, 2016
  */
-public class ServerStateLogger extends RunListener {
+public class ServerStateLogger extends TestCaseRunListener {
 
     private static final Logger log = LoggerFactory.getLogger(ServerStateLogger.class);
     private final ServerStateLoggerOperations ops = new ServerStateLoggerOperations();
     private Map<String, Map<String, String>> initServerStateMap;
 
     @Override
-    public void testRunStarted(Description description) throws Exception {
+    protected void beforeTestCase() throws Exception {
         if (ConfigUtils.isDomain()) {
             initServerStateMap = ops.getServerStateMap();
         }
     }
 
     @Override
-    public void testRunFinished(Result result) throws Exception {
+    protected void afterTestCase() throws Exception {
         checkServerStateMap();
         checkRestartRequired();
         checkReloadRequired();
@@ -65,21 +63,21 @@ public class ServerStateLogger extends RunListener {
         if (ConfigUtils.isDomain()) {
             Map<String, Map<String, String>> actualServerStateMap = ops.getServerStateMap();
             if (!initServerStateMap.equals(actualServerStateMap)) {
-                log.warn("Server states don't equal initial ones! Expected '{}' but was '{}'.", initServerStateMap,
-                        actualServerStateMap);
+                log.warn("Server states don't equal initial ones after '{}' run! Expected '{}' but was '{}'.",
+                        getCurrentTestCaseCanonicalName(), initServerStateMap, actualServerStateMap);
             }
         }
     }
 
     private void checkRestartRequired() throws IOException {
         if (ops.isRestartRequired()) {
-            log.warn("Restart is required!");
+            log.warn("Restart is required after '{}' run!", getCurrentTestCaseCanonicalName());
         }
     }
 
     private void checkReloadRequired() throws IOException {
         if (ops.isReloadRequired()) {
-            log.warn("Reload is required!");
+            log.warn("Reload is required after '{}' run!", getCurrentTestCaseCanonicalName());
         }
     }
 
