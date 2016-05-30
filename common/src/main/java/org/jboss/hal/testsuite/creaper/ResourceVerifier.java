@@ -26,6 +26,7 @@ import java.io.IOException;
 
 import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.cli.Library;
+import org.jboss.hal.testsuite.dmr.ModelNodeGenerator;
 import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.junit.Assert;
 import org.slf4j.Logger;
@@ -104,6 +105,7 @@ public class ResourceVerifier {
 
     /**
      * Verifies the value of attribute in model.
+     * @param expectedValue - to create this parameter value you can use {@link ModelNodeGenerator}
      * @param errorMessageSuffix is intended to be used for e.g. passing related tracked issue.
      * @throws OperationException
      */
@@ -124,6 +126,7 @@ public class ResourceVerifier {
 
     /**
      * Verifies the value of attribute in model.
+     * @param expectedValue - to create this parameter value you can use {@link ModelNodeGenerator}
      */
     public ResourceVerifier verifyAttribute(String attributeName, final ModelNode expectedValue) throws Exception {
         return verifyAttribute(attributeName, expectedValue, "");

@@ -31,6 +31,7 @@ import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Standalone;
 import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
+import org.jboss.hal.testsuite.dmr.ModelNodeGenerator;
 import org.jboss.hal.testsuite.finder.Application;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
@@ -220,8 +221,7 @@ public class IIOPTestCase {
 
         assertEquals("Table should have one row.", 1, actual.size());
 
-        ModelNode expectedPropertiesNode = new ModelNode();
-        expectedPropertiesNode.get(KEY_VALUE).set(VALUE); // add child pair
+        ModelNode expectedPropertiesNode = new ModelNodeGenerator().createObjectNodeWithPropertyChild(KEY_VALUE, VALUE);
         new ResourceVerifier(iiopSubsystemAddress, client).verifyAttribute("properties", expectedPropertiesNode);
     }
 
