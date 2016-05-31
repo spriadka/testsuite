@@ -217,15 +217,23 @@ public class ResourceVerifier {
 
     /**
      * Verifies the value of attribute in model is undefined.
+     * @param errorMessagePrefix is intended to be used for e.g. passing related tracked issue.
      */
-    public ResourceVerifier verifyAttributeIsUndefined(String attributeName) throws Exception {
+    public ResourceVerifier verifyAttributeIsUndefined(String attributeName, String errorMessagePrefix) throws Exception {
         waitFor(()-> {
             ModelNodeResult actualResult = ops.readAttribute(resourceAddress, attributeName);
             return actualResult.isSuccess() && !actualResult.hasDefined(Constants.RESULT);
         });
 
-        ops.readAttribute(resourceAddress, attributeName).assertNotDefinedValue();
+        ops.readAttribute(resourceAddress, attributeName).assertNotDefinedValue(errorMessagePrefix);
         return this;
+    }
+
+    /**
+     * Verifies the value of attribute in model is undefined.
+     */
+    public ResourceVerifier verifyAttributeIsUndefined(String attributeName) throws Exception {
+        return verifyAttributeIsUndefined(attributeName, null);
     }
 
     private void waitFor(PropagationChecker checker) throws Exception {
