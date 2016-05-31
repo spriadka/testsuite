@@ -58,7 +58,6 @@ public class ConnectorServicesTestCase extends AbstractMessagingTestCase {
         operations.removeIfExists(CONNECTOR_SERVICE_ADDRESS);
         operations.removeIfExists(CONNECTOR_SERVICE_ADDRESS_TBA);
         operations.removeIfExists(CONNECTOR_SERVICE_ADDRESS_TBR);
-        administration.reloadIfRequired(); //only reload which should be run
     }
 
     @Page
