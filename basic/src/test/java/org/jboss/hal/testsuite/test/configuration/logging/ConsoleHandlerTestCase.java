@@ -56,7 +56,6 @@ public class ConsoleHandlerTestCase extends LoggingAbstractTestCase {
         operations.removeIfExists(C_HANDLER_ADDRESS);
         operations.removeIfExists(C_HANDLER_TBA_ADDRESS);
         operations.removeIfExists(C_HANDLER_TB_REMOVED_ADDRESS);
-        administration.reloadIfRequired();
     }
 
     @Drone

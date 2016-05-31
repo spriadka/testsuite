@@ -51,7 +51,6 @@ public class LogCategoriesTestCase extends LoggingAbstractTestCase {
         operations.removeIfExists(LOGGER_ADDRESS);
         operations.removeIfExists(LOGGER_TO_BE_ADDED_ADDRESS);
         operations.removeIfExists(LOGGER_TO_BE_REMOVED_ADDRESS);
-        administration.reloadIfRequired();
     }
 
     @Drone
