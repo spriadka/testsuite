@@ -21,6 +21,11 @@ public class ConfigSnapshotTaker extends TestCaseRunListener {
     private static final Logger log = LoggerFactory.getLogger(ConfigSnapshotTaker.class);
 
     protected void afterTestCase() throws Exception {
+        String currentTestCaseCanonicalName = getCurrentTestCaseCanonicalName();
+        if (currentTestCaseCanonicalName == null) {
+            log.error("Current test class is null! Snapshot could not be done!");
+            return;
+        }
         LocalTime time = LocalTime.now();
         String timeStamp = String.format("%02d:%02d:%02d_", time.getHour(), time.getMinute(), time.getSecond());
         File directory = new File(FileUtils.getTempDirectoryPath()
@@ -28,7 +33,7 @@ public class ConfigSnapshotTaker extends TestCaseRunListener {
                 .concat(XML_SNAPSHOT_DIRECTORY)
                 .concat(File.separator)
                 .concat(timeStamp)
-                .concat(getCurrentTestCaseCanonicalName()));
+                .concat(currentTestCaseCanonicalName));
         if (!directory.exists()) {
             if (!directory.mkdirs()) {
                 throw new IOException("Unable to create path '" + directory.toString() + "'.");
