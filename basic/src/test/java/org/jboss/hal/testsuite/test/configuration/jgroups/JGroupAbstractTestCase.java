@@ -8,7 +8,6 @@ import org.jboss.arquillian.junit.InSequence;
 import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
-import org.jboss.hal.testsuite.creaper.command.RemoveSocketBinding;
 import org.jboss.hal.testsuite.finder.Application;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
@@ -119,8 +118,8 @@ public class JGroupAbstractTestCase {
             jGroupsOperations.removeProperty(TRANSPORT_ADDRESS, PROPERTY_NAME_P);
             jGroupsOperations.removeProperty(PROTOCOL_ADDRESS, PROPERTY_NAME);
             jGroupsOperations.removeProperty(PROTOCOL_ADDRESS, PROPERTY_NAME_P);
-            client.apply(new RemoveSocketBinding(socketBinding));
-            client.apply(new RemoveSocketBinding(diagnosticSocketBinding));
+            jGroupsOperations.removeSocketBinding(socketBinding);
+            jGroupsOperations.removeSocketBinding(diagnosticSocketBinding);
             administration.restartIfRequired();
             administration.reloadIfRequired();
         } finally {
@@ -130,8 +129,7 @@ public class JGroupAbstractTestCase {
 
     @Test
     public void socketBindingEdit() throws Exception {
-        String name = jGroupsOperations.createSocketBinding();
-        editTextAndVerify(TRANSPORT_ADDRESS,  "socketBinding", "socket-binding", name);
+        editTextAndVerify(TRANSPORT_ADDRESS,  "socketBinding", "socket-binding", socketBinding);
     }
 
     @Test
@@ -141,8 +139,7 @@ public class JGroupAbstractTestCase {
 
     @Test
     public void diagnosticSocketEdit() throws Exception {
-        String name = jGroupsOperations.createSocketBinding();
-        editTextAndVerify(TRANSPORT_ADDRESS, "diagSocketBinding", "diagnostics-socket-binding", name);
+        editTextAndVerify(TRANSPORT_ADDRESS, "diagSocketBinding", "diagnostics-socket-binding", diagnosticSocketBinding);
     }
 
     @Test

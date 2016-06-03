@@ -4,6 +4,7 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.dmr.ModelNode;
 import org.jboss.dmr.Property;
 import org.jboss.hal.testsuite.creaper.command.AddSocketBinding;
+import org.jboss.hal.testsuite.creaper.command.RemoveSocketBinding;
 import org.jboss.hal.testsuite.util.AvailablePortFinder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,5 +58,9 @@ class JGroupsOperations {
 
     public String createSocketBinding() throws IOException, CommandFailedException {
         return createSocketBinding("JGroupsSocketBinding_" + RandomStringUtils.randomAlphanumeric(6));
+    }
+
+    public void removeSocketBinding(String name) throws CommandFailedException {
+        client.apply(new RemoveSocketBinding(name));
     }
 }
