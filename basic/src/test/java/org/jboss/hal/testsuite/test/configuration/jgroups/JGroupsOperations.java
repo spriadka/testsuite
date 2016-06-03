@@ -35,9 +35,7 @@ class JGroupsOperations {
     }
 
     public void removeProperty(Address address, String name) throws IOException, OperationException {
-        if (operations.exists(address.and("property", name))) {
-            operations.remove(address.and("property", name));
-        }
+        operations.remove(address.and("property", name));
     }
 
     public boolean propertyExists(Address address, String name, String value) throws IOException {
