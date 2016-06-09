@@ -44,6 +44,7 @@ import org.openqa.selenium.WebDriver;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * @author Harald Pehl
@@ -97,7 +98,12 @@ public class ServerOperationsTestCase {
         try {
             navigationByServerGroup.step(FinderNames.SERVER).selectColumn().invoke("Add");
 
-            WindowFragment addServerDialog = Console.withBrowser(browser).openedWindow();
+            WindowFragment addServerDialog = null;
+            try {
+                addServerDialog = Console.withBrowser(browser).openedWindow();
+            } catch (TimeoutException e) {
+                fail("'Create New Server Configuration' dialog didn't open in time. See https://issues.jboss.org/browse/JBEAP-4902");
+            }
             addServerDialog.getEditor().text("name", serverName);
             addServerDialog.getEditor().text("portOffset", "999");
             addServerDialog.getEditor().clickButton("Save");
