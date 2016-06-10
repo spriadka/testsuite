@@ -1,5 +1,9 @@
 package org.jboss.hal.testsuite.test.configuration.deploymentScanners;
 
+import java.io.File;
+import java.io.IOException;
+
+import org.apache.commons.io.FileUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
@@ -13,6 +17,7 @@ import org.jboss.hal.testsuite.dmr.ResourceAddress;
 import org.jboss.hal.testsuite.dmr.ResourceVerifier;
 import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
 import org.jboss.hal.testsuite.page.config.DeploymentScannerPage;
+import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.jboss.hal.testsuite.util.Console;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -102,17 +107,24 @@ public class DeploymentScannerTestCase {
     }
 
     @Test
-    public void updateRelativePath() {
-        cliClient.executeCommand(add);
+    public void updateRelativePath() throws IOException {
+        final String jbossHomeDirPath = "jboss.home.dir";
+        final File deploymentsDirInJbossHome = new File(ConfigUtils.getDistHome(), PATH);
+        FileUtils.forceMkdir(deploymentsDirInJbossHome);
+        try {
+            cliClient.executeCommand(add);
 
-        page.navigateToDeploymentScanners();
-        page.getResourceManager().getResourceTable().selectRowByText(0, NAME);
-        page.getMainConfigFragment().edit().text("relative-to", "jboss");
-        page.clickButton("Save");
+            page.navigateToDeploymentScanners();
+            page.getResourceManager().getResourceTable().selectRowByText(0, NAME);
+            page.getMainConfigFragment().edit().text("relative-to", jbossHomeDirPath);
+            page.clickButton("Save");
 
-        verifier.verifyAttribute(address, "relative-to", "jboss", 500);
-        cliClient.executeCommand("/subsystem=deployment-scanner/scanner=" + NAME + ":remove");
-        verifier.verifyResource(address, false);
+            verifier.verifyAttribute(address, "relative-to", jbossHomeDirPath, 500);
+            cliClient.executeCommand("/subsystem=deployment-scanner/scanner=" + NAME + ":remove");
+            verifier.verifyResource(address, false);
+        } finally {
+            FileUtils.forceDelete(deploymentsDirInJbossHome);
+        }
     }
 
     @Test
