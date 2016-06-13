@@ -35,8 +35,9 @@ public class JournalTestCase extends AbstractMessagingTestCase {
     }
 
     @AfterClass
-    public static void tearDown() throws IOException, OperationException {
+    public static void tearDown() throws IOException, OperationException, InterruptedException, TimeoutException {
         operations.removeIfExists(SERVER_ADDRESS);
+        administration.restart();
     }
 
     @Page
