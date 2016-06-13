@@ -229,7 +229,7 @@ public class Editor extends BaseFragment {
         String byDmrAttrSelector = "tr[data-dmr-attr='" + identifier + "'] input:visible";
         By selector = ByJQuery.selector(byIdSelector + ", " + byNameSelector + ", " + byDmrAttrSelector);
 
-        Graphene.waitGui().withTimeout(500, TimeUnit.MILLISECONDS).until().element(selector).is().visible();
+        Graphene.waitGui().withTimeout(500, TimeUnit.MILLISECONDS).until().element(selector).is().present();
         WebElement input = findElement(selector, root);
         if (!input.isDisplayed()) {
             // maybe just too long form
