@@ -4,6 +4,7 @@ import org.wildfly.extras.creaper.core.CommandFailedException;
 import org.wildfly.extras.creaper.core.online.OnlineCommand;
 import org.wildfly.extras.creaper.core.online.OnlineCommandContext;
 import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.OperationException;
 import org.wildfly.extras.creaper.core.online.operations.Operations;
 
 import java.io.IOException;
@@ -31,7 +32,7 @@ public final class RemoveSocketBinding implements OnlineCommand {
     }
 
     @Override
-    public void apply(OnlineCommandContext ctx) throws CommandFailedException {
+    public void apply(OnlineCommandContext ctx) throws CommandFailedException, OperationException {
 
         Operations operations = new Operations(ctx.client);
         String socketBindingGroup = this.socketBindingGroup;
@@ -44,7 +45,7 @@ public final class RemoveSocketBinding implements OnlineCommand {
                 .and("socket-binding", socketBindingName);
 
         try {
-            operations.remove(socketBindingAddress);
+            operations.removeIfExists(socketBindingAddress);
         } catch (IOException e) {
             throw new CommandFailedException(e);
         }
