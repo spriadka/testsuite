@@ -47,11 +47,11 @@ public class PatchManagementPage extends ConfigPage {
     }
 
     public String getLastPatchDate() {
-        return getLastPatchRow().getCellValue(1);
+        return getLastPatchRow().getCellValue(2);
     }
 
     public String getLastPatchType() {
-        return getLastPatchRow().getCellValue(2);
+        return getLastPatchRow().getCellValue(3);
     }
 
 }
