@@ -211,7 +211,7 @@ public class SimpleWebserviceEndpointTestCase {
     }
 
     //Utils
-    private static WebArchive createDeployment() {
+    private WebArchive createDeployment() {
         WebArchive war = ShrinkWrap.create(WebArchive.class, DEPLOYMENT_FILE_NAME);
         war.addPackage(SimpleWebserviceEndpointImpl.class.getPackage());
         war.addClass(SimpleWebserviceEndpointImpl.class);

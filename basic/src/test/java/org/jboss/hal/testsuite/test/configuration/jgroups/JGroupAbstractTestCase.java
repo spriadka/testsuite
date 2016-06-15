@@ -70,8 +70,6 @@ public class JGroupAbstractTestCase {
     private static String socketBinding;
     private static String diagnosticSocketBinding;
 
-    //private static final
-
     @Drone
     public WebDriver browser;
 

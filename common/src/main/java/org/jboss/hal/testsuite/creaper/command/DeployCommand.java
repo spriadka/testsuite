@@ -113,7 +113,7 @@ public class DeployCommand implements OnlineCommand {
          * @return
          */
         public Builder particularGroup(String groupName) {
-            if (groupName != null && groupName.trim().isEmpty()) {
+            if (groupName == null || groupName.trim().isEmpty()) {
                 throw new IllegalArgumentException("Group name should be neither empty nor whitespace!");
             }
             this.particularGroup = groupName;
@@ -126,7 +126,7 @@ public class DeployCommand implements OnlineCommand {
          * @return
          */
         public Builder name(String deploymentName) {
-            if (deploymentName != null && deploymentName.trim().isEmpty()) {
+            if (deploymentName == null || deploymentName.trim().isEmpty()) {
                 throw new IllegalArgumentException("Deployment name should be neither empty nor whitespace!");
             }
             this.deploymentName = deploymentName;
@@ -134,12 +134,12 @@ public class DeployCommand implements OnlineCommand {
         }
 
         /**
-         * Optional, if not set, deploymentName will be used, if it is set. If not, filename will be used.
+         * Optional, if not specified deploymentName will be used. May not be unique.
          * @param runtimeName should be neither empty nor whitespace
          * @return
          */
         public Builder runtimeName(String runtimeName) {
-            if (runtimeName != null && runtimeName.trim().isEmpty()) {
+            if (runtimeName == null || runtimeName.trim().isEmpty()) {
                 throw new IllegalArgumentException("Runtime name should be neither empty nor whitespace!");
             }
             this.runtimeName = runtimeName;
