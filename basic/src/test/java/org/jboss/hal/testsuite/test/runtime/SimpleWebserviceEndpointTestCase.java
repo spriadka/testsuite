@@ -120,7 +120,9 @@ public class SimpleWebserviceEndpointTestCase {
     public static void afterClass() throws IOException, TimeoutException, InterruptedException {
         try {
             DEPLOYMENT_FILE.delete();
-            operations.writeAttribute(WEBSERVICES_ADDRESS, STATISTICS_ENABLED, originalStatisticsEnabledValue);
+            if (originalStatisticsEnabledValue != null) {
+                operations.writeAttribute(WEBSERVICES_ADDRESS, STATISTICS_ENABLED, originalStatisticsEnabledValue);
+            }
             administration.restartIfRequired();
             administration.reloadIfRequired();
         } finally {
