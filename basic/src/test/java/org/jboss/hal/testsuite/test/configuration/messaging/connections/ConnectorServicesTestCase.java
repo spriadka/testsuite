@@ -25,7 +25,11 @@ import java.util.concurrent.TimeoutException;
 
 import static org.junit.Assert.assertTrue;
 
-@Ignore("JBEAP-4467")
+@Ignore("After validation on presence of selected ConnectorServiceFactory was added it's now hard to tests this "
+        + "since no implementation of ConnectorServiceFactory is part of ActiveMQ module so far. Moreover this feature "
+        + "is proposed to be removed from console as useless - see https://issues.jboss.org/browse/JBEAP-4467. "
+        + "Untill this test case will be completelly rewritten it will be ignored. "
+        + "In case this feature will be per JBEAP-4467 removed the testcase will be removed as well.")
 @RunWith(Arquillian.class)
 @Category(Shared.class)
 public class ConnectorServicesTestCase extends AbstractMessagingTestCase {
