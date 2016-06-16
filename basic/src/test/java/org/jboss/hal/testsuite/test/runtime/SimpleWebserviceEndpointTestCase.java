@@ -113,14 +113,13 @@ public class SimpleWebserviceEndpointTestCase {
         }
         client.apply(undeployBuilder.build());
 
-        DEPLOYMENT_FILE.delete();
-
         administration.reloadIfRequired();
     }
 
     @AfterClass
     public static void afterClass() throws IOException, TimeoutException, InterruptedException {
         try {
+            DEPLOYMENT_FILE.delete();
             operations.writeAttribute(WEBSERVICES_ADDRESS, STATISTICS_ENABLED, originalStatisticsEnabledValue);
             administration.restartIfRequired();
             administration.reloadIfRequired();
