@@ -5,6 +5,7 @@ import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
@@ -29,11 +30,13 @@ import org.wildfly.extras.creaper.core.CommandFailedException;
 import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.Operations;
+import org.wildfly.extras.creaper.core.online.operations.ReadAttributeOption;
 import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
 
 import javax.xml.namespace.QName;
 import javax.xml.ws.Service;
 import javax.xml.ws.WebServiceException;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -64,6 +67,9 @@ public class SimpleWebserviceEndpointTestCase {
     private static final String DEPLOYMENT_FILE_NAME = "test.war";
     private static final File DEPLOYMENT_FILE = new File("src/test/resources/" + DEPLOYMENT_FILE_NAME);
 
+    private static final String STATISTICS_ENABLED = "statistics-enabled";
+    private static ModelNode originalStatisticsEnabledValue;
+
     @Drone
     private WebDriver browser;
 
@@ -72,7 +78,9 @@ public class SimpleWebserviceEndpointTestCase {
 
     @BeforeClass
     public static void beforeClass() throws IOException, CommandFailedException {
-        operations.writeAttribute(WEBSERVICES_ADDRESS, "statistics-enabled", true);
+        originalStatisticsEnabledValue = operations.readAttribute(WEBSERVICES_ADDRESS, STATISTICS_ENABLED,
+                ReadAttributeOption.NOT_INCLUDE_DEFAULTS).value();
+        operations.writeAttribute(WEBSERVICES_ADDRESS, STATISTICS_ENABLED, true);
         if (client.options().isDomain) {
             address = Address.host(client.options().defaultHost)
                     .and("server", "server-one");
@@ -113,7 +121,7 @@ public class SimpleWebserviceEndpointTestCase {
     @AfterClass
     public static void afterClass() throws IOException, TimeoutException, InterruptedException {
         try {
-            operations.undefineAttribute(WEBSERVICES_ADDRESS, "statistics-enabled");
+            operations.writeAttribute(WEBSERVICES_ADDRESS, STATISTICS_ENABLED, originalStatisticsEnabledValue);
             administration.restartIfRequired();
             administration.reloadIfRequired();
         } finally {

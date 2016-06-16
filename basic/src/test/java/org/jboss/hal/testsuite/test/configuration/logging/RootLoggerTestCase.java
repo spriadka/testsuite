@@ -21,6 +21,7 @@ import org.wildfly.extras.creaper.commands.logging.Logging;
 import org.wildfly.extras.creaper.core.CommandFailedException;
 import org.wildfly.extras.creaper.core.online.ModelNodeResult;
 import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.ReadAttributeOption;
 
 import static org.junit.Assert.assertTrue;
 
@@ -65,7 +66,8 @@ public class RootLoggerTestCase extends LoggingAbstractTestCase {
     @Test
     public void editHandlers() throws Exception {
         String handler = "testHandler_" + RandomStringUtils.randomAlphanumeric(5);
-        ModelNodeResult defaultValue = operations.readAttribute(ROOT_LOGGER_ADDRESS, "handlers");
+        ModelNodeResult originalHandlersResult = operations.readAttribute(ROOT_LOGGER_ADDRESS, "handlers",
+                ReadAttributeOption.NOT_INCLUDE_DEFAULTS);
         client.apply(Logging.handler()
                 .console()
                 .add(handler)
@@ -73,8 +75,13 @@ public class RootLoggerTestCase extends LoggingAbstractTestCase {
         try {
             editTextAreaAndVerify(ROOT_LOGGER_ADDRESS, "handlers", new String[]{handler});
         } finally {
-            operations.writeAttribute(ROOT_LOGGER_ADDRESS, "handlers", defaultValue.value());
-            new ResourceVerifier(ROOT_LOGGER_ADDRESS, client, 4000).verifyAttribute("handlers", defaultValue.value());
+            operations.writeAttribute(ROOT_LOGGER_ADDRESS, "handlers", originalHandlersResult.value());
+            ResourceVerifier rootLoggerVerifier = new ResourceVerifier(ROOT_LOGGER_ADDRESS, client, 4000);
+            if (originalHandlersResult.hasDefinedValue()) {
+                rootLoggerVerifier.verifyAttribute("handlers", originalHandlersResult.value());
+            } else {
+                rootLoggerVerifier.verifyAttributeIsUndefined("handlers");
+            }
             client.apply(Logging.handler().console().remove(handler));
         }
     }

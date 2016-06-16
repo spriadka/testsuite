@@ -3,6 +3,7 @@ package org.jboss.hal.testsuite.test.configuration.undertow;
 import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
@@ -20,9 +21,9 @@ import org.junit.runner.RunWith;
 import org.wildfly.extras.creaper.commands.undertow.AddUndertowListener;
 import org.wildfly.extras.creaper.commands.undertow.SslVerifyClient;
 import org.wildfly.extras.creaper.core.CommandFailedException;
-import org.wildfly.extras.creaper.core.online.ModelNodeResult;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.OperationException;
+import org.wildfly.extras.creaper.core.online.operations.ReadAttributeOption;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
@@ -366,7 +367,8 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
     @Test
     public void editSocketBinding() throws Exception {
         String socketBinding = undertowOps.createSocketBinding();
-        ModelNodeResult result = operations.readAttribute(HTTPS_LISTENER_ADDRESS, SOCKET_BINDING);
+        ModelNode originalSocketBindingValue = operations.readAttribute(HTTPS_LISTENER_ADDRESS, SOCKET_BINDING,
+                ReadAttributeOption.NOT_INCLUDE_DEFAULTS).value();
         try {
             new ConfigChecker.Builder(client, HTTPS_LISTENER_ADDRESS)
                     .configFragment(page.getConfigFragment())
@@ -374,7 +376,7 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
                     .verifyFormSaved()
                     .verifyAttribute(SOCKET_BINDING, socketBinding);
         } finally {
-            operations.writeAttribute(HTTPS_LISTENER_ADDRESS, SOCKET_BINDING, result.value());
+            operations.writeAttribute(HTTPS_LISTENER_ADDRESS, SOCKET_BINDING, originalSocketBindingValue);
         }
     }
 
