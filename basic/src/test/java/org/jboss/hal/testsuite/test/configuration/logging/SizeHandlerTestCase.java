@@ -56,7 +56,6 @@ public class SizeHandlerTestCase extends LoggingAbstractTestCase {
         operations.removeIfExists(SIZE_HANDLER_ADDRESS);
         operations.removeIfExists(SIZE_HANDLER_TBA_ADDRESS);
         operations.removeIfExists(SIZE_HANDLER_TBR_ADDRESS);
-        administration.reloadIfRequired();
     }
 
     @Drone

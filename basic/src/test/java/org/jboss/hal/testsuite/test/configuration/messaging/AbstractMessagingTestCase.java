@@ -24,6 +24,7 @@ import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 
 import static org.junit.Assert.assertTrue;
 
@@ -55,9 +56,10 @@ public abstract class AbstractMessagingTestCase {
     }
 
     @AfterClass
-    public static void afterClass_() throws IOException, CommandFailedException {
+    public static void afterClass_() throws IOException, CommandFailedException, InterruptedException, TimeoutException {
         try {
             removeAccumulatedSocketBindings();
+            administration.reloadIfRequired();
         } finally {
             client.close();
         }

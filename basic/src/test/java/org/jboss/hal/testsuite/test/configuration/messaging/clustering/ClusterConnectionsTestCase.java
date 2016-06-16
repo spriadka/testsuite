@@ -68,7 +68,6 @@ public class ClusterConnectionsTestCase extends AbstractMessagingTestCase {
         operations.removeIfExists(CC_ADDRESS);
         operations.removeIfExists(CC_TBR_ADDRESS);
         operations.removeIfExists(CC_TBA_ADDRESS);
-        administration.reloadIfRequired();
     }
 
     @Test //https://issues.jboss.org/browse/HAL-827

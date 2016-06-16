@@ -21,6 +21,7 @@ import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
 import static org.junit.Assert.assertTrue;
 
@@ -48,8 +49,12 @@ public abstract class LoggingAbstractTestCase {
     }
 
     @AfterClass
-    public static void afterClass_() throws IOException {
-        client.close();
+    public static void afterClass_() throws InterruptedException, TimeoutException, IOException {
+        try {
+            administration.reloadIfRequired();
+        } finally {
+            client.close();
+        }
     }
 
     protected void editTextAndVerify(Address address, String name, String value) throws Exception {

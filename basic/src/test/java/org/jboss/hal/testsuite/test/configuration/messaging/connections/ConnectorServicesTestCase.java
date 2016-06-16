@@ -12,6 +12,7 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
@@ -24,11 +25,17 @@ import java.util.concurrent.TimeoutException;
 
 import static org.junit.Assert.assertTrue;
 
+@Ignore("After validation on presence of selected ConnectorServiceFactory was added it's now hard to tests this "
+        + "since no implementation of ConnectorServiceFactory is part of ActiveMQ module so far. Moreover this feature "
+        + "is proposed to be removed from console as useless - see https://issues.jboss.org/browse/JBEAP-4467. "
+        + "Untill this test case will be completelly rewritten it will be ignored. "
+        + "In case this feature will be per JBEAP-4467 removed the testcase will be removed as well.")
 @RunWith(Arquillian.class)
 @Category(Shared.class)
 public class ConnectorServicesTestCase extends AbstractMessagingTestCase {
     /* There should be no reload performed in this test case because it is error prone and possibly causes crash of
-     * ActiveMQ. See note below.*/
+     * ActiveMQ. See note below.
+     * After validation of factory-class value added and due to https://issues.jboss.org/browse/JBEAP-4467 this will be ignored.*/
 
     private static final String CONNECTOR_SERVICE = "connector-service_" + RandomStringUtils.randomAlphanumeric(5);
     private static final String CONNECTOR_SERVICE_TBA = "connector-service-TBA_" + RandomStringUtils.randomAlphanumeric(5);
@@ -46,7 +53,7 @@ public class ConnectorServicesTestCase extends AbstractMessagingTestCase {
 
     @BeforeClass
     public static void setUp() throws Exception {
-        operations.add(CONNECTOR_SERVICE_ADDRESS, Values.of("factory-class", FACTORY_CLASS));
+        operations.add(CONNECTOR_SERVICE_ADDRESS, Values.of("factory-class", FACTORY_CLASS)).assertSuccess();
         PropertiesOps.addProperty(CONNECTOR_SERVICE_ADDRESS, client, PROPERTY_TBR_KEY, "test");
         new ResourceVerifier(CONNECTOR_SERVICE_ADDRESS, client).verifyExists();
         operations.add(CONNECTOR_SERVICE_ADDRESS_TBR, Values.of("factory-class", FACTORY_CLASS));
@@ -58,7 +65,6 @@ public class ConnectorServicesTestCase extends AbstractMessagingTestCase {
         operations.removeIfExists(CONNECTOR_SERVICE_ADDRESS);
         operations.removeIfExists(CONNECTOR_SERVICE_ADDRESS_TBA);
         operations.removeIfExists(CONNECTOR_SERVICE_ADDRESS_TBR);
-        administration.reloadIfRequired(); //only reload which should be run
     }
 
     @Page

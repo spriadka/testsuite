@@ -23,14 +23,17 @@ import org.jboss.hal.testsuite.util.Console;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.openqa.selenium.WebDriver;
+import org.wildfly.extras.creaper.core.CommandFailedException;
 import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.OperationException;
 import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
 
 import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -47,8 +50,12 @@ public class JGroupAbstractTestCase {
     protected static final String PROPERTY_VALUE_P = "url1";
     protected static final String DEFAULT_PROTOCOL = "UNICAST3";
 
-    protected static final String  PROTOCOL_PROPERTY_TBR = "protocolProperty_" + RandomStringUtils.randomAlphanumeric(3);
-    protected static final String  PROTOCOL_PROPERTY_TBR_VALUE = RandomStringUtils.randomAlphanumeric(3);
+    /**
+     * Only valid properties have to be added! https://issues.jboss.org/browse/JBEAP-4279
+     * See http://www.jgroups.org/manual-3.x/html/protlist.html#UNICAST3
+     */
+    protected static final String  PROTOCOL_PROPERTY_TBR = "conn_close_timeout";
+    protected static final String  PROTOCOL_PROPERTY_TBR_VALUE = String.valueOf(60000);
     protected static final String  TRANSPORT_PROPERTY_TBR = "protocolProperty_" + RandomStringUtils.randomAlphanumeric(3);
     protected static final String  TRANSPORT_PROPERTY_TBR_VALUE = RandomStringUtils.randomAlphanumeric(3);
 
@@ -60,11 +67,20 @@ public class JGroupAbstractTestCase {
     protected static final Address JGROUPS_ADDRESS = client.options().isStandalone ? Address.subsystem("jgroups") :
             Address.of("profile", "full-ha").and("subsystem", "jgroups");
 
+    private static String socketBinding;
+    private static String diagnosticSocketBinding;
+
     @Drone
     public WebDriver browser;
 
     @Page
     public JGroupsPage page;
+
+    @BeforeClass
+    public static void beforeClass() throws IOException, CommandFailedException {
+        socketBinding = jGroupsOperations.createSocketBinding();
+        diagnosticSocketBinding = jGroupsOperations.createSocketBinding();
+    }
 
     @Before
     public void before() {
@@ -91,7 +107,7 @@ public class JGroupAbstractTestCase {
     }
 
     @AfterClass
-    public static void tearDown() throws IOException, OperationException {
+    public static void tearDown() throws IOException, OperationException, TimeoutException, InterruptedException, CommandFailedException {
         try {
             jGroupsOperations.removeProperty(TRANSPORT_ADDRESS, TRANSPORT_PROPERTY_TBR);
             jGroupsOperations.removeProperty(PROTOCOL_ADDRESS, PROTOCOL_PROPERTY_TBR);
@@ -100,6 +116,10 @@ public class JGroupAbstractTestCase {
             jGroupsOperations.removeProperty(TRANSPORT_ADDRESS, PROPERTY_NAME_P);
             jGroupsOperations.removeProperty(PROTOCOL_ADDRESS, PROPERTY_NAME);
             jGroupsOperations.removeProperty(PROTOCOL_ADDRESS, PROPERTY_NAME_P);
+            jGroupsOperations.removeSocketBinding(socketBinding);
+            jGroupsOperations.removeSocketBinding(diagnosticSocketBinding);
+            administration.restartIfRequired();
+            administration.reloadIfRequired();
         } finally {
             IOUtils.closeQuietly(client);
         }
@@ -107,8 +127,7 @@ public class JGroupAbstractTestCase {
 
     @Test
     public void socketBindingEdit() throws Exception {
-        String name = jGroupsOperations.createSocketBinding();
-        editTextAndVerify(TRANSPORT_ADDRESS,  "socketBinding", "socket-binding", name);
+        editTextAndVerify(TRANSPORT_ADDRESS,  "socketBinding", "socket-binding", socketBinding);
     }
 
     @Test
@@ -118,8 +137,7 @@ public class JGroupAbstractTestCase {
 
     @Test
     public void diagnosticSocketEdit() throws Exception {
-        String name = jGroupsOperations.createSocketBinding();
-        editTextAndVerify(TRANSPORT_ADDRESS, "diagSocketBinding", "diagnostics-socket-binding", name);
+        editTextAndVerify(TRANSPORT_ADDRESS, "diagSocketBinding", "diagnostics-socket-binding", diagnosticSocketBinding);
     }
 
     @Test

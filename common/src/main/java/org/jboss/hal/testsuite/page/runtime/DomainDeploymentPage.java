@@ -3,6 +3,10 @@ package org.jboss.hal.testsuite.page.runtime;
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.arquillian.graphene.page.Location;
+import org.jboss.hal.testsuite.finder.Column;
+import org.jboss.hal.testsuite.finder.FinderNames;
+import org.jboss.hal.testsuite.finder.FinderNavigation;
+import org.jboss.hal.testsuite.finder.Row;
 import org.jboss.hal.testsuite.fragment.BaseFragment;
 import org.jboss.hal.testsuite.fragment.runtime.DeploymentContentRepositoryArea;
 import org.jboss.hal.testsuite.fragment.runtime.DeploymentServerGroupArea;
@@ -56,10 +60,46 @@ public class DomainDeploymentPage extends ConfigurationPage {
         }
     }
 
-    public boolean checkAssingDeploymentNameInAssingContent(String assingName) {
+    public boolean checkAssignDeploymentNameInAssignContent(String assignName) {
         WebElement editPanel = browser.findElement(By.className("default-window-content"));
         String contentText = editPanel.findElement(By.className("gwt-Label")).getText();
         editPanel.findElement(ByJQuery.selector("button:contains(Cancel)")).click();
-        return contentText.contains(assingName);
+        return contentText.contains(assignName);
+    }
+
+    public Row navigateToRowInServerGroup(String groupName, String deploymentName) {
+        Row row = new FinderNavigation(browser, this.getClass()).step(FinderNames.BROWSE_BY, FinderNames.SERVER_GROUPS)
+                .step(FinderNames.SERVER_GROUP, groupName)
+                .step(FinderNames.DEPLOYMENT, deploymentName)
+                .selectRow();
+        Console.withBrowser(browser).waitUntilLoaded();
+        return row;
+    }
+
+    public Row navigateToRowInUnassignedContent(String deploymentName) {
+        Row row = new FinderNavigation(browser, this.getClass())
+                .step(FinderNames.BROWSE_BY, "Unassigned Content")
+                .step("Unassigned", deploymentName)
+                .selectRow();
+        Console.withBrowser(browser).waitUntilLoaded();
+        return row;
+    }
+
+    public Column navigateToColumnInContentRepository() {
+        Column column = new FinderNavigation(browser, this.getClass())
+                .step(FinderNames.BROWSE_BY, "Content Repository").step("All Content")
+                .selectColumn();
+        Console.withBrowser(browser).waitUntilLoaded();
+        return column;
+    }
+
+    public Column navigateToDeploymentColumnInServerGroup(String groupName) {
+        Column column = new FinderNavigation(browser, this.getClass())
+                .step(FinderNames.BROWSE_BY, FinderNames.SERVER_GROUPS)
+                .step(FinderNames.SERVER_GROUP, groupName)
+                .step(FinderNames.DEPLOYMENT)
+                .selectColumn();
+        Console.withBrowser(browser).waitUntilLoaded();
+        return column;
     }
 }

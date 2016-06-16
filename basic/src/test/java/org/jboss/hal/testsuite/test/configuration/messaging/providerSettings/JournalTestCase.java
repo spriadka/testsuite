@@ -15,6 +15,7 @@ import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.OperationException;
+import org.wildfly.extras.creaper.core.online.operations.Values;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
@@ -29,11 +30,14 @@ public class JournalTestCase extends AbstractMessagingTestCase {
     @BeforeClass
     public static void setUp() throws IOException {
         operations.add(SERVER_ADDRESS);
+        Address journalPathAddress = SERVER_ADDRESS.and("path", "journal-directory");
+        operations.add(journalPathAddress, Values.of("path", "test-journal").and("relative-to", "jboss.server.data.dir"));
     }
 
     @AfterClass
-    public static void tearDown() throws IOException, OperationException {
+    public static void tearDown() throws IOException, OperationException, InterruptedException, TimeoutException {
         operations.removeIfExists(SERVER_ADDRESS);
+        administration.restart();
     }
 
     @Page
@@ -104,6 +108,6 @@ public class JournalTestCase extends AbstractMessagingTestCase {
 
     @Test
     public void updateJournalFileSize() throws Exception {
-        editTextAndVerify(SERVER_ADDRESS, "journal-file-size", 4296L);
+        editTextAndVerify(SERVER_ADDRESS, "journal-file-size", 4096L);
     }
 }

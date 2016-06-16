@@ -1,13 +1,15 @@
 package org.jboss.hal.testsuite.test.configuration.JCA;
 
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
+
+import org.apache.commons.io.IOUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Standalone;
-import org.jboss.hal.testsuite.dmr.Dispatcher;
-import org.jboss.hal.testsuite.dmr.ResourceAddress;
-import org.jboss.hal.testsuite.dmr.ResourceVerifier;
+import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
+import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.finder.Application;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
@@ -15,11 +17,13 @@ import org.jboss.hal.testsuite.page.config.JCAPage;
 import org.jboss.hal.testsuite.page.config.StandaloneConfigEntryPoint;
 import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
+import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
+import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
 
 /**
  * Created by pcyprian on 22.10.15.
@@ -27,22 +31,23 @@ import org.openqa.selenium.WebDriver;
 @RunWith(Arquillian.class)
 @Category(Standalone.class)
 public class WorkManagerTestCase {
+
+    private static final OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
+    private static final Administration adminOps = new Administration(client);
+
     private FinderNavigation navigation;
 
-    private ModelNode path = new ModelNode("/subsystem=jca/workmanager=default/short-running-threads=default");
-    private ResourceAddress address = new ResourceAddress(path);
-    private static Dispatcher dispatcher;
-    private static ResourceVerifier verifier;
-
-    @BeforeClass
-    public static void setUp() {
-        dispatcher = new Dispatcher();
-        verifier  = new ResourceVerifier(dispatcher);
-    }
+    private final Address threadPoolExecutorAddress = Address.subsystem("jca").and("workmanager", "default")
+            .and("short-running-threads", "default");
+    private final ResourceVerifier verifier = new ResourceVerifier(threadPoolExecutorAddress, client);
 
     @AfterClass
-    public static void tearDown() {
-        dispatcher.close();
+    public static void tearDown() throws IOException, InterruptedException, TimeoutException {
+        try {
+            adminOps.reloadIfRequired();
+        } finally {
+            IOUtils.closeQuietly(client);
+        }
     }
 
     @Drone
@@ -63,99 +68,99 @@ public class WorkManagerTestCase {
     }
 
     @Test
-    public void updateKeepAliveTimeOut() {
+    public void updateKeepAliveTimeOut() throws Exception {
         page.edit().text("keepaliveTime", "1");
         page.clickButton("Save");
-        verifier.verifyAttribute(address, "keepalive-time.time", "1", 500);
+        verifier.verifyAttribute("keepalive-time.time", 1L);
 
         page.edit().text("keepaliveTime", "10");
         page.clickButton("Save");
 
-        verifier.verifyAttribute(address, "keepalive-time.time", "10", 500);
+        verifier.verifyAttribute("keepalive-time.time", 10L);
     }
 
     @Test
-    public void updateKeepAliveTimeOutUnit() {
+    public void updateKeepAliveTimeOutUnit() throws Exception {
         page.edit().select("keepaliveTimeUnit", "MILLISECONDS");
         page.clickButton("Save");
 
-        verifier.verifyAttribute(address, "keepalive-time.unit", "MILLISECONDS", 500);
+        verifier.verifyAttribute("keepalive-time.unit", "MILLISECONDS");
 
         page.edit().select("keepaliveTimeUnit", "SECONDS");
         page.clickButton("Save");
 
-        verifier.verifyAttribute(address, "keepalive-time.unit", "SECONDS", 500);
+        verifier.verifyAttribute("keepalive-time.unit", "SECONDS");
     }
 
     @Test
-    public void updateAllowCoreTimeout() {
+    public void updateAllowCoreTimeout() throws Exception {
         page.edit().checkbox("allowCoreTimeout", true);
         page.clickButton("Save");
 
-        verifier.verifyAttribute(address, "allow-core-timeout", true, 500);
+        verifier.verifyAttribute("allow-core-timeout", true);
 
         page.edit().checkbox("allowCoreTimeout", false);
         page.clickButton("Save");
 
-        verifier.verifyAttribute(address, "allow-core-timeout", false, 500);
+        verifier.verifyAttribute("allow-core-timeout", false);
     }
 
     @Test
-    public void updateThreadFactory() {
+    public void updateThreadFactory() throws Exception {
         page.edit().text("threadFactory", "tf");
         page.clickButton("Save");
 
-        verifier.verifyAttribute(address, "thread-factory", "tf", 500);
+        verifier.verifyAttribute("thread-factory", "tf");
 
         page.edit().text("threadFactory", "");
         page.clickButton("Save");
 
-        verifier.verifyAttribute(address, "thread-factory", "undefined", 500);
+        verifier.verifyAttributeIsUndefined("thread-factory");
     }
 
     @Test
-    public void updateMaxThreads() {
+    public void updateMaxThreads() throws Exception {
         page.switchToSizing();
 
         page.edit().text("maxThreads", "1");
         page.clickButton("Save");
 
-        verifier.verifyAttribute(address, "max-threads", "1", 500);
+        verifier.verifyAttribute("max-threads", 1);
 
         page.edit().text("maxThreads", "50");
         page.clickButton("Save");
 
-        verifier.verifyAttribute(address, "max-threads", "50", 500);
+        verifier.verifyAttribute("max-threads", 50);
     }
 
     @Test
-    public void updateCoreThreads() {
+    public void updateCoreThreads() throws Exception {
         page.switchToSizing();
 
         page.edit().text("coreThreads", "100");
         page.clickButton("Save");
 
-        verifier.verifyAttribute(address, "core-threads", "100", 500);
+        verifier.verifyAttribute("core-threads", 100);
 
         page.edit().text("coreThreads", "50");
         page.clickButton("Save");
 
-        verifier.verifyAttribute(address, "core-threads", "50", 500);
+        verifier.verifyAttribute("core-threads", 50);
     }
 
     @Test
-    public void updateQueueLength() {
+    public void updateQueueLength() throws Exception {
         page.switchToSizing();
 
         page.edit().text("queueLength", "1000");
         page.clickButton("Save");
 
-        verifier.verifyAttribute(address, "queue-length", "1000", 500);
+        verifier.verifyAttribute("queue-length", 1000);
 
         page.edit().text("queueLength", "50");
         page.clickButton("Save");
 
-        verifier.verifyAttribute(address, "queue-length", "50", 500);
+        verifier.verifyAttribute("queue-length", 50);
     }
 
 }

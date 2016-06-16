@@ -4,8 +4,8 @@ import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Shared;
-import org.jboss.hal.testsuite.creaper.command.RemoveSocketBinding;
 import org.jboss.hal.testsuite.page.config.TransactionsPage;
+import org.jboss.hal.testsuite.util.ConfigChecker;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -93,10 +93,14 @@ public class TransactionsTestCase extends TransactionsTestCaseAbstract {
         ModelNode value = operations.readAttribute(TRANSACTIONS_ADDRESS, SOCKET_BINDING_ATTR).value();
         try {
             page.getConfig().switchTo("Recovery");
-            editTextAndVerify(TRANSACTIONS_ADDRESS, SOCKET_BINDING_ATTR, socketBinding);
+            new ConfigChecker.Builder(client, TRANSACTIONS_ADDRESS)
+                    .configFragment(page.getConfigFragment())
+                    .editAndSave(ConfigChecker.InputType.TEXT, SOCKET_BINDING_ATTR, socketBinding)
+                    .verifyFormSaved()
+                    .verifyAttribute(SOCKET_BINDING_ATTR, socketBinding);
+
         } finally {
             operations.writeAttribute(TRANSACTIONS_ADDRESS, SOCKET_BINDING_ATTR, value);
-            client.apply(new RemoveSocketBinding(socketBinding));
         }
     }
 
@@ -106,10 +110,13 @@ public class TransactionsTestCase extends TransactionsTestCaseAbstract {
         ModelNode value = operations.readAttribute(TRANSACTIONS_ADDRESS, STATUS_SOCKET_BINDING_ATTR).value();
         try {
             page.getConfig().switchTo("Recovery");
-            editTextAndVerify(TRANSACTIONS_ADDRESS, STATUS_SOCKET_BINDING_ATTR, socketBinding);
+            new ConfigChecker.Builder(client, TRANSACTIONS_ADDRESS)
+                    .configFragment(page.getConfigFragment())
+                    .editAndSave(ConfigChecker.InputType.TEXT, STATUS_SOCKET_BINDING_ATTR, socketBinding)
+                    .verifyFormSaved()
+                    .verifyAttribute(STATUS_SOCKET_BINDING_ATTR, socketBinding);
         } finally {
             operations.writeAttribute(TRANSACTIONS_ADDRESS, STATUS_SOCKET_BINDING_ATTR, value);
-            client.apply(new RemoveSocketBinding(socketBinding));
         }
     }
 

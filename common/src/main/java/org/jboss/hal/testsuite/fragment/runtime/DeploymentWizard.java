@@ -1,7 +1,11 @@
 package org.jboss.hal.testsuite.fragment.runtime;
 
+import org.jboss.arquillian.graphene.Graphene;
+import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
+import org.jboss.hal.testsuite.fragment.shared.table.ResourceTableFragment;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -82,4 +86,15 @@ public class DeploymentWizard extends WizardWindow {
         next();
         return this;
     }
+
+    public DeploymentWizard enableDeploymentInGroup(String deploymentName) {
+        Graphene.waitAjax().until().element(ByJQuery.selector(".default-cell-table")).is().present();
+        ResourceTableFragment table = Graphene.createPageFragment(ResourceTableFragment.class, this.getRoot());
+        WebElement checkbox = table.getRowByText(0, deploymentName)
+                .getCell(1)
+                .findElement(By.tagName("input"));
+        checkbox.click();
+        return this;
+    }
+
 }

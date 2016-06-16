@@ -37,18 +37,24 @@ public class DeployCommand implements OnlineCommand {
     private final boolean toAllGroups;
     private final String particularGroup;
     private final String deploymentName;
+    private final String runtimeName;
+    private final boolean disabled;
+    private final boolean unmanaged;
 
     private DeployCommand(Builder builder) {
         this.path = builder.path;
         this.toAllGroups = builder.toAllGroups;
         this.particularGroup = builder.particularGroup;
         this.deploymentName = builder.deploymentName;
+        this.runtimeName = builder.runtimeName;
+        this.disabled = builder.disabled;
+        this.unmanaged = builder.unmanaged;
     }
 
     @Override
     public void apply(OnlineCommandContext ctx) throws Exception {
         StringBuilder cmd = new StringBuilder("deploy ").append(path);
-        if (ctx.options.isDomain) {
+        if (ctx.options.isDomain && !disabled) {
             if (toAllGroups) {
                 cmd.append(" --all-server-groups");
             } else {
@@ -58,6 +64,15 @@ public class DeployCommand implements OnlineCommand {
         if (deploymentName != null) {
             cmd.append(" --name=").append(deploymentName);
         }
+        if (runtimeName != null) {
+            cmd.append(" --runtime-name=").append(runtimeName);
+        }
+        if (disabled) {
+            cmd.append(" --disabled");
+        }
+        if (unmanaged) {
+            cmd.append(" --unmanaged");
+        }
         ctx.client.executeCli(cmd.toString());
     }
 
@@ -66,6 +81,9 @@ public class DeployCommand implements OnlineCommand {
         private boolean toAllGroups = false;
         private String particularGroup;
         private String deploymentName;
+        private String runtimeName;
+        private boolean disabled = false;
+        private boolean unmanaged;
 
         public Builder(String path) {
             if (!new File(path).exists()) {
@@ -95,7 +113,7 @@ public class DeployCommand implements OnlineCommand {
          * @return
          */
         public Builder particularGroup(String groupName) {
-            if (groupName != null && groupName.trim().isEmpty()) {
+            if (groupName == null || groupName.trim().isEmpty()) {
                 throw new IllegalArgumentException("Group name should be neither empty nor whitespace!");
             }
             this.particularGroup = groupName;
@@ -108,16 +126,39 @@ public class DeployCommand implements OnlineCommand {
          * @return
          */
         public Builder name(String deploymentName) {
-            if (deploymentName != null && deploymentName.trim().isEmpty()) {
+            if (deploymentName == null || deploymentName.trim().isEmpty()) {
                 throw new IllegalArgumentException("Deployment name should be neither empty nor whitespace!");
             }
             this.deploymentName = deploymentName;
             return this;
         }
 
+        /**
+         * Optional, if not specified deploymentName will be used. May not be unique.
+         * @param runtimeName should be neither empty nor whitespace
+         * @return
+         */
+        public Builder runtimeName(String runtimeName) {
+            if (runtimeName == null || runtimeName.trim().isEmpty()) {
+                throw new IllegalArgumentException("Runtime name should be neither empty nor whitespace!");
+            }
+            this.runtimeName = runtimeName;
+            return this;
+        }
+
+        public Builder disabled() {
+            this.disabled = true;
+            return this;
+        }
+
+        public Builder unmanaged() {
+            this.unmanaged = true;
+            return this;
+        }
+
         public DeployCommand build() {
             if (ConfigUtils.isDomain()) {
-                if (toAllGroups == (particularGroup != null)) {
+                if (!disabled && toAllGroups == (particularGroup != null)) {
                     throw new IllegalArgumentException("In domain mode either nonempty particularGroup XOR toAllGroups should be specified!");
                 }
             } else {

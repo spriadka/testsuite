@@ -4,22 +4,24 @@ import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Standalone;
-import org.jboss.hal.testsuite.cli.CliClient;
-import org.jboss.hal.testsuite.cli.CliClientFactory;
-import org.jboss.hal.testsuite.finder.Application;
-import org.jboss.hal.testsuite.finder.FinderNames;
-import org.jboss.hal.testsuite.finder.FinderNavigation;
-import org.jboss.hal.testsuite.page.config.StandaloneConfigurationPage;
+import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
+import org.jboss.hal.testsuite.creaper.command.BackupAndRestoreAttributes;
 import org.jboss.hal.testsuite.page.config.WebServicesPage;
-import org.jboss.hal.testsuite.test.util.ConfigAreaChecker;
-import org.jboss.hal.testsuite.util.ResourceVerifier;
+import org.jboss.hal.testsuite.util.ConfigChecker;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
+import org.wildfly.extras.creaper.core.CommandFailedException;
+import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
+import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
 
-import static org.jboss.hal.testsuite.cli.CliConstants.WEB_SERVICES_SUBSYSTEM_ADDRESS;
+import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
 
 /**
@@ -34,13 +36,15 @@ public class WebServicesTestCase {
     private static final String WSDL_PORT = "wsdl-port";
     private static final String WSDL_SECURE_PORT = "wsdl-secure-port";
 
-    private static final String PORT_VALUE = "50";
+    private static final int PORT_VALUE = 50;
     private static final String PORT_VALUE_NEGATIVE = "-50";
     private static final String SIMPLE_IP = "127.0.0.2";
 
-    private CliClient client = CliClientFactory.getClient();
-    private ResourceVerifier verifier = new ResourceVerifier(WEB_SERVICES_SUBSYSTEM_ADDRESS, client);
-    private ConfigAreaChecker checker = new ConfigAreaChecker(verifier);
+    private static final OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
+    private static final Administration administration = new Administration(client);
+    private static final Address WEBSERVICES_ADDRESS = Address.subsystem("webservices");
+
+    private static BackupAndRestoreAttributes backup;
 
     @Drone
     public WebDriver browser;
@@ -48,44 +52,83 @@ public class WebServicesTestCase {
     @Page
     public WebServicesPage page;
 
+    @BeforeClass
+    public static void beforeClass() throws CommandFailedException {
+        backup = new BackupAndRestoreAttributes.Builder(WEBSERVICES_ADDRESS).build();
+        client.apply(backup.backup());
+    }
+
     @Before
     public void before() {
-        new FinderNavigation(browser, StandaloneConfigurationPage.class)
-                .step(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
-                .step(FinderNames.SUBSYSTEM, "Web Services")
-                .selectRow()
-                .invoke(FinderNames.VIEW);
-        Application.waitUntilVisible();
+        page.navigate();
+    }
+
+    @AfterClass
+    public static void afterClass() throws CommandFailedException, IOException, TimeoutException, InterruptedException {
+        try {
+            client.apply(backup.restore());
+            administration.restartIfRequired();
+            administration.reloadIfRequired();
+        } finally {
+            client.close();
+        }
     }
 
     @Test
-    public void modifySoapAddress() {
-        checker.editCheckboxAndAssert(page, MODIFY_SOAP_ADDRESS, false).dmrAttribute(MODIFY_SOAP_ADDRESS).invoke();
-        checker.editCheckboxAndAssert(page, MODIFY_SOAP_ADDRESS, true).dmrAttribute(MODIFY_SOAP_ADDRESS).invoke();
+    public void modifySoapAddress() throws Exception {
+        new ConfigChecker.Builder(client, WEBSERVICES_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .editAndSave(ConfigChecker.InputType.CHECKBOX, MODIFY_SOAP_ADDRESS, false)
+                .verifyFormSaved()
+                .verifyAttribute(MODIFY_SOAP_ADDRESS, false);
+
+        new ConfigChecker.Builder(client, WEBSERVICES_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .editAndSave(ConfigChecker.InputType.CHECKBOX, MODIFY_SOAP_ADDRESS, true)
+                .verifyFormSaved()
+                .verifyAttribute(MODIFY_SOAP_ADDRESS, true);
     }
 
     @Test
-    public void setWsdlPort() {
-        checker.editTextAndAssert(page, WSDL_PORT, PORT_VALUE).invoke();
+    public void setWsdlPort() throws Exception {
+        new ConfigChecker.Builder(client, WEBSERVICES_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .editAndSave(ConfigChecker.InputType.TEXT, WSDL_PORT, PORT_VALUE)
+                .verifyFormSaved()
+                .verifyAttribute(WSDL_PORT, PORT_VALUE);
     }
 
     @Test
-    public void setWsdlPortNegative() {
-        checker.editTextAndAssert(page, WSDL_PORT, PORT_VALUE_NEGATIVE).expectError().invoke();
+    public void setWsdlPortNegative() throws Exception {
+        new ConfigChecker.Builder(client, WEBSERVICES_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .editAndSave(ConfigChecker.InputType.TEXT, WSDL_PORT, PORT_VALUE_NEGATIVE)
+                .verifyFormNotSaved();
     }
 
     @Test
-    public void setWsdlSecurePort() {
-        checker.editTextAndAssert(page, WSDL_SECURE_PORT, PORT_VALUE).invoke();
+    public void setWsdlSecurePort() throws Exception {
+        new ConfigChecker.Builder(client, WEBSERVICES_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .editAndSave(ConfigChecker.InputType.TEXT, WSDL_SECURE_PORT, PORT_VALUE)
+                .verifyFormSaved()
+                .verifyAttribute(WSDL_PORT, PORT_VALUE);
     }
 
     @Test
-    public void setWsdlSecurePortNegative() {
-        checker.editTextAndAssert(page, WSDL_SECURE_PORT, PORT_VALUE_NEGATIVE).expectError().invoke();
+    public void setWsdlSecurePortNegative() throws Exception {
+        new ConfigChecker.Builder(client, WEBSERVICES_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .editAndSave(ConfigChecker.InputType.TEXT, WSDL_SECURE_PORT, PORT_VALUE_NEGATIVE)
+                .verifyFormNotSaved();
     }
 
     @Test
-    public void setWsdlHostSimpleIP() {
-        checker.editTextAndAssert(page, WSDL_HOST, SIMPLE_IP).invoke();
+    public void setWsdlHostSimpleIP() throws Exception {
+        new ConfigChecker.Builder(client, WEBSERVICES_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .editAndSave(ConfigChecker.InputType.TEXT, WSDL_HOST, SIMPLE_IP)
+                .verifyFormSaved()
+                .verifyAttribute(WSDL_HOST, SIMPLE_IP);
     }
 }

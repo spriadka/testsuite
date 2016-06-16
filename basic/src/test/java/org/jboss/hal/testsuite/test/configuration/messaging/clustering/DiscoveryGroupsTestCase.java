@@ -62,7 +62,6 @@ public class DiscoveryGroupsTestCase extends AbstractMessagingTestCase {
         operations.removeIfExists(DG_ADDRESS);
         operations.removeIfExists(DG_TBA_ADDRESS);
         operations.removeIfExists(DG_TBR_ADDRESS);
-        administration.reloadIfRequired();
     }
 
     @Page

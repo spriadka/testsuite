@@ -84,7 +84,7 @@ public class HTTPListenerTestCase extends UndertowTestCaseAbstract {
         client.apply(new AddUndertowListener
                 .HttpBuilder(HTTP_LISTENER, HTTP_SERVER, undertowOps.createSocketBinding()).build());
         client.apply(new AddUndertowListener
-                .HttpBuilder(HTTP_LISTENER_TBR, HTTP_SERVER, undertowOps.createSocketBindingWithoutReference()).build());
+                .HttpBuilder(HTTP_LISTENER_TBR, HTTP_SERVER, undertowOps.createSocketBinding()).build());
         administration.reloadIfRequired();
     }
 

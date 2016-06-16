@@ -54,7 +54,6 @@ public class SyslogTestCase extends LoggingAbstractTestCase {
         operations.removeIfExists(SYSLOG_HANDLER_ADDRESS);
         operations.removeIfExists(SYSLOG_HANDLER_TBA_ADDRESS);
         operations.removeIfExists(SYSLOG_HANDLER_TBR_ADDRESS);
-        administration.reloadIfRequired();
     }
 
     @Drone

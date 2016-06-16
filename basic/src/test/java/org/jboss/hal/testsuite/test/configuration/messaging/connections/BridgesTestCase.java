@@ -85,8 +85,6 @@ public class BridgesTestCase extends AbstractMessagingTestCase {
         //remove queues
         client.apply(new RemoveQueue(QUEUE_CREATE_BRIDGE));
         client.apply(new RemoveQueue(QUEUE_EDIT_BRIDGE));
-
-        administration.reloadIfRequired();
     }
 
     @Test

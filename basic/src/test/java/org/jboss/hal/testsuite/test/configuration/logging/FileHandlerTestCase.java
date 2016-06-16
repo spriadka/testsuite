@@ -48,7 +48,6 @@ public class FileHandlerTestCase extends LoggingAbstractTestCase {
     public static void tearDown() throws IOException, OperationException, TimeoutException, InterruptedException {
         operations.removeIfExists(FILE_HANDLER_ADDRESS);
         operations.removeIfExists(FILE_HANDLER_TB_REMOVED_ADDRESS);
-        administration.reloadIfRequired();
     }
 
     @Drone

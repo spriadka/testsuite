@@ -47,7 +47,6 @@ public class FormatterTestCase extends LoggingAbstractTestCase {
     public static void afterClass() throws InterruptedException, TimeoutException, IOException, OperationException {
         operations.removeIfExists(FORMATTER_ADDRESS);
         operations.removeIfExists(FORMATTER_ADDRESS_TO_BE_REMOVED);
-        administration.reloadIfRequired();
     }
 
     @Drone

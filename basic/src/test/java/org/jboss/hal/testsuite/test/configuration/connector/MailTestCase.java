@@ -8,6 +8,7 @@ import org.jboss.hal.testsuite.category.Standalone;
 import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.creaper.command.AddSocketBinding;
+import org.jboss.hal.testsuite.creaper.command.RemoveSocketBinding;
 import org.jboss.hal.testsuite.finder.Application;
 import org.jboss.hal.testsuite.finder.Column;
 import org.jboss.hal.testsuite.finder.FinderNames;
@@ -85,13 +86,14 @@ public class MailTestCase {
     public MailSessionsPage page;
 
     private FinderNavigation navi;
+    private static String socketBinding;
 
     @BeforeClass
     public static void beforeClass() throws Exception {
         client = ManagementClientProvider.createOnlineManagementClient();
         administration = new Administration(client);
         operations = new Operations(client);
-        String socketBinding = createSocketBinding();
+        socketBinding = createSocketBinding();
         operations.add(MAIL_SESSION_PRE_ADDRESS, Values.of("jndi-name", "java:/" + PRE_NAME));
         new ResourceVerifier(MAIL_SESSION_PRE_ADDRESS, client).verifyExists();
         operations.add(MAIL_SESSION_TBR_ADDRESS, Values.of("jndi-name", "java:/" + TBR_NAME));
@@ -108,8 +110,10 @@ public class MailTestCase {
     }
 
     @AfterClass
-    public static void cleanUp() throws IOException, OperationException, InterruptedException, TimeoutException {
+    public static void cleanUp() throws IOException, OperationException, InterruptedException, TimeoutException, CommandFailedException {
         try {
+            client.apply(new RemoveSocketBinding(socketBinding));
+            client.apply(new RemoveSocketBinding(SOCKET_BINDING));
             operations.removeIfExists(SERVER_ADDRESS);
             operations.removeIfExists(SERVER_TBR_ADDRESS);
             operations.removeIfExists(MAIL_SESSION_PRE_ADDRESS);

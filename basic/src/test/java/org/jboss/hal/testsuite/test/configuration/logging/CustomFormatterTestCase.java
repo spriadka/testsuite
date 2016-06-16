@@ -58,7 +58,6 @@ public class CustomFormatterTestCase extends LoggingAbstractTestCase {
         operations.removeIfExists(CUSTOM_FORMATTER_ADDRESS);
         operations.removeIfExists(CUSTOM_FORMATTER_TBR_ADDRESS);
         operations.removeIfExists(CUSTOM_FORMATTER_TBA_ADDRESS);
-        administration.reloadIfRequired();
     }
 
     @Drone

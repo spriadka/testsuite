@@ -68,7 +68,6 @@ public class BroadcastGroupsTestCase extends AbstractMessagingTestCase {
         operations.removeIfExists(BG_TBR_ADDRESS);
         administration.reloadIfRequired();
         operations.removeIfExists(NEW_SERVER);
-        administration.reloadIfRequired();
     }
 
     @Test

@@ -53,9 +53,10 @@ public abstract class TransactionsTestCaseAbstract {
     }
 
     @AfterClass
-    public static void afterClass() throws CommandFailedException, IOException, TimeoutException, InterruptedException {
+    public static void afterClass() throws CommandFailedException, InterruptedException, TimeoutException, IOException {
         try {
             client.apply(backup.restore());
+            transactionsOps.close();
             administration.restartIfRequired();
             administration.reloadIfRequired();
         } finally {

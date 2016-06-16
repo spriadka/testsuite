@@ -117,7 +117,7 @@ public class DivertsTestCase extends AbstractMessagingTestCase {
         operations.add(address, Values.empty()
                 .and("divert-address", divertAddress)
                 .and("forwarding-address", forwardingAddress)
-                .and("routing-name", routingName));
+                .and("routing-name", routingName)).assertSuccess();
         administration.reloadIfRequired();
         new ResourceVerifier(address, client, 3000).verifyExists();
     }

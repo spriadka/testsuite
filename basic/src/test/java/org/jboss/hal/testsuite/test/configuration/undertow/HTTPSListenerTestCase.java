@@ -3,12 +3,14 @@ package org.jboss.hal.testsuite.test.configuration.undertow;
 import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
 import org.jboss.hal.testsuite.page.config.UndertowHTTPPage;
+import org.jboss.hal.testsuite.util.ConfigChecker;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
@@ -21,6 +23,7 @@ import org.wildfly.extras.creaper.commands.undertow.SslVerifyClient;
 import org.wildfly.extras.creaper.core.CommandFailedException;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.OperationException;
+import org.wildfly.extras.creaper.core.online.operations.ReadAttributeOption;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
@@ -90,13 +93,13 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
         operations.add(HTTP_SERVER_ADDRESS);
         administration.reloadIfRequired();
         client.apply(new AddUndertowListener.HttpsBuilder(HTTPS_LISTENER, HTTP_SERVER,
-                        undertowOps.createSocketBindingWithoutReference())
+                        undertowOps.createSocketBinding())
                 .securityRealm(undertowOps.createSecurityRealm())
                 .verifyClient(SslVerifyClient.NOT_REQUESTED)
                 .enabled(true)
                 .build());
         client.apply(new AddUndertowListener.HttpsBuilder(HTTPS_LISTENER_TBR, HTTP_SERVER,
-                        undertowOps.createSocketBindingWithoutReference())
+                        undertowOps.createSocketBinding())
                 .securityRealm(undertowOps.createSecurityRealm())
                 .verifyClient(SslVerifyClient.NOT_REQUESTED)
                 .enabled(true)
@@ -363,7 +366,18 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
 
     @Test
     public void editSocketBinding() throws Exception {
-        editTextAndVerify(HTTPS_LISTENER_ADDRESS, SOCKET_BINDING, undertowOps.createSocketBindingWithoutReference());
+        String socketBinding = undertowOps.createSocketBinding();
+        ModelNode originalSocketBindingValue = operations.readAttribute(HTTPS_LISTENER_ADDRESS, SOCKET_BINDING,
+                ReadAttributeOption.NOT_INCLUDE_DEFAULTS).value();
+        try {
+            new ConfigChecker.Builder(client, HTTPS_LISTENER_ADDRESS)
+                    .configFragment(page.getConfigFragment())
+                    .editAndSave(ConfigChecker.InputType.TEXT, SOCKET_BINDING, socketBinding)
+                    .verifyFormSaved()
+                    .verifyAttribute(SOCKET_BINDING, socketBinding);
+        } finally {
+            operations.writeAttribute(HTTPS_LISTENER_ADDRESS, SOCKET_BINDING, originalSocketBindingValue);
+        }
     }
 
     @Test

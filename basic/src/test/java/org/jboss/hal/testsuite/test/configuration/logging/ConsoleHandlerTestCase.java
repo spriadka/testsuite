@@ -33,11 +33,14 @@ import java.util.concurrent.TimeoutException;
 public class ConsoleHandlerTestCase extends LoggingAbstractTestCase {
 
     private static final String CONSOLE_HANDLER = "CONSOLE_HANDLER_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String CONSOLE_HANDLER_TBA = "CONSOLE_HANDLER_TBA_" + RandomStringUtils.randomAlphanumeric(5);
     private static final String CONSOLE_HANDLER_TB_REMOVED = "C_HANDLER_REMOVE_ME_" + RandomStringUtils.randomAlphanumeric(5);
 
     private static final Address C_HANDLER_ADDRESS = LOGGING_SUBSYSTEM.and("console-handler", CONSOLE_HANDLER);
     private static final Address C_HANDLER_TB_REMOVED_ADDRESS = LOGGING_SUBSYSTEM
             .and("console-handler", CONSOLE_HANDLER_TB_REMOVED);
+    private static final Address C_HANDLER_TBA_ADDRESS = LOGGING_SUBSYSTEM
+            .and("console-handler", CONSOLE_HANDLER_TBA);
 
     @BeforeClass
     public static void setUp() throws CommandFailedException, InterruptedException, TimeoutException, IOException {
@@ -51,8 +54,8 @@ public class ConsoleHandlerTestCase extends LoggingAbstractTestCase {
     @AfterClass
     public static void tearDown() throws InterruptedException, TimeoutException, IOException, OperationException {
         operations.removeIfExists(C_HANDLER_ADDRESS);
+        operations.removeIfExists(C_HANDLER_TBA_ADDRESS);
         operations.removeIfExists(C_HANDLER_TB_REMOVED_ADDRESS);
-        administration.reloadIfRequired();
     }
 
     @Drone
@@ -69,10 +72,9 @@ public class ConsoleHandlerTestCase extends LoggingAbstractTestCase {
 
     @Test
     public void addConsoleHandler() throws Exception {
-        String name = "CONSOLE_HANDLER_" + RandomStringUtils.randomAlphanumeric(5);
-        page.addConsoleHandler(name, "ALL");
+        page.addConsoleHandler(CONSOLE_HANDLER_TBA, "ALL");
 
-        new ResourceVerifier(LOGGING_SUBSYSTEM.and("console-handler", name), client).verifyExists();
+        new ResourceVerifier(C_HANDLER_TBA_ADDRESS, client).verifyExists();
     }
 
     @Test

@@ -55,7 +55,6 @@ public class RemoteConnectorTestCase extends AbstractMessagingTestCase {
         operations.removeIfExists(REMOTE_CONNECTOR_ADDRESS);
         operations.removeIfExists(REMOTE_CONNECTOR_TBR_ADDRESS);
         operations.removeIfExists(REMOTE_CONNECTOR_TBA_ADDRESS);
-        administration.reloadIfRequired();
     }
 
     @Page

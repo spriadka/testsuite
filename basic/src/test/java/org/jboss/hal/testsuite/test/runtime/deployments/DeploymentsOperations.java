@@ -1,8 +1,11 @@
 package org.jboss.hal.testsuite.test.runtime.deployments;
 
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
+import org.jboss.hal.testsuite.creaper.command.UndeployCommand;
+import org.wildfly.extras.creaper.core.CommandFailedException;
 import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
 import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.OperationException;
 import org.wildfly.extras.creaper.core.online.operations.Operations;
 
 import java.io.IOException;
@@ -32,8 +35,18 @@ public class DeploymentsOperations {
         new ResourceVerifier(Address.of("deployment", deploymentName), client, 10000).verifyDoesNotExist(message);
     }
 
-    public void undeploy(String deploymentName) throws IOException {
-        operations.invoke(String.format(COMMAND_UNDEPLOY, deploymentName), Address.root());
+    public void undeploy(String deploymentName) throws IOException, CommandFailedException {
+        UndeployCommand.Builder builder = new UndeployCommand.Builder(deploymentName);
+        if (client.options().isDomain) {
+            builder.fromAllGroups();
+        }
+        client.apply(builder.build());
+    }
+
+    public void undeployIfExists(String deploymentName) throws IOException, OperationException, CommandFailedException {
+        if (operations.exists(Address.of("deployment", deploymentName))) {
+            undeploy(deploymentName);
+        }
     }
 
     private void verifyDeploymentEnabled(String deploymentName, boolean isEnabled) throws Exception {

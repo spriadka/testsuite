@@ -54,7 +54,6 @@ public class RemoteAcceptorTestCase extends AbstractMessagingTestCase {
         operations.removeIfExists(REMOTE_ACCEPTOR_ADDRESS);
         operations.removeIfExists(REMOTE_ACCEPTOR_TBA_ADDRESS);
         operations.removeIfExists(REMOTE_ACCEPTOR_TBR_ADDRESS);
-        administration.reloadIfRequired();
     }
 
     @Page
