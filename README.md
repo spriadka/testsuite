@@ -8,6 +8,7 @@ and [Graphene](https://docs.jboss.org/author/display/ARQGRA2/Home) Arquillian ex
 * Maven 3.0.4 or higher
 * Firefox browser (tested on 31.2.0 esr version, will probably not run with far older or younger versions)
 * Wildfly (10 or higher) or EAP (7 or higher)
+* To setup WildFly/EAP for HAL RBAC tests please follow [RBAC.md](RBAC.md) instructions.
 
 You can download it here:
 <http://wildfly.org/downloads/> or <http://www.jboss.org/products/eap/download/>
@@ -84,7 +85,7 @@ Should contain majority of tests which don't require special configuration.
 
 ### rbac
 
-Should contain RBAC related tests.
+Should contain RBAC related tests. To setup WildFly/EAP for HAL RBAC tests please follow [RBAC.md](RBAC.md) instructions.
 
 ## Tips
 
