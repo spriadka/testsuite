@@ -79,7 +79,7 @@ batch
 /core-service=management/access=authorization/role-mapping=other-Administrator/include=other-aministrator:add(name=other-administrator, type=user, realm=ManagementRealm)
 /core-service=management/access=authorization/role-mapping=other-Maintainer/include=other-Maintainer:add(name=other-Maintainer, type=user, realm=ManagementRealm)
 /core-service=management/access=authorization/role-mapping=other-Operator/include=other-operator:add(name=other-operator, type=user, realm=ManagementRealm)
-/core-service=management/access=authorization/role-mapping=other-Operator/include=main-administrator-other-monitor:add(name=main-administrator-other-monitor, type=user, realm=ManagementRealm)
+/core-service=management/access=authorization/role-mapping=other-Monitor/include=main-administrator-other-monitor:add(name=main-administrator-other-monitor, type=user, realm=ManagementRealm)
 /core-service=management/access=authorization/role-mapping=other-Monitor/include=other-monitor:add(name=other-monitor, type=user, realm=ManagementRealm)
 /core-service=management/access=authorization/role-mapping=other-Auditor/include=other-auditor:add(name=other-auditor, type=user, realm=ManagementRealm)
 /core-service=management/access=authorization/role-mapping=other-Deployer/include=other-deployer:add(name=other-deployer, type=user, realm=ManagementRealm)

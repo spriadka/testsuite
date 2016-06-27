@@ -14,10 +14,10 @@ import org.jboss.hal.testsuite.util.RbacRole;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
-import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 
-import static org.junit.Assert.fail;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.core.Is.is;
 
 /**
  * Tests behaviour of server group detail page when accessed with a role with several different
@@ -38,7 +38,17 @@ public class ServerGroupDetailTestCase {
     private ServerGroupDetailPage serverGroupDetailPage;
 
     @Test
-    public void mainAdministratorOtherMonitor() {
+    public void modificationButtonsNotVisibleForMonitor() {
+        Authentication.with(browser).authenticate(RbacRole.MAIN_ADMINISTRATOR_OTHER_MONITOR);
+
+        startOnRuntimePage();
+        goToServerGroupDetailPage("other-server-group");
+
+        checkVisibilityOfButtons(false);
+    }
+
+    @Test
+    public void modificationButtonsVisibleForAdministrator() {
         Authentication.with(browser).authenticate(RbacRole.MAIN_ADMINISTRATOR_OTHER_MONITOR);
 
         startOnRuntimePage();
@@ -46,7 +56,7 @@ public class ServerGroupDetailTestCase {
         goBackToRuntimePage();
         goToServerGroupDetailPage("main-server-group");
 
-        checkThatButtonsAreVisible();
+        checkVisibilityOfButtons(true);
     }
 
     // test utils
@@ -68,21 +78,20 @@ public class ServerGroupDetailTestCase {
         runtimePageNavigation.resetNavigation();
     }
 
-    private void checkThatButtonsAreVisible() {
+    private void checkVisibilityOfButtons(boolean expectVisible) {
         serverGroupDetailPage.switchToSystemProperties();
-        checkVisibleButton("Add");
-        checkVisibleButton("Remove");
+        checkButtonVisibility("Add", expectVisible);
+        checkButtonVisibility("Remove", expectVisible);
 
         serverGroupDetailPage.switchToJVMConfiguration();
-        checkVisibleButton("Clear");
+        checkButtonVisibility("Clear", expectVisible);
     }
 
-    private void checkVisibleButton(String buttonLabel) {
-        try {
-            serverGroupDetailPage.getButton(buttonLabel);
-        } catch (NoSuchElementException exception) {
-            fail(buttonLabel + " button is not visible");
-        }
+    private void checkButtonVisibility(String buttonLabel, boolean expectVisible) {
+        boolean actuallyVisible = serverGroupDetailPage.isButtonVisible(buttonLabel);
+        assertThat("Incorrectly set visibility of button \'" + buttonLabel + "\'.",
+                actuallyVisible,
+                is(expectVisible));
     }
 
 }
