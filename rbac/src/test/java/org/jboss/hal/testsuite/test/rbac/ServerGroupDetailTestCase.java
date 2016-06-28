@@ -38,21 +38,14 @@ public class ServerGroupDetailTestCase {
     private ServerGroupDetailPage serverGroupDetailPage;
 
     @Test
-    public void modificationButtonsNotVisibleForMonitor() {
+    public void buttonsVisibilityIsChangedForDifferentPrivileges() {
         Authentication.with(browser).authenticate(RbacRole.MAIN_ADMINISTRATOR_OTHER_MONITOR);
 
         startOnRuntimePage();
         goToServerGroupDetailPage("other-server-group");
 
         checkVisibilityOfButtons(false);
-    }
 
-    @Test
-    public void modificationButtonsVisibleForAdministrator() {
-        Authentication.with(browser).authenticate(RbacRole.MAIN_ADMINISTRATOR_OTHER_MONITOR);
-
-        startOnRuntimePage();
-        goToServerGroupDetailPage("other-server-group");
         goBackToRuntimePage();
         goToServerGroupDetailPage("main-server-group");
 
@@ -89,7 +82,7 @@ public class ServerGroupDetailTestCase {
 
     private void checkButtonVisibility(String buttonLabel, boolean expectVisible) {
         boolean actuallyVisible = serverGroupDetailPage.isButtonVisible(buttonLabel);
-        assertThat("Incorrectly set visibility of button \'" + buttonLabel + "\'.",
+        assertThat("Incorrectly set visibility for button \'" + buttonLabel + "\'.",
                 actuallyVisible,
                 is(expectVisible));
     }
