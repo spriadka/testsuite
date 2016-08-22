@@ -29,4 +29,11 @@ public class TransactionsPage extends ConfigPage implements Navigatable {
         Application.waitUntilVisible();
     }
 
+    public void switchToProcessID() {
+        getConfig().switchTo("Process ID");
+    }
+
+    public void switchToRecovery() {
+        getConfig().switchTo("Recovery");
+    }
 }
