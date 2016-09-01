@@ -62,7 +62,8 @@ public class ServerOperationsTestCase {
     @Drone WebDriver browser;
     private final String
         hostName = "master",
-        serverGroupName = "main-server-group";
+        serverGroupName = "main-server-group",
+        serverName2beSelected = "server-two";
     private FinderNavigation navigationByHost;
     private FinderNavigation navigationByServerGroup;
     private final Address hostAddress = Address.host(hostName);
@@ -87,19 +88,19 @@ public class ServerOperationsTestCase {
 
     @Test(expected = TimeoutException.class)  //NoSuchElementException.class - wainting until element is visible, so different exception
     public void wrongSelection() {
-        navigationByHost.step(FinderNames.SERVER, "unknown").selectColumn();
+        navigationByHost.step(FinderNames.SERVER, "unknown").selectRow();
     }
 
     @Test
     public void selectServerByHost() {
         // makes sure we can select a server by host
-        navigationByHost.step(FinderNames.SERVER).selectColumn();
+        navigationByHost.step(FinderNames.SERVER, serverName2beSelected).selectRow();
     }
 
     @Test
     public void selectServerByServerGroup() {
         // makes sure we can select a server by server group
-        navigationByServerGroup.step(FinderNames.SERVER).selectColumn();
+        navigationByServerGroup.step(FinderNames.SERVER, serverName2beSelected).selectRow();
     }
 
     @Test
