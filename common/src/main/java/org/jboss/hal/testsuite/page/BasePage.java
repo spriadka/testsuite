@@ -298,4 +298,14 @@ public abstract class BasePage {
         String cellClass = PropUtils.get("table.cell.class");
         return By.ByXPath.xpath("//td[contains(@class,'" + cellClass + "') and descendant::div[@class='navigation-column-item'" + xpathSuffix);
     }
+
+    /**
+     * Clicks on "Back" link in the top link bar.
+     */
+    public void clickOnBackLink() {
+        WebElement back = browser.findElement(By.className(PropUtils.get("icon.backarrows.class")));
+        back.click();
+        Console.withBrowser(browser).waitUntilLoaded();
+    }
+
 }
