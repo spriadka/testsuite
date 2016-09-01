@@ -21,30 +21,37 @@
  */
 package org.jboss.hal.testsuite.test.runtime.server;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Domain;
-import org.jboss.hal.testsuite.cli.CliClient;
-import org.jboss.hal.testsuite.cli.CliClientFactory;
-import org.jboss.hal.testsuite.cli.CliUtils;
+import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
+import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.fragment.WindowFragment;
 import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
 import org.jboss.hal.testsuite.page.runtime.DomainRuntimeEntryPoint;
+import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.jboss.hal.testsuite.util.Console;
+import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
+import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
+import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.OperationException;
+import org.wildfly.extras.creaper.core.online.operations.Operations;
+import org.wildfly.extras.creaper.core.online.operations.Values;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
+import java.io.IOException;
 
 /**
  * @author Harald Pehl
@@ -53,47 +60,54 @@ import static org.junit.Assert.fail;
 @Category(Domain.class)
 public class ServerOperationsTestCase {
 
-    private static CliClient cli = CliClientFactory.getDomainClient("full");
-
     @Drone WebDriver browser;
+    private final String
+        hostName = ConfigUtils.getDefaultHost(),
+        serverGroupName = ConfigUtils.get("suite.domain.server.group", "main-server-group"),
+        serverName2beSelected = ConfigUtils.get("suite.domain.server", "server-two");
     private FinderNavigation navigationByHost;
     private FinderNavigation navigationByServerGroup;
+    private final Address hostAddress = Address.host(hostName);
+    private static final OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
+    private final Operations ops = new Operations(client);
 
     @Before
     public void before() {
         navigationByHost = new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
                 .step(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
-                .step(FinderNames.HOST, "master");
+                .step(FinderNames.HOST, hostName);
 
         navigationByServerGroup = new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
                 .step(FinderNames.BROWSE_DOMAIN_BY, FinderNames.SERVER_GROUPS)
-                .step(FinderNames.SERVER_GROUP, "main-server-group");
+                .step(FinderNames.SERVER_GROUP, serverGroupName);
+    }
+
+    @AfterClass
+    public static void afterClass() {
+        IOUtils.closeQuietly(client);
     }
 
     @Test(expected = TimeoutException.class)  //NoSuchElementException.class - wainting until element is visible, so different exception
     public void wrongSelection() {
-        new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
-                .step(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
-                .step(FinderNames.HOST, "master")
-                .step(FinderNames.SERVER, "unknown")
-                .selectColumn();
+        navigationByHost.step(FinderNames.SERVER, "unknown").selectRow();
     }
 
     @Test
     public void selectServerByHost() {
         // makes sure we can select a server by host
-        navigationByHost.step(FinderNames.SERVER).selectColumn();
+        navigationByHost.step(FinderNames.SERVER, serverName2beSelected).selectRow();
     }
 
     @Test
     public void selectServerByServerGroup() {
         // makes sure we can select a server by server group
-        navigationByServerGroup.step(FinderNames.SERVER).selectColumn();
+        navigationByServerGroup.step(FinderNames.SERVER, serverName2beSelected).selectRow();
     }
 
     @Test
-    public void addServer() {
-        String serverName = "ServerOperationsSrv_" + RandomStringUtils.randomAlphanumeric(8);
+    public void addServer() throws Exception {
+        final String serverName = "ServerOperationsSrv_" + RandomStringUtils.randomAlphanumeric(8);
+        final Address serverAddress = hostAddress.and("server-config", serverName);
 
         try {
             navigationByServerGroup.step(FinderNames.SERVER).selectColumn().invoke("Add");
@@ -109,20 +123,18 @@ public class ServerOperationsTestCase {
             addServerDialog.getEditor().clickButton("Save");
             addServerDialog.waitUntilClosed();
 
-            assertTrue(cli
-                    .executeForSuccess(
-                            CliUtils.buildCommand("/host=master/server-config=" + serverName, ":read-resource")));
+            new ResourceVerifier(serverAddress, client).verifyExists();
 
         } finally {
-            removeIfPresent(serverName);
+            removeIfExists(serverAddress);
         }
     }
 
     @Test
-    public void removeServer() {
-        String serverName = "ServerOperationsSrv_" + RandomStringUtils.randomAlphanumeric(8);
-        cli.executeCommand(CliUtils.buildCommand("/host=master/server-config=" + serverName, ":add",
-                new String[]{"group=main-server-group", "socket-binding-port-offset=999"}));
+    public void removeServer() throws Exception {
+        final String serverName = "ServerOperationsSrv_" + RandomStringUtils.randomAlphanumeric(8);
+        final Address serverAddress = hostAddress.and("server-config", serverName);
+        ops.add(serverAddress, Values.of("group", serverGroupName).and("socket-binding-port-offset", 999));
 
         try {
             navigationByServerGroup.step(FinderNames.SERVER, serverName).selectRow().invoke("Remove");
@@ -131,19 +143,17 @@ public class ServerOperationsTestCase {
             window.confirm();
             Graphene.waitGui().until().element(window.getRoot()).is().not().present();
 
-            assertFalse(cli
-                    .executeForSuccess(
-                            CliUtils.buildCommand("/host=master/server-config=" + serverName, ":read-resource")));
+            new ResourceVerifier(serverAddress, client).verifyDoesNotExist();
 
         } finally {
-            removeIfPresent(serverName);
+            removeIfExists(serverAddress);
         }
     }
 
-    private void removeIfPresent(final String serverName) {
-        if (cli.executeForSuccess(
-                CliUtils.buildCommand("/host=master/server-config=" + serverName, ":read-resource"))) {
-            cli.executeCommand(CliUtils.buildCommand("/host=master/server-config=" + serverName, ":remove"));
+    // Cannot use ops.removeIfExists(Address) due to https://github.com/wildfly-extras/creaper/issues/137
+    private void removeIfExists(Address address) throws IOException, OperationException {
+        if (ops.exists(address)) {
+            ops.remove(address);
         }
     }
 }
