@@ -34,6 +34,7 @@ import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.fragment.WindowFragment;
 import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
 import org.jboss.hal.testsuite.page.runtime.DomainRuntimeEntryPoint;
+import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.jboss.hal.testsuite.util.Console;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -61,9 +62,9 @@ public class ServerOperationsTestCase {
 
     @Drone WebDriver browser;
     private final String
-        hostName = "master",
-        serverGroupName = "main-server-group",
-        serverName2beSelected = "server-two";
+        hostName = ConfigUtils.getDefaultHost(),
+        serverGroupName = ConfigUtils.get("suite.domain.server.group", "main-server-group"),
+        serverName2beSelected = ConfigUtils.get("suite.domain.server", "server-two");
     private FinderNavigation navigationByHost;
     private FinderNavigation navigationByServerGroup;
     private final Address hostAddress = Address.host(hostName);
@@ -74,11 +75,11 @@ public class ServerOperationsTestCase {
     public void before() {
         navigationByHost = new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
                 .step(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
-                .step(FinderNames.HOST, "master");
+                .step(FinderNames.HOST, hostName);
 
         navigationByServerGroup = new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
                 .step(FinderNames.BROWSE_DOMAIN_BY, FinderNames.SERVER_GROUPS)
-                .step(FinderNames.SERVER_GROUP, "main-server-group");
+                .step(FinderNames.SERVER_GROUP, serverGroupName);
     }
 
     @AfterClass
