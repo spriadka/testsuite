@@ -8,6 +8,8 @@ import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.fragment.config.undertow.UndertowFragment;
 import org.jboss.hal.testsuite.page.config.UndertowPage;
+import org.jboss.hal.testsuite.util.Console;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -60,6 +62,12 @@ public abstract class UndertowTestCaseAbstract {
         } finally {
             client.close();
         }
+    }
+
+    @After
+    public void disposeOfReloadRequiredWindow() throws InterruptedException, TimeoutException, IOException {
+        Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
+        administration.reloadIfRequired();
     }
 
     protected void editTextAndVerify(Address address, String attributeName, String value) throws Exception {
