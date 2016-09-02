@@ -54,7 +54,7 @@ public abstract class UndertowTestCaseAbstract {
     @AfterClass
     public static void mainTearDown() throws InterruptedException, IOException, TimeoutException, OperationException, CommandFailedException {
         try {
-            undertowOps.close();
+            undertowOps.cleanupReferences();
             administration.restartIfRequired();
             administration.reloadIfRequired();
         } finally {
