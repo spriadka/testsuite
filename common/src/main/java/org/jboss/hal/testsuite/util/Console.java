@@ -10,6 +10,7 @@ import org.jboss.hal.testsuite.fragment.WindowFragment;
 import org.jboss.hal.testsuite.fragment.formeditor.PropertyEditor;
 import org.jboss.hal.testsuite.fragment.shared.modal.ReloadRequiredWindow;
 import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
+import org.jboss.hal.testsuite.fragment.shared.modal.suggestbox.SuggestBoxPopUp;
 import org.jboss.hal.testsuite.fragment.shared.table.ResourceTableFragment;
 import org.jboss.hal.testsuite.page.BasePage;
 import org.jboss.hal.testsuite.page.home.HomePage;
@@ -77,30 +78,60 @@ public class Console {
     }
 
     /**
-     * Retrieves currently opened popup menu
-     *
-     * @param clazz
-     * @param selector
-     * @param <T>
-     * @return currently opened menu
+     * Retrieves currently opened popup menu which class is {@link PopUpFragment.ROOT_SELECTOR}.
+     * @param clazz Class of retrieved popup
+     * @param rootSelector selector for root of popup
+     * @param <T> type of popup
+     * @return  Currently opened popup menu
      */
-    public <T extends PopUpFragment> T openedPopup(Class<T> clazz, By selector) {
-        Graphene.waitGui().until().element(PopUpFragment.ROOT_SELECTOR).is().present();
+    public <T extends PopUpFragment> T openedPopup(Class<T> clazz, By rootSelector) {
+        return openedPopup(clazz, PopUpFragment.ROOT_SELECTOR, rootSelector);
+    }
 
-        WebElement popupRoot = browser.findElement(selector);
+    /**
+     * Retrieves currently opened popup menu.
+     * @param clazz Class of retrieved popup
+     * @param rootSelector selector for root of popup
+     * @param popupSelector selector for pop up
+     * @param <T> type of popup
+     * @return  Currently opened popup menu
+     */
+    public <T extends PopUpFragment> T openedPopup(Class<T> clazz, By rootSelector, By popupSelector) {
+        Graphene.waitGui().until().element(popupSelector).is().present();
+
+        WebElement popupRoot = browser.findElement(rootSelector);
         T popup = Graphene.createPageFragment(clazz, popupRoot);
 
         return popup;
     }
 
+     /**
+     * Retrieves currently opened popup menu which class is {@link PopUpFragment.ROOT_SELECTOR} and root
+     * {@link PopUpFragment.ROOT_SELECTOR}.
+     * @param clazz Class of retrieved popup
+     * @param <T> type of popup
+     * @return  Currently opened popup menu
+     */
     public <T extends PopUpFragment> T openedPopup(Class<T> clazz) {
-        return openedPopup(clazz, PopUpFragment.ROOT_SELECTOR);
+        return openedPopup(clazz, PopUpFragment.ROOT_SELECTOR, PopUpFragment.ROOT_SELECTOR);
     }
 
+    /**
+     * Retrieves currently opened popup menu which class is {@link PopUpFragment.ROOT_SELECTOR}, root
+     * {@link PopUpFragment.ROOT_SELECTOR} and class {@link PopUpFragment.class}.
+     * @return
+     */
     public PopUpFragment openedPopup() {
         return openedPopup(PopUpFragment.class, PopUpFragment.ROOT_SELECTOR);
     }
 
+    /**
+     * Retrieves currently opened popup under input with suggestion box
+     */
+    public SuggestBoxPopUp openedSuggestionBoxPopUp() {
+        By selector = ByJQuery.selector("." + PropUtils.get("components.suggestboxpopup.class"));
+        return openedPopup(SuggestBoxPopUp.class, selector, selector);
+    }
 
     /**
      * Retrieves currently opened window using specified selector.

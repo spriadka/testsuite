@@ -21,13 +21,16 @@ public class ConfigFragment extends BaseFragment {
         return Graphene.createPageFragment(ResourceManager.class, root);
     }
 
-    public WebElement getEditButton() {
-        By selector = ByJQuery.selector(
-                "." + PropUtils.get("configarea.edit.button.class") + ":visible"
-        );
+    private By getEditButtonSelector() {
+        return ByJQuery.selector("." + PropUtils.get("configarea.edit.button.class") + ":visible");
+    }
 
-        WebElement button = root.findElement(selector);
-        return button;
+    public WebElement getEditButton() {
+        return root.findElement(getEditButtonSelector());
+    }
+
+    public boolean isInEditMode() {
+        return !isElementVisible(getEditButtonSelector());
     }
 
     /**
