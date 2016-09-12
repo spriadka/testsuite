@@ -8,7 +8,6 @@ import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.fragment.config.undertow.UndertowFragment;
 import org.jboss.hal.testsuite.page.config.UndertowPage;
-import org.jboss.hal.testsuite.util.Console;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -65,8 +64,7 @@ public abstract class UndertowTestCaseAbstract {
     }
 
     @After
-    public void disposeOfReloadRequiredWindow() throws InterruptedException, TimeoutException, IOException {
-        Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
+    public void disposeOfReloadRequired() throws InterruptedException, TimeoutException, IOException {
         administration.reloadIfRequired();
     }
 

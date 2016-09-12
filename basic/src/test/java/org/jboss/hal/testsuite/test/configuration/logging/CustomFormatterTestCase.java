@@ -84,11 +84,10 @@ public class CustomFormatterTestCase extends LoggingAbstractTestCase {
 
 
     @After
-    public void restoreFormatterAndGetRidOfReloadRequiredWindow() throws CommandFailedException, InterruptedException, TimeoutException, IOException {
+    public void restoreFormatterAndGetRidOfReloadRequired() throws CommandFailedException, InterruptedException, TimeoutException, IOException {
         if (backupAndRestoreAttributes != null) {
             client.apply(backupAndRestoreAttributes.restore());
         }
-        Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
         administration.reloadIfRequired();
     }
 
