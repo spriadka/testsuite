@@ -99,6 +99,7 @@ Should contain RBAC related tests. To setup WildFly/EAP for HAL RBAC tests pleas
 ## Known issues
 
 * No sreenshots on test failure neither test error currently (It seems Arquillian unlike Surefire thinks they passed).
+* Multiple aliases for tested IP address (usually 127.0.0.1) in hosts file has to be avoided - see [related Selenium issue](https://github.com/seleniumhq/selenium-google-code-issue-archive/issues/3280)
 
 ## Problems?
 
