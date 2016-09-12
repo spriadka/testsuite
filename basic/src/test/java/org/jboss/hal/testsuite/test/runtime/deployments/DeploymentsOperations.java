@@ -2,6 +2,9 @@ package org.jboss.hal.testsuite.test.runtime.deployments;
 
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.creaper.command.UndeployCommand;
+import org.jboss.shrinkwrap.api.Archive;
+import org.jboss.shrinkwrap.api.exporter.ZipExporter;
+import org.wildfly.extras.creaper.commands.deployments.Deploy;
 import org.wildfly.extras.creaper.core.CommandFailedException;
 import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
 import org.wildfly.extras.creaper.core.online.operations.Address;
@@ -33,6 +36,13 @@ public class DeploymentsOperations {
     public void verifyDeploymentDoesNotExist(String deploymentName) throws Exception {
         String message = String.format("Deployment '%s' should not exist!", deploymentName);
         new ResourceVerifier(Address.of("deployment", deploymentName), client, 10000).verifyDoesNotExist(message);
+    }
+
+    public void deploy(Archive<?> archive) throws CommandFailedException {
+        Deploy deployCommand = new Deploy
+                .Builder(archive.as(ZipExporter.class).exportAsInputStream(), archive.getName(), true)
+                .build();
+        client.apply(deployCommand);
     }
 
     public void undeploy(String deploymentName) throws IOException, CommandFailedException {
