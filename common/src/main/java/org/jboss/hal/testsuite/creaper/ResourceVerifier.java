@@ -22,8 +22,6 @@
 
 package org.jboss.hal.testsuite.creaper;
 
-import java.io.IOException;
-
 import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.cli.Library;
 import org.jboss.hal.testsuite.dmr.ModelNodeGenerator;
@@ -37,6 +35,8 @@ import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.OperationException;
 import org.wildfly.extras.creaper.core.online.operations.Operations;
+
+import java.io.IOException;
 
 /**
  * Helper class to verify resource existence and attribute values in model.
@@ -119,7 +119,7 @@ public class ResourceVerifier {
 
         ModelNodeResult actualResult = ops.readAttribute(resourceAddress, attributeName);
         actualResult.assertDefinedValue();
-        Assert.assertEquals("Attribute value is different in model!" + errorMessageSuffix,
+        Assert.assertEquals("Attribute value is different in model! " + errorMessageSuffix,
                 expectedValue, actualResult.value());
         return this;
     }

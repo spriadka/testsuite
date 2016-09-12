@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
-public final class UndertowOperations implements AutoCloseable {
+public final class UndertowOperations {
 
     private static final Logger log = LoggerFactory.getLogger(UndertowOperations.class);
 
@@ -103,8 +103,7 @@ public final class UndertowOperations implements AutoCloseable {
         return name;
     }
 
-    @Override
-    public void close() throws IOException, OperationException, CommandFailedException {
+    public void cleanupReferences() throws IOException, OperationException, CommandFailedException {
         for (String socketBinding : referenceHolder.getReferencesByType(ReferenceType.SOCKET_BINDING)) {
             client.apply(new RemoveSocketBinding(socketBinding));
         }

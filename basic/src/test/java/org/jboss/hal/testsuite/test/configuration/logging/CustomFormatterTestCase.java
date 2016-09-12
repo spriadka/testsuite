@@ -8,8 +8,11 @@ import org.jboss.dmr.ModelNode;
 import org.jboss.dmr.Property;
 import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
+import org.jboss.hal.testsuite.creaper.command.BackupAndRestoreAttributes;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.page.config.LoggingPage;
+import org.jboss.hal.testsuite.util.Console;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -17,6 +20,7 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
+import org.wildfly.extras.creaper.core.CommandFailedException;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.OperationException;
 import org.wildfly.extras.creaper.core.online.operations.Values;
@@ -65,12 +69,26 @@ public class CustomFormatterTestCase extends LoggingAbstractTestCase {
     @Page
     private LoggingPage page;
 
+    private BackupAndRestoreAttributes backupAndRestoreAttributes;
+
     @Before
-    public void before() {
+    public void before() throws CommandFailedException {
         page.navigate();
         page.switchToFormatterTab();
         page.switchToCustomPattern();
         page.selectFormatter(CUSTOM_FORMATTER);
+        backupAndRestoreAttributes = new BackupAndRestoreAttributes.Builder(CUSTOM_FORMATTER_ADDRESS).build();
+        client.apply(backupAndRestoreAttributes.backup());
+    }
+
+
+
+    @After
+    public void restoreFormatterAndGetRidOfReloadRequired() throws CommandFailedException, InterruptedException, TimeoutException, IOException {
+        if (backupAndRestoreAttributes != null) {
+            client.apply(backupAndRestoreAttributes.restore());
+        }
+        administration.reloadIfRequired();
     }
 
     @Test
@@ -94,9 +112,12 @@ public class CustomFormatterTestCase extends LoggingAbstractTestCase {
     public void updateCustomFormatterProperties() throws Exception {
         ConfigFragment config = page.getConfigFragment();
         config.editTextAndSave("class", "org.jboss.logmanager.formatters.PatternFormatter"); //need to set formatter class which has needed setter method
+        Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
+        administration.reloadIfRequired();
         config.editTextAndSave("properties", "pattern=%s%E%n");
         ModelNode expected = new ModelNode().add(new Property("pattern", new ModelNode("%s%E%n")));
-        new ResourceVerifier(CUSTOM_FORMATTER_ADDRESS, client).verifyAttribute("properties", expected);
+        new ResourceVerifier(CUSTOM_FORMATTER_ADDRESS, client)
+                .verifyAttribute("properties", expected, "Failed probably due https://issues.jboss.org/browse/HAL-1174");
     }
 
     @Test

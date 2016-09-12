@@ -190,16 +190,6 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
     }
 
     @Test
-    public void setEnableSPDYToTrue() throws Exception {
-        editCheckboxAndVerify(HTTPS_LISTENER_ADDRESS, ENABLE_SPDY, true);
-    }
-
-    @Test
-    public void setEnableSPDYToFalse() throws Exception {
-        editCheckboxAndVerify(HTTPS_LISTENER_ADDRESS, ENABLE_SPDY, false);
-    }
-
-    @Test
     public void setEnabledToTrue() throws Exception {
         editCheckboxAndVerify(HTTPS_LISTENER_ADDRESS, ENABLED, true);
     }

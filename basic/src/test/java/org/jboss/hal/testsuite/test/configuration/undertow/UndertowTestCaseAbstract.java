@@ -8,6 +8,7 @@ import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.fragment.config.undertow.UndertowFragment;
 import org.jboss.hal.testsuite.page.config.UndertowPage;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -54,12 +55,17 @@ public abstract class UndertowTestCaseAbstract {
     @AfterClass
     public static void mainTearDown() throws InterruptedException, IOException, TimeoutException, OperationException, CommandFailedException {
         try {
-            undertowOps.close();
+            undertowOps.cleanupReferences();
             administration.restartIfRequired();
             administration.reloadIfRequired();
         } finally {
             client.close();
         }
+    }
+
+    @After
+    public void disposeOfReloadRequired() throws InterruptedException, TimeoutException, IOException {
+        administration.reloadIfRequired();
     }
 
     protected void editTextAndVerify(Address address, String attributeName, String value) throws Exception {
