@@ -30,6 +30,10 @@ import java.util.logging.Logger;
 import javax.batch.api.chunk.ItemReader;
 import javax.inject.Named;
 
+/**
+ * Batch {@link ItemReader} to be used in testing batch jobs in {@link BatchManagementTestCase}
+ * @author pjelinek
+ */
 @Named("testReader")
 public class Reader implements ItemReader {
 

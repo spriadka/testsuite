@@ -19,7 +19,8 @@ package org.jboss.hal.testsuite.test.runtime.batch;
 import java.io.Serializable;
 
 /**
- * This class controls the checkpoint for the {@link Reader}
+ * This class is used in testing batch jobs in {@link BatchManagementTestCase} to control the checkpoint
+ * for the {@link Reader}
  *
  */
 public class Checkpoint implements Serializable {

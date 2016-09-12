@@ -230,7 +230,14 @@ public class BatchManagementTestCase {
                 .allMatch(jobFileName -> jobFileName.equals(expectedJobFileName));
     }
 
-    private void deployBatchApplication(long timeout) throws CommandFailedException {
+    /**
+     * Deploy batch application as web archive with {@link #deploymentName} name containing two batch jobs named
+     * {@link #jobOneName} and {@link #jobTwoName} with configuration files named {@link #jobOneFileName}
+     * and {@link #jobTwoFileName}
+     * @param itemProcessingSleep - if set greater than zero it will slow down processing of each item in running batch
+     * job for given number of milliseconds
+     */
+    private void deployBatchApplication(long itemProcessingSleep) throws CommandFailedException {
         String randomString = "-" + RandomStringUtils.randomAlphabetic(6);
         deploymentName = BatchManagementTestCase.class.getSimpleName() + randomString + ".war";
         jobOneName = "job-one" + randomString;
@@ -239,14 +246,14 @@ public class BatchManagementTestCase {
         jobTwoFileName = jobTwoName + "-config.xml";
         WebArchive archive = ShrinkWrap.create(WebArchive.class, deploymentName)
                 .addClasses(Checkpoint.class, Reader.class, Processor.class, Writer.class)
-                .addAsWebInfResource(getBatchConfigAsset(jobOneName, timeout), "classes/META-INF/batch-jobs/" + jobOneFileName)
-                .addAsWebInfResource(getBatchConfigAsset(jobTwoName, timeout), "classes/META-INF/batch-jobs/" + jobTwoFileName)
+                .addAsWebInfResource(getBatchConfigAsset(jobOneName, itemProcessingSleep), "classes/META-INF/batch-jobs/" + jobOneFileName)
+                .addAsWebInfResource(getBatchConfigAsset(jobTwoName, itemProcessingSleep), "classes/META-INF/batch-jobs/" + jobTwoFileName)
                 .addAsWebInfResource("batch/names.txt", "classes/org/jboss/hal/testsuite/test/runtime/batch/names.txt")
                 .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml");
         deploymentOps.deploy(archive);
     }
 
-    private StringAsset getBatchConfigAsset(String jobId, long timeout) {
+    private StringAsset getBatchConfigAsset(String jobId, long itemProcessingSleep) {
         return new StringAsset(
                 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
                 "<job id=\"" + jobId + "\" xmlns=\"http://xmlns.jcp.org/xml/ns/javaee\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
@@ -256,7 +263,7 @@ public class BatchManagementTestCase {
                 "            <reader ref=\"testReader\" />\n" +
                 "            <processor ref=\"testProcessor\">\n" +
                 "                <properties>\n" +
-                "                    <property name=\"timeout\" value=\"" + timeout + "\"/>\n" +
+                "                    <property name=\"itemProcessingSleep\" value=\"" + itemProcessingSleep + "\"/>\n" +
                 "                </properties>\n" +
                 "            </processor>\n" +
                 "            <writer ref=\"testWriter\" />\n" +

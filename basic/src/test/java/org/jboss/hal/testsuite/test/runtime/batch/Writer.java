@@ -29,6 +29,10 @@ import java.util.logging.Logger;
 import javax.batch.api.chunk.AbstractItemWriter;
 import javax.inject.Named;
 
+/**
+ * Batch {@link AbstractItemWriter} to be used in testing batch jobs in {@link BatchManagementTestCase}
+ * @author pjelinek
+ */
 @Named("testWriter")
 public class Writer extends AbstractItemWriter {
 

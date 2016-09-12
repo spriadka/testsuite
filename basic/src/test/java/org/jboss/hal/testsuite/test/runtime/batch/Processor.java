@@ -30,6 +30,10 @@ import javax.batch.api.chunk.ItemProcessor;
 import javax.inject.Inject;
 import javax.inject.Named;
 
+/**
+ * Batch {@link ItemProcessor} to be used in testing batch jobs in {@link BatchManagementTestCase}
+ * @author pjelinek
+ */
 @Named("testProcessor")
 public class Processor implements ItemProcessor {
 
@@ -37,13 +41,13 @@ public class Processor implements ItemProcessor {
 
     @Inject
     @BatchProperty
-    private Long timeout;
+    private Long itemProcessingSleep;
 
     @Override
     public String processItem(Object item) throws Exception {
-        if (timeout != null && timeout > 0L) {
-            log.info("Processing slowly " + item + " with " + timeout + "ms timeout.");
-            TimeUnit.MILLISECONDS.sleep(timeout);
+        if (itemProcessingSleep != null && itemProcessingSleep > 0L) {
+            log.info("Processing slowly " + item + " with " + itemProcessingSleep + "ms sleep.");
+            TimeUnit.MILLISECONDS.sleep(itemProcessingSleep);
         }
         return ((String) item).toUpperCase();
     }

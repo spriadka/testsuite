@@ -35,6 +35,9 @@ public class BatchJobOperations {
         this.ops = new Operations(client);
     }
 
+    /**
+     * @return execution id
+     */
     public long startJob(final String deploymentName, final String jobXmlName) throws IOException {
         ModelNodeResult result = ops.invoke("start-job", getBatchSubsystemInDeploymentAddress(deploymentName),
                 Values.of("job-xml-name", jobXmlName));
