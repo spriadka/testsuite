@@ -52,15 +52,14 @@ public class ConfigurationChangesTestCase {
     @Page
     private ConfigurationChangesPage page;
 
-    private static OnlineManagementClient client;
-    private static Operations operations;
+    private static final OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
+    private static final Operations operations = new Operations(client);
+    private static final Administration administration = new Administration(client);
     private static Address serviceAddress;
     private static ConfigurationChangesResource changesResource;
 
     @BeforeClass
     public static void beforeClass() {
-        client = ManagementClientProvider.createOnlineManagementClient();
-        operations = new Operations(client);
         serviceAddress = client.options().isDomain ?
                 Address.host(client.options().defaultHost)
                         .and("core-service", "management")
@@ -71,14 +70,15 @@ public class ConfigurationChangesTestCase {
     }
 
     @Before
-    public void before() throws IOException, OperationException {
+    public void before() throws IOException, OperationException, TimeoutException, InterruptedException {
         final int MAX_HISTORY = 100;
         //make sure the service is up and running
         if (!operations.exists(serviceAddress)) {
             operations.add(serviceAddress, Values.of("max-history", MAX_HISTORY)).assertSuccess();
         } else {
-            operations.writeAttribute(serviceAddress, "max-history", MAX_HISTORY);
+            operations.writeAttribute(serviceAddress, "max-history", MAX_HISTORY).assertSuccess();
         }
+        administration.reloadIfRequired();
         page.navigate();
     }
 
@@ -86,7 +86,6 @@ public class ConfigurationChangesTestCase {
     public static void afterClass() throws IOException, OperationException, TimeoutException, InterruptedException {
         try {
             operations.removeIfExists(serviceAddress);
-            Administration administration = new Administration(client);
             administration.reloadIfRequired();
         } finally {
             client.close();
@@ -95,15 +94,17 @@ public class ConfigurationChangesTestCase {
 
     @Test
     public void disableAndEnableTracking() throws Exception {
+        final int MAX_HISTORY = 42;
+
         page.disable();
         new ResourceVerifier(serviceAddress, client)
                 .verifyDoesNotExist();
 
         page.openEnableConfigurationChangesDialog()
-                .maxHistory(100)
+                .maxHistory(MAX_HISTORY)
                 .clickSave();
         new ResourceVerifier(serviceAddress, client)
-                .verifyAttribute("max-history", 100);
+                .verifyAttribute("max-history", MAX_HISTORY);
     }
 
     @Test
@@ -140,7 +141,7 @@ public class ConfigurationChangesTestCase {
         client.apply(backup.backup());
         client.apply(backup.restore());
         Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
-        new Administration(client).reloadIfRequired();
+        administration.reloadIfRequired();
 
         Assert.assertFalse("They definitely should not be equal, this is before refresh state",
                 isChangesListsEqual(changesResource.getAllConfigurationChanges(),
