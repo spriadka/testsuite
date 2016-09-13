@@ -1,5 +1,8 @@
 package org.jboss.hal.testsuite.test.configuration.infinispan;
 
+import static org.wildfly.extras.creaper.core.online.Constants.PROFILE;
+import static org.wildfly.extras.creaper.core.online.Constants.SUBSYSTEM;
+
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
@@ -8,6 +11,7 @@ import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.config.infinispan.CacheWizard;
 import org.jboss.hal.testsuite.page.config.HibernateCachePage;
+import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -29,7 +33,12 @@ import java.util.concurrent.TimeoutException;
  */
 public abstract class AbstractCacheTestCase {
 
-    protected static final Address ABSTRACT_CACHE_ADDRESS = Address.subsystem("infinispan").and("cache-container", "hibernate");
+    private static final String INFINISPAN = "infinispan";
+    protected static final Address ABSTRACT_CACHE_ADDRESS =
+            (ConfigUtils.isDomain() ?
+                Address.of(PROFILE, "full-ha").and(SUBSYSTEM, INFINISPAN) :
+                Address.subsystem(INFINISPAN)
+            ).and("cache-container", "hibernate");
 
     protected final String cacheName = "cache_" + RandomStringUtils.randomAlphanumeric(5);
     protected final String cacheTypeAddress = getCacheType().getAddressName();

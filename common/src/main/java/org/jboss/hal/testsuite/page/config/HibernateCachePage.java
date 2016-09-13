@@ -25,7 +25,7 @@ public class HibernateCachePage extends ConfigPage implements Navigatable {
         if (ConfigUtils.isDomain()) {
             navigation = new FinderNavigation(browser, DomainConfigEntryPoint.class)
                     .step(FinderNames.CONFIGURATION, FinderNames.PROFILES)
-                    .step(FinderNames.PROFILE, "full");
+                    .step(FinderNames.PROFILE, "full-ha");
         } else {
             navigation = new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
                     .step(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS);
