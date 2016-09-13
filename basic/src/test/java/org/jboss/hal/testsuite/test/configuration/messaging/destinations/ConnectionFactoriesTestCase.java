@@ -49,7 +49,7 @@ public class ConnectionFactoriesTestCase extends AbstractMessagingTestCase {
     @Before
     public void before() {
         page.navigateToMessaging();
-        page.selectQueuesAndTopics();
+        page.selectConnectionsView();
         page.switchToConnectionFactories();
     }
 
