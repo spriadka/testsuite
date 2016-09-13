@@ -75,6 +75,7 @@ public class QueuesTopicsTestCase extends AbstractMessagingTestCase {
     public void before() {
         page.navigateToMessaging();
         page.selectQueuesAndTopics();
+        page.switchToJmsQueuesTopics();
         page.selectInTable(TOPIC);
     }
 

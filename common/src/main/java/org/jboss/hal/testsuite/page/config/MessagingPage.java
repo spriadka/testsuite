@@ -122,7 +122,7 @@ public class MessagingPage extends ConfigPage implements Navigatable {
     }
 
     public void switchToConnectionManagementTab() {
-        WebElement security = browser.findElement(ByJQuery.selector("div.gwt-Label:contains(Connection Management)"));
+        WebElement security = browser.findElement(ByJQuery.selector("div.gwt-Label:contains(Connection Management):visible"));
         security.click();
     }
 
@@ -164,6 +164,10 @@ public class MessagingPage extends ConfigPage implements Navigatable {
 
     public void switchToBridges() {
         switchView("Bridges");
+    }
+
+    public void switchToJmsQueuesTopics() {
+        switchView("JMS Queues/Topics");
     }
 
     public void selectInTable(String value, int column) {
