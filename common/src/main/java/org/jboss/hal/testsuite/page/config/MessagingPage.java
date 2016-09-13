@@ -166,6 +166,10 @@ public class MessagingPage extends ConfigPage implements Navigatable {
         switchView("Bridges");
     }
 
+    public void switchToJmsQueuesTopics() {
+        switchView("JMS Queues/Topics");
+    }
+
     public void selectInTable(String value, int column) {
         getResourceManager().getResourceTable().selectRowByText(column, value);
     }
