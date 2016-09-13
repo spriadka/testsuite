@@ -122,7 +122,7 @@ public class MessagingPage extends ConfigPage implements Navigatable {
     }
 
     public void switchToConnectionManagementTab() {
-        WebElement security = browser.findElement(ByJQuery.selector("div.gwt-Label:contains(Connection Management)"));
+        WebElement security = browser.findElement(ByJQuery.selector("div.gwt-Label:contains(Connection Management):visible"));
         security.click();
     }
 
