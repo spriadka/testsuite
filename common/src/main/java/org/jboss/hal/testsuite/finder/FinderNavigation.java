@@ -204,7 +204,8 @@ public class FinderNavigation {
                             return navigate(exactRowText);
                         } else {
                             naviRetriesNo = 0;
-                            throw new TimeoutException("Navigation frozen! Probably due to https://issues.jboss.org/browse/JBEAP-2168.", e);
+                            throw new TimeoutException(
+                                    "Navigation frozen! Probably due to JBEAP-2168 or changed navigation tree.", e);
                         }
                     }
                 }
