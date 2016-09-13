@@ -32,6 +32,10 @@ import org.openqa.selenium.support.ui.Select;
  */
 public class MessagingPage extends ConfigPage implements Navigatable {
 
+    private static final String
+        MESSAGING_PROVIDER_LABEL = "Messaging Provider",
+        MESSAGING_SUBSYSTEM_LABEL = "Messaging",
+        SETTINGS_LABEL = "Settings";
     private FinderNavigation navigation;
 
     public ConfigFragment getConfigFragment() {
@@ -44,47 +48,26 @@ public class MessagingPage extends ConfigPage implements Navigatable {
         return  Graphene.createPageFragment(ConfigFragment.class, editPanel);
     }
 
-    public void navigateToMessaging() {
-        if (ConfigUtils.isDomain()) {
-            navigation = new FinderNavigation(browser, DomainConfigEntryPoint.class)
-                    .step(FinderNames.CONFIGURATION, FinderNames.PROFILES)
-                    .step(FinderNames.PROFILE, ConfigUtils.getDefaultProfile())
-                    .step(FinderNames.SUBSYSTEM, "Messaging")
-                    .step("Messaging Provider", "default");
-        } else {
-            navigation = new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
-                    .step(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
-                    .step(FinderNames.SUBSYSTEM, "Messaging")
-                    .step("Messaging Provider", "default");
-        }
-    }
-
     public void navigateToMessagingProvider() {
         if (ConfigUtils.isDomain()) {
             navigation = new FinderNavigation(browser, DomainConfigEntryPoint.class)
                     .step(FinderNames.CONFIGURATION, FinderNames.PROFILES)
-                    .step(FinderNames.PROFILE, ConfigUtils.getDefaultProfile())
-                    .step(FinderNames.SUBSYSTEM, "Messaging");
+                    .step(FinderNames.PROFILE, ConfigUtils.getDefaultProfile());
         } else {
             navigation = new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
-                    .step(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
-                    .step(FinderNames.SUBSYSTEM, "Messaging");
+                    .step(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS);
         }
+        navigation.step(FinderNames.SUBSYSTEM, MESSAGING_SUBSYSTEM_LABEL);
+        navigation.step(SETTINGS_LABEL, MESSAGING_PROVIDER_LABEL);
     }
 
     public void selectProvider(String provider) {
-        if (ConfigUtils.isDomain()) {
-            navigation = new FinderNavigation(browser, DomainConfigEntryPoint.class)
-                    .step(FinderNames.CONFIGURATION, FinderNames.PROFILES)
-                    .step(FinderNames.PROFILE, ConfigUtils.getDefaultProfile())
-                    .step(FinderNames.SUBSYSTEM, "Messaging")
-                    .step("Messaging Provider", provider);
-        } else {
-            navigation = new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
-                    .step(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
-                    .step(FinderNames.SUBSYSTEM, "Messaging")
-                    .step("Messaging Provider", provider);
-        }
+        navigateToMessagingProvider();
+        navigation.step(MESSAGING_PROVIDER_LABEL, provider);
+    }
+
+    public void navigateToMessaging() {
+        selectProvider("default");
     }
 
     public void selectView(String view) {
