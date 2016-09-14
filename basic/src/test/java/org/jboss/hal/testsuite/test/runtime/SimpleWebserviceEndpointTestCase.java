@@ -162,7 +162,7 @@ public class SimpleWebserviceEndpointTestCase {
         mbuiNavigation.displayMBuiSubTree("subsystem");
         mbuiNavigation.displayMBuiSubTree("webservices");
         mbuiNavigation.displayMBuiSubTree("endpoint");
-        mbuiNavigation.selectItemInMBuiTree("test%3ATestService");
+        mbuiNavigation.selectItemInMBuiTree("test:TestService");
 
         mbuiNavigation.checkAndAssertMBuiValueOf("Request count", "3");
         mbuiNavigation.checkAndAssertMBuiValueOf("Response count", "3");
@@ -198,7 +198,7 @@ public class SimpleWebserviceEndpointTestCase {
         mbuiNavigation.displayMBuiSubTree("subsystem");
         mbuiNavigation.displayMBuiSubTree("webservices");
         mbuiNavigation.displayMBuiSubTree("endpoint");
-        mbuiNavigation.selectItemInMBuiTree("test%3ATestService");
+        mbuiNavigation.selectItemInMBuiTree("test:TestService");
 
         mbuiNavigation.checkAndAssertMBuiValueOf("Request count", "1");
         mbuiNavigation.checkAndAssertMBuiValueOf("Response count", "0");
