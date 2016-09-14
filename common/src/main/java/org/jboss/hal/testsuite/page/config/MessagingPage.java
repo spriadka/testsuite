@@ -294,7 +294,7 @@ public class MessagingPage extends ConfigPage implements Navigatable {
     public void addFactory(String name, String jndiName, String connector) {
         clickButton("Add");
         getWindowFragment().getEditor().text("name", name);
-        getWindowFragment().getEditor().text("jndiName", jndiName);
+        getWindowFragment().getEditor().text("entries", jndiName);
         getWindowFragment().getEditor().text("connectors", connector);
         getWindowFragment().clickButton("Save");
     }
