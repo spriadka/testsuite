@@ -43,10 +43,7 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
     private static final String BUFFER_POOL = "buffer-pool";
     private static final String DECODE_URL = "decode-url";
     private static final String ENABLE_HTTP2 = "enable-http2";
-    private static final String ENABLE_SPDY = "enable-spdy";
     private static final String ENABLED = "enabled";
-    private static final String ENABLED_CIPHER_SUITES = "enabled-cipher-suites";
-    private static final String ENABLED_PROTOCOLS = "enabled-protocols";
     private static final String MAX_BUFFERED_REQUEST_SIZE = "max-buffered-request-size";
     private static final String MAX_CONNECTIONS = "max-connections";
     private static final String MAX_COOKIES = "max-cookies";
@@ -60,22 +57,17 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
     private static final String RECORD_REQUEST_START_TIME = "record-request-start-time";
     private static final String REQUEST_PARSE_TIMEOUT = "request-parse-timeout";
     private static final String RESOLVE_PEER_ADDRESS = "resolve-peer-address";
-    private static final String SECURITY_REALM = "security-realm";
     private static final String SEND_BUFFER = "send-buffer";
     private static final String SOCKET_BINDING = "socket-binding";
     private static final String SSL_SESSION_CACHE_SIZE = "ssl-session-cache-size";
     private static final String SSL_SESSION_TIMEOUT = "ssl-session-timeout";
     private static final String TCP_BACKLOG = "tcp-backlog";
     private static final String TCP_KEEP_ALIVE = "tcp-keep-alive";
-    private static final String VERIFY_CLIENT = "verify-client";
     private static final String URL_CHARSET = "url-charset";
     private static final String WORKER = "worker";
     private static final String WRITE_TIMEOUT = "write-timeout";
 
     //values
-    private static final String VERIFY_CLIENT_VALUE = "REQUIRED";
-    private static final String CIPHER_SUITE = "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256";
-
     private static final String HTTP_SERVER = "undertow-http-server-https-listener_" + RandomStringUtils.randomAlphanumeric(5);
 
     private static final String HTTPS_LISTENER = "https-listener_" + RandomStringUtils.randomAlphanumeric(5);
@@ -197,16 +189,6 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
     @Test
     public void setEnabledToFalse() throws Exception {
         editCheckboxAndVerify(HTTPS_LISTENER_ADDRESS, ENABLED, false);
-    }
-
-    @Test
-    public void editEnabledCipherSuites() throws Exception {
-        editTextAndVerify(HTTPS_LISTENER_ADDRESS, ENABLED_CIPHER_SUITES, CIPHER_SUITE);
-    }
-
-    @Test
-    public void editEnabledProtocols() throws Exception {
-        editTextAndVerify(HTTPS_LISTENER_ADDRESS, ENABLED_PROTOCOLS);
     }
 
     @Test
@@ -340,11 +322,6 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
     }
 
     @Test
-    public void editSecurityRealm() throws Exception {
-        editTextAndVerify(HTTPS_LISTENER_ADDRESS, SECURITY_REALM, undertowOps.createSecurityRealm());
-    }
-
-    @Test
     public void editSendBuffer() throws Exception {
         editTextAndVerify(HTTPS_LISTENER_ADDRESS, SEND_BUFFER, NUMERIC_VALID);
     }
@@ -417,11 +394,6 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
     }
 
     @Test
-    public void selectVerifyClient() throws Exception {
-        selectOptionAndVerify(HTTPS_LISTENER_ADDRESS, VERIFY_CLIENT, VERIFY_CLIENT_VALUE);
-    }
-
-    @Test
     public void editURLCharset() throws Exception {
         editTextAndVerify(HTTPS_LISTENER_ADDRESS, URL_CHARSET);
     }
@@ -444,13 +416,11 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
     @Test
     public void addHTTPSListenerInGUI() throws Exception {
         String socketBinding = undertowOps.createSocketBinding();
-        String securityRealm = undertowOps.createSecurityRealm();
         ConfigFragment config = page.getConfigFragment();
         WizardWindow wizard = config.getResourceManager().addResource();
 
         Editor editor = wizard.getEditor();
         editor.text("name", HTTPS_LISTENER_TBA);
-        editor.text(SECURITY_REALM, securityRealm);
         editor.text(SOCKET_BINDING, socketBinding);
         boolean result = wizard.finish();
 
@@ -458,7 +428,6 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
         Assert.assertTrue("HTTPS listener should be present in table", config.resourceIsPresent(HTTPS_LISTENER_TBA));
         ResourceVerifier verifier = new ResourceVerifier(HTTPS_LISTENER_TBA_ADDRESS, client);
         verifier.verifyAttribute(SOCKET_BINDING, socketBinding);
-        verifier.verifyAttribute(SECURITY_REALM, securityRealm);
 }
 
     @Test
