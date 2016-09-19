@@ -32,9 +32,10 @@ import org.openqa.selenium.support.ui.Select;
  */
 public class MessagingPage extends ConfigPage implements Navigatable {
 
-    private static final String
+    protected static final String
         MESSAGING_PROVIDER_LABEL = "Messaging Provider",
         MESSAGING_SUBSYSTEM_LABEL = "Messaging",
+        JMS_BRIDGE_LABEL = "JMS Bridge",
         SETTINGS_LABEL = "Settings";
     private FinderNavigation navigation;
 
