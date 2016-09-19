@@ -115,7 +115,9 @@ public class SuggestionChecker {
             Collections.sort(filteredSuggestionFromResource);
             Collections.sort(valuesLabels);
 
-            Assert.assertEquals("Non relevant suggestions appeared or some of the are missing, input value: '" + inputFieldValue + "'.",
+            Assert.assertEquals("Non relevant suggestions appeared or some of the are missing, input value: '" + inputFieldValue + "'. " +
+                    "Size expected: '" + filteredSuggestionFromResource.size() + "' vs. size actual: '" + valuesLabels.size() + "'. " +
+                    "If sizes are not equal it is probably because of https://issues.jboss.org/browse/HAL-1169.",
                     filteredSuggestionFromResource,
                     valuesLabels);
         }
