@@ -5,4 +5,4 @@ jdk:
 
 install: echo LOL, we need to skip downloading dependencies as we enforce jboss.dist
 
-script: mvn install -fae -DskipTests=true -Dmaven.javadoc.skip=true -Djboss.dist -B
+script: mvn verify -Pbasic,rbac -fae -DskipTests=true -Dmaven.javadoc.skip=true -Djboss.dist -B
