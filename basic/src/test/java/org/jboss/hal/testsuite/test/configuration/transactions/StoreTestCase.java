@@ -17,7 +17,7 @@ import java.io.IOException;
 
 @RunWith(Arquillian.class)
 @Category(Shared.class)
-public class JDBCTestCase extends TransactionsTestCaseAbstract {
+public class StoreTestCase extends TransactionsTestCaseAbstract {
 
     private static final String JDBC_ACTION_STORE_DROP_TABLE_ATTR = "jdbc-action-store-drop-table";
     private static final String JDBC_ACTION_STORE_TABLE_PREFIX_ATTR = "jdbc-action-store-table-prefix";
@@ -33,7 +33,7 @@ public class JDBCTestCase extends TransactionsTestCaseAbstract {
     @Before
     public void before() {
         page.navigate();
-        page.getConfig().switchTo("JDBC");
+        page.getConfig().switchTo("Store");
     }
 
     @Test
