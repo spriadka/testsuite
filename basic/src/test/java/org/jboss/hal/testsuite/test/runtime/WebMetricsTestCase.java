@@ -68,7 +68,7 @@ public class WebMetricsTestCase {
 
     public static final String NUMBER_OF_REQUESTS = "Request Count";
     public static final String ERRORS = "Error Count";
-    public static final String BYTES_SEND = "Bytes Send";
+    public static final String BYTES_SEND = "Bytes Sent";
     public static final String BYTES_RECEIVED = "Bytes Received";
 
     private static final Address UNDERTOW_SUBSYSTEM_ADDR = Address.subsystem("undertow");
