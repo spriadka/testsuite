@@ -52,5 +52,6 @@ public class StandardSocketBindingsPage extends ConfigPage implements Navigatabl
         Application.waitUntilVisible();
         Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
         getResourceManager().viewByName("standard-sockets");
+        Console.withBrowser(browser).waitUntilLoaded().waitForContent();
     }
 }
