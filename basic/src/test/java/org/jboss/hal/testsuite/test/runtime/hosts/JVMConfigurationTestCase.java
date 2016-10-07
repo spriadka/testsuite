@@ -294,6 +294,8 @@ public class JVMConfigurationTestCase {
                     .editAndSave(ConfigChecker.InputType.SELECT, TYPE_IDENTIFIER, VALUE)
                     .verifyFormSaved()
                     .verifyAttribute(TYPE_IDENTIFIER, VALUE);
+        } catch (AssertionError e) {
+            throw new AssertionError(e.getMessage() + ". Failed probably due to https://issues.jboss.org/browse/HAL-1195");
         } finally {
             operations.writeAttribute(JVM_ADDRESS, TYPE_IDENTIFIER, originalValue.value());
         }
