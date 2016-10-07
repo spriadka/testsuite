@@ -1,6 +1,5 @@
 package org.jboss.hal.testsuite.test.configuration.infinispan;
 
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
@@ -41,12 +40,14 @@ public class CacheContainersTestCase {
     private static final String JNDI_NAME = "java:/" + CACHE_CONTAINER_NAME;
 
     private static final OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
-    private final Operations ops = new Operations(client);
-    private final Administration adminOps = new Administration(client);
+    private static final Operations ops = new Operations(client);
+    private static final Administration adminOps = new Administration(client);
 
-    private final Address cacheContainerAddress = Address.subsystem("infinispan").and("cache-container",
+    private static final Address SUBSYSTEM_ADDRESS = client.options().isDomain ? Address.of("profile", "full-ha")
+            .and("subsystem", "infinispan") : Address.subsystem("infinispan");
+    private static final Address CACHE_CONTAINER_ADDRESS = SUBSYSTEM_ADDRESS.and("cache-container",
             CACHE_CONTAINER_NAME);
-    private final Address transportAddress = cacheContainerAddress.and("transport", "TRANSPORT");
+    private static final Address TRANSPORT_ADDRESS = CACHE_CONTAINER_ADDRESS.and("transport", "TRANSPORT");
 
     @Drone
     public WebDriver browser;
@@ -61,8 +62,8 @@ public class CacheContainersTestCase {
     }
 
     @AfterClass
-    public static void afterClass() {
-        IOUtils.closeQuietly(client);
+    public static void afterClass() throws InterruptedException, TimeoutException, IOException {
+        client.close();
     }
 
     @Test
@@ -72,7 +73,7 @@ public class CacheContainersTestCase {
         boolean result = wizard.name(CACHE_CONTAINER_NAME).finish();
 
         assertTrue("Window should be closed.", result);
-        new ResourceVerifier(cacheContainerAddress, client).verifyExists();
+        new ResourceVerifier(CACHE_CONTAINER_ADDRESS, client).verifyExists();
     }
 
 
@@ -80,7 +81,7 @@ public class CacheContainersTestCase {
     public void removeCacheContainer() throws Exception {
         addCacheContainer();
         page.navigateAndRemoveCacheContainer(CACHE_CONTAINER_NAME);
-        new ResourceVerifier(cacheContainerAddress, client).verifyDoesNotExist();
+        new ResourceVerifier(CACHE_CONTAINER_ADDRESS, client).verifyDoesNotExist();
     }
 
     @Test
@@ -89,7 +90,7 @@ public class CacheContainersTestCase {
         String attributeValue = JNDI_NAME;
         addCacheContainer();
         page.invokeContainerSettings(CACHE_CONTAINER_NAME);
-        new ConfigChecker.Builder(client, cacheContainerAddress).configFragment(page.getSettingsConfig())
+        new ConfigChecker.Builder(client, CACHE_CONTAINER_ADDRESS).configFragment(page.getSettingsConfig())
             .editAndSave(InputType.TEXT, attributeName, attributeValue)
             .verifyFormSaved()
             .verifyAttribute(attributeName, attributeValue);
@@ -101,7 +102,7 @@ public class CacheContainersTestCase {
         String attributeValue = "infDefCache_" + RandomStringUtils.randomAlphanumeric(5);
         addCacheContainer();
         page.invokeContainerSettings(CACHE_CONTAINER_NAME);
-        new ConfigChecker.Builder(client, cacheContainerAddress).configFragment(page.getSettingsConfig())
+        new ConfigChecker.Builder(client, CACHE_CONTAINER_ADDRESS).configFragment(page.getSettingsConfig())
             .editAndSave(InputType.TEXT, attributeName, attributeValue)
             .verifyFormSaved()
             .verifyAttribute(attributeName, attributeValue);
@@ -113,7 +114,7 @@ public class CacheContainersTestCase {
         String attributeValue = "infModule" + RandomStringUtils.randomAlphanumeric(5);
         addCacheContainer();
         page.invokeContainerSettings(CACHE_CONTAINER_NAME);
-        new ConfigChecker.Builder(client, cacheContainerAddress).configFragment(page.getSettingsConfig())
+        new ConfigChecker.Builder(client, CACHE_CONTAINER_ADDRESS).configFragment(page.getSettingsConfig())
             .editAndSave(InputType.TEXT, attributeName, attributeValue)
             .verifyFormSaved()
             .verifyAttribute(attributeName, attributeValue);
@@ -122,10 +123,10 @@ public class CacheContainersTestCase {
     @Test
     public void setStatisticsEnabledToTrue() throws Exception {
         String attributeName = "statistics-enabled";
-        boolean attributeValue = true;
+        final boolean attributeValue = true;
         addCacheContainer();
         page.invokeContainerSettings(CACHE_CONTAINER_NAME);
-        new ConfigChecker.Builder(client, cacheContainerAddress).configFragment(page.getSettingsConfig())
+        new ConfigChecker.Builder(client, CACHE_CONTAINER_ADDRESS).configFragment(page.getSettingsConfig())
             .editAndSave(InputType.CHECKBOX, attributeName, attributeValue)
             .verifyFormSaved()
             .verifyAttribute(attributeName, attributeValue);
@@ -137,7 +138,7 @@ public class CacheContainersTestCase {
         boolean attributeValue = false;
         addCacheContainer();
         page.invokeContainerSettings(CACHE_CONTAINER_NAME);
-        new ConfigChecker.Builder(client, cacheContainerAddress).configFragment(page.getSettingsConfig())
+        new ConfigChecker.Builder(client, CACHE_CONTAINER_ADDRESS).configFragment(page.getSettingsConfig())
             .editAndSave(InputType.CHECKBOX, attributeName, attributeValue)
             .verifyFormSaved()
             .verifyAttribute(attributeName, attributeValue);
@@ -148,7 +149,7 @@ public class CacheContainersTestCase {
         String attributeName = "aliases";
         addCacheContainer();
         page.invokeContainerSettings(CACHE_CONTAINER_NAME);
-        new ConfigChecker.Builder(client, cacheContainerAddress).configFragment(page.getSettingsConfig())
+        new ConfigChecker.Builder(client, CACHE_CONTAINER_ADDRESS).configFragment(page.getSettingsConfig())
             .editAndSave(InputType.TEXT, attributeName, "this\nthat")
             .verifyFormSaved()
             .verifyAttribute(attributeName, new ModelNode().add("this").add("that"));
@@ -159,8 +160,9 @@ public class CacheContainersTestCase {
         String attributeName = "lock-timeout";
         long attributeValue = 3600000;
         addCacheContainer();
+        addJGroupsTransport();
         page.invokeTransportSettings(CACHE_CONTAINER_NAME);
-        new ConfigChecker.Builder(client, transportAddress).configFragment(page.getSettingsConfig())
+        new ConfigChecker.Builder(client, TRANSPORT_ADDRESS).configFragment(page.getSettingsConfig())
             .editAndSave(InputType.TEXT, attributeName, attributeValue)
             .verifyFormSaved()
             .verifyAttribute(attributeName, attributeValue);
@@ -171,20 +173,25 @@ public class CacheContainersTestCase {
         String attributeName = "channel";
         String attributeValue = "ee";
         addCacheContainer();
+        addJGroupsTransport();
         page.invokeTransportSettings(CACHE_CONTAINER_NAME);
-        new ConfigChecker.Builder(client, transportAddress).configFragment(page.getSettingsConfig())
+        new ConfigChecker.Builder(client, TRANSPORT_ADDRESS).configFragment(page.getSettingsConfig())
             .editAndSave(InputType.TEXT, attributeName, attributeValue)
             .verifyFormSaved()
             .verifyAttribute(attributeName, attributeValue);
     }
 
     private void addCacheContainer() throws Exception {
-        ops.add(cacheContainerAddress);
-        new ResourceVerifier(cacheContainerAddress, client).verifyExists();
+        ops.add(CACHE_CONTAINER_ADDRESS).assertSuccess();
+        new ResourceVerifier(CACHE_CONTAINER_ADDRESS, client).verifyExists();
     }
 
     private void deleteCacheContainer() throws IOException, OperationException {
-        ops.removeIfExists(cacheContainerAddress);
+        ops.removeIfExists(CACHE_CONTAINER_ADDRESS);
+    }
+
+    private void addJGroupsTransport() throws IOException {
+        ops.add(TRANSPORT_ADDRESS).assertSuccess();
     }
 
 }
