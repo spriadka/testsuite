@@ -169,7 +169,7 @@ public class CacheContainersTestCase {
     @Test
     public void editChannel() throws Exception {
         String attributeName = "channel";
-        String attributeValue = attributeName + RandomStringUtils.randomAlphanumeric(5);
+        String attributeValue = "ee";
         addCacheContainer();
         page.invokeTransportSettings(CACHE_CONTAINER_NAME);
         new ConfigChecker.Builder(client, transportAddress).configFragment(page.getSettingsConfig())
