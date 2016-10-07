@@ -32,6 +32,7 @@ public class UndertowHTTPPage extends UndertowPage implements Navigatable {
         Console.withBrowser(browser)
                 .waitUntilLoaded()
                 .dismissReloadRequiredWindowIfPresent();
+        Console.withBrowser(browser).waitForContent();
     }
 
     public UndertowHTTPPage selectHTTPServer(String serverName) {
