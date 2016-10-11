@@ -1,5 +1,6 @@
 package org.jboss.hal.testsuite.test.configuration.infinispan;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
@@ -40,8 +41,8 @@ public class CacheContainersTestCase {
     private static final String JNDI_NAME = "java:/" + CACHE_CONTAINER_NAME;
 
     private static final OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
-    private static final Operations ops = new Operations(client);
-    private static final Administration adminOps = new Administration(client);
+    private final Operations ops = new Operations(client);
+    private final Administration adminOps = new Administration(client);
 
     private static final Address SUBSYSTEM_ADDRESS = client.options().isDomain ? Address.of("profile", "full-ha")
             .and("subsystem", "infinispan") : Address.subsystem("infinispan");
@@ -62,8 +63,8 @@ public class CacheContainersTestCase {
     }
 
     @AfterClass
-    public static void afterClass() throws InterruptedException, TimeoutException, IOException {
-        client.close();
+    public static void afterClass() {
+        IOUtils.closeQuietly(client);
     }
 
     @Test
