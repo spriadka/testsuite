@@ -3,6 +3,7 @@ package org.jboss.hal.testsuite.test.runtime;
 import org.apache.commons.io.IOUtils;
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.drone.api.annotation.Drone;
+import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.dmr.ModelNode;
@@ -13,6 +14,7 @@ import org.jboss.hal.testsuite.creaper.command.DeployCommand;
 import org.jboss.hal.testsuite.creaper.command.UndeployCommand;
 import org.jboss.hal.testsuite.fragment.MetricsAreaFragment;
 import org.jboss.hal.testsuite.fragment.MetricsFragment;
+import org.jboss.hal.testsuite.mbui.MBUITreeNavigation;
 import org.jboss.hal.testsuite.mbui.MbuiNavigation;
 import org.jboss.hal.testsuite.page.runtime.WebServiceEndpointsPage;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -159,10 +161,13 @@ public class SimpleWebserviceEndpointTestCase {
 
         wsePage.navigateInDeploymentsMenu();
 
-        mbuiNavigation.displayMBuiSubTree("subsystem");
-        mbuiNavigation.displayMBuiSubTree("webservices");
-        mbuiNavigation.displayMBuiSubTree("endpoint");
-        mbuiNavigation.selectItemInMBuiTree("test:TestService");
+        Graphene.createPageFragment(MBUITreeNavigation.class, wsePage.getContentRoot())
+                .step("subsystem")
+                .step("webservices")
+                .step("endpoint")
+                .step("test:TestService")
+                .navigateToTreeItem()
+                .clickLabel();
 
         mbuiNavigation.checkAndAssertMBuiValueOf("Request count", "3");
         mbuiNavigation.checkAndAssertMBuiValueOf("Response count", "3");
