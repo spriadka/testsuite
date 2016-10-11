@@ -53,6 +53,8 @@ public abstract class AbstractFederationTestCase {
     protected static final Administration adminOps = new Administration(client);
     protected UtilFedName name = new UtilFedName(this);
 
+    protected static final String FAIL_MESSAGE_HAL_1194 = "Probably fails due to the https://issues.jboss.org/browse/HAL-1194";
+
     @Drone
     protected WebDriver browser;
 

@@ -100,7 +100,8 @@ public class ConfigurationChangesResource implements ConfigurationChangesProvide
             if (COMPOSITE.equals(opName)) {
 
                 List<ModelNode> steps = op1.get(STEPS).asList();
-                for (ModelNode step : steps) {
+                for (int idxStep = 0; idxStep < steps.size(); idxStep++) {
+                    ModelNode step = steps.get(idxStep);
                     if (step.hasDefined(OP_ADDR)) {
                         ModelNode addressNode = step.get(OP_ADDR);
                         List<ModelNode> modelNodes = addressNode.asList();
@@ -111,6 +112,10 @@ public class ConfigurationChangesResource implements ConfigurationChangesProvide
                             if (i + 1 < modelNodes.size())
                                 address.append(" / ");
                         }
+                    }
+                    // separates each step resource address
+                    if (idxStep + 1 < steps.size()) {
+                        address.append(" | ");
                     }
                 }
 

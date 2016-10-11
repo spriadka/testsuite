@@ -179,17 +179,11 @@ public class IIOPTestCase {
     @Test
     @InSequence(4)
     public void setAuthMethodValues() throws Exception {
+        boolean finished;
+
         page.switchToEditMode();
         ConfigFragment editPanelFragment = page.getConfigFragment();
-        editPanelFragment = page.getConfigFragment();
-        editPanelFragment.getEditor().select("auth-method", "");
-        boolean finished = editPanelFragment.save();
 
-        assertTrue("Config should be saved and closed.", finished);
-        //when setting undefined ("") value , value is set to default
-        new ResourceVerifier(iiopSubsystemAddress, client).verifyAttribute("auth-method", "username_password");
-
-        page.switchToEditMode();
         editPanelFragment.getEditor().select("auth-method", "none");
         finished = editPanelFragment.save();
         log.debug("f : " + finished);

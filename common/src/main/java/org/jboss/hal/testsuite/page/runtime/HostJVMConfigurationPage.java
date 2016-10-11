@@ -2,6 +2,7 @@ package org.jboss.hal.testsuite.page.runtime;
 
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.ByJQuery;
+import org.jboss.hal.testsuite.finder.Application;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
@@ -23,6 +24,7 @@ public class HostJVMConfigurationPage extends ConfigurationPage {
                 .step(FinderNames.HOST, ConfigUtils.getDefaultHost())
                 .selectRow()
                 .invoke("JVM");
+        Application.waitUntilVisible();
     }
 
     public void selectJVMConfiguration(String name) {

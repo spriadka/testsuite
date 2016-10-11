@@ -45,7 +45,7 @@ public class WebServiceEndpointsPage extends MetricsPage implements Navigatable 
                     .step(FinderNames.SERVER, FinderNames.STANDALONE_SERVER);
         }
         navigation.step(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
-                .step(FinderNames.SUBSYSTEM, "Webservices")
+                .step(FinderNames.SUBSYSTEM, "Web Services")
                 .selectRow()
                 .invoke(FinderNames.VIEW);
         Application.waitUntilVisible();

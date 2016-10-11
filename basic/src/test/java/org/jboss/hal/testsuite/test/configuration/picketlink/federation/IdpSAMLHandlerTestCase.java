@@ -22,10 +22,6 @@
 
 package org.jboss.hal.testsuite.test.configuration.picketlink.federation;
 
-import static org.jboss.hal.testsuite.test.configuration.picketlink.federation.UtilFedName.*;
-
-import java.io.IOException;
-
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
@@ -38,6 +34,13 @@ import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.OperationException;
+
+import java.io.IOException;
+
+import static org.jboss.hal.testsuite.test.configuration.picketlink.federation.UtilFedName.HANDLER_CLASS_NAME;
+import static org.jboss.hal.testsuite.test.configuration.picketlink.federation.UtilFedName.Key;
+import static org.jboss.hal.testsuite.test.configuration.picketlink.federation.UtilFedName.NAME_LABEL;
+import static org.jboss.hal.testsuite.test.configuration.picketlink.federation.UtilFedName.SAML_HANDLERS_LABEL;
 
 /**
  * Created by pjelinek on Nov 23, 2015
@@ -74,7 +77,7 @@ public class IdpSAMLHandlerTestCase extends AbstractFederationTestCase {
         wizard.clickSave().assertClosed();
 
         resourceVerifier.verifyExists()
-            .verifyAttribute(HANDLER_CLASS_NAME, className);
+            .verifyAttribute(HANDLER_CLASS_NAME, className, FAIL_MESSAGE_HAL_1194);
     }
 
     @Test
@@ -86,7 +89,7 @@ public class IdpSAMLHandlerTestCase extends AbstractFederationTestCase {
         editor.text(HANDLER_CLASS_NAME, ""); // invalid, either class-name or code has to be provided
         wizard.clickSave();
 
-        resourceVerifier.verifyDoesNotExist();
+        resourceVerifier.verifyDoesNotExist(FAIL_MESSAGE_HAL_1194);
     }
 
     @Test
