@@ -12,6 +12,7 @@ import static junit.framework.TestCase.assertEquals;
 /**
  * Created by pcyprian on 26.11.15.
  */
+@Deprecated
 public class MbuiNavigation {
 
     @Drone

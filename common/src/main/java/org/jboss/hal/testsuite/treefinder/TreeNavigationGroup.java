@@ -1,4 +1,4 @@
-package org.jboss.hal.testsuite.mbui;
+package org.jboss.hal.testsuite.treefinder;
 
 import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.openqa.selenium.By;
@@ -11,9 +11,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class MBUITreeGroup {
+/**
+ * Represents a group of navigation items. Be aware, that containment of this group varies from several subtrees as its
+ * children to just one child with no subtree.
+ */
+public class TreeNavigationGroup {
 
-    private static final Logger logger = LoggerFactory.getLogger(MBUITreeGroup.class);
+    private static final Logger logger = LoggerFactory.getLogger(TreeNavigationGroup.class);
 
     private static final String TREE_ITEM_CLASS_NAME = "gwt-TreeItem";
 
@@ -21,7 +25,11 @@ public class MBUITreeGroup {
 
     private final WebElement root;
 
-    public MBUITreeGroup(WebElement root) {
+    private TreeNavigationGroup() {
+        throw new UnsupportedOperationException("It is not allowed to use this constructor!");
+    }
+
+    TreeNavigationGroup(WebElement root) {
         this.root = root;
     }
 
@@ -36,11 +44,11 @@ public class MBUITreeGroup {
      * Get all direct children of current root
      * @return list of direct children
      */
-    public List<MBUITreeGroup> getDirectChildren() {
+    private List<TreeNavigationGroup> getDirectChildren() {
         List<WebElement> elements = root.findElements(DIRECT_CHILDREN_SELECTOR);
         if (elements.size() > 0) {
             logger.debug("Found '{}' direct children!", elements.size());
-            return elements.stream().map(MBUITreeGroup::new).collect(Collectors.toList());
+            return elements.stream().map(TreeNavigationGroup::new).collect(Collectors.toList());
         }
         return Collections.emptyList();
     }
@@ -58,12 +66,13 @@ public class MBUITreeGroup {
      * @param label by which the item will be looked for
      * @return this
      */
-    public MBUITreeGroup getDirectChildByLabel(String label) {
-        for (MBUITreeGroup child : getDirectChildren()) {
+    TreeNavigationGroup getDirectChildByLabel(String label) {
+        for (TreeNavigationGroup child : getDirectChildren()) {
             if (child.getLabel().equals(label)) {
                 return child;
             }
         }
+        //TODO: Is it good thing to throw an unchecked exception here? Should not be the user of API informed?
         throw new NotFoundException("Not found child with label '" + label + "'!");
     }
 
@@ -71,9 +80,9 @@ public class MBUITreeGroup {
      * Clicks on button which toggles opening of subtree
      * @return this
      */
-    public MBUITreeGroup clickOpenTreeToggleButton() {
+    private TreeNavigationGroup clickOpenTreeToggleButton() {
         //Click on an arrow icon on left of label
-        root.findElement(ByJQuery.selector("> table tr > td:has(img) > img")).click();
+        root.findElement(ByJQuery.selector("> table tr > td > img")).click();
         return this;
     }
 
@@ -81,7 +90,7 @@ public class MBUITreeGroup {
      * Clicks root label of this subtree
      * @return this
      */
-    public MBUITreeGroup clickLabel() {
+    public TreeNavigationGroup clickLabel() {
         root.findElement(ByJQuery.selector("> table tr > td:has(div)")).click();
         return this;
     }
@@ -90,7 +99,7 @@ public class MBUITreeGroup {
      * Reveals subtree if it is currently closed
      * @return this
      */
-    public MBUITreeGroup openSubTreeIfNotOpen() {
+    TreeNavigationGroup openSubTreeIfNotOpen() {
         if (!root.findElement(DIRECT_CHILDREN_SELECTOR).isDisplayed()) {
             clickOpenTreeToggleButton();
         }
@@ -111,7 +120,7 @@ public class MBUITreeGroup {
      * @return true if this item has children
      */
     public boolean hasChildren() {
-        return hasSubtree() && clickOpenTreeToggleButton().getDirectChildren().size() > 0;
+        return hasSubtree() && openSubTreeIfNotOpen().getDirectChildren().size() > 0;
     }
 
 }

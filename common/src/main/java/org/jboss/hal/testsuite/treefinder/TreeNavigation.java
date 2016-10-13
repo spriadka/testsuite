@@ -1,4 +1,4 @@
-package org.jboss.hal.testsuite.mbui;
+package org.jboss.hal.testsuite.treefinder;
 
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.findby.ByJQuery;
@@ -13,15 +13,15 @@ import java.util.LinkedList;
 import java.util.List;
 
 /**
- * Class representing model based user navigation
+ * Class representing tree based navigation located e.g. in generated subsystems and deployments
  */
-public class MBUITreeNavigation {
+public class TreeNavigation {
 
-    private static final Logger logger = LoggerFactory.getLogger(MBUITreeNavigation.class);
+    private static final Logger logger = LoggerFactory.getLogger(TreeNavigation.class);
 
     private static final String TREE_CLASS_NAME = "gwt-Tree";
 
-    private MBUITreeNavigation() {
+    private TreeNavigation() {
     }
 
     @Drone
@@ -38,7 +38,7 @@ public class MBUITreeNavigation {
      * @param label name of label of item through which the navigation will be performed.
      * @return this
      */
-    public MBUITreeNavigation step(String label) {
+    public TreeNavigation step(String label) {
         if (steps == null) {
             steps = new LinkedList<>();
         }
@@ -50,10 +50,11 @@ public class MBUITreeNavigation {
      * Navigates to target item step by step
      * @return target item
      */
-    public MBUITreeGroup navigateToTreeItem() {
-        MBUITreeGroup current = new MBUITreeGroup(root.findElement(ByJQuery.selector("> div:nth-child(2)")));
-        logger.info(current.getRoot().getAttribute("innerHTML"));
+    public TreeNavigationGroup navigateToTreeItem() {
+        TreeNavigationGroup current = new TreeNavigationGroup(root.findElement(ByJQuery.selector("> div:nth-child(2)")));
+        logger.debug("Top level {}: '{}'", TreeNavigationGroup.class.getSimpleName(), current.getRoot().getAttribute("innerHTML"));
         for (String step : steps) {
+            logger.debug("Navigating to next subtree with root label '{}'.", step);
             current = current.openSubTreeIfNotOpen().getDirectChildByLabel(step);
         }
         return current;

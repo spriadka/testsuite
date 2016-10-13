@@ -3,7 +3,6 @@ package org.jboss.hal.testsuite.test.runtime;
 import org.apache.commons.io.IOUtils;
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.drone.api.annotation.Drone;
-import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.dmr.ModelNode;
@@ -14,8 +13,6 @@ import org.jboss.hal.testsuite.creaper.command.DeployCommand;
 import org.jboss.hal.testsuite.creaper.command.UndeployCommand;
 import org.jboss.hal.testsuite.fragment.MetricsAreaFragment;
 import org.jboss.hal.testsuite.fragment.MetricsFragment;
-import org.jboss.hal.testsuite.mbui.MBUITreeNavigation;
-import org.jboss.hal.testsuite.mbui.MbuiNavigation;
 import org.jboss.hal.testsuite.page.runtime.WebServiceEndpointsPage;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.exporter.ZipExporter;
@@ -38,7 +35,6 @@ import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
 import javax.xml.namespace.QName;
 import javax.xml.ws.Service;
 import javax.xml.ws.WebServiceException;
-
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -58,7 +54,6 @@ public class SimpleWebserviceEndpointTestCase {
     private static final String FAULTS = "Faults";
     private static final int DELTA = 3;
 
-    private MbuiNavigation mbuiNavigation;
     private static final OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
     private static final Operations operations = new Operations(client);
     private static final Administration administration = new Administration(client);
@@ -103,7 +98,6 @@ public class SimpleWebserviceEndpointTestCase {
         }
         client.apply(deployBuilder.name(DEPLOYMENT_FILE_NAME).build());
 
-        mbuiNavigation = new MbuiNavigation(browser);
         wsePage.navigate();
     }
 
@@ -161,7 +155,7 @@ public class SimpleWebserviceEndpointTestCase {
 
         wsePage.navigateInDeploymentsMenu();
 
-        Graphene.createPageFragment(MBUITreeNavigation.class, wsePage.getContentRoot())
+        wsePage.getTreeNavigation()
                 .step("subsystem")
                 .step("webservices")
                 .step("endpoint")
@@ -169,9 +163,9 @@ public class SimpleWebserviceEndpointTestCase {
                 .navigateToTreeItem()
                 .clickLabel();
 
-        mbuiNavigation.checkAndAssertMBuiValueOf("Request count", "3");
-        mbuiNavigation.checkAndAssertMBuiValueOf("Response count", "3");
-        mbuiNavigation.checkAndAssertMBuiValueOf("Fault count", "0");
+        assertEquals(wsePage.getFromItemTable().getValueOf("Request count"), "3");
+        assertEquals(wsePage.getFromItemTable().getValueOf("Response count"), "3");
+        assertEquals(wsePage.getFromItemTable().getValueOf("Fault count"), "0");
     }
 
     @Test
@@ -200,14 +194,17 @@ public class SimpleWebserviceEndpointTestCase {
 
         wsePage.navigateInDeploymentsMenu();
 
-        mbuiNavigation.displayMBuiSubTree("subsystem");
-        mbuiNavigation.displayMBuiSubTree("webservices");
-        mbuiNavigation.displayMBuiSubTree("endpoint");
-        mbuiNavigation.selectItemInMBuiTree("test:TestService");
+        wsePage.getTreeNavigation()
+                .step("subsystem")
+                .step("webservices")
+                .step("endpoint")
+                .step("test:TestService")
+                .navigateToTreeItem()
+                .clickLabel();
 
-        mbuiNavigation.checkAndAssertMBuiValueOf("Request count", "1");
-        mbuiNavigation.checkAndAssertMBuiValueOf("Response count", "0");
-        mbuiNavigation.checkAndAssertMBuiValueOf("Fault count", "1");
+        assertEquals(wsePage.getFromItemTable().getValueOf("Request count"), "1");
+        assertEquals(wsePage.getFromItemTable().getValueOf("Response count"), "0");
+        assertEquals(wsePage.getFromItemTable().getValueOf("Fault count"), "1");
     }
 
     @Test

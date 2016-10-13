@@ -1,11 +1,15 @@
 package org.jboss.hal.testsuite.page.runtime;
 
+import org.jboss.arquillian.graphene.Graphene;
+import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.hal.testsuite.finder.Application;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.fragment.MetricsAreaFragment;
+import org.jboss.hal.testsuite.fragment.shared.FormItemTableFragment;
 import org.jboss.hal.testsuite.page.MetricsPage;
 import org.jboss.hal.testsuite.page.Navigatable;
+import org.jboss.hal.testsuite.treefinder.TreeNavigation;
 import org.jboss.hal.testsuite.util.ConfigUtils;
 
 /**
@@ -50,4 +54,14 @@ public class WebServiceEndpointsPage extends MetricsPage implements Navigatable 
                 .invoke(FinderNames.VIEW);
         Application.waitUntilVisible();
     }
+
+    public TreeNavigation getTreeNavigation() {
+        return Graphene.createPageFragment(TreeNavigation.class, getContentRoot());
+    }
+
+    public FormItemTableFragment getFromItemTable() {
+        return Graphene.createPageFragment(FormItemTableFragment.class,
+                getContentRoot().findElement(ByJQuery.selector("table.form-item-table")));
+    }
+
 }
