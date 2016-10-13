@@ -119,4 +119,13 @@ public class TreeNavigationGroup {
         return hasSubtree() && openSubTreeIfNotOpen().getDirectChildren().size() > 0;
     }
 
+    /**
+     * Find if this item has child with given label
+     * @param label Label of child
+     * @return true if this item has child with given label
+     */
+    public boolean hasChild(String label) {
+        return hasChildren() && getDirectChildByLabel(label) != null;
+    }
+
 }
