@@ -1,6 +1,5 @@
 package org.jboss.hal.testsuite.fragment.shared.modal;
 
-import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.PropUtils;
 import org.openqa.selenium.By;
@@ -18,7 +17,7 @@ public class WizardWindowWithAdvancedSelectBoxOptions extends WizardWindow {
         for (WebElement elem : elements) {
             if (elem.getText().equalsIgnoreCase(label)) {
                 elem.click();
-                Graphene.waitGui().until().element(root).is().not().present();
+                Console.withBrowser(browser).waitUntilFinished();
                 return this;
             }
         }

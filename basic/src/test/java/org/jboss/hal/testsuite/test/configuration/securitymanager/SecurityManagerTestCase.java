@@ -10,6 +10,7 @@ import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.creaper.command.BackupAndRestoreAttributes;
 import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindowWithAdvancedSelectBoxOptions;
 import org.jboss.hal.testsuite.page.config.SecurityManagerPage;
+import org.jboss.hal.testsuite.util.Console;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -93,7 +94,8 @@ public class SecurityManagerTestCase {
     @InSequence(1)
     @Test
     public void addDefaultInstance() throws Exception {
-        //TODO not working
+        Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
+
         page.getTreeNavigation()
                 .step(DEPLOYMENT_PERMISSIONS)
                 .navigateToTreeItem()
