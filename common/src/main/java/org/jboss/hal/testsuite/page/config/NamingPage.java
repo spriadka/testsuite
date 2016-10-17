@@ -14,7 +14,8 @@ public class NamingPage extends TreeNavigationPage {
                     .step(FinderNames.CONFIGURATION, FinderNames.PROFILES)
                     .step(FinderNames.PROFILE, ConfigUtils.getDefaultProfile());
         } else {
-            navigation = new FinderNavigation(browser, StandaloneConfigEntryPoint.class);
+            navigation = new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
+                    .step(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS);
         }
         navigation.step(FinderNames.SUBSYSTEM, "Naming")
                 .selectRow()
