@@ -1,4 +1,4 @@
-package org.jboss.hal.testsuite.test.naming;
+package org.jboss.hal.testsuite.test.configuration.naming;
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
@@ -20,8 +20,6 @@ import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.wildfly.extras.creaper.core.online.ModelNodeResult;
 import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
 import org.wildfly.extras.creaper.core.online.operations.Address;
@@ -39,7 +37,6 @@ import static org.junit.Assert.assertTrue;
 @RunWith(Arquillian.class)
 @Category(Shared.class)
 public class NamingTestCase {
-    private static final Logger logger = LoggerFactory.getLogger(NamingTestCase.class);
 
     @Page
     private NamingPage page;
