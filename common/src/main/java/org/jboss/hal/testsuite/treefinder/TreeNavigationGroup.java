@@ -25,10 +25,6 @@ public class TreeNavigationGroup {
 
     private final WebElement root;
 
-    private TreeNavigationGroup() {
-        throw new UnsupportedOperationException("It is not allowed to use this constructor!");
-    }
-
     TreeNavigationGroup(WebElement root) {
         this.root = root;
     }
@@ -54,7 +50,7 @@ public class TreeNavigationGroup {
     }
 
     /**
-     * Returns label of root item odf this group
+     * Returns label of root item of this group
      * @return label
      */
     public String getLabel() {
@@ -64,7 +60,8 @@ public class TreeNavigationGroup {
     /**
      * Return direct child of current root tree item by its label
      * @param label by which the item will be looked for
-     * @return this
+     * @return child
+     * @throws NotFoundException if child with given label is not found
      */
     TreeNavigationGroup getDirectChildByLabel(String label) {
         for (TreeNavigationGroup child : getDirectChildren()) {
@@ -72,7 +69,6 @@ public class TreeNavigationGroup {
                 return child;
             }
         }
-        //TODO: Is it good thing to throw an unchecked exception here? Should not be the user of API informed?
         throw new NotFoundException("Not found child with label '" + label + "'!");
     }
 
@@ -108,7 +104,7 @@ public class TreeNavigationGroup {
 
     /**
      * Find if this item has a subtree to open
-     * @return true if this item has subtree
+     * @return true if this item has subtree, false otherwise
      */
     public boolean hasSubtree() {
         //Just check if this root contains table with arrow and label
@@ -117,7 +113,7 @@ public class TreeNavigationGroup {
 
     /**
      * Find if this item has children
-     * @return true if this item has children
+     * @return true if this item has children, false otherwise
      */
     public boolean hasChildren() {
         return hasSubtree() && openSubTreeIfNotOpen().getDirectChildren().size() > 0;

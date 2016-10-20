@@ -155,7 +155,7 @@ public class SimpleWebserviceEndpointTestCase {
 
         wsePage.navigateInDeploymentsMenu();
 
-        wsePage.getTreeNavigation()
+        wsePage.treeNavigation()
                 .step("subsystem")
                 .step("webservices")
                 .step("endpoint")
@@ -163,9 +163,9 @@ public class SimpleWebserviceEndpointTestCase {
                 .navigateToTreeItem()
                 .clickLabel();
 
-        assertEquals(wsePage.getFromItemTable().getValueOf("Request count"), "3");
-        assertEquals(wsePage.getFromItemTable().getValueOf("Response count"), "3");
-        assertEquals(wsePage.getFromItemTable().getValueOf("Fault count"), "0");
+        assertEquals(wsePage.formItemTable().getValueOf("Request count"), "3");
+        assertEquals(wsePage.formItemTable().getValueOf("Response count"), "3");
+        assertEquals(wsePage.formItemTable().getValueOf("Fault count"), "0");
     }
 
     @Test
@@ -194,7 +194,7 @@ public class SimpleWebserviceEndpointTestCase {
 
         wsePage.navigateInDeploymentsMenu();
 
-        wsePage.getTreeNavigation()
+        wsePage.treeNavigation()
                 .step("subsystem")
                 .step("webservices")
                 .step("endpoint")
@@ -202,9 +202,9 @@ public class SimpleWebserviceEndpointTestCase {
                 .navigateToTreeItem()
                 .clickLabel();
 
-        assertEquals(wsePage.getFromItemTable().getValueOf("Request count"), "1");
-        assertEquals(wsePage.getFromItemTable().getValueOf("Response count"), "0");
-        assertEquals(wsePage.getFromItemTable().getValueOf("Fault count"), "1");
+        assertEquals(wsePage.formItemTable().getValueOf("Request count"), "1");
+        assertEquals(wsePage.formItemTable().getValueOf("Response count"), "0");
+        assertEquals(wsePage.formItemTable().getValueOf("Fault count"), "1");
     }
 
     @Test

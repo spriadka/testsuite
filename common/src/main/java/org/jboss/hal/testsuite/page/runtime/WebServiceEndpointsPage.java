@@ -55,11 +55,11 @@ public class WebServiceEndpointsPage extends MetricsPage implements Navigatable 
         Application.waitUntilVisible();
     }
 
-    public TreeNavigation getTreeNavigation() {
+    public TreeNavigation treeNavigation() {
         return Graphene.createPageFragment(TreeNavigation.class, getContentRoot());
     }
 
-    public FormItemTableFragment getFromItemTable() {
+    public FormItemTableFragment formItemTable() {
         return Graphene.createPageFragment(FormItemTableFragment.class,
                 getContentRoot().findElement(ByJQuery.selector("table.form-item-table")));
     }

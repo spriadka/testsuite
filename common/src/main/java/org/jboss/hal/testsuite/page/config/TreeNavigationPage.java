@@ -11,11 +11,11 @@ import org.jboss.hal.testsuite.treefinder.TreeNavigation;
  */
 public class TreeNavigationPage extends ConfigPage {
 
-    public TreeNavigation getTreeNavigation() {
+    public TreeNavigation treeNavigation() {
         return Graphene.createPageFragment(TreeNavigation.class, getContentRoot());
     }
 
-    public FormItemTableFragment getFromItemTable() {
+    public FormItemTableFragment formItemTable() {
         return Graphene.createPageFragment(FormItemTableFragment.class,
                 getContentRoot().findElement(ByJQuery.selector("table.form-item-table")));
     }
