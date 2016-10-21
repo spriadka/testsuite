@@ -12,6 +12,9 @@ import org.wildfly.extras.creaper.core.online.operations.OperationException;
 import org.wildfly.extras.creaper.core.online.operations.Operations;
 
 import java.io.IOException;
+import java.util.List;
+
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author mkrajcov <mkrajcov@redhat.com>
@@ -94,4 +97,37 @@ public class DeploymentsOperations {
     public void verifyIsDeploymentDisabledInServerGroup(String serverGroup, String deploymentName) throws Exception {
         verifyDeployementEnabledInServerGroup(serverGroup, deploymentName, false);
     }
+
+    public void verifyDeploymentContentDefault(List<String> itemsInDeploment) {
+        assertTrue(itemInListExistsLowerCase(itemsInDeploment, "meta-inf/manifest.mf | 127 b"));
+        assertTrue(itemInListExistsLowerCase(itemsInDeploment, "index.jsp | 361 b"));
+        assertTrue(itemInListExistsLowerCase(itemsInDeploment, "page.html | 68 b"));
+    }
+
+    public boolean deploymentNeverEnabled(List<String> previewListItems) {
+        return itemInListExistsLowerCase(previewListItems, "the deployment was never enabled");
+    }
+
+    public boolean deploymentNeverDisabled(List<String> previewListItems) {
+        return itemInListExistsLowerCase(previewListItems, "the deployment was never disabled");
+    }
+
+    public boolean deplomentEnabledTimestampExists(List<String> previewListItems) {
+        return itemInListExistsLowerCase(previewListItems, "last enabled at");
+    }
+
+    public boolean deplomentDisabledTimestampExists(List<String> previewListItems) {
+        return itemInListExistsLowerCase(previewListItems, "last disabled at");
+    }
+
+    public boolean itemInListExistsLowerCase(List<String> lines, String item) {
+        for (String line : lines) {
+            String lowLine = line.toLowerCase();
+            if (lowLine.contains(item)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
 }

@@ -38,6 +38,7 @@ public interface FinderNames {
     String PROFILE = "Profile";
     String PROFILES = "Profiles";
     String REMOVE = "Remove";
+    String REPLACE = "Replace";
     String SERVER = "Server";
     String SERVER_GROUP = "Server Group";
     String SERVER_GROUPS = "Server Groups";
@@ -45,4 +46,9 @@ public interface FinderNames {
     String SUBSYSTEM = "Subsystem";
     String SUBSYSTEMS = "Subsystems";
     String VIEW = "View";
+
+    String DISABLE = "Disable";
+    String ENABLE = "Enable";
+    String EXPLODE = "Explode";
+    String BROWSE_CONTENT = "Browse Content";
 }

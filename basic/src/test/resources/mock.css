@@ -1,0 +1,23 @@
+/* remember to define focus styles! */
+:focus { outline:0px; }
+
+/* remember to highlight inserts somehow! */
+ins { text-decoration:none; }
+del { text-decoration:line-through; }
+
+/* tables still need 'cellspacing="0"' in the markup */
+table {
+  border-collapse:collapse;
+  border-spacing:0px;
+  }
+
+/**
+ * Font reset =========================================================
+ *
+ * Specifically targets form elements which browsers oftentimes give
+ * special treatment.
+ */
+input,
+select,
+textarea,
+body { font: 13px/20px "Helvetica Neue",Helvetica,Arial,sans-serif; }
