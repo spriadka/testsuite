@@ -13,6 +13,8 @@ import org.jboss.hal.testsuite.creaper.command.DeployCommand;
 import org.jboss.hal.testsuite.creaper.command.UndeployCommand;
 import org.jboss.hal.testsuite.fragment.MetricsAreaFragment;
 import org.jboss.hal.testsuite.fragment.MetricsFragment;
+import org.jboss.hal.testsuite.fragment.shared.FormItemTableFragment;
+import org.jboss.hal.testsuite.page.config.TreeNavigationPage;
 import org.jboss.hal.testsuite.page.runtime.WebServiceEndpointsPage;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.exporter.ZipExporter;
@@ -72,6 +74,9 @@ public class SimpleWebserviceEndpointTestCase {
 
     @Page
     private WebServiceEndpointsPage wsePage;
+
+    @Page
+    private TreeNavigationPage treeNavigationPage;
 
     @BeforeClass
     public static void beforeClass() throws IOException, CommandFailedException {
@@ -155,7 +160,7 @@ public class SimpleWebserviceEndpointTestCase {
 
         wsePage.navigateInDeploymentsMenu();
 
-        wsePage.treeNavigation()
+        treeNavigationPage.treeNavigation()
                 .step("subsystem")
                 .step("webservices")
                 .step("endpoint")
@@ -163,9 +168,10 @@ public class SimpleWebserviceEndpointTestCase {
                 .navigateToTreeItem()
                 .clickLabel();
 
-        assertEquals(wsePage.formItemTable().getValueOf("Request count"), "3");
-        assertEquals(wsePage.formItemTable().getValueOf("Response count"), "3");
-        assertEquals(wsePage.formItemTable().getValueOf("Fault count"), "0");
+        FormItemTableFragment table = treeNavigationPage.formItemTable();
+        assertEquals(table.getValueOf("Request count"), "3");
+        assertEquals(table.getValueOf("Response count"), "3");
+        assertEquals(table.getValueOf("Fault count"), "0");
     }
 
     @Test
@@ -194,7 +200,7 @@ public class SimpleWebserviceEndpointTestCase {
 
         wsePage.navigateInDeploymentsMenu();
 
-        wsePage.treeNavigation()
+        treeNavigationPage.treeNavigation()
                 .step("subsystem")
                 .step("webservices")
                 .step("endpoint")
@@ -202,9 +208,10 @@ public class SimpleWebserviceEndpointTestCase {
                 .navigateToTreeItem()
                 .clickLabel();
 
-        assertEquals(wsePage.formItemTable().getValueOf("Request count"), "1");
-        assertEquals(wsePage.formItemTable().getValueOf("Response count"), "0");
-        assertEquals(wsePage.formItemTable().getValueOf("Fault count"), "1");
+        FormItemTableFragment table = treeNavigationPage.formItemTable();
+        assertEquals(table.getValueOf("Request count"), "1");
+        assertEquals(table.getValueOf("Response count"), "0");
+        assertEquals(table.getValueOf("Fault count"), "1");
     }
 
     @Test
