@@ -182,16 +182,6 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
     }
 
     @Test
-    public void setEnabledToTrue() throws Exception {
-        editCheckboxAndVerify(HTTPS_LISTENER_ADDRESS, ENABLED, true);
-    }
-
-    @Test
-    public void setEnabledToFalse() throws Exception {
-        editCheckboxAndVerify(HTTPS_LISTENER_ADDRESS, ENABLED, false);
-    }
-
-    @Test
     public void editMaxBufferedRequestSize() throws Exception {
         editTextAndVerify(HTTPS_LISTENER_ADDRESS, MAX_BUFFERED_REQUEST_SIZE, NUMERIC_VALID);
     }
