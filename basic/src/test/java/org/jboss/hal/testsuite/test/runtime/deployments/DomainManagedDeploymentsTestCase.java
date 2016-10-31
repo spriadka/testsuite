@@ -11,7 +11,7 @@ import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.Row;
 import org.jboss.hal.testsuite.fragment.runtime.DeploymentWizard;
 import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
-import org.jboss.hal.testsuite.page.runtime.DomainDeploymentPage;
+import org.jboss.hal.testsuite.page.runtime.DeploymentsPage;
 import org.jboss.hal.testsuite.util.Console;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -80,7 +80,7 @@ public class DomainManagedDeploymentsTestCase {
     WebDriver browser;
 
     @Page
-    DomainDeploymentPage page;
+    DeploymentsPage page;
 
 
     @AfterClass

@@ -15,6 +15,7 @@ import org.jboss.hal.testsuite.fragment.MetricsAreaFragment;
 import org.jboss.hal.testsuite.fragment.MetricsFragment;
 import org.jboss.hal.testsuite.fragment.shared.FormItemTableFragment;
 import org.jboss.hal.testsuite.page.config.TreeNavigationPage;
+import org.jboss.hal.testsuite.page.runtime.DeploymentsPage;
 import org.jboss.hal.testsuite.page.runtime.WebServiceEndpointsPage;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.exporter.ZipExporter;
@@ -77,6 +78,9 @@ public class SimpleWebserviceEndpointTestCase {
 
     @Page
     private TreeNavigationPage treeNavigationPage;
+
+    @Page
+    private DeploymentsPage deploymentsPage;
 
     @BeforeClass
     public static void beforeClass() throws IOException, CommandFailedException {
@@ -158,7 +162,7 @@ public class SimpleWebserviceEndpointTestCase {
         assertEquals(0.0, faults);
         verifier.verifyAttribute("fault-count", 0L);
 
-        wsePage.navigateInDeploymentsMenu();
+        deploymentsPage.navigateToDeploymentAndInvokeView(DEPLOYMENT_FILE_NAME);
 
         treeNavigationPage.treeNavigation()
                 .step("subsystem")
@@ -198,7 +202,7 @@ public class SimpleWebserviceEndpointTestCase {
         assertEquals(1.0, faults);
         verifier.verifyAttribute("fault-count", 1L);
 
-        wsePage.navigateInDeploymentsMenu();
+        deploymentsPage.navigateToDeploymentAndInvokeView(DEPLOYMENT_FILE_NAME);
 
         treeNavigationPage.treeNavigation()
                 .step("subsystem")

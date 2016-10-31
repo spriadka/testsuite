@@ -27,7 +27,7 @@ import org.jboss.hal.testsuite.category.Domain;
 import org.jboss.hal.testsuite.cli.Library;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
-import org.jboss.hal.testsuite.page.runtime.DomainDeploymentPage;
+import org.jboss.hal.testsuite.page.runtime.DomainDeploymentEntryPoint;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -46,7 +46,7 @@ public class ServerGroupDeploymentTestCase {
 
     @Before
     public void before() {
-        navigation = new FinderNavigation(browser, DomainDeploymentPage.class)
+        navigation = new FinderNavigation(browser, DomainDeploymentEntryPoint.class)
                 .step(FinderNames.BROWSE_BY, FinderNames.SERVER_GROUPS)
                 .step(FinderNames.SERVER_GROUP, "main-server-group")
                 .step(FinderNames.DEPLOYMENT);

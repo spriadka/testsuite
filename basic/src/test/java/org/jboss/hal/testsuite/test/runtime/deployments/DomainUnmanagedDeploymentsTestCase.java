@@ -9,7 +9,7 @@ import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.creaper.command.DeployCommand;
 import org.jboss.hal.testsuite.fragment.runtime.DeploymentWizard;
 import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
-import org.jboss.hal.testsuite.page.runtime.DomainDeploymentPage;
+import org.jboss.hal.testsuite.page.runtime.DeploymentsPage;
 import org.jboss.hal.testsuite.util.Console;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -67,7 +67,7 @@ public class DomainUnmanagedDeploymentsTestCase {
     WebDriver browser;
 
     @Page
-    DomainDeploymentPage page;
+    DeploymentsPage page;
 
     @BeforeClass
     public static void setUp() throws IOException, TimeoutException, InterruptedException, CommandFailedException {

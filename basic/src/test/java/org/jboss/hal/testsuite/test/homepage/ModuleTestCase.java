@@ -22,8 +22,6 @@
 
 package org.jboss.hal.testsuite.test.homepage;
 
-import java.util.List;
-
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
@@ -33,10 +31,10 @@ import org.jboss.hal.testsuite.page.admin.RoleAssignmentPage;
 import org.jboss.hal.testsuite.page.config.DomainConfigEntryPoint;
 import org.jboss.hal.testsuite.page.config.StandaloneConfigEntryPoint;
 import org.jboss.hal.testsuite.page.home.HomePage;
-import org.jboss.hal.testsuite.page.runtime.DeploymentPage;
-import org.jboss.hal.testsuite.page.runtime.DomainDeploymentPage;
+import org.jboss.hal.testsuite.page.runtime.DomainDeploymentEntryPoint;
 import org.jboss.hal.testsuite.page.runtime.DomainRuntimeEntryPoint;
 import org.jboss.hal.testsuite.page.runtime.PatchManagementPage;
+import org.jboss.hal.testsuite.page.runtime.StandaloneDeploymentEntryPoint;
 import org.jboss.hal.testsuite.page.runtime.StandaloneRuntimeEntryPoint;
 import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.jboss.hal.testsuite.util.PropUtils;
@@ -47,6 +45,8 @@ import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+
+import java.util.List;
 
 /**
  * Created by pjelinek on Oct 9, 2015
@@ -71,8 +71,8 @@ public class ModuleTestCase {
     @Test
     public void deployments() throws Exception {
         Class <? extends BasePage> expectedAddressPage = ConfigUtils.isDomain() ?
-                DomainDeploymentPage.class
-              : DeploymentPage.class;
+                DomainDeploymentEntryPoint.class
+              : StandaloneDeploymentEntryPoint.class;
         assertModule("deployments", expectedAddressPage, 1);
     }
 
