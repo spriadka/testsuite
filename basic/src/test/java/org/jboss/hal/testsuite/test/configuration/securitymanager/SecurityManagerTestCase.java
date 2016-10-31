@@ -78,7 +78,7 @@ public class SecurityManagerTestCase {
     @InSequence(0)
     @Test
     public void removeDefaultInstance() throws Exception {
-        page.getTreeNavigation()
+        page.treeNavigation()
                 .step(DEPLOYMENT_PERMISSIONS)
                 .navigateToTreeItem()
                 .clickLabel();
@@ -96,7 +96,7 @@ public class SecurityManagerTestCase {
     public void addDefaultInstance() throws Exception {
         Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
 
-        page.getTreeNavigation()
+        page.treeNavigation()
                 .step(DEPLOYMENT_PERMISSIONS)
                 .navigateToTreeItem()
                 .clickLabel();

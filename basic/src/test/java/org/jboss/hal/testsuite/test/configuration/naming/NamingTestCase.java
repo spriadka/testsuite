@@ -92,7 +92,7 @@ public class NamingTestCase {
 
     @Test
     public void verifyIfNewlyAddedBindingInCLIIsAddedAfterRefresh() throws IOException, OperationException {
-        page.getTreeNavigation()
+        page.treeNavigation()
                 .step(BINDING)
                 .navigateToTreeItem().clickLabel();
 
@@ -105,7 +105,7 @@ public class NamingTestCase {
 
             page.refreshTreeNavigation();
 
-            assertTrue(page.getTreeNavigation()
+            assertTrue(page.treeNavigation()
                     .step(BINDING)
                     .navigateToTreeItem()
                     .hasChild(name));
@@ -116,7 +116,7 @@ public class NamingTestCase {
 
     @Test
     public void addBindingInUI() throws Exception {
-        page.getTreeNavigation()
+        page.treeNavigation()
                 .step(BINDING)
                 .navigateToTreeItem().clickLabel();
 
@@ -137,7 +137,7 @@ public class NamingTestCase {
 
     @Test
     public void removeBindingInUI() throws Exception {
-        page.getTreeNavigation()
+        page.treeNavigation()
                 .step(BINDING)
                 .navigateToTreeItem().clickLabel();
 
@@ -151,7 +151,7 @@ public class NamingTestCase {
 
     @Test
     public void verifyRemoteNamingServiceExists() {
-        assertTrue(page.getTreeNavigation()
+        assertTrue(page.treeNavigation()
                 .step(SERVICE)
                 .navigateToTreeItem()
                 .clickLabel()
@@ -161,7 +161,7 @@ public class NamingTestCase {
     @Ignore("Not testable because of https://issues.jboss.org/browse/HAL-1199 . Ignore until resolved.")
     @Test
     public void toggleCache() throws Exception {
-        page.getTreeNavigation()
+        page.treeNavigation()
                 .step(BINDING)
                 .step(DEFAULT_BINDING_NAME)
                 .navigateToTreeItem().clickLabel();
