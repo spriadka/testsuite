@@ -15,6 +15,7 @@ import org.jboss.hal.testsuite.util.ConfigChecker;
 import org.jboss.hal.testsuite.util.ConfigChecker.InputType;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
@@ -38,17 +39,25 @@ import static org.junit.Assert.assertTrue;
 public class CacheContainersTestCase {
 
     private static final String CACHE_CONTAINER_NAME = "cc_" + RandomStringUtils.randomAlphabetic(5);
+    private static final String CACHE_CONTAINER_TBA_NAME = "cc-tba_" + RandomStringUtils.randomAlphabetic(5);
+    private static final String CACHE_CONTAINER_TBR_NAME = "cc-tbr_" + RandomStringUtils.randomAlphabetic(5);
+
     private static final String JNDI_NAME = "java:/" + CACHE_CONTAINER_NAME;
 
     private static final OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
-    private final Operations ops = new Operations(client);
-    private final Administration adminOps = new Administration(client);
+    private static final Operations ops = new Operations(client);
+    private static final Administration adminOps = new Administration(client);
 
     private static final Address SUBSYSTEM_ADDRESS = client.options().isDomain ? Address.of("profile", "full-ha")
             .and("subsystem", "infinispan") : Address.subsystem("infinispan");
-    private static final Address CACHE_CONTAINER_ADDRESS = SUBSYSTEM_ADDRESS.and("cache-container",
-            CACHE_CONTAINER_NAME);
+    private static final Address CACHE_CONTAINER_ADDRESS = SUBSYSTEM_ADDRESS.and("cache-container", CACHE_CONTAINER_NAME);
+    private static final Address CACHE_CONTAINER_TBA_ADDRESS = SUBSYSTEM_ADDRESS.and("cache-container", CACHE_CONTAINER_TBA_NAME);
+    private static final Address CACHE_CONTAINER_TBR_ADDRESS = SUBSYSTEM_ADDRESS.and("cache-container", CACHE_CONTAINER_TBR_NAME);
+
     private static final Address TRANSPORT_ADDRESS = CACHE_CONTAINER_ADDRESS.and("transport", "TRANSPORT");
+
+    private static final String LOCAL_CACHE_NAME = CACHE_CONTAINER_NAME + "_local-cache";
+    private static final Address LOCAL_CACHE_ADDRESS = CACHE_CONTAINER_ADDRESS.and("local-cache", LOCAL_CACHE_NAME);
 
     @Drone
     public WebDriver browser;
@@ -58,38 +67,53 @@ public class CacheContainersTestCase {
 
     @After
     public void after() throws OperationException, IOException, TimeoutException, InterruptedException {
-        deleteCacheContainer();
+        adminOps.reloadIfRequired();
+    }
+
+    @BeforeClass
+    public static void beforeClass() throws IOException, TimeoutException, InterruptedException {
+        ops.add(CACHE_CONTAINER_TBR_ADDRESS).assertSuccess();
+        ops.add(CACHE_CONTAINER_ADDRESS).assertSuccess();
+        ops.add(TRANSPORT_ADDRESS).assertSuccess();
+        ops.add(LOCAL_CACHE_ADDRESS).assertSuccess();
         adminOps.reloadIfRequired();
     }
 
     @AfterClass
-    public static void afterClass() {
-        IOUtils.closeQuietly(client);
+    public static void afterClass() throws IOException, OperationException, TimeoutException, InterruptedException {
+        try {
+            ops.undefineAttribute(CACHE_CONTAINER_ADDRESS, "default-cache");
+            ops.removeIfExists(LOCAL_CACHE_ADDRESS);
+            ops.removeIfExists(CACHE_CONTAINER_ADDRESS);
+            ops.removeIfExists(CACHE_CONTAINER_TBA_ADDRESS);
+            ops.removeIfExists(CACHE_CONTAINER_TBR_ADDRESS);
+            adminOps.reloadIfRequired();
+        } finally {
+            IOUtils.closeQuietly(client);
+        }
     }
 
     @Test
     public void createCacheContainer() throws Exception {
         page.navigate();
         CacheContainerWizard wizard = page.invokeAddCacheContainer();
-        boolean result = wizard.name(CACHE_CONTAINER_NAME).finish();
+        boolean result = wizard.name(CACHE_CONTAINER_TBA_NAME).finish();
 
         assertTrue("Window should be closed.", result);
-        new ResourceVerifier(CACHE_CONTAINER_ADDRESS, client).verifyExists();
+        new ResourceVerifier(CACHE_CONTAINER_TBA_ADDRESS, client).verifyExists();
     }
 
 
     @Test
     public void removeCacheContainer() throws Exception {
-        addCacheContainer();
-        page.navigateAndRemoveCacheContainer(CACHE_CONTAINER_NAME);
-        new ResourceVerifier(CACHE_CONTAINER_ADDRESS, client).verifyDoesNotExist();
+        page.navigateAndRemoveCacheContainer(CACHE_CONTAINER_TBR_NAME);
+        new ResourceVerifier(CACHE_CONTAINER_TBR_ADDRESS, client).verifyDoesNotExist();
     }
 
     @Test
     public void editJndiName() throws Exception {
         String attributeName = "jndi-name";
         String attributeValue = JNDI_NAME;
-        addCacheContainer();
         page.invokeContainerSettings(CACHE_CONTAINER_NAME);
         new ConfigChecker.Builder(client, CACHE_CONTAINER_ADDRESS).configFragment(page.getSettingsConfig())
             .editAndSave(InputType.TEXT, attributeName, attributeValue)
@@ -100,8 +124,7 @@ public class CacheContainersTestCase {
     @Test
     public void editDefaultCache() throws Exception {
         String attributeName = "default-cache";
-        String attributeValue = "infDefCache_" + RandomStringUtils.randomAlphanumeric(5);
-        addCacheContainer();
+        String attributeValue = LOCAL_CACHE_NAME;
         page.invokeContainerSettings(CACHE_CONTAINER_NAME);
         new ConfigChecker.Builder(client, CACHE_CONTAINER_ADDRESS).configFragment(page.getSettingsConfig())
             .editAndSave(InputType.TEXT, attributeName, attributeValue)
@@ -111,9 +134,8 @@ public class CacheContainersTestCase {
 
     @Test
     public void editModule() throws Exception {
-        String attributeName = "default-cache";
+        String attributeName = "module";
         String attributeValue = "infModule" + RandomStringUtils.randomAlphanumeric(5);
-        addCacheContainer();
         page.invokeContainerSettings(CACHE_CONTAINER_NAME);
         new ConfigChecker.Builder(client, CACHE_CONTAINER_ADDRESS).configFragment(page.getSettingsConfig())
             .editAndSave(InputType.TEXT, attributeName, attributeValue)
@@ -125,7 +147,6 @@ public class CacheContainersTestCase {
     public void setStatisticsEnabledToTrue() throws Exception {
         String attributeName = "statistics-enabled";
         final boolean attributeValue = true;
-        addCacheContainer();
         page.invokeContainerSettings(CACHE_CONTAINER_NAME);
         new ConfigChecker.Builder(client, CACHE_CONTAINER_ADDRESS).configFragment(page.getSettingsConfig())
             .editAndSave(InputType.CHECKBOX, attributeName, attributeValue)
@@ -134,10 +155,9 @@ public class CacheContainersTestCase {
     }
 
     @Test
-    public void setStatisticsEnabledToFalse() throws InterruptedException, TimeoutException, Exception {
+    public void setStatisticsEnabledToFalse() throws Exception {
         String attributeName = "statistics-enabled";
         boolean attributeValue = false;
-        addCacheContainer();
         page.invokeContainerSettings(CACHE_CONTAINER_NAME);
         new ConfigChecker.Builder(client, CACHE_CONTAINER_ADDRESS).configFragment(page.getSettingsConfig())
             .editAndSave(InputType.CHECKBOX, attributeName, attributeValue)
@@ -148,7 +168,6 @@ public class CacheContainersTestCase {
     @Test
     public void editAliases() throws Exception {
         String attributeName = "aliases";
-        addCacheContainer();
         page.invokeContainerSettings(CACHE_CONTAINER_NAME);
         new ConfigChecker.Builder(client, CACHE_CONTAINER_ADDRESS).configFragment(page.getSettingsConfig())
             .editAndSave(InputType.TEXT, attributeName, "this\nthat")
@@ -160,8 +179,6 @@ public class CacheContainersTestCase {
     public void editLockTimeout() throws Exception {
         String attributeName = "lock-timeout";
         long attributeValue = 3600000;
-        addCacheContainer();
-        addJGroupsTransport();
         page.invokeTransportSettings(CACHE_CONTAINER_NAME);
         new ConfigChecker.Builder(client, TRANSPORT_ADDRESS).configFragment(page.getSettingsConfig())
             .editAndSave(InputType.TEXT, attributeName, attributeValue)
@@ -173,26 +190,11 @@ public class CacheContainersTestCase {
     public void editChannel() throws Exception {
         String attributeName = "channel";
         String attributeValue = "ee";
-        addCacheContainer();
-        addJGroupsTransport();
         page.invokeTransportSettings(CACHE_CONTAINER_NAME);
         new ConfigChecker.Builder(client, TRANSPORT_ADDRESS).configFragment(page.getSettingsConfig())
             .editAndSave(InputType.TEXT, attributeName, attributeValue)
             .verifyFormSaved()
             .verifyAttribute(attributeName, attributeValue);
-    }
-
-    private void addCacheContainer() throws Exception {
-        ops.add(CACHE_CONTAINER_ADDRESS).assertSuccess();
-        new ResourceVerifier(CACHE_CONTAINER_ADDRESS, client).verifyExists();
-    }
-
-    private void deleteCacheContainer() throws IOException, OperationException {
-        ops.removeIfExists(CACHE_CONTAINER_ADDRESS);
-    }
-
-    private void addJGroupsTransport() throws IOException {
-        ops.add(TRANSPORT_ADDRESS).assertSuccess();
     }
 
 }
