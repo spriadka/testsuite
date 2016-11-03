@@ -52,7 +52,11 @@ public class RequestControllerSubsystemTestCase {
 
     @AfterClass
     public static void afterClass() throws InterruptedException, TimeoutException, IOException {
-        administration.reloadIfRequired();
+        try {
+            administration.reloadIfRequired();
+        } finally {
+            client.close();
+        }
     }
 
     @Test
