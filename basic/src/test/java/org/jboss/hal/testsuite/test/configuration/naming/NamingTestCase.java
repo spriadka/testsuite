@@ -122,7 +122,7 @@ public class NamingTestCase {
 
         WizardWindowWithOptionalFields window = page.getResourceManager()
                 .addResource(WizardWindowWithOptionalFields.class);
-        window.openAdvancedOptionsTab();
+        window.openOptionalFieldsTab();
 
         Editor editor = window.getEditor();
         editor.text(NAME, BINDING_TBA_NAME);
@@ -150,7 +150,7 @@ public class NamingTestCase {
     }
 
     @Test
-    public void verifyRemoteNamingServiceExists() {
+    public void testRemoteNamingServiceExistsInTreeNavigation() {
         assertTrue(page.treeNavigation()
                 .step(SERVICE)
                 .navigateToTreeItem()

@@ -9,8 +9,16 @@ import org.openqa.selenium.WebElement;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * {@link WizardWindow} which has select box on its first page
+ */
 public class WizardWindowWithAdvancedSelectBoxOptions extends WizardWindow {
 
+    /**
+     * Picks a option by its label in select box
+     * @param label label of desired option
+     * @return this
+     */
     public WizardWindowWithAdvancedSelectBoxOptions pick(String label) {
         List<WebElement> elements = getOptionElements();
 
@@ -24,6 +32,10 @@ public class WizardWindowWithAdvancedSelectBoxOptions extends WizardWindow {
         throw new NoSuchElementException("Unable to find option with value " + label);
     }
 
+    /**
+     * Obtains {@link WebElement}s of available options in select box
+     * @return list of labels of options
+     */
     public List<WebElement> getOptionElements() {
         String cssClass = PropUtils.get("components.selectbox.item.class");
         By selector = By.className(cssClass);
@@ -31,15 +43,20 @@ public class WizardWindowWithAdvancedSelectBoxOptions extends WizardWindow {
         return root.findElements(selector);
     }
 
-
+    /**
+     * Obtains labels of available options in select box
+     * @return list of labels of options
+     */
     public List<String> getOptions() {
-        List<WebElement> elements = getOptionElements();
-
-        return elements.stream()
+        return getOptionElements().stream()
                 .map(WebElement::getText)
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Clicks on 'Continue' button to get on next page
+     * @return this
+     */
     public WizardWindowWithAdvancedSelectBoxOptions clickContinue() {
         clickButton("Continue");
 

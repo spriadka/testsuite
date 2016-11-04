@@ -15,6 +15,9 @@ import org.openqa.selenium.NotFoundException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriver;
 
+/**
+ * Abstract class for testing subsystems which have no configurable attributes
+ */
 @RunWith(Arquillian.class)
 @Category(Shared.class)
 public abstract class NoConfigSubsystemTestCaseAbstract {
@@ -22,6 +25,10 @@ public abstract class NoConfigSubsystemTestCaseAbstract {
     @Drone
     private WebDriver browser;
 
+    /**
+     * Verifies that subsystem with given label exists in GUI
+     * @param subsystemLabel label of subsystem
+     */
     public void verifySubsystemIsPresentByNavigatingToIt(String subsystemLabel) {
         try {
             FinderNavigation navigation;

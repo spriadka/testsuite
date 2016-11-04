@@ -62,9 +62,9 @@ public class RequestControllerSubsystemTestCase {
     @Test
     public void verifyActiveRequests() throws Exception {
         ModelNodeResult value = operations.readAttribute(REQUEST_CONTROLLER_SUBSYSTEM_ADDRESS, ACTIVE_REQUESTS,
-                ReadAttributeOption.INCLUDE_DEFAULTS);
+                ReadAttributeOption.NOT_INCLUDE_DEFAULTS);
 
-        value.assertSuccess();
+        value.assertDefinedValue();
 
         Assert.assertEquals(page.getConfigFragment().edit().text(ACTIVE_REQUESTS), value.stringValue());
     }
@@ -73,7 +73,7 @@ public class RequestControllerSubsystemTestCase {
     public void editMaxRequests() throws Exception {
         int value = 42;
         ModelNodeResult originalValue = operations.readAttribute(REQUEST_CONTROLLER_SUBSYSTEM_ADDRESS, MAX_REQUESTS,
-                ReadAttributeOption.INCLUDE_DEFAULTS);
+                ReadAttributeOption.NOT_INCLUDE_DEFAULTS);
         originalValue.assertSuccess();
         try {
             new ConfigChecker.Builder(client, REQUEST_CONTROLLER_SUBSYSTEM_ADDRESS)
@@ -90,7 +90,7 @@ public class RequestControllerSubsystemTestCase {
     @Test
     public void toggleTrackIndividualEndpoints() throws Exception {
         ModelNodeResult originalValue = operations.readAttribute(REQUEST_CONTROLLER_SUBSYSTEM_ADDRESS,
-                TRACK_INDIVIDUAL_ENDPOINTS, ReadAttributeOption.INCLUDE_DEFAULTS);
+                TRACK_INDIVIDUAL_ENDPOINTS, ReadAttributeOption.NOT_INCLUDE_DEFAULTS);
         originalValue.assertSuccess();
         boolean originalValueBool = originalValue.booleanValue();
         try {

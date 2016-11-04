@@ -7,6 +7,9 @@ import org.jboss.hal.testsuite.page.ConfigPage;
 import org.jboss.hal.testsuite.page.Navigatable;
 import org.jboss.hal.testsuite.util.ConfigUtils;
 
+/**
+ * Abstraction over configuration page for JSF subsystem.
+ */
 public class JsfPage extends ConfigPage implements Navigatable {
 
     public void navigate() {

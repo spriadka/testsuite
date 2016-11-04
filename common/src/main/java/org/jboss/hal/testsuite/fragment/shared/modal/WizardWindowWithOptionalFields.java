@@ -5,11 +5,15 @@ import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
+/**
+ * {@link WizardWindow} with optional fields tab. E.g. tab labeled 'Optional Fields' when adding new resource.
+ */
 public class WizardWindowWithOptionalFields extends WizardWindow {
 
-    public void openAdvancedOptionsTab() {
-        maximizeWindow();
-        makeContentActiveForUserInput();
+    /**
+     * Opens tab in wizard window. E.g. tab labeled 'Optional Fields' when adding new resource.
+     */
+    public void openOptionalFieldsTab() {
         final By disclosurePanelSelector = ByJQuery.selector(".form-edit-panel .gwt-DisclosurePanel tbody > tr > td > a");
         final WebElement disclosurePanel = root.findElement(disclosurePanelSelector);
         Graphene.waitGui().until().element(disclosurePanelSelector).is().visible();
@@ -20,13 +24,4 @@ public class WizardWindowWithOptionalFields extends WizardWindow {
                 .is()
                 .visible();
     }
-
-    private void makeContentActiveForUserInput() {
-        root.findElement(ByJQuery.selector(".default-window-content")).click();
-    }
-
-    private void maximizeWindow() {
-        root.findElement(By.ByClassName.className("icon-resize-full")).click();
-    }
-
 }

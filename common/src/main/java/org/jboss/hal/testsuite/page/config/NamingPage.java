@@ -5,6 +5,9 @@ import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.util.ConfigUtils;
 
+/**
+ * Abstraction over configuration page for naming subsystem.
+ */
 public class NamingPage extends TreeNavigationPage {
 
     public void navigate() {

@@ -5,6 +5,9 @@ import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.util.ConfigUtils;
 
+/**
+ * Abstraction over configuration page for security manager subsystem.
+ */
 public class SecurityManagerPage extends TreeNavigationPage {
 
     public void navigate() {

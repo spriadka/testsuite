@@ -8,6 +8,9 @@ import org.jboss.hal.testsuite.page.ConfigPage;
 import org.jboss.hal.testsuite.page.Navigatable;
 import org.jboss.hal.testsuite.util.ConfigUtils;
 
+/**
+ * Abstraction over configuration page for request controller subsystem.
+ */
 public class RequestControllerPage extends ConfigPage implements Navigatable {
 
     @Override
