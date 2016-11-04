@@ -22,24 +22,24 @@
 
 package org.jboss.hal.testsuite.testlistener;
 
-import static java.util.function.Function.identity;
-import static java.util.stream.Collectors.toMap;
-import static org.jboss.as.controller.client.helpers.ClientConstants.HOST;
-import static org.jboss.as.controller.client.helpers.ClientConstants.SERVER;
-import static org.jboss.as.controller.client.helpers.ClientConstants.SERVER_CONFIG;
-import static org.jboss.as.controller.client.helpers.ClientConstants.STATUS;
+import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
+import org.wildfly.extras.creaper.core.online.ModelNodeResult;
+import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
+import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.Operations;
+import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
 
 import java.io.IOException;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
-import org.wildfly.extras.creaper.core.online.ModelNodeResult;
-import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
-import org.wildfly.extras.creaper.core.online.operations.Address;
-import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
-import org.wildfly.extras.creaper.core.online.operations.Operations;
+import static java.util.function.Function.identity;
+import static java.util.stream.Collectors.toMap;
+import static org.jboss.as.controller.client.helpers.ClientConstants.HOST;
+import static org.jboss.as.controller.client.helpers.ClientConstants.SERVER;
+import static org.jboss.as.controller.client.helpers.ClientConstants.SERVER_CONFIG;
+import static org.jboss.as.controller.client.helpers.ClientConstants.STATUS;
 
 /**
  * Helper class to read server state informations from model for {@link ServerStateLogger}. <br />
@@ -68,7 +68,7 @@ public class ServerStateLoggerOperations {
         }
     }
 
-    private class ModelReader {
+    private static class ModelReader {
 
         private final Operations ops;
 
