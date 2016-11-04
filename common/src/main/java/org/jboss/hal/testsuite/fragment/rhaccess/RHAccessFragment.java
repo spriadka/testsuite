@@ -1,7 +1,5 @@
 package org.jboss.hal.testsuite.fragment.rhaccess;
 
-import java.util.concurrent.TimeUnit;
-
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.arquillian.graphene.wait.IsNotElementBuilder;
@@ -12,6 +10,8 @@ import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.SearchContext;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by mvelas on 3.11.14.
@@ -28,7 +28,7 @@ public class RHAccessFragment extends BaseFragment {
     protected final String RH_ACCESS_LOGIN = PropUtils.get("rhaccess.login");
     protected final String RH_ACCESS_PASSWORD = PropUtils.get("rhaccess.password");
 
-    private final int LONG_SEARCH_TIMEOUT = 60;    // [s] (long query)
+    private static final int LONG_SEARCH_TIMEOUT = 60;    // [s] (long query)
 
     public boolean isAuthenticationRequested() {
         try {
