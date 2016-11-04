@@ -3,6 +3,7 @@ package org.jboss.hal.testsuite.fragment.rhaccess;
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.hal.testsuite.fragment.PopUpFragment;
+import org.jboss.hal.testsuite.util.Library;
 import org.jboss.hal.testsuite.util.PropUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -32,10 +33,8 @@ public class RHAccessMenuFragment extends PopUpFragment {
         List<WebElement> menuEntries = root.findElements(ByJQuery.selector("div." + ENTRY_ITEM_CLASS));
         menuEntries.get(entry.index).click();
 
-        try {
-            // TODO - this wait must be implemented in more fancy way
-            Thread.sleep(RH_ACCESS_TIMEOUT * 1000);
-        } catch (Exception ignored) { }
+        // TODO - this wait must be implemented in more fancy way
+        Library.letsSleep(RH_ACCESS_TIMEOUT * 1000);
 
         WebElement iFrame = browser.findElement(ByJQuery.selector("iframe.gwt-Frame"));
         WebElement content = browser.switchTo().frame(iFrame).findElement(By.tagName("body"));
