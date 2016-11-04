@@ -76,7 +76,7 @@ public class Dispatcher {
     private static final Logger log = LoggerFactory.getLogger(Dispatcher.class);
 
     private static final String MANAGEMENT_HOST = ConfigUtils.get("as.managementAddress");
-    private static final int MANAGEMENT_PORT = Integer.valueOf(ConfigUtils.get("as.managementPort"));
+    private static final int MANAGEMENT_PORT = Integer.parseInt(ConfigUtils.get("as.managementPort"));
     private static final String USERNAME = "authentication";
     private static final String PASSWORD = "must be disabled";
     private static final int WAIT = 200;
