@@ -45,7 +45,7 @@ public class SecurityTestCase extends AbstractMessagingTestCase {
     @Before
     public void before() {
         page.selectProvider(SERVER_NAME);
-        page.InvokeProviderSettings();
+        page.invokeProviderSettings();
         page.switchToSecurityTab();
     }
 

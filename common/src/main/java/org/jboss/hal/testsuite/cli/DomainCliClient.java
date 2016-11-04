@@ -27,6 +27,7 @@ import org.jboss.as.cli.scriptsupport.CLI;
 /**
  * Use {@link CliClientFactory} to obtain instance.
  * @author rhatlapa (rhatlapa@redhat.com)
+ * @deprecated use creaper
  */
 public class DomainCliClient extends CliClient {
     private final String profile;

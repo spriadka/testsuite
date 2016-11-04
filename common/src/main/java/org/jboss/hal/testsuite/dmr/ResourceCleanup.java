@@ -28,6 +28,7 @@ import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.REM
  * Helper class to cleanup resources created in test cases.
  *
  * @author Harald Pehl
+ * @deprecated use creaper
  */
 public class ResourceCleanup {
 

@@ -45,8 +45,8 @@ import java.io.IOException;
 public class ResourceVerifier {
 
     private static final Logger log = LoggerFactory.getLogger(ResourceVerifier.class);
-    private static final int DEFAULT_TIMEOUT = Integer.valueOf(ConfigUtils.get("propagate.to.model.timeout", "500"));
-    public static final int LONG_TIMEOUT = Integer.valueOf(ConfigUtils.get("propagate.to.model.timeout.long", "6000"));
+    private static final int DEFAULT_TIMEOUT = Integer.parseInt(ConfigUtils.get("propagate.to.model.timeout", "500"));
+    public static final int LONG_TIMEOUT = Integer.parseInt(ConfigUtils.get("propagate.to.model.timeout.long", "6000"));
 
     private Address resourceAddress;
     private Operations ops;

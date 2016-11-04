@@ -32,11 +32,13 @@ import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.*;
  * Abstraction over a model node to execute operations.
  *
  * @author Harald Pehl
+ * @deprecated Use creaper for management operations
  */
 public class Operation extends ModelNode {
 
     /**
      * A builder for creating operations. Name and address are required, operation parameters are optional.
+     * @deprecated
      */
     public static class Builder {
 
@@ -105,6 +107,10 @@ public class Operation extends ModelNode {
 
     private final int timeout;
 
+    public Operation() {
+        this("whoami", new ResourceAddress(), new ModelNode(), "", 0);
+    }
+
     protected Operation(final String name, final ResourceAddress address, final ModelNode parameter, final String role,
             int timeout) {
         get(OP).set(name);
@@ -124,5 +130,24 @@ public class Operation extends ModelNode {
 
     public int getTimeout() {
         return timeout;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Operation)) return false;
+        if (!super.equals(o)) return false;
+
+        Operation operation = (Operation) o;
+
+        return getTimeout() == operation.getTimeout();
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = super.hashCode();
+        result = 31 * result + getTimeout();
+        return result;
     }
 }

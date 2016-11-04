@@ -62,6 +62,7 @@ import java.util.NoSuchElementException;
  * To get a fully qualified address from an address template use the {@link #resolve(StatementContext, String...)} method.
  *
  * @author Harald Pehl
+ * @deprecated Use creaper
  */
 public class AddressTemplate {
 

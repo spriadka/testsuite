@@ -22,8 +22,11 @@
 
 package org.jboss.hal.testsuite.cli;
 
+import java.util.Arrays;
+
 /**
  * @author rhatlapa (rhatlapa@redhat.com)
+ * @deprecated use creaper
  */
 public class CliConfiguration {
     private String host = "127.0.0.1";
@@ -64,7 +67,11 @@ public class CliConfiguration {
     }
 
     public char[] getPassword() {
-        return password;
+        if (password != null) {
+            return Arrays.copyOf(password, password.length);
+        } else {
+            return null;
+        }
     }
 }
 

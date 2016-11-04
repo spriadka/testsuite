@@ -372,11 +372,12 @@
             <id>finding-bugs</id>
             <phase>compile</phase>
             <goals>
-              <goal>findbugs</goal>
+              <goal>check</goal>
             </goals>
             <configuration>
               <threshold>Low</threshold>
               <xmlOutput>true</xmlOutput>
+              <failOnError>true</failOnError>
             </configuration>
           </execution>
         </executions>

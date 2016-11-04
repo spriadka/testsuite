@@ -27,6 +27,7 @@ import org.jboss.dmr.ModelNode;
  * Represents a fully qualified DMR address ready to be put into a DMR operation.
  *
  * @author Harald Pehl
+ * @deprecated use creaper
  */
 public class ResourceAddress extends ModelNode {
 

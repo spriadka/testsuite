@@ -90,10 +90,10 @@ public final class BackupAndRestoreAttributes {
                 }
             }
 
-            for (String attribute : attributeValueMap.keySet()) {
-                if (excluded == null || !excluded.contains(attribute)) { //attribute is not excluded
-                    logger.info("Adding attribute '" + attribute + "' to batch.");
-                    batch.writeAttribute(address, attribute, attributeValueMap.get(attribute));
+            for (Map.Entry<String, ModelNode> attributeEntry : attributeValueMap.entrySet()) {
+                if (excluded == null || !excluded.contains(attributeEntry.getKey())) { //attribute is not excluded
+                    logger.info("Adding attribute '" + attributeEntry + "' to batch.");
+                    batch.writeAttribute(address, attributeEntry.getKey(), attributeEntry.getValue());
                 }
             }
 

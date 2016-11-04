@@ -23,7 +23,7 @@ public class NotificationCenterFragment extends BaseFragment {
      */
     public int getMessagesCount() {
         String[] split = getText().split(" ");
-        return Integer.valueOf(split[split.length - 1]);
+        return Integer.parseInt(split[split.length - 1]);
     }
 
     /**

@@ -29,19 +29,20 @@ import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.net.UnknownHostException;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.sasl.RealmCallback;
-import java.io.IOException;
-import java.net.UnknownHostException;
 
 /**
  * Central class to execute {@link Operation}s.
  *
  * @author Harald Pehl
+ * @deprecated use creaper
  */
 public class Dispatcher {
 
@@ -75,7 +76,7 @@ public class Dispatcher {
     private static final Logger log = LoggerFactory.getLogger(Dispatcher.class);
 
     private static final String MANAGEMENT_HOST = ConfigUtils.get("as.managementAddress");
-    private static final int MANAGEMENT_PORT = Integer.valueOf(ConfigUtils.get("as.managementPort"));
+    private static final int MANAGEMENT_PORT = Integer.parseInt(ConfigUtils.get("as.managementPort"));
     private static final String USERNAME = "authentication";
     private static final String PASSWORD = "must be disabled";
     private static final int WAIT = 200;

@@ -107,7 +107,7 @@ public class MessagingPage extends ConfigPage implements Navigatable {
         getWindowFragment().clickButton("Confirm");
     }
 
-    public void InvokeProviderSettings() {
+    public void invokeProviderSettings() {
         navigation.selectRow().invoke("Provider Settings");
         Library.letsSleep(1000);
     }

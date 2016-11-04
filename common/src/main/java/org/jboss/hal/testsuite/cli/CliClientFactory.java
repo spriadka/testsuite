@@ -26,12 +26,13 @@ import org.jboss.hal.testsuite.util.ConfigUtils;
 
 /**
  * Created by pjelinek on May 14, 2015
+ * @deprecated use creaper
  */
 public class CliClientFactory {
 
     private static final String FULL = "full";
     private static final String MANAGEMENT_ADDRESS = ConfigUtils.get("as.managementAddress");
-    private static final int MANAGEMENT_PORT = Integer.valueOf(ConfigUtils.get("as.managementPort"));
+    private static final int MANAGEMENT_PORT = Integer.parseInt(ConfigUtils.get("as.managementPort"));
     private static final CliConfiguration CLI_CONFIGURATION = new CliConfiguration(MANAGEMENT_ADDRESS, MANAGEMENT_PORT);
 
     /**

@@ -38,7 +38,7 @@ public class AvailablePortFinder {
      *
      * WARNING: this can take a very long time.
      */
-    private static Set<Integer> getAvailableTCPPorts() {
+    public static Set<Integer> getAvailableTCPPorts() {
         return getAvailableTCPPorts(MIN_PORT_NUMBER, MAX_PORT_NUMBER);
     }
 
@@ -47,7 +47,7 @@ public class AvailablePortFinder {
      *
      * @throws NoSuchElementException if all ports are used
      */
-    private static int getNextAvailableTCPPort() {
+    public static int getNextAvailableTCPPort() {
         // Here, we simply return an unused port found by the system
         try (ServerSocket serverSocket = new ServerSocket(0)) {
             return serverSocket.getLocalPort();
@@ -62,7 +62,7 @@ public class AvailablePortFinder {
      * @param fromPort the port to scan for usage
      * @throws NoSuchElementException if all ports are used
      */
-    private static int getNextAvailablePort(int fromPort) {
+    public static int getNextAvailablePort(int fromPort) {
         if (fromPort < MIN_PORT_NUMBER || fromPort > MAX_PORT_NUMBER) {
             throw new IllegalArgumentException("Invalid start port: " + fromPort);
         }
@@ -81,7 +81,7 @@ public class AvailablePortFinder {
      *
      * @param port the port to check for usage
      */
-    private static boolean isPortFreeToUse(int port) {
+    public static boolean isPortFreeToUse(int port) {
         return isUDPPortFreeToUse(port) && isTCPPortFreeToUse(port);
     }
 
@@ -90,7 +90,7 @@ public class AvailablePortFinder {
      *
      * @param port the port to check for usage
      */
-    private static boolean isUDPPortFreeToUse(int port) {
+    public static boolean isUDPPortFreeToUse(int port) {
         if (port < MIN_PORT_NUMBER || port > MAX_PORT_NUMBER) {
             throw new IllegalArgumentException("Invalid start port: " + port);
         }
@@ -109,7 +109,7 @@ public class AvailablePortFinder {
      *
      * @param port the port to check for usage
      */
-    private static boolean isTCPPortFreeToUse(int port) {
+    public static boolean isTCPPortFreeToUse(int port) {
         if (port < MIN_PORT_NUMBER || port > MAX_PORT_NUMBER) {
             throw new IllegalArgumentException("Invalid start port: " + port);
         }
@@ -131,7 +131,7 @@ public class AvailablePortFinder {
      * {@link #MIN_PORT_NUMBER} and {@link #MAX_PORT_NUMBER} or
      * <code>fromPort</code> if greater than <code>toPort</code>.
      */
-    private static Set<Integer> getAvailableTCPPorts(int fromPort, int toPort) {
+    public static Set<Integer> getAvailableTCPPorts(int fromPort, int toPort) {
         if (fromPort < MIN_PORT_NUMBER || toPort > MAX_PORT_NUMBER || fromPort > toPort) {
             throw new IllegalArgumentException("Invalid port range: " + fromPort + " ~ " + toPort);
         }

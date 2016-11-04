@@ -1,19 +1,15 @@
 package org.jboss.hal.testsuite.page.config;
 
-import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.config.iiop.IIOPConfigArea;
 import org.openqa.selenium.By;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 /**
  * Created by pcyprian on 12.8.15.
  */
 public class IIOPPage extends ConfigurationPage {
-    @Drone
-    WebDriver browser;
 
     public void switchToEditMode() {
         WebElement viewPanel = browser.findElement(By.className("form-view-panel"));

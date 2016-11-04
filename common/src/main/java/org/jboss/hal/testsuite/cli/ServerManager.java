@@ -24,6 +24,7 @@ package org.jboss.hal.testsuite.cli;
 
 /**
  * @author jcechace
+ * @deprecated use creaper
  */
 public abstract class ServerManager {
 

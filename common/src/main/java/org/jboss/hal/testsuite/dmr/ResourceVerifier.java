@@ -36,6 +36,7 @@ import static org.junit.Assert.assertTrue;
 /**
  * Helper class to verify resource (attributes).
  * @author Harald Pehl
+ * @deprecated use creaper
  */
 public class ResourceVerifier {
 

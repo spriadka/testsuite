@@ -29,6 +29,7 @@ import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.*;
  * Represents the response of {@link Dispatcher#execute(Operation)}.
  *
  * @author Harald Pehl
+ * @deprecated use creaper
  */
 public class DmrResponse {
 

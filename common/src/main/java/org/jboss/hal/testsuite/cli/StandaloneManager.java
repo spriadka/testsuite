@@ -31,6 +31,7 @@ import java.io.IOException;
 
 /**
  * @author rhatlapa (rhatlapa@redhat.com)
+ * @deprecated use creaper
  */
 public class StandaloneManager extends ServerManager {
 
