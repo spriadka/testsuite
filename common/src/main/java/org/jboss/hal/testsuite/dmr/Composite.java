@@ -38,6 +38,10 @@ import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.COM
  */
 public class Composite extends Operation {
 
+    public Composite() {
+        super();
+    }
+
     public Composite(Operation first, Operation... rest) {
         super(COMPOSITE, ResourceAddress.ROOT, new ModelNode(), null, 0);
         List<Operation> operations = new ArrayList<>();
