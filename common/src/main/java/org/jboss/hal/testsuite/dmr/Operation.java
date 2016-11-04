@@ -32,11 +32,13 @@ import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.*;
  * Abstraction over a model node to execute operations.
  *
  * @author Harald Pehl
+ * @deprecated Use creaper for management operations
  */
 public class Operation extends ModelNode {
 
     /**
      * A builder for creating operations. Name and address are required, operation parameters are optional.
+     * @deprecated
      */
     public static class Builder {
 

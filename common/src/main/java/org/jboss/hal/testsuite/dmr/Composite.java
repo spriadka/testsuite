@@ -33,6 +33,7 @@ import static org.jboss.as.controller.descriptions.ModelDescriptionConstants.COM
 /**
  * Represents a composite operation using a list of given operations. The composite won't use a timeout.
  *
+ * @deprecated Use Creaper batch for management management operations
  * @author Harald Pehl
  */
 public class Composite extends Operation {

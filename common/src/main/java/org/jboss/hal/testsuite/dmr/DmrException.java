@@ -25,6 +25,7 @@ import java.io.IOException;
 
 /**
  * @author Harald Pehl
+ * @deprecated use creaper
  */
 public class DmrException extends RuntimeException {
 

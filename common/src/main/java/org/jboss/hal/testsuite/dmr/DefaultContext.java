@@ -35,6 +35,7 @@ import java.util.LinkedList;
  * </ul>
  *
  * @author Harald Pehl
+ * @deprecated use creaper
  */
 public class DefaultContext implements StatementContext {
 

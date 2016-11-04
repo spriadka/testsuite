@@ -5,6 +5,7 @@ import java.util.LinkedList;
 /**
  * A context able to {@linkplain AddressTemplate#resolve(StatementContext, String...) resolve} patterns in an {@link
  * AddressTemplate}.
+ * @deprecated use creaper
  */
 public interface StatementContext {
 
