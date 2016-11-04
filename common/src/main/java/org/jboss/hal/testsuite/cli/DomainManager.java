@@ -22,6 +22,10 @@
 
 package org.jboss.hal.testsuite.cli;
 
+import org.jboss.dmr.ModelNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -30,12 +34,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import org.jboss.dmr.ModelNode;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 /**
  * @author Martin Simka
+ * @deprecated use creaper
  */
 public class DomainManager extends ServerManager {
 

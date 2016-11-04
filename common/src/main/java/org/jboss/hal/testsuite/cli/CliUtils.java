@@ -24,6 +24,7 @@ package org.jboss.hal.testsuite.cli;
 
 /**
  * @author Petr Kremensky pkremens@redhat.com, Radim Hatlapatka rhatlapa@redhat.com
+ * @deprecated use Creaper
  */
 public class CliUtils {
 

@@ -24,6 +24,7 @@ package org.jboss.hal.testsuite.cli;
 
 /**
  * @author rhatlapa (rhatlapa@redhat.com)
+ * @deprecated use creaper Addresses
  */
 public class CliConstants {
     public static final String UNDEFINED = "undefined";

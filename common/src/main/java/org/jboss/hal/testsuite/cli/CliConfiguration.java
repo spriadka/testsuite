@@ -26,6 +26,7 @@ import java.util.Arrays;
 
 /**
  * @author rhatlapa (rhatlapa@redhat.com)
+ * @deprecated use creaper
  */
 public class CliConfiguration {
     private String host = "127.0.0.1";
