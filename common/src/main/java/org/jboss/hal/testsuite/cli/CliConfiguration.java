@@ -22,6 +22,8 @@
 
 package org.jboss.hal.testsuite.cli;
 
+import java.util.Arrays;
+
 /**
  * @author rhatlapa (rhatlapa@redhat.com)
  */
@@ -64,7 +66,11 @@ public class CliConfiguration {
     }
 
     public char[] getPassword() {
-        return password;
+        if (password != null) {
+            return Arrays.copyOf(password, password.length);
+        } else {
+            return null;
+        }
     }
 }
 
