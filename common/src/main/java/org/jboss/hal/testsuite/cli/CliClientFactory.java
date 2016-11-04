@@ -26,6 +26,7 @@ import org.jboss.hal.testsuite.util.ConfigUtils;
 
 /**
  * Created by pjelinek on May 14, 2015
+ * @deprecated use creaper
  */
 public class CliClientFactory {
 
