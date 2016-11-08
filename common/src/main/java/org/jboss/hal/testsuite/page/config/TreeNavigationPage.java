@@ -20,4 +20,11 @@ public class TreeNavigationPage extends ConfigPage {
                 getContentRoot().findElement(ByJQuery.selector("table.form-item-table")));
     }
 
+    /**
+     * Clicks refresh button above the navigation tree
+     */
+    public void refreshTreeNavigation() {
+        getContentRoot().findElement(ByJQuery.selector("div.split-west button[title=\"Refresh Model\"]")).click();
+    }
+
 }
