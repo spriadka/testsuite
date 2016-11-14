@@ -68,23 +68,23 @@ public class WeldSubsystemTestCase {
     }
 
     private void toggleCheckboxAndWriteBackDefaultValue(Address address, String attributeName) throws Exception {
-        final ModelNodeResult value = operations.readAttribute(address, attributeName);
-        value.assertSuccess();
-        final boolean booleanValue = value.booleanValue();
+        final ModelNodeResult originalValueResult = operations.readAttribute(address, attributeName);
+        originalValueResult.assertSuccess();
+        final boolean originalBooleanValue = originalValueResult.booleanValue();
         try {
             new ConfigChecker.Builder(client, address)
                     .configFragment(page.getConfigFragment())
-                    .editAndSave(ConfigChecker.InputType.CHECKBOX, attributeName, !booleanValue)
+                    .editAndSave(ConfigChecker.InputType.CHECKBOX, attributeName, !originalBooleanValue)
                     .verifyFormSaved()
-                    .verifyAttribute(attributeName, !booleanValue);
+                    .verifyAttribute(attributeName, !originalBooleanValue);
 
             new ConfigChecker.Builder(client, address)
                     .configFragment(page.getConfigFragment())
-                    .editAndSave(ConfigChecker.InputType.CHECKBOX, attributeName, booleanValue)
+                    .editAndSave(ConfigChecker.InputType.CHECKBOX, attributeName, originalBooleanValue)
                     .verifyFormSaved()
-                    .verifyAttribute(attributeName, booleanValue);
+                    .verifyAttribute(attributeName, originalBooleanValue);
         } finally {
-            operations.writeAttribute(address, attributeName, value.value());
+            operations.writeAttribute(address, attributeName, originalValueResult.value());
         }
     }
 
