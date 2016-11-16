@@ -7,6 +7,8 @@ import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Domain;
 import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.creaper.command.DeployCommand;
+import org.jboss.hal.testsuite.finder.FinderNames;
+import org.jboss.hal.testsuite.finder.Row;
 import org.jboss.hal.testsuite.fragment.runtime.DeploymentWizard;
 import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
 import org.jboss.hal.testsuite.page.runtime.DomainDeploymentPage;
@@ -26,12 +28,13 @@ import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 import static org.junit.Assert.assertTrue;
 
 /**
- * @author mkrajcov <mkrajcov@redhat.com>
+ * @author mkrajcov <mkrajcov@redhat.com>, jstefl <jstefl@redhat.com>
  */
 @RunWith(Arquillian.class)
 @Category(Domain.class)
@@ -61,6 +64,12 @@ public class DomainManagedDeploymentsTestCase {
     private static final String DEPLOYMENT_ENABLED_NAME = "n-enabled_" + RandomStringUtils.randomAlphanumeric(5) + ".war";
     private static final String DEPLOYMENT_ENABLED_RUNTIME_NAME = "rn-enabled_" + RandomStringUtils.randomAlphanumeric(5) + ".war";
 
+    private static final String DEPLOYMENT_MED_1 = "n-med_dom_1" + RandomStringUtils.randomAlphanumeric(5) + ".war";
+    private static final String DEPLOYMENT_MED_1_RUNTIMME_NAME = "rn-med_dom_1" + RandomStringUtils.randomAlphanumeric(5) + ".war";
+
+    private static final String DEPLOYMENT_MED_2 = "n-med_dom_2" + RandomStringUtils.randomAlphanumeric(5) + ".war";
+    private static final String DEPLOYMENT_MED_2_RUNTIMME_NAME = "rn-med_dom_2" + RandomStringUtils.randomAlphanumeric(5) + ".war";
+
 
     private static OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
     private static Operations operations = new Operations(client);
@@ -73,6 +82,7 @@ public class DomainManagedDeploymentsTestCase {
     @Page
     DomainDeploymentPage page;
 
+
     @AfterClass
     public static void cleanUp() throws IOException, CommandFailedException, OperationException, TimeoutException, InterruptedException {
         try {
@@ -82,6 +92,8 @@ public class DomainManagedDeploymentsTestCase {
             ops.undeployIfExists(DEPLOYMENT_ASSIGN_NAME);
             ops.undeployIfExists(DEPLOYMENT_ASSIGN_CHECK_NAME);
             ops.undeployIfExists(DEPLOYMENT_TBR_NAME);
+            ops.undeployIfExists(DEPLOYMENT_MED_1);
+            ops.undeployIfExists(DEPLOYMENT_MED_2);
             administration.restartIfRequired();
             administration.reloadIfRequired();
         } finally {
@@ -116,6 +128,22 @@ public class DomainManagedDeploymentsTestCase {
                 .runtimeName(DEPLOYMENT_ASSIGN_RUNTIME_NAME)
                 .particularGroup(OTHER_SERVER_GROUP)
                 .build());
+
+        client.apply(new DeployCommand.Builder(FILE_PATH + FILE_NAME)
+                .name(DEPLOYMENT_MED_1)
+                .runtimeName(DEPLOYMENT_MED_1_RUNTIMME_NAME)
+                .particularGroup(OTHER_SERVER_GROUP)
+                .disabled()
+                .build());
+        new Operations(client).invoke("explode", Address.deployment(DEPLOYMENT_MED_1)).assertSuccess();
+
+        client.apply(new DeployCommand.Builder(FILE_PATH + FILE_NAME)
+                .name(DEPLOYMENT_MED_2)
+                .runtimeName(DEPLOYMENT_MED_2_RUNTIMME_NAME)
+                .particularGroup(OTHER_SERVER_GROUP)
+                .disabled()
+                .build());
+        new Operations(client).invoke("explode", Address.deployment(DEPLOYMENT_MED_2)).assertSuccess();
     }
 
     @Test
@@ -238,5 +266,29 @@ public class DomainManagedDeploymentsTestCase {
         //remove2nd
         page.navigateToRowInUnassignedContent("testNew").invoke("Remove");
         Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
+    }
+
+    @Test
+    public void medAssignDeploySuccessExpected() throws Exception {
+        page.navigateToDeploymentColumnInServerGroup(MAIN_SERVER_GROUP).invoke("Add");
+
+        DeploymentWizard wizard = Console.withBrowser(browser).openedWizard(DeploymentWizard.class);
+
+        boolean result = wizard.switchToRepository()
+                .nextFluent()
+                .enableDeploymentInGroup(DEPLOYMENT_MED_1)
+                .finish();
+
+        assertTrue("Deployment wizard should close", result);
+        ops.verifyIsDeploymentAssignedToServerGroup(MAIN_SERVER_GROUP, DEPLOYMENT_MED_1);
+    }
+
+    @Test
+    public void medBrowseContentOnUnassignedDeploymentSuccessExpected() throws Exception {
+        Row row = page.navigateToRowInUnassignedContent(DEPLOYMENT_MED_2);
+        row.invoke(FinderNames.BROWSE_CONTENT);
+
+        List<String> itemsInDeploment = page.getDeploymentBrowsedContentItems();
+        ops.verifyDeploymentContentDefault(itemsInDeploment);
     }
 }

@@ -45,10 +45,36 @@ public class PreviewFragment extends BaseFragment {
         return element.getText().substring(22).trim();
     }
 
-    public List<String> getDisplayedUnorderedList() {
-        By selector = ByJQuery.selector("ul li");
-        Graphene.waitAjax().until().element(root, selector).is().visible();
+    /**
+     * Extract unordered html-list from page.
+     *
+     * @param waitUntilValue  method will finishes successfully only when specified value occurs in list.
+     *                        It waits for waitModelInterval timeout at worst.
+     *                        If input value is empty or contains null, method returns content immediately.
+     * @return List of html-list items
+     */
+    public List<String> getDisplayedUnorderedList(String waitUntilValue) {
+        String selectorString = "ul li";
+        StringBuffer selectorWaitBuffer = new StringBuffer(selectorString);
+        if (waitUntilValue != null && !waitUntilValue.isEmpty()) {
+            selectorWaitBuffer.append(":contains('" + waitUntilValue + "')");
+        }
+
+        By selector = ByJQuery.selector(selectorString);
+        By selectorWait = ByJQuery.selector(selectorWaitBuffer.toString());
+
+        Graphene.waitModel(browser).until().element(selectorWait).is().visible();
+
         return root.findElements(selector).stream().filter(element -> element.isDisplayed()).map(element -> element.getText()).collect(toList());
+    }
+
+    /**
+     * @return Text usually placed above unordered list.
+     */
+    public String getPreviewIntroText() {
+        By selector = ByJQuery.selector("p");
+        Graphene.waitAjax().until().element(root, selector).is().visible();
+        return root.findElement(selector).getText();
     }
 
 }

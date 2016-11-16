@@ -18,6 +18,9 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author jcechace
  */
@@ -101,5 +104,17 @@ public class DomainDeploymentPage extends ConfigurationPage {
                 .selectColumn();
         Console.withBrowser(browser).waitUntilLoaded();
         return column;
+    }
+
+    public List<String> getDeploymentBrowsedContentItems() {
+        By selector = ByJQuery.selector("table.browse-content tr");
+        List<String> items = new ArrayList<>();
+
+        List<WebElement> webElements = getContentRoot().findElements(selector);
+        for (WebElement webElement : webElements ) {
+            items.add(webElement.getText());
+        }
+
+        return items;
     }
 }

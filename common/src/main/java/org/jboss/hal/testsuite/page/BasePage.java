@@ -6,6 +6,7 @@ import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.arquillian.graphene.findby.FindByJQuery;
 import org.jboss.hal.testsuite.cli.Library;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
+import org.jboss.hal.testsuite.fragment.AlertFragment;
 import org.jboss.hal.testsuite.fragment.MessageListEntry;
 import org.jboss.hal.testsuite.fragment.NavigationFragment;
 import org.jboss.hal.testsuite.fragment.NotificationCenterFragment;
@@ -214,7 +215,7 @@ public abstract class BasePage {
     }
 
     /**
-     * @return fragment for notification area
+     * @return fragment for notification area - ususally element containg "messages: X" displayed on top/right
      */
     public NotificationCenterFragment getNotificationArea() {
         if (notification == null) {
@@ -223,6 +224,21 @@ public abstract class BasePage {
         }
         return notification;
     }
+
+    /**
+     * @return returns area display message as popup element in center of page, Area is closed after few seconds automatically usually.
+     */
+    public AlertFragment getAlertArea() {
+        By alertSelector = By.cssSelector(AlertFragment.ROOT_SELECTOR);
+
+        Graphene.waitGui().until().element(alertSelector).is().visible();
+        WebElement element = browser.findElement(alertSelector);
+
+        AlertFragment alert = Graphene.createPageFragment(AlertFragment.class, element);
+
+        return alert;
+    }
+
 
     public RHAccessHeaderFragment getRedHatAccessArea() {
         List<WebElement> candidates = browser.findElements(By.className(RHAccessHeaderFragment.CLASS_ROOT));
