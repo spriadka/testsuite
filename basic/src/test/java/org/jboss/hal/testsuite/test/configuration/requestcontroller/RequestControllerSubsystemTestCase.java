@@ -4,6 +4,7 @@ import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Shared;
+import org.jboss.hal.testsuite.category.Standalone;
 import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.page.config.RequestControllerPage;
 import org.jboss.hal.testsuite.util.ConfigChecker;
@@ -25,7 +26,6 @@ import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
 @RunWith(Arquillian.class)
-@Category(Shared.class)
 public class RequestControllerSubsystemTestCase {
 
     @Drone
@@ -59,6 +59,7 @@ public class RequestControllerSubsystemTestCase {
         }
     }
 
+    @Category(Standalone.class)
     @Test
     public void verifyActiveRequests() throws Exception {
         ModelNodeResult value = operations.readAttribute(REQUEST_CONTROLLER_SUBSYSTEM_ADDRESS, ACTIVE_REQUESTS,
@@ -69,6 +70,7 @@ public class RequestControllerSubsystemTestCase {
         Assert.assertEquals(page.getConfigFragment().edit().text(ACTIVE_REQUESTS), value.stringValue());
     }
 
+    @Category(Shared.class)
     @Test
     public void editMaxRequests() throws Exception {
         int value = 42;
@@ -87,6 +89,7 @@ public class RequestControllerSubsystemTestCase {
         }
     }
 
+    @Category(Shared.class)
     @Test
     public void toggleTrackIndividualEndpoints() throws Exception {
         final ModelNodeResult originalValue = operations.readAttribute(REQUEST_CONTROLLER_SUBSYSTEM_ADDRESS,
