@@ -3,6 +3,7 @@ package org.jboss.hal.testsuite.test.configuration.infinispan;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Shared;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.wildfly.extras.creaper.core.online.operations.OperationException;
@@ -20,23 +21,23 @@ public class ReplicatedCacheTestCase extends AbstractCacheTestCase {
     @Before
     public void before_() {
         page.replicated();
-        page.selectCache(cacheName);
+        page.selectCache(CACHE_NAME);
     }
 
-    @Override
-    protected CacheType getCacheType() {
-        return CacheType.REPLICATED;
+    @BeforeClass
+    public static void beforeClass_() {
+        initializeAddresses(CacheType.REPLICATED);
     }
 
     public void addCache() throws IOException {
-        operations.add(cacheAddress, Values.of("mode", "SYNC"));
-        operations.add(transactionAddress);
-        operations.add(storeAddress, Values.of("class", "org.infinispan.configuration.cache.SingleFileStoreConfigurationBuilder"));
-        operations.add(lockingAddress);
+        operations.add(CACHE_ADDRESS, Values.of("mode", "SYNC"));
+        operations.add(TRANSACTION_ADDRESS);
+        operations.add(STORE_ADDRESS, Values.of("class", "org.infinispan.configuration.cache.SingleFileStoreConfigurationBuilder"));
+        operations.add(LOCKING_ADDRESS);
     }
 
     public void deleteCache() throws IOException, OperationException {
-        operations.removeIfExists(cacheAddress);
+        operations.removeIfExists(CACHE_ADDRESS);
     }
 }
 

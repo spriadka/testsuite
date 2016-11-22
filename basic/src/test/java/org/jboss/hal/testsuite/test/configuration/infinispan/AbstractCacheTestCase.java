@@ -1,8 +1,5 @@
 package org.jboss.hal.testsuite.test.configuration.infinispan;
 
-import static org.wildfly.extras.creaper.core.online.Constants.PROFILE;
-import static org.wildfly.extras.creaper.core.online.Constants.SUBSYSTEM;
-
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
@@ -33,20 +30,20 @@ import java.util.concurrent.TimeoutException;
  */
 public abstract class AbstractCacheTestCase {
 
-    private static final String INFINISPAN = "infinispan";
-    protected static final Address ABSTRACT_CACHE_ADDRESS =
-            (ConfigUtils.isDomain() ?
-                Address.of(PROFILE, "full-ha").and(SUBSYSTEM, INFINISPAN) :
-                Address.subsystem(INFINISPAN)
-            ).and("cache-container", "hibernate");
+    protected static final String
+            INFINISPAN = "infinispan",
+            CACHE_NAME = "cache_" + RandomStringUtils.randomAlphanumeric(5),
+            CACHE_TBA_NAME = "cache_TBA_" + RandomStringUtils.randomAlphanumeric(5),
+            CACHE_TBR_NAME = "cache_TBR_" + RandomStringUtils.randomAlphanumeric(5);
 
-    protected final String cacheName = "cache_" + RandomStringUtils.randomAlphanumeric(5);
-    protected final String cacheTypeAddress = getCacheType().getAddressName();
-    protected final Address cacheAddress = ABSTRACT_CACHE_ADDRESS.and(cacheTypeAddress, cacheName);
-
-    protected final Address lockingAddress = cacheAddress.and("locking", "LOCKING");
-    protected final Address transactionAddress = cacheAddress.and("transaction", "TRANSACTION");
-    protected final Address storeAddress = cacheAddress.and("store", "STORE");
+    protected static Address
+            ABSTRACT_CACHE_ADDRESS = Address.subsystem(INFINISPAN).and("cache-container", "hibernate"),
+            CACHE_ADDRESS,
+            CACHE_TBA_ADDRESS,
+            CACHE_TBR_ADDRESS,
+            LOCKING_ADDRESS,
+            TRANSACTION_ADDRESS,
+            STORE_ADDRESS;
 
     protected static OnlineManagementClient client;
     protected static Administration administration;
@@ -61,7 +58,7 @@ public abstract class AbstractCacheTestCase {
 
     @BeforeClass
     public static void beforeClass() {
-        client = ManagementClientProvider.createOnlineManagementClient();
+        client = ConfigUtils.isDomain() ? ManagementClientProvider.withProfile("full-ha") : ManagementClientProvider.createOnlineManagementClient();
         operations = new Operations(client);
         administration = new Administration(client);
     }
@@ -80,156 +77,176 @@ public abstract class AbstractCacheTestCase {
     }
 
     @AfterClass
-    public static void tearDown() throws IOException {
-        client.close();
+    public static void tearDown() throws IOException, OperationException, TimeoutException, InterruptedException {
+        try {
+            operations.removeIfExists(CACHE_TBA_ADDRESS);
+            operations.removeIfExists(CACHE_TBR_ADDRESS);
+            administration.reloadIfRequired();
+        } finally {
+            client.close();
+        }
+    }
+
+    protected static void initializeAddresses(CacheType type) {
+        final String cacheTypeAddress = type.getAddressName();
+        CACHE_ADDRESS = ABSTRACT_CACHE_ADDRESS.and(cacheTypeAddress, CACHE_NAME);
+        CACHE_TBA_ADDRESS = ABSTRACT_CACHE_ADDRESS.and(cacheTypeAddress, CACHE_TBA_NAME);
+        CACHE_TBR_ADDRESS = ABSTRACT_CACHE_ADDRESS.and(cacheTypeAddress, CACHE_TBR_NAME);
+        LOCKING_ADDRESS = CACHE_ADDRESS.and("locking", "LOCKING");
+        TRANSACTION_ADDRESS = CACHE_ADDRESS.and("transaction", "TRANSACTION");
+        STORE_ADDRESS = CACHE_ADDRESS.and("store", "STORE");
     }
 
 
     @Test
     public void createCache() throws Exception {
-        String name = "cn_" + RandomStringUtils.randomAlphanumeric(5);
-
         CacheWizard wizard = page.content().addCache();
 
-        boolean result = wizard.name(name)
+        boolean result = wizard.name(CACHE_TBA_NAME)
                 .mode("SYNC")
                 .finish();
 
         Assert.assertTrue("Window should be closed", result);
-        new ResourceVerifier(ABSTRACT_CACHE_ADDRESS.and(cacheTypeAddress, name), client).verifyExists();
+        new ResourceVerifier(CACHE_TBA_ADDRESS, client).verifyExists();
+    }
 
-        page.content().getResourceManager().removeResourceAndConfirm(name);
-        new ResourceVerifier(ABSTRACT_CACHE_ADDRESS.and(cacheTypeAddress, name), client).verifyDoesNotExist();
+    @Test
+    public void removeCache() throws Exception {
+        page.content().getResourceManager()
+                .removeResource(CACHE_TBR_NAME)
+                .confirmAndDismissReloadRequiredMessage();
+
+        new ResourceVerifier(CACHE_TBR_ADDRESS, client).verifyDoesNotExist();
     }
 
     //ATTRIBUTES
     @Test
     public void editJndiName() throws Exception {
-        page.selectCache(cacheName);
-        editTextAndVerify(cacheAddress, "jndi-name", "java:/" + cacheName);
+        page.selectCache(CACHE_NAME);
+        editTextAndVerify(CACHE_ADDRESS, "jndi-name", "java:/" + CACHE_NAME);
     }
 
     //STORE
     @Test
     public void editShared() throws Exception {
         page.getConfig().switchTo("Store");
-        page.selectCache(cacheName);
-        editCheckboxAndVerify(storeAddress, "shared", true);
-        page.selectCache(cacheName);
-        editCheckboxAndVerify(storeAddress, "shared", false);
+        page.selectCache(CACHE_NAME);
+        editCheckboxAndVerify(STORE_ADDRESS, "shared", true);
+        page.selectCache(CACHE_NAME);
+        editCheckboxAndVerify(STORE_ADDRESS, "shared", false);
     }
 
     @Test
     public void editPassivation() throws Exception {
         page.getConfig().switchTo("Store");
-        page.selectCache(cacheName);
-        editCheckboxAndVerify(storeAddress, "passivation", true);
-        page.selectCache(cacheName);
-        editCheckboxAndVerify(storeAddress, "passivation", false);
+        page.selectCache(CACHE_NAME);
+        editCheckboxAndVerify(STORE_ADDRESS, "passivation", true);
+        page.selectCache(CACHE_NAME);
+        editCheckboxAndVerify(STORE_ADDRESS, "passivation", false);
     }
 
     @Test
     public void editPreload() throws Exception {
         page.getConfig().switchTo("Store");
-        page.selectCache(cacheName);
-        editCheckboxAndVerify(storeAddress, "preload", true);
-        page.selectCache(cacheName);
-        editCheckboxAndVerify(storeAddress, "preload", false);
+        page.selectCache(CACHE_NAME);
+        editCheckboxAndVerify(STORE_ADDRESS, "preload", true);
+        page.selectCache(CACHE_NAME);
+        editCheckboxAndVerify(STORE_ADDRESS, "preload", false);
     }
 
     @Test
     public void editFetchState() throws Exception {
         page.getConfig().switchTo("Store");
-        page.selectCache(cacheName);
-        editCheckboxAndVerify(storeAddress, "fetch-state", true);
-        page.selectCache(cacheName);
-        editCheckboxAndVerify(storeAddress, "fetch-state", false);
+        page.selectCache(CACHE_NAME);
+        editCheckboxAndVerify(STORE_ADDRESS, "fetch-state", true);
+        page.selectCache(CACHE_NAME);
+        editCheckboxAndVerify(STORE_ADDRESS, "fetch-state", false);
     }
 
     @Test
     public void editPurge() throws Exception {
         page.getConfig().switchTo("Store");
-        page.selectCache(cacheName);
-        editCheckboxAndVerify(storeAddress, "purge", true);
-        page.selectCache(cacheName);
-        editCheckboxAndVerify(storeAddress, "purge", false);
+        page.selectCache(CACHE_NAME);
+        editCheckboxAndVerify(STORE_ADDRESS, "purge", true);
+        page.selectCache(CACHE_NAME);
+        editCheckboxAndVerify(STORE_ADDRESS, "purge", false);
     }
 
     @Test
     public void editSingleton() throws Exception {
         page.getConfig().switchTo("Store");
-        page.selectCache(cacheName);
-        editCheckboxAndVerify(storeAddress, "singleton", true);
-        page.selectCache(cacheName);
-        editCheckboxAndVerify(storeAddress, "singleton", false);
+        page.selectCache(CACHE_NAME);
+        editCheckboxAndVerify(STORE_ADDRESS, "singleton", true);
+        page.selectCache(CACHE_NAME);
+        editCheckboxAndVerify(STORE_ADDRESS, "singleton", false);
     }
 
     //LOCKING
     @Test
     public void editConcurrencyLevel() throws Exception {
         page.getConfig().switchTo("Locking");
-        page.selectCache(cacheName);
-        editTextAndVerify(lockingAddress, "concurrency-level", 1);
+        page.selectCache(CACHE_NAME);
+        editTextAndVerify(LOCKING_ADDRESS, "concurrency-level", 1);
         verifyIfErrorAppears("concurrency-level", "-1");
     }
 
     @Test
     public void editIsolation() throws Exception {
         page.getConfig().switchTo("Locking");
-        page.selectCache(cacheName);
-        selectOptionAndVerify(lockingAddress, "isolation", "REPEATABLE_READ");
-        page.selectCache(cacheName);
-        selectOptionAndVerify(lockingAddress, "isolation", "NONE");
-        page.selectCache(cacheName);
-        selectOptionAndVerify(lockingAddress, "isolation", "SERIALIZABLE");
+        page.selectCache(CACHE_NAME);
+        selectOptionAndVerify(LOCKING_ADDRESS, "isolation", "REPEATABLE_READ");
+        page.selectCache(CACHE_NAME);
+        selectOptionAndVerify(LOCKING_ADDRESS, "isolation", "NONE");
+        page.selectCache(CACHE_NAME);
+        selectOptionAndVerify(LOCKING_ADDRESS, "isolation", "SERIALIZABLE");
     }
 
 
     @Test
     public void editStriping() throws Exception {
         page.getConfig().switchTo("Locking");
-        page.selectCache(cacheName);
-        editCheckboxAndVerify(lockingAddress, "striping", true);
-        page.selectCache(cacheName);
-        editCheckboxAndVerify(lockingAddress, "striping", false);
+        page.selectCache(CACHE_NAME);
+        editCheckboxAndVerify(LOCKING_ADDRESS, "striping", true);
+        page.selectCache(CACHE_NAME);
+        editCheckboxAndVerify(LOCKING_ADDRESS, "striping", false);
     }
 
     @Test
     public void editAcquireTimeout() throws Exception {
         page.getConfig().switchTo("Locking");
-        page.selectCache(cacheName);
+        page.selectCache(CACHE_NAME);
         verifyIfErrorAppears("acquire-timeout", "-1");
-        page.selectCache(cacheName);
-        editTextAndVerify(lockingAddress, "acquire-timeout", 5000L);
+        page.selectCache(CACHE_NAME);
+        editTextAndVerify(LOCKING_ADDRESS, "acquire-timeout", 5000L);
     }
 
     //TRANSACTION
     @Test
     public void editMode() throws Exception {
         page.getConfig().switchTo("Transaction");
-        page.selectCache(cacheName);
-        selectOptionAndVerify(transactionAddress, "mode", "NONE");
-        page.selectCache(cacheName);
-        selectOptionAndVerify(transactionAddress, "mode", "NON_XA");
+        page.selectCache(CACHE_NAME);
+        selectOptionAndVerify(TRANSACTION_ADDRESS, "mode", "NONE");
+        page.selectCache(CACHE_NAME);
+        selectOptionAndVerify(TRANSACTION_ADDRESS, "mode", "NON_XA");
     }
 
     @Test
     public void editLocking() throws Exception {
         page.getConfig().switchTo("Transaction");
-        page.selectCache(cacheName);
-        selectOptionAndVerify(transactionAddress, "locking", "OPTIMISTIC");
-        page.selectCache(cacheName);
-        selectOptionAndVerify(transactionAddress, "locking", "PESSIMISTIC");
+        page.selectCache(CACHE_NAME);
+        selectOptionAndVerify(TRANSACTION_ADDRESS, "locking", "OPTIMISTIC");
+        page.selectCache(CACHE_NAME);
+        selectOptionAndVerify(TRANSACTION_ADDRESS, "locking", "PESSIMISTIC");
     }
 
     @Test
     public void editStopTimeout() throws Exception {
         page.getConfig().switchTo("Transaction");
-        page.selectCache(cacheName);
-        editTextAndVerify(transactionAddress, "stop-timeout", 13400L);
-        page.selectCache(cacheName);
+        page.selectCache(CACHE_NAME);
+        editTextAndVerify(TRANSACTION_ADDRESS, "stop-timeout", 13400L);
+        page.selectCache(CACHE_NAME);
         verifyIfErrorAppears("stop-timeout", "150asdf50");
-        page.selectCache(cacheName);
+        page.selectCache(CACHE_NAME);
         verifyIfErrorAppears("stop-timeout", "-15000");
     }
 
@@ -269,8 +286,6 @@ public abstract class AbstractCacheTestCase {
         administration.reloadIfRequired();
         new ResourceVerifier(address, client).verifyAttribute(identifier, value);
     }
-
-    protected abstract CacheType getCacheType();
 
     public abstract void addCache() throws IOException;
 

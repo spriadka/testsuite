@@ -7,6 +7,7 @@ import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.fragment.config.infinispan.CacheWizard;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
@@ -27,7 +28,7 @@ public class LocalCacheTestCase extends AbstractCacheTestCase {
     @Test
     public void createCache() throws Exception {
         String name = "cn_" + RandomStringUtils.randomAlphanumeric(5);
-        Address localCacheAddress = ABSTRACT_CACHE_ADDRESS.and(getCacheType().getAddressName(), name);
+        Address localCacheAddress = ABSTRACT_CACHE_ADDRESS.and(CacheType.LOCAL.getAddressName(), name);
 
         CacheWizard wizard = page.content().addCache();
 
@@ -48,26 +49,26 @@ public class LocalCacheTestCase extends AbstractCacheTestCase {
         }
     }
 
-    @Override
-    protected CacheType getCacheType() {
-        return CacheType.LOCAL;
+    @BeforeClass
+    public static void beforeClass_() {
+        initializeAddresses(CacheType.LOCAL);
     }
 
     @Before
     public void before_() {
         page.local();
-        page.selectCache(cacheName);
+        page.selectCache(CACHE_NAME);
     }
 
     public void addCache() throws IOException {
-        operations.add(cacheAddress, Values.of("mode", "SYNC"));
-        operations.add(transactionAddress);
-        operations.add(storeAddress, Values.of("class", "org.infinispan.configuration.cache.SingleFileStoreConfigurationBuilder"));
-        operations.add(lockingAddress);
+        operations.add(CACHE_ADDRESS, Values.of("mode", "SYNC"));
+        operations.add(TRANSACTION_ADDRESS);
+        operations.add(STORE_ADDRESS, Values.of("class", "org.infinispan.configuration.cache.SingleFileStoreConfigurationBuilder"));
+        operations.add(LOCKING_ADDRESS);
     }
 
     public void deleteCache() throws IOException, OperationException {
-        operations.removeIfExists(cacheAddress);
+        operations.removeIfExists(CACHE_ADDRESS);
     }
 }
 
