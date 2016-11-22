@@ -1,6 +1,7 @@
 package org.jboss.hal.testsuite.fragment.config.datasource;
 
 import org.jboss.arquillian.graphene.Graphene;
+import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
 import org.jboss.hal.testsuite.fragment.shared.table.ResourceTableFragment;
 import org.jboss.hal.testsuite.fragment.shared.util.ResourceManager;
@@ -33,6 +34,17 @@ public class DatasourceWizard extends WizardWindow {
 
     public ResourceTableFragment getResourceTable() {
         return Graphene.createPageFragment(ResourceManager.class, root).getResourceTable();
+    }
+
+    /**
+     * Selects datasource template time on first page of datasource wizard.
+     * @param templateLabel label of template which will be used
+     * @return this
+     */
+    public DatasourceWizard selectTemplate(String templateLabel) {
+        By selectListItemSelector = ByJQuery.selector(".choose_template:contains('" + templateLabel + "')");
+        getRoot().findElement(selectListItemSelector).findElement(By.tagName("input")).click();
+        return this;
     }
 
     public void selectDriver(String driverName) {

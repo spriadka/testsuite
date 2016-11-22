@@ -1,9 +1,15 @@
 package org.jboss.hal.testsuite.page.config;
 
 import org.jboss.arquillian.graphene.page.Location;
+import org.jboss.hal.testsuite.finder.Column;
+import org.jboss.hal.testsuite.finder.FinderNames;
+import org.jboss.hal.testsuite.finder.FinderNavigation;
+import org.jboss.hal.testsuite.finder.Row;
 import org.jboss.hal.testsuite.fragment.config.datasource.DatasourceConfigArea;
 import org.jboss.hal.testsuite.fragment.config.datasource.DatasourceWizard;
 import org.jboss.hal.testsuite.fragment.config.datasource.PoolConfig;
+import org.jboss.hal.testsuite.page.Navigatable;
+import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.jboss.hal.testsuite.util.Console;
 
 /**
@@ -11,7 +17,10 @@ import org.jboss.hal.testsuite.util.Console;
  */
 
 @Location("#profiles/ds-finder")
-public class DatasourcesPage extends ConfigurationPage {
+public class DatasourcesPage extends ConfigurationPage implements Navigatable {
+
+    private FinderNavigation NAVIGATION_TO_DATASOURCE_SUBSYSTEM_INSTANCE;
+
     @Override
     public DatasourceConfigArea getConfig() {
         return getConfig(DatasourceConfigArea.class);
@@ -21,11 +30,16 @@ public class DatasourcesPage extends ConfigurationPage {
         return addResource(DatasourceWizard.class);
     }
 
+    @Deprecated
     public void switchToXA() {
         selectMenu("XA");
         Console.withBrowser(browser).waitUntilLoaded();
     }
 
+    /**
+     * Get opened {@link DatasourceWizard}
+     * @return opened {@link DatasourceWizard}
+     */
     public DatasourceWizard getDatasourceWizard() {
         return Console.withBrowser(browser).openedWizard(DatasourceWizard.class);
     }
@@ -34,4 +48,99 @@ public class DatasourcesPage extends ConfigurationPage {
         return getConfig().switchTo("Pool", PoolConfig.class);
     }
 
+    private enum DatasourceType {
+        XA("xa", "XA Datasource"),
+        NON_XA("", "Datasource");
+
+        private String typeColumnLabel;
+        private String finalColumnLabel;
+
+        DatasourceType(String typeColumnLabel, String finalColumnLabel) {
+            this.typeColumnLabel = typeColumnLabel;
+            this.finalColumnLabel = finalColumnLabel;
+        }
+
+        public String getTypeColumnLabel() {
+            return typeColumnLabel;
+        }
+
+        public String getFinalColumnLabel() {
+            return finalColumnLabel;
+        }
+    }
+
+    private enum Action {
+        VIEW(FinderNames.VIEW),
+        ADD(FinderNames.ADD);
+
+        private String actionLabel;
+
+        Action(String actionLabel) {
+            this.actionLabel = actionLabel;
+        }
+
+        public String getActionLabel() {
+            return actionLabel;
+        }
+    }
+
+    private FinderNavigation createNavigationToDatasourcesColumn() {
+        if (NAVIGATION_TO_DATASOURCE_SUBSYSTEM_INSTANCE != null) {
+            return NAVIGATION_TO_DATASOURCE_SUBSYSTEM_INSTANCE;
+        }
+
+        FinderNavigation navigation;
+        if (ConfigUtils.isDomain()) {
+            navigation = new FinderNavigation(browser, DomainConfigurationPage.class)
+                    .step(FinderNames.CONFIGURATION, FinderNames.PROFILES)
+                    .step(FinderNames.PROFILE, ConfigUtils.getDefaultProfile());
+        } else {
+            navigation = new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
+                    .step(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS);
+        }
+        NAVIGATION_TO_DATASOURCE_SUBSYSTEM_INSTANCE = navigation.step(FinderNames.SUBSYSTEM, "Datasources");
+        return NAVIGATION_TO_DATASOURCE_SUBSYSTEM_INSTANCE;
+    }
+
+    /**
+     * Navigates to datasource subsystem and invokes action on found row with datasource
+     * @param action {@link Action} which will be performed on found row
+     * @param type type of datasource
+     * @param name name of datasource
+     */
+    private void invokeActionOnDatasourceRow(Action action, DatasourceType type, String name) {
+        Row row = createNavigationToDatasourcesColumn()
+                .step("Type", type.getTypeColumnLabel())
+                .step(type.getFinalColumnLabel(), name)
+                .selectRow(true);
+        Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
+        row.invoke(action.getActionLabel());
+    }
+
+    /**
+     * Navigates to datasource subsystem and invokes action on final column containing datasource names
+     * @param action {@link Action} which will be performed on found column
+     * @param type type of datasource
+     */
+    private void invokeActionOnDatasourceColumn(Action action, DatasourceType type) {
+        Column column = createNavigationToDatasourcesColumn()
+                .step("Type", type.getTypeColumnLabel())
+                .step(type.getFinalColumnLabel())
+                .selectColumn();
+        Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
+        column.invoke(action.getActionLabel());
+    }
+
+    @Override
+    public void navigate() {
+        createNavigationToDatasourcesColumn().selectColumn();
+        Console.withBrowser(browser).waitUntilLoaded();
+    }
+
+    /**
+     * Invokes add action on datasource column
+     */
+    public void invokeAddDatasource() {
+        invokeActionOnDatasourceColumn(Action.ADD, DatasourceType.NON_XA);
+    }
 }
