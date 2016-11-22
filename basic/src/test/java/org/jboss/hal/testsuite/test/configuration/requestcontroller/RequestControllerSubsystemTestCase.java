@@ -89,22 +89,25 @@ public class RequestControllerSubsystemTestCase {
 
     @Test
     public void toggleTrackIndividualEndpoints() throws Exception {
-        ModelNodeResult originalValue = operations.readAttribute(REQUEST_CONTROLLER_SUBSYSTEM_ADDRESS,
+        final ModelNodeResult originalValue = operations.readAttribute(REQUEST_CONTROLLER_SUBSYSTEM_ADDRESS,
                 TRACK_INDIVIDUAL_ENDPOINTS, ReadAttributeOption.NOT_INCLUDE_DEFAULTS);
+        final ModelNodeResult defaultValue = operations.readAttribute(REQUEST_CONTROLLER_SUBSYSTEM_ADDRESS,
+                TRACK_INDIVIDUAL_ENDPOINTS, ReadAttributeOption.INCLUDE_DEFAULTS);
         originalValue.assertSuccess();
-        boolean originalValueBool = originalValue.booleanValue();
+        defaultValue.assertSuccess();
+        final boolean defaultValueBool = defaultValue.booleanValue(); //originalValue is undefined
         try {
             new ConfigChecker.Builder(client, REQUEST_CONTROLLER_SUBSYSTEM_ADDRESS)
                     .configFragment(page.getConfigFragment())
-                    .editAndSave(ConfigChecker.InputType.CHECKBOX, TRACK_INDIVIDUAL_ENDPOINTS, !originalValueBool)
+                    .editAndSave(ConfigChecker.InputType.CHECKBOX, TRACK_INDIVIDUAL_ENDPOINTS, !defaultValueBool)
                     .verifyFormSaved()
-                    .verifyAttribute(TRACK_INDIVIDUAL_ENDPOINTS, !originalValueBool);
+                    .verifyAttribute(TRACK_INDIVIDUAL_ENDPOINTS, !defaultValueBool);
 
             new ConfigChecker.Builder(client, REQUEST_CONTROLLER_SUBSYSTEM_ADDRESS)
                     .configFragment(page.getConfigFragment())
-                    .editAndSave(ConfigChecker.InputType.CHECKBOX, TRACK_INDIVIDUAL_ENDPOINTS, originalValueBool)
+                    .editAndSave(ConfigChecker.InputType.CHECKBOX, TRACK_INDIVIDUAL_ENDPOINTS, defaultValueBool)
                     .verifyFormSaved()
-                    .verifyAttribute(TRACK_INDIVIDUAL_ENDPOINTS, originalValueBool);
+                    .verifyAttribute(TRACK_INDIVIDUAL_ENDPOINTS, defaultValueBool);
         } finally {
             operations.writeAttribute(REQUEST_CONTROLLER_SUBSYSTEM_ADDRESS, TRACK_INDIVIDUAL_ENDPOINTS,
                     originalValue.value()).assertSuccess();
