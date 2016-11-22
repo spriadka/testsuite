@@ -15,7 +15,9 @@ import org.jboss.hal.testsuite.finder.Row;
 
 import org.jboss.hal.testsuite.fragment.runtime.DeploymentWizard;
 import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
-import org.jboss.hal.testsuite.page.runtime.DeploymentPage;
+import org.jboss.hal.testsuite.page.config.TreeNavigationPage;
+import org.jboss.hal.testsuite.page.runtime.DeploymentsPage;
+import org.jboss.hal.testsuite.page.runtime.StandaloneDeploymentEntryPoint;
 import org.jboss.hal.testsuite.util.Console;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -114,11 +116,14 @@ public class ManagedDeploymentsTestCase {
     private WebDriver browser;
 
     @Page
-    private DeploymentPage page;
+    private DeploymentsPage page;
+
+    @Page
+    private TreeNavigationPage treeNavigationPage;
 
     @Before
     public void before() {
-        navigation = new FinderNavigation(browser, DeploymentPage.class);
+        navigation = new FinderNavigation(browser, StandaloneDeploymentEntryPoint.class);
     }
 
     @BeforeClass
@@ -304,12 +309,12 @@ public class ManagedDeploymentsTestCase {
 
     @Test
     public void unmanagedDeployment() throws Exception {
-        page.viewDeployment(DEPLOYMENT_UNMANAGED_10);
+        page.navigateToDeploymentAndInvokeView(DEPLOYMENT_UNMANAGED_10);
 
-        String content = page.getDeploymentContentTableRow("Managed");
+        String content = treeNavigationPage.formItemTable().getValueOf("Managed");
         assertTrue(content.contains("false"));
 
-        content = page.getDeploymentContentTableRow("Status");
+        content = treeNavigationPage.formItemTable().getValueOf("Status");
         assertTrue("Status of deployment should be 'OK'", content.contains("OK"));
     }
 
@@ -375,20 +380,20 @@ public class ManagedDeploymentsTestCase {
     public void medExplodedDeploymentFlagFalseInViewInfoSuccessExpected() {
         navigation.step(FinderNames.DEPLOYMENT, DEPLOYMENT_MANAGED_DISABLED_EXPLODED_7).selectRow();
         Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
-        page.viewDeployment(DEPLOYMENT_MANAGED_DISABLED_EXPLODED_7);
+        page.navigateToDeploymentAndInvokeView(DEPLOYMENT_MANAGED_DISABLED_EXPLODED_7);
 
-        String content = page.getDeploymentContentTableRow("Content");
+        String content = treeNavigationPage.formItemTable().getValueOf("Content");
         assertTrue("Deployment should be exploded but stats states that is not", content.contains("\"archive\" => false"));
 
-        content = page.getDeploymentContentTableRow("Status");
+        content = treeNavigationPage.formItemTable().getValueOf("Status");
         assertTrue("Status of deployment should be 'STOPPED'", content.contains("STOPPED"));
     }
 
     @Test
     public void medExplodedDeploymentFlagTrueInViewInfoSuccessExpected() {
-        page.viewDeployment(DEPLOYMENT_MANAGED_ENABLED_8);
+        page.navigateToDeploymentAndInvokeView(DEPLOYMENT_MANAGED_ENABLED_8);
 
-        String content = page.getDeploymentContentTableRow("Content");
+        String content = treeNavigationPage.formItemTable().getValueOf("Content");
         assertTrue("Unexploded deployment should be marked as 'archive => true' in deployment detail, reported [HAL-1226]", content.contains("\"archive\" => true"));
     }
 
@@ -396,15 +401,15 @@ public class ManagedDeploymentsTestCase {
     public void medManagedTrueIsInViewInformationsSuccessExpected() {
         navigation.step(FinderNames.DEPLOYMENT, DEPLOYMENT_MANAGED_DISABLED_EXPLODED_9).selectRow();
         Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
-        page.viewDeployment(DEPLOYMENT_MANAGED_DISABLED_EXPLODED_9);
+        page.navigateToDeploymentAndInvokeView(DEPLOYMENT_MANAGED_DISABLED_EXPLODED_9);
 
-        String content = page.getDeploymentContentTableRow("Managed");
+        String content = treeNavigationPage.formItemTable().getValueOf("Managed");
         assertTrue(content.contains("true"));
 
-        content = page.getDeploymentContentTableRow("Status");
+        content = treeNavigationPage.formItemTable().getValueOf("Status");
         assertTrue("Status of deployment should be 'STOPPED'", content.contains("STOPPED"));
 
-        content = page.getDeploymentContentTableRow("Enabled");
+        content = treeNavigationPage.formItemTable().getValueOf("Enabled");
         assertTrue("Deployment should be disabled", content.contains("false"));
     }
 

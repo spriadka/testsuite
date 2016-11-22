@@ -2,7 +2,6 @@ package org.jboss.hal.testsuite.test.runtime.deployments;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
-import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Standalone;
 import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
@@ -13,7 +12,7 @@ import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.finder.Row;
 import org.jboss.hal.testsuite.fragment.runtime.DeploymentWizard;
 import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
-import org.jboss.hal.testsuite.page.runtime.DeploymentPage;
+import org.jboss.hal.testsuite.page.runtime.StandaloneDeploymentEntryPoint;
 import org.jboss.hal.testsuite.util.Console;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -62,9 +61,6 @@ public class UnmanagedDeploymentsTestCase {
     @Drone
     private WebDriver browser;
 
-    @Page
-    private DeploymentPage page;
-
     @BeforeClass
     public static void setUp() throws IOException, TimeoutException, InterruptedException, CommandFailedException {
         new Administration(client).reloadIfRequired();
@@ -88,7 +84,7 @@ public class UnmanagedDeploymentsTestCase {
 
     @Before
     public void before() {
-        navigation = new FinderNavigation(browser, DeploymentPage.class);
+        navigation = new FinderNavigation(browser, StandaloneDeploymentEntryPoint.class);
     }
 
     @AfterClass

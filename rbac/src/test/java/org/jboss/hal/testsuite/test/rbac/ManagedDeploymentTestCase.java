@@ -10,8 +10,8 @@ import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.fragment.runtime.DeploymentWizard;
 import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
-import org.jboss.hal.testsuite.page.runtime.DeploymentPage;
-import org.jboss.hal.testsuite.page.runtime.DomainDeploymentPage;
+import org.jboss.hal.testsuite.page.runtime.DomainDeploymentEntryPoint;
+import org.jboss.hal.testsuite.page.runtime.StandaloneDeploymentEntryPoint;
 import org.jboss.hal.testsuite.util.Authentication;
 import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.jboss.hal.testsuite.util.Console;
@@ -49,9 +49,9 @@ public class ManagedDeploymentTestCase {
     public void before() {
         NAME = "n_" + RandomStringUtils.randomAlphanumeric(5) + ".war";
         if (ConfigUtils.isDomain()) {
-            navigation = new FinderNavigation(browser, DomainDeploymentPage.class);
+            navigation = new FinderNavigation(browser, DomainDeploymentEntryPoint.class);
         } else {
-            navigation = new FinderNavigation(browser, DeploymentPage.class);
+            navigation = new FinderNavigation(browser, StandaloneDeploymentEntryPoint.class);
         }
     }
 
@@ -99,7 +99,7 @@ public class ManagedDeploymentTestCase {
 
     public void checkButtons(boolean visible) {
         if (ConfigUtils.isDomain()) {
-            navigation = new FinderNavigation(browser, DomainDeploymentPage.class)
+            navigation = new FinderNavigation(browser, DomainDeploymentEntryPoint.class)
                         .step(FinderNames.BROWSE_BY, "Content Repository")
                     .step("All Content");
             navigation.selectColumn();
@@ -119,7 +119,7 @@ public class ManagedDeploymentTestCase {
 
     public void createDeployment(boolean shouldSucceed) {
         if (ConfigUtils.isDomain()) {
-            navigation = new FinderNavigation(browser, DomainDeploymentPage.class)
+            navigation = new FinderNavigation(browser, DomainDeploymentEntryPoint.class)
                     .step(FinderNames.BROWSE_BY, "Content Repository")
                     .step("All Content");
             navigation.selectColumn().invoke("Add");
@@ -153,7 +153,7 @@ public class ManagedDeploymentTestCase {
 
     private void removeDeployment() {
         if (ConfigUtils.isDomain()) {
-            navigation = new FinderNavigation(browser, DomainDeploymentPage.class)
+            navigation = new FinderNavigation(browser, DomainDeploymentEntryPoint.class)
                     .step(FinderNames.BROWSE_BY, "Content Repository")
                     .step("All Content", NAME);
             navigation.selectRow().invoke("Remove");
@@ -169,7 +169,7 @@ public class ManagedDeploymentTestCase {
 
     private void enableDeployment() {
         if (ConfigUtils.isDomain()) {
-            navigation = new FinderNavigation(browser, DomainDeploymentPage.class)
+            navigation = new FinderNavigation(browser, DomainDeploymentEntryPoint.class)
                     .step(FinderNames.BROWSE_BY, "Server Groups")
                     .step(FinderNames.SERVER_GROUP, "main-server-group")
                     .step("Deployment", NAME);
@@ -184,7 +184,7 @@ public class ManagedDeploymentTestCase {
     }
 
     private void assingDeployment() {
-        navigation = new FinderNavigation(browser, DomainDeploymentPage.class)
+        navigation = new FinderNavigation(browser, DomainDeploymentEntryPoint.class)
                 .step(FinderNames.BROWSE_BY, "Content Repository")
                 .step("All Content", NAME);
         navigation.selectRow().invoke("Assign");
@@ -194,7 +194,7 @@ public class ManagedDeploymentTestCase {
     }
 
     private void unassingDeployment() {
-        navigation = new FinderNavigation(browser, DomainDeploymentPage.class)
+        navigation = new FinderNavigation(browser, DomainDeploymentEntryPoint.class)
                 .step(FinderNames.BROWSE_BY, "Content Repository")
                 .step("All Content", NAME);
         navigation.selectRow().invoke("Unassign");
