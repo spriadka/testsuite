@@ -287,8 +287,14 @@ public abstract class AbstractCacheTestCase {
         new ResourceVerifier(address, client).verifyAttribute(identifier, value);
     }
 
-    public abstract void addCache() throws IOException;
+    /**
+     * Method to add specific cache type in model - not a test
+     */
+    protected abstract void addCache() throws IOException;
 
-    public abstract void deleteCache() throws IOException, OperationException;
+    /**
+     * Method to remove specific cache type in model - not a test
+     */
+    protected abstract void deleteCache() throws IOException, OperationException;
 
 }

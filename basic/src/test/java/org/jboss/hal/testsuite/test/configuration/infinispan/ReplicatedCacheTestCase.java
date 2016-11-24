@@ -29,14 +29,14 @@ public class ReplicatedCacheTestCase extends AbstractCacheTestCase {
         initializeAddresses(CacheType.REPLICATED);
     }
 
-    public void addCache() throws IOException {
+    protected void addCache() throws IOException {
         operations.add(CACHE_ADDRESS, Values.of("mode", "SYNC"));
         operations.add(TRANSACTION_ADDRESS);
         operations.add(STORE_ADDRESS, Values.of("class", "org.infinispan.configuration.cache.SingleFileStoreConfigurationBuilder"));
         operations.add(LOCKING_ADDRESS);
     }
 
-    public void deleteCache() throws IOException, OperationException {
+    protected void deleteCache() throws IOException, OperationException {
         operations.removeIfExists(CACHE_ADDRESS);
     }
 }
