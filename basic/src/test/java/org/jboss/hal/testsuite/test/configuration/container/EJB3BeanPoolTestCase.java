@@ -93,7 +93,7 @@ public class EJB3BeanPoolTestCase {
                 .timeoutUnit("MINUTES")
                 .finish();
         Assert.assertTrue("Window should be closed", result);
-        new ResourceVerifier(BEAN_POOL_TBA_ADDRESS, client).verifyExists("Probably fails because of https://issues.jboss.org/browse/HAL-1196");
+        new ResourceVerifier(BEAN_POOL_TBA_ADDRESS, client).verifyExists("Probably fails because of https://issues.jboss.org/browse/HAL-1233");
     }
 
     @Test
