@@ -28,14 +28,17 @@ E.g. for standalone Wildfly 10 using CLI:
 ### Required profile (-P) parameters
 
 Can be one of those:
-* `-Pbasic,standalone` ... run basic tests against standalone mode
-* `-Pbasic,domain` ... run basic tests against domain mode
-* `-Prbac,standalone` ... run RBAC related tests against standalone mode
-* `-Prbac,domain` ... run RBAC related tests against domain mode
-* `-P[basic,rbac],[domain,standalone],serverCheck` ... run tests against given mode and at the end of every test class run
-    * take snapshot of server xml configuration file
-    * check if server requires reload or restart
-    * in domain mode check if running states of servers don't change after test class run
+
+| Profiles                                         | Explanation                                                        |
+|--------------------------------------------------|--------------------------------------------------------------------|
+| `-Pbasic,standalone`                             | run basic tests against standalone mode                            |
+| `-Pbasic,domain`                                 | run basic tests against domain mode                                |
+| `-Prbac,standalone`                              | run RBAC related tests against standalone mode                     |
+| `-Prbac,domain`                                  | run RBAC related tests against domain mode                         |
+| `-P[basic,rbac],[domain,standalone],serverCheck` | run tests against given mode and at the end of every test class run, <ul><li>take snapshot of server xml configuration file,</li><li>check if server requires reload or restart,</li><li>in domain mode check if running states of servers don't change after test class run</li></ul>          |
+| `-Ptransactions,standalone`                      | run tests related to prepared transactions in messaging subsystem against standalone mode – domain mode is not currently available, [see more in modules README](transactions/README.md) |
+
+
 
 ### Required jboss.dist parameter
 

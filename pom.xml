@@ -229,6 +229,13 @@
     </profile>
 
     <profile>
+      <id>transactions</id>
+      <modules>
+        <module>transactions</module>
+      </modules>
+    </profile>
+
+    <profile>
       <id>serverCheck</id>
       <build>
         <plugins>
