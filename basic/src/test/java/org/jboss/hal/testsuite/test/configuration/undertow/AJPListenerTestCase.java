@@ -168,18 +168,6 @@ public class AJPListenerTestCase extends UndertowTestCaseAbstract {
         editCheckboxAndVerify(AJP_LISTENER_ADDRESS, DECODE_URL, false);
     }
 
-    //@Test
-
-    @Test
-    public void setEnabledToTrue() throws Exception {
-        editCheckboxAndVerify(AJP_LISTENER_ADDRESS, ENABLED, true);
-    }
-
-    @Test
-    public void setEnabledToFalse() throws Exception {
-        editCheckboxAndVerify(AJP_LISTENER_ADDRESS, ENABLED, false);
-    }
-
     @Test
     public void editMaxBufferedRequestSize() throws Exception {
         editTextAndVerify(AJP_LISTENER_ADDRESS, MAX_BUFFERED_REQUEST_SIZE, NUMERIC_VALID);
