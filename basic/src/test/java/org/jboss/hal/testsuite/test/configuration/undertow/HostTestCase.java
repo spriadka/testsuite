@@ -18,6 +18,7 @@ import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.OperationException;
+import org.wildfly.extras.creaper.core.online.operations.Values;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
@@ -53,9 +54,12 @@ public class HostTestCase extends UndertowTestCaseAbstract {
 
     @BeforeClass
     public static void setUp() throws InterruptedException, TimeoutException, IOException {
-        operations.add(HTTP_SERVER_ADDRESS);
-        operations.add(HOST_ADDRESS);
-        operations.add(HOST_TBR_ADDRESS);
+        final String defaultWebModule = "default-web-module";
+        operations.add(HTTP_SERVER_ADDRESS).assertSuccess();
+        operations.add(HOST_ADDRESS, Values.of(defaultWebModule, "defaultWebModule-" + RandomStringUtils
+                .randomAlphanumeric(6))).assertSuccess();
+        operations.add(HOST_TBR_ADDRESS, Values.of(defaultWebModule, "defaultWebModule-tbr-" + RandomStringUtils
+                .randomAlphanumeric(6))).assertSuccess();
         administration.reloadIfRequired();
     }
 
