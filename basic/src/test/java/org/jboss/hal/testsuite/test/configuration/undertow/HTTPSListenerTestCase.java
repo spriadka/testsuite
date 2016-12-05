@@ -43,7 +43,6 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
     private static final String BUFFER_POOL = "buffer-pool";
     private static final String DECODE_URL = "decode-url";
     private static final String ENABLE_HTTP2 = "enable-http2";
-    private static final String ENABLED = "enabled";
     private static final String MAX_BUFFERED_REQUEST_SIZE = "max-buffered-request-size";
     private static final String MAX_CONNECTIONS = "max-connections";
     private static final String MAX_COOKIES = "max-cookies";
@@ -59,8 +58,6 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
     private static final String RESOLVE_PEER_ADDRESS = "resolve-peer-address";
     private static final String SEND_BUFFER = "send-buffer";
     private static final String SOCKET_BINDING = "socket-binding";
-    private static final String SSL_SESSION_CACHE_SIZE = "ssl-session-cache-size";
-    private static final String SSL_SESSION_TIMEOUT = "ssl-session-timeout";
     private static final String TCP_BACKLOG = "tcp-backlog";
     private static final String TCP_KEEP_ALIVE = "tcp-keep-alive";
     private static final String URL_CHARSET = "url-charset";
@@ -335,26 +332,6 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
         } finally {
             operations.writeAttribute(HTTPS_LISTENER_ADDRESS, SOCKET_BINDING, originalSocketBindingValue);
         }
-    }
-
-    @Test
-    public void editSSLSessionCacheSize() throws Exception {
-        editTextAndVerify(HTTPS_LISTENER_ADDRESS, SSL_SESSION_CACHE_SIZE, NUMERIC_VALID);
-    }
-
-    @Test
-    public void editSSLSessionCacheSizeInvalid() throws Exception {
-        verifyIfErrorAppears(SSL_SESSION_CACHE_SIZE, NUMERIC_INVALID);
-    }
-
-    @Test
-    public void editSSLSessionTimeout() throws Exception {
-        editTextAndVerify(HTTPS_LISTENER_ADDRESS, SSL_SESSION_TIMEOUT, NUMERIC_VALID);
-    }
-
-    @Test
-    public void editSSLSessionTimeoutInvalid() throws Exception {
-        verifyIfErrorAppears(SSL_SESSION_TIMEOUT, NUMERIC_INVALID);
     }
 
     @Test
