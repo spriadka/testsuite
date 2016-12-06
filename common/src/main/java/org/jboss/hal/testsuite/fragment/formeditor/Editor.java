@@ -207,7 +207,6 @@ public class Editor extends BaseFragment {
             String byNameSelector = "input[name='" + identifier + "']:visible";
             String byDmrAttrSelector = "tr[data-dmr-attr='" + identifier + "'] textarea:visible";
             By selector = ByJQuery.selector(byIdSelector + ", " + byNameSelector + ", " + byDmrAttrSelector);
-
             text = findElement(selector, root);
         }
 
@@ -224,7 +223,7 @@ public class Editor extends BaseFragment {
     private WebElement findInputElement(String type, String identifier) {
         log.debug("looking for the '{}' input element identified by '{}'", type, identifier);
 
-        String byIdSelector = "input[type='" + type + "'][id$='" + identifier + "']:visible";
+        String byIdSelector = "input[type='" + type + "'][id$='_" + identifier + "']:visible";
         String byNameSelector = "input[type='" + type + "'][name='" + identifier + "']:visible";
         String byDmrAttrSelector = "tr[data-dmr-attr='" + identifier + "'] input:visible";
         By selector = ByJQuery.selector(byIdSelector + ", " + byNameSelector + ", " + byDmrAttrSelector);
