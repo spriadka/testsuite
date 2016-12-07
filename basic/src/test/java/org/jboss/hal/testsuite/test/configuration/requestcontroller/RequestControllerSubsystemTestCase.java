@@ -4,6 +4,7 @@ import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Shared;
+import org.jboss.hal.testsuite.category.Standalone;
 import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.page.config.RequestControllerPage;
 import org.jboss.hal.testsuite.util.ConfigChecker;
@@ -25,7 +26,6 @@ import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
 @RunWith(Arquillian.class)
-@Category(Shared.class)
 public class RequestControllerSubsystemTestCase {
 
     @Drone
@@ -59,6 +59,7 @@ public class RequestControllerSubsystemTestCase {
         }
     }
 
+    @Category(Standalone.class)
     @Test
     public void verifyActiveRequests() throws Exception {
         ModelNodeResult value = operations.readAttribute(REQUEST_CONTROLLER_SUBSYSTEM_ADDRESS, ACTIVE_REQUESTS,
@@ -69,6 +70,7 @@ public class RequestControllerSubsystemTestCase {
         Assert.assertEquals(page.getConfigFragment().edit().text(ACTIVE_REQUESTS), value.stringValue());
     }
 
+    @Category(Shared.class)
     @Test
     public void editMaxRequests() throws Exception {
         int value = 42;
@@ -87,24 +89,28 @@ public class RequestControllerSubsystemTestCase {
         }
     }
 
+    @Category(Shared.class)
     @Test
     public void toggleTrackIndividualEndpoints() throws Exception {
-        ModelNodeResult originalValue = operations.readAttribute(REQUEST_CONTROLLER_SUBSYSTEM_ADDRESS,
+        final ModelNodeResult originalValue = operations.readAttribute(REQUEST_CONTROLLER_SUBSYSTEM_ADDRESS,
                 TRACK_INDIVIDUAL_ENDPOINTS, ReadAttributeOption.NOT_INCLUDE_DEFAULTS);
+        final ModelNodeResult defaultValue = operations.readAttribute(REQUEST_CONTROLLER_SUBSYSTEM_ADDRESS,
+                TRACK_INDIVIDUAL_ENDPOINTS, ReadAttributeOption.INCLUDE_DEFAULTS);
         originalValue.assertSuccess();
-        boolean originalValueBool = originalValue.booleanValue();
+        defaultValue.assertSuccess();
+        final boolean defaultValueBool = defaultValue.booleanValue(); //originalValue is undefined
         try {
             new ConfigChecker.Builder(client, REQUEST_CONTROLLER_SUBSYSTEM_ADDRESS)
                     .configFragment(page.getConfigFragment())
-                    .editAndSave(ConfigChecker.InputType.CHECKBOX, TRACK_INDIVIDUAL_ENDPOINTS, !originalValueBool)
+                    .editAndSave(ConfigChecker.InputType.CHECKBOX, TRACK_INDIVIDUAL_ENDPOINTS, !defaultValueBool)
                     .verifyFormSaved()
-                    .verifyAttribute(TRACK_INDIVIDUAL_ENDPOINTS, !originalValueBool);
+                    .verifyAttribute(TRACK_INDIVIDUAL_ENDPOINTS, !defaultValueBool);
 
             new ConfigChecker.Builder(client, REQUEST_CONTROLLER_SUBSYSTEM_ADDRESS)
                     .configFragment(page.getConfigFragment())
-                    .editAndSave(ConfigChecker.InputType.CHECKBOX, TRACK_INDIVIDUAL_ENDPOINTS, originalValueBool)
+                    .editAndSave(ConfigChecker.InputType.CHECKBOX, TRACK_INDIVIDUAL_ENDPOINTS, defaultValueBool)
                     .verifyFormSaved()
-                    .verifyAttribute(TRACK_INDIVIDUAL_ENDPOINTS, originalValueBool);
+                    .verifyAttribute(TRACK_INDIVIDUAL_ENDPOINTS, defaultValueBool);
         } finally {
             operations.writeAttribute(REQUEST_CONTROLLER_SUBSYSTEM_ADDRESS, TRACK_INDIVIDUAL_ENDPOINTS,
                     originalValue.value()).assertSuccess();
