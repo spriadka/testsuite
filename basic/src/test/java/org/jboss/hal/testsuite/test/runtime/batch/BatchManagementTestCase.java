@@ -3,6 +3,10 @@ package org.jboss.hal.testsuite.test.runtime.batch;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.util.List;
 import java.util.Set;
 import org.apache.commons.io.IOUtils;
@@ -22,6 +26,7 @@ import org.jboss.shrinkwrap.api.asset.StringAsset;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.junit.After;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
@@ -214,7 +219,7 @@ public class BatchManagementTestCase {
         assertAttributeEquals(execution.createTime, jobStatusArea.getMetric("Create Time"));
         assertAttributeEquals(execution.startTime, jobStatusArea.getMetric("Start Time"));
         assertAttributeEquals(execution.endTime, jobStatusArea.getMetric("End Time"));
-        assertAttributeEquals(execution.lastUpdatedTime, jobStatusArea.getMetric("Last Updated Time"));
+        assertTimesCloseEnough(execution.lastUpdatedTime, jobStatusArea.getMetric("Last Updated Time"));
     }
 
     private void assertAttributeEquals(String expectedAttrValueFromModel, String actualAttrValueFromBrowser) {
@@ -223,6 +228,26 @@ public class BatchManagementTestCase {
         } else {
             assertEquals(expectedAttrValueFromModel, actualAttrValueFromBrowser);
         }
+    }
+
+    private void assertTimesCloseEnough(String expectedTimeFromModel, String actualTimeFromBrowser) {
+        final long
+            maxDiffMilis = 100,
+            actualDiffMilis = Duration.between(getInstant(expectedTimeFromModel), getInstant(actualTimeFromBrowser))
+                .toMillis();
+        Assert.assertTrue("Difference between expected time from model '" + expectedTimeFromModel + "' and actual time "
+                + "from browser '" + actualTimeFromBrowser + "' is '" + actualDiffMilis + "' ms what is more than "
+                + "maximum allowed difference of '" + maxDiffMilis + "' ms.", actualDiffMilis <= maxDiffMilis);
+    }
+
+    private Instant getInstant(String timeString) {
+        DateTimeFormatter formater = new DateTimeFormatterBuilder()
+            .parseCaseInsensitive()
+            .append(DateTimeFormatter.ISO_LOCAL_DATE_TIME)
+            .optionalStart()
+            .appendOffset("+HHMM", "0000")
+            .toFormatter();
+        return formater.parse(timeString, Instant::from);
     }
 
     private boolean everyJobFileNameInTableEquals(String expectedJobFileName) {
