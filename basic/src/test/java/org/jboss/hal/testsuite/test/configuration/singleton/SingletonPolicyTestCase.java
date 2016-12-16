@@ -19,6 +19,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.wildfly.extras.creaper.core.online.ModelNodeResult;
 import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
@@ -139,11 +140,15 @@ public class SingletonPolicyTestCase {
                 .navigateToTreeItem()
                 .clickLabel();
 
-        new ConfigChecker.Builder(client, SINGLETON_POLICY_ADDRESS)
-                .configFragment(page.getConfigFragment())
-                .editAndSave(ConfigChecker.InputType.TEXT, CACHE_CONTAINER, CACHE_CONTAINER_RESOURCE_EDIT)
-                .verifyFormSaved()
-                .verifyAttribute(CACHE_CONTAINER, CACHE_CONTAINER_RESOURCE_EDIT);
+        try {
+            new ConfigChecker.Builder(client, SINGLETON_POLICY_ADDRESS)
+                    .configFragment(page.getConfigFragment())
+                    .editAndSave(ConfigChecker.InputType.TEXT, CACHE_CONTAINER, CACHE_CONTAINER_RESOURCE_EDIT)
+                    .verifyFormSaved()
+                    .verifyAttribute(CACHE_CONTAINER, CACHE_CONTAINER_RESOURCE_EDIT);
+        } catch (NoSuchElementException e) {
+            throw new IllegalStateException("This is probably failing because of https://issues.jboss.org/browse/HAL-1255", e);
+        }
     }
 
     @Test
@@ -154,7 +159,7 @@ public class SingletonPolicyTestCase {
         operations.writeAttribute(SINGLETON_POLICY_ADDRESS, CACHE_CONTAINER, CACHE_CONTAINER_RESOURCE);
 
         page.treeNavigation()
-                .step("singleton-policy")
+                .step(SINGLETON_POLICY)
                 .step(SINGLETON_POLICY_RESOURCE)
                 .navigateToTreeItem()
                 .clickLabel();
@@ -168,6 +173,8 @@ public class SingletonPolicyTestCase {
                     .editAndSave(ConfigChecker.InputType.TEXT, CACHE, CACHE_RESOURCE)
                     .verifyFormSaved()
                     .verifyAttribute(CACHE, CACHE_RESOURCE);
+        } catch (NoSuchElementException e) {
+            throw new IllegalStateException("This is probably failing because of https://issues.jboss.org/browse/HAL-1255", e);
         } finally {
             operations.writeAttribute(SINGLETON_POLICY_ADDRESS, CACHE, resultValue.value());
         }
@@ -198,11 +205,16 @@ public class SingletonPolicyTestCase {
                 .clickLabel();
 
         final int value = 5;
-        new ConfigChecker.Builder(client, SINGLETON_POLICY_ADDRESS)
-                .configFragment(page.getConfigFragment())
-                .editAndSave(ConfigChecker.InputType.TEXT, QUORUM, String.valueOf(value))
-                .verifyFormSaved()
-                .verifyAttribute(QUORUM, value);
+
+        try {
+            new ConfigChecker.Builder(client, SINGLETON_POLICY_ADDRESS)
+                    .configFragment(page.getConfigFragment())
+                    .editAndSave(ConfigChecker.InputType.TEXT, QUORUM, String.valueOf(value))
+                    .verifyFormSaved()
+                    .verifyAttribute(QUORUM, value);
+        } catch (NoSuchElementException e) {
+            throw new IllegalStateException("This is probably failing because of https://issues.jboss.org/browse/HAL-1255", e);
+        }
     }
 
     @Test
