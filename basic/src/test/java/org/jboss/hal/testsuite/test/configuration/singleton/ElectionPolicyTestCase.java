@@ -52,7 +52,8 @@ public class ElectionPolicyTestCase {
             ELECTION_POLICY = "election-policy",
             NAME_PREFERENCES = "name-preferences",
             SOCKET_BINDING_PREFERENCES = "socket-binding-preferences",
-            SIMPLE = "simple";
+            SIMPLE = "simple",
+            RANDOM = "random";
 
     private static final Address
             SINGLETON_SUBSYSTEM_ADDRESS = Address.subsystem("singleton"),
@@ -86,7 +87,7 @@ public class ElectionPolicyTestCase {
         //Add singleton policy with defined election policy
         operations.batch(new Batch()
                 .add(SINGLETON_POLICY_EDIT_ADDRESS, Values.of(CACHE_CONTAINER, CACHE_CONTAINER_RESOURCE))
-                .add(SINGLETON_POLICY_EDIT_ADDRESS.and(ELECTION_POLICY, "simple")));
+                .add(SINGLETON_POLICY_EDIT_ADDRESS.and(ELECTION_POLICY, SIMPLE))).assertSuccess();
     }
 
     @AfterClass
@@ -103,7 +104,7 @@ public class ElectionPolicyTestCase {
     }
 
     @Test
-    public void addSimpleElectionPolicyInUI() throws Exception {
+    public void addRandomElectionPolicyInUI() throws Exception {
         page.treeNavigation()
                 .step(SINGLETON_POLICY)
                 .step(SINGLETON_POLICY_RESOURCE)
@@ -113,11 +114,12 @@ public class ElectionPolicyTestCase {
         WizardWindowWithAdvancedSelectBoxOptions window = page.getResourceManager()
                 .addResource(WizardWindowWithAdvancedSelectBoxOptions.class);
 
-        window.pick(SIMPLE)
+        window.pick(RANDOM)
                 .clickContinue()
                 .finish();
 
-        new ResourceVerifier(SINGLETON_POLICY_ADDRESS.and(ELECTION_POLICY, SIMPLE), client).verifyExists();
+        new ResourceVerifier(SINGLETON_POLICY_ADDRESS.and(ELECTION_POLICY, RANDOM), client)
+                .verifyExists("This probably fails because of https://issues.jboss.org/browse/HAL-1256");
     }
 
     @Test
