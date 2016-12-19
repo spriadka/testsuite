@@ -159,7 +159,7 @@ public class DeploymentsPage extends ConfigurationPage {
      */
     public Column navigateToDeploymentColumnInServerGroup(String groupName) {
         checkIfServerIsRunningInExpectedMode(ServerMode.DOMAIN);
-        Column column = new FinderNavigation(browser, this.getClass())
+        Column column = new FinderNavigation(browser, DomainDeploymentEntryPoint.class)
                 .step(FinderNames.BROWSE_BY, FinderNames.SERVER_GROUPS)
                 .step(FinderNames.SERVER_GROUP, groupName)
                 .step(FinderNames.DEPLOYMENT)
