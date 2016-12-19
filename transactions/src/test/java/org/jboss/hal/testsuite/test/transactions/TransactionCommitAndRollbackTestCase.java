@@ -151,7 +151,7 @@ public class TransactionCommitAndRollbackTestCase {
 
         @Override
         public void handle(String line) {
-            logger.debug(line);
+            logger.debug("Line handled by tailer: '{}'", line);
             for (PreparedTransactionTestCell transactionTestCell : TRANSACTIONS_TEST_DATA) {
                 if (transactionTestCell.matchesLogLinePattern(line)) {
                     transactionTestCell.setFinishedSuccessfully();
