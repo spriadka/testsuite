@@ -5,20 +5,24 @@ import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.page.Navigatable;
 import org.jboss.hal.testsuite.page.config.ConfigurationPage;
-import org.jboss.hal.testsuite.page.config.StandaloneConfigEntryPoint;
+import org.jboss.hal.testsuite.util.Console;
 
 public class MessagingPreparedTransactionsPage extends ConfigurationPage implements Navigatable {
 
     @Override
     public void navigate() {
-        new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
-                .step(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
+        new FinderNavigation(browser, StandaloneRuntimeEntryPoint.class)
+                .step(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
+                .step(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
                 .step(FinderNames.SUBSYSTEM, "Messaging - ActiveMQ")
-                .step("Settings", "Messaging Provider")
-                .step("Messaging Provider", "default")
                 .selectRow()
-                .invoke("Prepared Transactions");
+                .invoke(FinderNames.VIEW);
         Application.waitUntilVisible();
+        getResourceManager().getResourceTable()
+                .getRowByText(0, "default")
+                .view();
+        Console.withBrowser(browser).waitUntilLoaded();
+        switchSubTab("Prepared Transactions");
     }
 
     public void selectPreparedTransaction(String xId) {

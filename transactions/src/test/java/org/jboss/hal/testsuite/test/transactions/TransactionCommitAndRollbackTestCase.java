@@ -9,6 +9,7 @@ import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Standalone;
 import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.page.runtime.MessagingPreparedTransactionsPage;
+import org.jboss.hal.testsuite.util.AssertionErrorCollector;
 import org.jboss.hal.testsuite.util.PathOperations;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -28,8 +29,6 @@ import org.wildfly.extras.creaper.core.online.operations.Values;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -39,7 +38,6 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 /**
  * Test class testing rollback and commit of prepared transactions in Web Console.
@@ -134,17 +132,18 @@ public class TransactionCommitAndRollbackTestCase {
         }
 
         //check if finished successfully
-        List<AssertionError> errors = new LinkedList<>();
+        AssertionErrorCollector assertionErrorCollector = new AssertionErrorCollector();
         for (PreparedTransactionTestCell transactionTestCell : TRANSACTIONS_TEST_DATA) {
             try {
-                Assert.assertTrue(transactionTestCell.getFinishedSuccessfully());
+                Assert.assertTrue(
+                        "Transaction " + transactionTestCell.getXId() + " should be " +
+                        (transactionTestCell.getPerformedAction().equals(PerformedAction.COMMIT) ? "committed" : "rolled back") +
+                         " successfully.", transactionTestCell.getFinishedSuccessfully());
             } catch (AssertionError error) {
-                errors.add(error);
+                assertionErrorCollector.collect(error);
             }
         }
-        if (errors.size() > 0) {
-            throw new AssertionError(errors.stream().map(AssertionError::getMessage).collect(Collectors.joining(", ")));
-        }
+        assertionErrorCollector.report();
     }
 
     private static final class LogListenerForRollbackAndCommit extends TailerListenerAdapter {
