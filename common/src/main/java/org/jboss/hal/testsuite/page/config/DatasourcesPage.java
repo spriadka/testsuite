@@ -14,8 +14,6 @@ import org.jboss.hal.testsuite.util.Console;
 
 public class DatasourcesPage extends ConfigurationPage implements Navigatable {
 
-    private FinderNavigation NAVIGATION_TO_DATASOURCE_SUBSYSTEM_INSTANCE;
-
     @Override
     public DatasourceConfigArea getConfig() {
         return getConfig(DatasourceConfigArea.class);
@@ -76,21 +74,20 @@ public class DatasourcesPage extends ConfigurationPage implements Navigatable {
     }
 
     private FinderNavigation createNavigationToDatasourcesColumn() {
-        if (NAVIGATION_TO_DATASOURCE_SUBSYSTEM_INSTANCE != null) {
-            return NAVIGATION_TO_DATASOURCE_SUBSYSTEM_INSTANCE;
-        }
+        return createNavigationToDatasourcesColumn(ConfigUtils.getDefaultProfile());
+    }
 
+    private FinderNavigation createNavigationToDatasourcesColumn(String profileName) {
         FinderNavigation navigation;
         if (ConfigUtils.isDomain()) {
             navigation = new FinderNavigation(browser, DomainConfigurationPage.class)
                     .step(FinderNames.CONFIGURATION, FinderNames.PROFILES)
-                    .step(FinderNames.PROFILE, ConfigUtils.getDefaultProfile());
+                    .step(FinderNames.PROFILE, profileName);
         } else {
             navigation = new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
                     .step(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS);
         }
-        NAVIGATION_TO_DATASOURCE_SUBSYSTEM_INSTANCE = navigation.step(FinderNames.SUBSYSTEM, "Datasources");
-        return NAVIGATION_TO_DATASOURCE_SUBSYSTEM_INSTANCE;
+        return navigation.step(FinderNames.SUBSYSTEM, "Datasources");
     }
 
     /**
@@ -114,7 +111,17 @@ public class DatasourcesPage extends ConfigurationPage implements Navigatable {
      * @param type type of datasource
      */
     private void invokeActionOnDatasourceColumn(Action action, DatasourceType type) {
-        Column column = createNavigationToDatasourcesColumn()
+        invokeActionOnDatasourceColumn(action, type, ConfigUtils.getDefaultProfile());
+    }
+
+    /**
+     * Navigates to datasource subsystem and invokes action on final column containing datasource names
+     * @param action {@link Action} which will be performed on found column
+     * @param type type of datasource
+     * @param profileName name of profile used in navigation in domain mode
+     */
+    private void invokeActionOnDatasourceColumn(Action action, DatasourceType type, String profileName) {
+        Column column = createNavigationToDatasourcesColumn(profileName)
                 .step("Type", type.getTypeColumnLabel())
                 .step(type.getFinalColumnLabel())
                 .selectColumn(true);
@@ -133,6 +140,13 @@ public class DatasourcesPage extends ConfigurationPage implements Navigatable {
      */
     public void invokeAddDatasource() {
         invokeActionOnDatasourceColumn(Action.ADD, DatasourceType.NON_XA);
+    }
+
+    /**
+     * Invokes add action on non-XA datasource column using desired profile in navigation
+     */
+    public void invokeAddDatasourceOnProfile(String profileName) {
+        invokeActionOnDatasourceColumn(Action.ADD, DatasourceType.NON_XA, profileName);
     }
 
     /**

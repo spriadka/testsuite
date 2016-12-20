@@ -1,112 +1,82 @@
 package org.jboss.hal.testsuite.test.configuration.datasources;
 
 import org.apache.commons.io.IOUtils;
-import org.jboss.arquillian.graphene.Graphene;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Domain;
-import org.jboss.hal.testsuite.cli.CliClientFactory;
-import org.jboss.hal.testsuite.cli.DomainManager;
 import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
-import org.jboss.hal.testsuite.page.config.DomainConfigurationPage;
-import org.jboss.hal.testsuite.page.home.HomePage;
-import org.jboss.hal.testsuite.util.ConfigUtils;
-import org.jboss.hal.testsuite.util.Console;
-import org.junit.After;
+import org.jboss.hal.testsuite.creaper.ResourceVerifier;
+import org.jboss.hal.testsuite.page.config.DatasourcesPage;
 import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
-import org.wildfly.extras.creaper.core.CommandFailedException;
 import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
+import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.Operations;
 import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
-/**
- * @author jcechace
- */
-@Ignore("Test connection button has been removed from datasource wizard - JBEAP-2821")
 @Category(Domain.class)
 @RunWith(Arquillian.class)
 public class DomainTestConnectionTestCase extends AbstractTestConnectionTestCase {
 
     @Page
-    private DomainConfigurationPage domainConfigurationPage;
+    private DatasourcesPage datasourcesPage;
 
-    private static String dsNameValid;
-    private static String dsSameNameValid;
-    private static String dsSameNameInvalid;
-
-
-    private static final String VALID_URL = "jdbc:h2:mem:test2;DB_CLOSE_DELAY=-1";
-    private static final String INVALID_URL = "invalidUrl";
+    private static final String
+            VALID_URL = "jdbc:h2:mem:test2;DB_CLOSE_DELAY=-1",
+            INVALID_URL = "invalidUrl";
 
     private static OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
     private static OnlineManagementClient fullHaClient = ManagementClientProvider.withProfile("full-ha");
     private static Administration administration = new Administration(client);
+    private static Operations fullHaOperations = new Operations(fullHaClient);
     private static DataSourcesOperations dsOps = new DataSourcesOperations(client);
-    private static DomainManager manager = new DomainManager(CliClientFactory.getClient());
-
-    // Setup
-    @BeforeClass
-    public static void setup() throws CommandFailedException, InterruptedException, TimeoutException, IOException {  // create needed datasources
-        dsNameValid = dsOps.createDataSource(VALID_URL);
-        dsSameNameValid = new DataSourcesOperations(fullHaClient, "full-ha").createDataSource(VALID_URL); ///
-        dsSameNameInvalid = dsOps.createDataSource(dsSameNameValid, INVALID_URL);
-        administration.reload();
-    }
 
     @AfterClass
-    public static void tearDown() throws CommandFailedException { // remove datasources when finished
+    public static void tearDown() throws InterruptedException, TimeoutException, IOException {
         try {
-            dsOps.removeDataSource(dsNameValid);
-            new DataSourcesOperations(fullHaClient, "full-ha").removeDataSource(dsSameNameValid); ///
-            dsOps.removeDataSource(dsSameNameInvalid);
+            administration.reloadIfRequired();
         } finally {
             IOUtils.closeQuietly(client);
             IOUtils.closeQuietly(fullHaClient);
         }
     }
 
-    @Before
-    public void before() {
-        Graphene.goTo(HomePage.class);
-        Console.withBrowser(browser).waitUntilLoaded();
-        Graphene.goTo(DomainConfigurationPage.class);
-        Console.withBrowser(browser).waitUntilLoaded();
-        domainConfigurationPage.selectProfile(ConfigUtils.getDefaultProfile()).selectMenu("Datasources").selectMenu("Non-XA");
-        Console.withBrowser(browser).waitUntilLoaded();
-    }
+    @Test
+    public void testConnectionOnServerGroupWithNoRunningServers() throws Exception {
+        datasourcesPage.invokeAddDatasourceOnProfile("full-ha");
 
-    @After
-    public void after() {
-        browser.navigate().refresh();
+        String name = "ConnectionOnProfileWithNoRunningServers_" + RandomStringUtils.randomAlphabetic(6);
+        Address address = DataSourcesOperations.getDsAddress(name);
+        try {
+            testConnectionInWizardAndCancel(name, VALID_URL, false);
+
+            administration.reloadIfRequired();
+            new ResourceVerifier(address, fullHaClient).verifyDoesNotExist();
+        } finally {
+            fullHaOperations.removeIfExists(address);
+        }
     }
 
     @Test
-    public void testValidWithNoRunningServer() throws IOException {
-        manager.stopAllServers(10L);
-        //testConnectionUnchecked(dsNameValid, false);
+    public void testInvalidConnectionOnServerGroupWithNoRunningServers() throws Exception {
+        datasourcesPage.invokeAddDatasourceOnProfile("full-ha");
+
+        String name = "InvalidConnectionOnProfileWithNoRunningServers_" + RandomStringUtils.randomAlphabetic(6);
+        Address address = DataSourcesOperations.getDsAddress(name);
+        try {
+            testConnectionInWizardAndCancel(name, INVALID_URL, false);
+
+            administration.reloadIfRequired();
+            new ResourceVerifier(address, fullHaClient).verifyDoesNotExist();
+        } finally {
+            fullHaOperations.removeIfExists(address);
+        }
     }
 
-    @Test
-    public void testInvalidWithSameName() throws IOException {
-        manager.startAllServers(10L);
-        //testConnectionUnchecked(dsSameNameValid, false);
-    }
-
-    @Test
-    public void testValidWithSameNameInOtherGroup() throws IOException {
-        Graphene.goTo(DomainConfigurationPage.class);
-        Console.withBrowser(browser).waitUntilLoaded();
-        domainConfigurationPage.selectProfile("full-ha").selectMenu("Datasources").selectMenu("Non-XA");
-        Console.withBrowser(browser).waitUntilFinished();
-        manager.startAllServers(10L);
-        //testConnectionUnchecked(dsSameNameValid, true);
-    }
 }
