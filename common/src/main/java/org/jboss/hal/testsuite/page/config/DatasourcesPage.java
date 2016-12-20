@@ -127,6 +127,7 @@ public class DatasourcesPage extends ConfigurationPage implements Navigatable {
                 .selectColumn(true);
         Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
         column.invoke(action.getActionLabel());
+        Console.withBrowser(browser).waitUntilLoaded();
     }
 
     @Override

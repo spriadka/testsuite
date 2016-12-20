@@ -7,8 +7,6 @@ import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
-import org.jboss.hal.testsuite.util.Console;
-import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -64,15 +62,10 @@ public class TestConnectionTestCase extends AbstractTestConnectionTestCase {
             dsOps.removeDataSource(DS_NAME_INVALID);
             dsOps.removeXADataSource(XA_DS_NAME_VALID);
             dsOps.removeXADataSource(XA_DS_NAME_INVALID);
-        } finally {
             administration.reloadIfRequired();
+        } finally {
             IOUtils.closeQuietly(client);
         }
-    }
-
-    @After
-    public void after() {
-        browser.navigate().refresh();
     }
 
     // Regular DS tests
@@ -122,7 +115,7 @@ public class TestConnectionTestCase extends AbstractTestConnectionTestCase {
             testConnectionInWizardAndClose(name, VALID_URL, true);
 
             administration.reloadIfRequired();
-            new ResourceVerifier(address, client).verifyDoesNotExist();
+            new ResourceVerifier(address, client).verifyDoesNotExist("Probably fails because of https://issues.jboss.org/browse/HAL-1257");
         } finally {
             operations.removeIfExists(address);
         }
@@ -168,8 +161,6 @@ public class TestConnectionTestCase extends AbstractTestConnectionTestCase {
     @Test
     public void validXADatasource() {
         datasourcesPage.invokeViewXADatasource(XA_DS_NAME_VALID);
-        Console.withBrowser(browser).waitUntilLoaded();
-
         testConnection(true);
     }
 
@@ -205,7 +196,7 @@ public class TestConnectionTestCase extends AbstractTestConnectionTestCase {
             testXAConnectionInWizardAndClose(name, VALID_URL, true);
 
             administration.reloadIfRequired();
-            new ResourceVerifier(address, client).verifyDoesNotExist();
+            new ResourceVerifier(address, client).verifyDoesNotExist("Probably fails because of https://issues.jboss.org/browse/HAL-1257");
         } finally {
             operations.removeIfExists(address);
         }
