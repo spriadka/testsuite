@@ -88,7 +88,7 @@ public class DatasourceTemplatesTestCase {
      * @param template template to verify
      */
     private void verifyDatasourceDriverFormForTemplate(DatasourceTemplate template) {
-        datasourceWizard.selectTemplate(template.getDatasourceTemplateName());
+        datasourceWizard.selectTemplateUnchecked(template.getDatasourceTemplateName());
         datasourceWizard.next();
         datasourceWizard.next();
 

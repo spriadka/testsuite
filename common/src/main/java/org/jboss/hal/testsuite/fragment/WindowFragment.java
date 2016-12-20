@@ -66,7 +66,9 @@ public class WindowFragment extends BaseFragment {
         waitUntilClosed(true);
     }
 
-
+    /**
+     * Closes wizard by clicking on cross in top right corner
+     */
     public void close() {
         By selector = By.className(PropUtils.get("modals.window.close.class"));
         WebElement close = root.findElement(selector);
@@ -87,11 +89,15 @@ public class WindowFragment extends BaseFragment {
     }
 
     public void cancel() {
-        String label = PropUtils.get("modals.window.cancel.label");
-        clickButton(label);
+        clickCancel();
 
         waitUntilClosed();
         closed = true;
+    }
+
+    public void clickCancel() {
+        String label = PropUtils.get("modals.window.cancel.label");
+        clickButton(label);
     }
 
     public void clickButton(String label) {

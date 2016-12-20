@@ -9,18 +9,27 @@ import org.jboss.hal.testsuite.fragment.config.datasource.TestConnectionWindow;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.jboss.hal.testsuite.fragment.formeditor.PropertyEditor;
 import org.jboss.hal.testsuite.page.config.DatasourcesPage;
-import org.jboss.hal.testsuite.util.Console;
 import org.junit.Assert;
 import org.openqa.selenium.WebDriver;
-import org.wildfly.extras.creaper.core.online.operations.Address;
-import org.wildfly.extras.creaper.core.online.operations.OperationException;
-
-import java.io.IOException;
 
 /**
  * @author jcechace
  */
 public abstract class AbstractTestConnectionTestCase {
+
+    /**
+     * Hook which method will be executed after test connection was performed in wizard
+     */
+    protected interface Hook {
+        void afterConnectionWasTested(DatasourceWizard wizard);
+    }
+
+    private static final String
+            NAME = "name",
+            JNDI_NAME = "jndiName",
+            CONNECTION_URL = "connectionUrl",
+            URL = "URL",
+            DETECTED_DRIVER = "h2";
 
     @Drone
     protected WebDriver browser;
@@ -28,10 +37,11 @@ public abstract class AbstractTestConnectionTestCase {
     @Page
     protected DatasourcesPage datasourcesPage;
 
-    protected void testConnection(String name, boolean expected) {
-        datasourcesPage.view(name);
-        Console.withBrowser(browser).waitUntilLoaded();
-
+    /**
+     * Tests connection in datasource view
+     * @param expected true if connection is expected to succeed, false otherwise
+     */
+    protected void testConnection(boolean expected) {
         DatasourceConfigArea config = datasourcesPage.getConfig();
         ConnectionConfig connection = config.connectionConfig();
         TestConnectionWindow window = connection.testConnection();
@@ -39,51 +49,154 @@ public abstract class AbstractTestConnectionTestCase {
         assertConnectionTest(window, expected);
     }
 
-    protected void testConnectionInWizard(DataSourcesOperations dsOps, String name, String url, boolean expected) throws IOException, OperationException {
-        DatasourceWizard wizard = datasourcesPage.addResource();
+    /**
+     * Tests connection in already opened wizard
+     * @param name name of datasource
+     * @param url connection url
+     * @param expected true if connection is expected to succeed, false otherwise
+     * @param hook hook which will be executed after test connection is performed
+     */
+    protected void testConnectionInWizard(String name, String url, boolean expected, Hook hook) {
+        DatasourceWizard wizard = datasourcesPage.getDatasourceWizard();
+        DatasourceWizard.DatasourceType type = DatasourceWizard.DatasourceType.NON_XA;
         Editor editor = wizard.getEditor();
 
-        wizard.next();
+        wizard.goToLocation(DatasourceWizard.Location.DATASOURCE_ATTRIBUTES, type);
 
-        editor.text("name", name);
-        editor.text("jndiName", "java:/" + name);
-        wizard.next();
+        editor.text(NAME, name);
+        editor.text(JNDI_NAME, "java:/" + name);
+
+        wizard.goToLocation(DatasourceWizard.Location.JDBC_DRIVER, type);
 
         wizard.switchToDetectedDriver();
-        wizard.selectDriver("h2");
-        wizard.next();
+        wizard.selectDriver(DETECTED_DRIVER);
 
-        editor.text("connectionUrl", url);
+        wizard.goToLocation(DatasourceWizard.Location.CONNECTION_SETTINGS, type);
+
+        editor.text(CONNECTION_URL, url);
+
+        wizard.goToLocation(DatasourceWizard.Location.TEST_CONNECTION, type);
 
         assertConnectionTest(wizard.testConnection(), expected);
-        Address dsAddress = DataSourcesOperations.getDsAddress(name);
-        Assert.assertFalse(dsAddress + " shouldn't exist", dsOps.exists(dsAddress));
+
+        hook.afterConnectionWasTested(wizard);
     }
 
-    protected void testXAConnectionInWizard(DataSourcesOperations dsOps, String name, String url, boolean expected) throws IOException, OperationException {
-        DatasourceWizard wizard = datasourcesPage.addResource();
+    /**
+     * Tests connection in already opened wizard and cancels the wizard afterwards.
+     * @param name name of datasource
+     * @param url connection url
+     * @param expected true if connection is expected to succeed, false otherwise
+     * @see AbstractTestConnectionTestCase#testConnectionInWizard(String, String, boolean, Hook)
+     */
+    protected void testConnectionInWizardAndCancel(String name, String url, boolean expected) {
+        testConnectionInWizard(name, url, expected, (DatasourceWizard wizard) ->
+                datasourcesPage.getDatasourceWizard().cancelAndDismissReloadRequiredWindow());
+    }
+
+    /**
+     * Tests connection in already opened wizard and clicks on cross in top right corner afterwards.
+     * @param name name of datasource
+     * @param url connection url
+     * @param expected true if connection is expected to succeed, false otherwise
+     * @see AbstractTestConnectionTestCase#testConnectionInWizard(String, String, boolean, Hook)
+     */
+    protected void testConnectionInWizardAndClose(String name, String url, boolean expected) {
+        testConnectionInWizard(name, url, expected, (DatasourceWizard wizard) ->
+                datasourcesPage.getDatasourceWizard().close());
+    }
+
+    /**
+     * Tests connection in already opened wizard and saves it afterwards.
+     * @param name name of datasource
+     * @param url connection url
+     * @param expected true if connection is expected to succeed, false otherwise
+     * @see AbstractTestConnectionTestCase#testConnectionInWizard(String, String, boolean, Hook)
+     */
+    protected void testConnectionInWizardAndSave(String name, String url, boolean expected) {
+        testConnectionInWizard(name, url, expected, (DatasourceWizard wizard) -> {
+            wizard.goToLocation(DatasourceWizard.Location.SUMMARY, DatasourceWizard.DatasourceType.NON_XA);
+            wizard.finishAndDismissReloadRequiredWindow();
+        });
+    }
+
+    /**
+     * Tests connection for XA datasource in already opened wizard
+     * @param name name of datasource
+     * @param url connection url
+     * @param expected true if connection is expected to succeed, false otherwise
+     * @param hook hook which will be executed after test connection is performed
+     */
+    protected void testXAConnectionInWizard(String name, String url, boolean expected, Hook hook) {
+        DatasourceWizard wizard = datasourcesPage.getDatasourceWizard();
+        DatasourceWizard.DatasourceType type = DatasourceWizard.DatasourceType.XA;
         Editor editor = wizard.getEditor();
 
-        wizard.next();
+        wizard.goToLocation(DatasourceWizard.Location.DATASOURCE_ATTRIBUTES, type);
 
-        editor.text("name", name);
-        editor.text("jndiName", "java:/" + name);
-        wizard.next();
+        editor.text(NAME, name);
+        editor.text(JNDI_NAME, "java:/" + name);
+
+        wizard.goToLocation(DatasourceWizard.Location.JDBC_DRIVER, type);
 
         wizard.switchToDetectedDriver();
-        wizard.selectDriver("h2");
-        wizard.next();
+        wizard.selectDriver(DETECTED_DRIVER);
+
+        wizard.goToLocation(DatasourceWizard.Location.XA_PROPERTIES, type);
 
         PropertyEditor properties = editor.properties();
-        properties.add("URL", url);
+        properties.add(URL, url);
 
-        wizard.next();
+        wizard.goToLocation(DatasourceWizard.Location.TEST_CONNECTION, type);
 
         assertConnectionTest(wizard.testConnection(), expected);
-        Address dsAddress = DataSourcesOperations.getXADsAddress(name);
-        Assert.assertFalse(dsAddress + " shouldn't exist", dsOps.exists(dsAddress));
+
+        hook.afterConnectionWasTested(wizard);
     }
 
+    /**
+     * Tests connection for XA datasource in already opened wizard and cancels the wizard afterwards.
+     * @param name name of datasource
+     * @param url connection url
+     * @param expected true if connection is expected to succeed, false otherwise
+     * @see AbstractTestConnectionTestCase#testXAConnectionInWizard(String, String, boolean, Hook)
+     */
+    protected void testXAConnectionInWizardAndCancel(String name, String url, boolean expected) {
+        testXAConnectionInWizard(name, url, expected, (DatasourceWizard wizard) ->
+                datasourcesPage.getDatasourceWizard().cancelAndDismissReloadRequiredWindow());
+    }
+
+    /**
+     * Tests connection for XA datasource in already opened wizard and clicks on cross in top right corner afterwards.
+     * @param name name of datasource
+     * @param url connection url
+     * @param expected true if connection is expected to succeed, false otherwise
+     * @see AbstractTestConnectionTestCase#testXAConnectionInWizard(String, String, boolean, Hook)
+     */
+    protected void testXAConnectionInWizardAndClose(String name, String url, boolean expected) {
+        testXAConnectionInWizard(name, url, expected, (DatasourceWizard wizard) ->
+                datasourcesPage.getDatasourceWizard().close());
+    }
+
+    /**
+     * Tests connection for XA datasource in already opened wizard and saves it afterwards.
+     * @param name name of datasource
+     * @param url connection url
+     * @param expected true if connection is expected to succeed, false otherwise
+     * @see AbstractTestConnectionTestCase#testXAConnectionInWizard(String, String, boolean, Hook)
+     */
+    protected void testXAConnectionInWizardAndSave(String name, String url, boolean expected) {
+        testXAConnectionInWizard(name, url, expected, (DatasourceWizard wizard) -> {
+            wizard.goToLocation(DatasourceWizard.Location.SUMMARY, DatasourceWizard.DatasourceType.XA);
+            wizard.finishAndDismissReloadRequiredWindow();
+        });
+    }
+
+    /**
+     * Assert expected value to test connection result
+     * @param window window with connection result
+     * @param expected true if connection is expected to succeed, false otherwise
+     */
     protected void assertConnectionTest(TestConnectionWindow window, boolean expected) {
         boolean result = window.isSuccessful();
         window.close();
