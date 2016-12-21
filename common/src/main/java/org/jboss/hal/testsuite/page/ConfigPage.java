@@ -185,6 +185,11 @@ public class ConfigPage extends BasePage {
         navigate();
     }
 
+    /**
+     * @param subsystemName - subsystem label in finder navigation
+     * @return {@link FinderNavigation} with prefilled steps to subsystem with provided subsystem label.
+     * In case of managed domain the subsystem is selected under full profile.
+     */
     protected FinderNavigation getSubsystemNavigation(String subsystemName) {
         FinderNavigation navigation;
         if (ConfigUtils.isDomain()) {
@@ -197,4 +202,5 @@ public class ConfigPage extends BasePage {
         }
         return navigation.step(FinderNames.SUBSYSTEM, subsystemName);
     }
+
 }

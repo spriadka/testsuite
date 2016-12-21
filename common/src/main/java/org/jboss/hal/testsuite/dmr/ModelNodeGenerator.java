@@ -22,7 +22,10 @@
 
 package org.jboss.hal.testsuite.dmr;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.jboss.dmr.ModelNode;
@@ -51,5 +54,73 @@ public class ModelNodeGenerator {
         ModelNode parent = new ModelNode();
         childPropertiesMap.forEach((propertyKey, propertyValue) -> parent.get(propertyKey).set(propertyValue));
         return parent;
+    }
+
+    /**
+     * Builder for creating {@link ModelNode} of type {@link ModelType#OBJECT} including map of properties
+     */
+    public static final class ModelNodePropertiesBuilder {
+
+        private Map<String, ModelNode> propertyMap = new LinkedHashMap<>();
+
+        public ModelNodePropertiesBuilder() { }
+
+        public ModelNodePropertiesBuilder addProperty(String key, ModelNode value) {
+            this.propertyMap.put(key, value);
+            return this;
+        }
+
+        public ModelNodePropertiesBuilder addProperty(String key, String value) {
+            return addProperty(key, new ModelNode(value));
+        }
+
+        public ModelNode build() {
+            if (propertyMap.isEmpty()) {
+                throw new IllegalStateException("You have to add any property first!");
+            }
+            return new ModelNodeGenerator().createObjectNodeWithPropertyChildren(propertyMap);
+        }
+
+    }
+
+    /**
+     * Builder for creating {@link ModelNode} of type {@link ModelType#LIST}
+     */
+    public static final class ModelNodeListBuilder {
+
+        private List<ModelNode> nodeList = new ArrayList<>();
+
+        private boolean isEmpty = false;
+
+        public ModelNodeListBuilder() { }
+
+        public ModelNodeListBuilder(ModelNode node) {
+            this.nodeList.add(node);
+        }
+
+        public ModelNodeListBuilder empty() {
+            this.isEmpty = true;
+            return this;
+        }
+
+        public ModelNodeListBuilder addNode(ModelNode node) {
+            this.nodeList.add(node);
+            return this;
+        }
+
+        public ModelNode build() {
+            ModelNode parent = new ModelNode();
+            if (isEmpty) {
+                parent.add();
+                parent.remove(0);
+                return parent; // empty list
+            }
+            if (nodeList.isEmpty()) {
+                throw new IllegalStateException("No child node yet set! You have to either set list as empty or add any"
+                        + " ModelNode first!");
+            }
+            nodeList.forEach(item -> parent.add(item));
+            return parent;
+        }
     }
 }

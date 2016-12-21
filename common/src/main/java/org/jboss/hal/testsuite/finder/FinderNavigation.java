@@ -238,6 +238,14 @@ public class FinderNavigation {
         if (address.size() > 0 ) address.clear();
     }
 
+    /**
+     * Select current row, click View and wait for application detail to open.
+     */
+    public void openApplication() {
+        this.selectRow().invoke(FinderNames.VIEW);
+        Application.waitUntilVisible();
+    }
+
     private By columnSelector(String name) {
         return By.cssSelector("[data-column=\"" + name + "\"]");
     }

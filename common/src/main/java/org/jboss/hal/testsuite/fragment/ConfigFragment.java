@@ -91,13 +91,17 @@ public class ConfigFragment extends BaseFragment {
         }
     }
 
-    public boolean resourceIsPresent(String name) {
+    public boolean resourceIsPresent(String name, int tableColumnIndex) {
         long start = System.currentTimeMillis();
-        while (getResourceManager().getResourceTable().getRowByText(0, name) == null) {
+        while (getResourceManager().getResourceTable().getRowByText(tableColumnIndex, name) == null) {
             if (System.currentTimeMillis() >= start + 2000) return false;
             Library.letsSleep(200);
         }
         return true;
+    }
+
+    public boolean resourceIsPresent(String name) {
+        return resourceIsPresent(name, 0);
     }
 
     public Boolean editTextAndSave(String identifier, String value) {
