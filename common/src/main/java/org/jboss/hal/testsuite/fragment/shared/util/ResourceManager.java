@@ -1,5 +1,6 @@
 package org.jboss.hal.testsuite.fragment.shared.util;
 
+import com.google.common.base.Predicate;
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.hal.testsuite.fragment.BaseFragment;
@@ -11,9 +12,11 @@ import org.jboss.hal.testsuite.fragment.shared.table.ResourceTableRowFragment;
 import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.PropUtils;
 import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author jcechace
@@ -25,36 +28,12 @@ public class ResourceManager extends BaseFragment {
      * @return {@link ResourceTableFragment} if found
      */
     public ResourceTableFragment getResourceTable() {
-        return getResourceTableInElement((WebElement) null);
-    }
-
-    /**
-     * Get resource table in element
-     * @param element element containing resource table
-     * @return {@link ResourceTableFragment} if found
-     */
-    public ResourceTableFragment getResourceTableInElement(WebElement element) {
         String cssClass = PropUtils.get("resourcetable.class");
         By selector = ByJQuery.selector("table:has('." + cssClass + ":visible')");
 
-        WebElement tableRoot;
-
-        if (element == null) {
-            tableRoot = getRoot().findElement(selector);
-        } else {
-            tableRoot = element.findElement(selector);
-        }
+        WebElement tableRoot = getRoot().findElement(selector);
 
         return Graphene.createPageFragment(ResourceTableFragment.class, tableRoot);
-    }
-
-    /**
-     * Get resource table in element defined by {@link By} selector
-     * @param elementSelector selector describing element containing resource table
-     * @return {@link ResourceTableFragment} if found
-     */
-    public ResourceTableFragment getResourceTableInElement(By elementSelector) {
-        return getResourceTableInElement(getRoot().findElement(elementSelector));
     }
 
     /**
@@ -69,9 +48,7 @@ public class ResourceManager extends BaseFragment {
     public <T extends WizardWindow> T addResource(Class<T> clazz, String label) {
         clickButton(label);
 
-        T wizard = Console.withBrowser(browser).openedWizard(clazz);
-
-        return wizard;
+        return Console.withBrowser(browser).openedWizard(clazz);
     }
 
     public <T extends WizardWindow> T addResource(Class<T> clazz) {
@@ -88,9 +65,7 @@ public class ResourceManager extends BaseFragment {
         String label = PropUtils.get("config.shared.remove.label");
         clickButton(label);
 
-        T window = Console.withBrowser(browser).openedWindow(clazz);
-
-        return window;
+        return Console.withBrowser(browser).openedWindow(clazz);
     }
 
     public ConfirmationWindow removeResource(String name) {
@@ -119,6 +94,23 @@ public class ResourceManager extends BaseFragment {
 
     public List<String> listResources() {
         return getResourceTable().getTextInColumn(0);
+    }
+
+    /**
+     * Checks if given resource is present in resource table
+     * @param name name of resource
+     * @return true if resource is present, false otherwise
+     */
+    public boolean isResourcePresent(String name) {
+        try {
+            Graphene.waitModel(browser)
+                    .pollingEvery(100, TimeUnit.MILLISECONDS)
+                    .withTimeout(2000, TimeUnit.MILLISECONDS)
+                    .until((Predicate<WebDriver>) input -> getResourceTable().getRowByText(0, name) != null);
+            return true;
+        } catch (Exception ignored) {
+            return false;
+        }
     }
 
 }

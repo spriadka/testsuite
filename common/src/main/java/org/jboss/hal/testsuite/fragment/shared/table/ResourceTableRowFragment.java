@@ -53,6 +53,6 @@ public class ResourceTableRowFragment extends BaseFragment {
     }
 
     public boolean isSelected() {
-        return getRoot().getAttribute("class").contains("cellTableSelectedRow");
+        return getRoot().getAttribute("class").contains(ROW_SELECTED_CLASS);
     }
 }

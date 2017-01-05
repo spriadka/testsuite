@@ -8,7 +8,7 @@ import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
-import org.jboss.hal.testsuite.fragment.shared.table.ResourceTableFragment;
+import org.jboss.hal.testsuite.fragment.shared.util.ResourceManager;
 import org.jboss.hal.testsuite.page.config.UndertowHostPage;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -20,6 +20,7 @@ import org.junit.runner.RunWith;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.Batch;
 import org.wildfly.extras.creaper.core.online.operations.OperationException;
 import org.wildfly.extras.creaper.core.online.operations.Values;
 
@@ -50,9 +51,13 @@ public class HostTestCase extends UndertowTestCaseAbstract {
     private static final String HOST_TBR = "host-btr_" + RandomStringUtils.randomAlphanumeric(5);
     private static final String HOST_TBA = "host-tba_" + RandomStringUtils.randomAlphanumeric(5);
 
-    private static final String ERROR_PAGE_FILTER_NAME = "ErrorFilterReferenceADD_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String REWRITE_FILTER_NAME = "RewriteFilterReferenceREMOVE_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final Address REWRITE_FILTER_ADDRESS = UndertowConstants.UNDERTOW_FILTERS_ADDRESS.and("rewrite", REWRITE_FILTER_NAME);
+    private static final String ERROR_PAGE_FILTER_NAME = "ErrorFilterReference_" + RandomStringUtils.randomAlphanumeric(5);
     private static final Address ERROR_PAGE_FILTER_ADDRESS = UndertowConstants.UNDERTOW_FILTERS_ADDRESS.and("error-page", ERROR_PAGE_FILTER_NAME);
-    private static final String REQUEST_LIMIT_FILTER_NAME = "ReqLimitFilterReferenceADD_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String GZIP_PAGE_FILTER_NAME = "GzipFilterReferenceADD_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final Address GZIP_PAGE_FILTER_ADDRESS = UndertowConstants.UNDERTOW_FILTERS_ADDRESS.and("gzip", GZIP_PAGE_FILTER_NAME);
+    private static final String REQUEST_LIMIT_FILTER_NAME = "ReqLimitFilterReference_" + RandomStringUtils.randomAlphanumeric(5);
     private static final Address REQUEST_LIMIT_FILTER_ADDRESS = UndertowConstants.UNDERTOW_FILTERS_ADDRESS.and("request-limit", REQUEST_LIMIT_FILTER_NAME);
 
     private static final Address HTTP_SERVER_ADDRESS = UndertowConstants.UNDERTOW_ADDRESS.and("server", HTTP_SERVER);
@@ -74,10 +79,20 @@ public class HostTestCase extends UndertowTestCaseAbstract {
         administration.reloadIfRequired();
 
         //host filter references
-        operations.add(ERROR_PAGE_FILTER_ADDRESS, Values.of("code", 404)).assertSuccess();
-        operations.add(HOST_ADDRESS.and("filter-ref", ERROR_PAGE_FILTER_NAME)).assertSuccess();
-        operations.add(REQUEST_LIMIT_FILTER_ADDRESS, Values.of("max-concurrent-requests", 42)).assertSuccess();
-        operations.add(HOST_ADDRESS.and("filter-ref", REQUEST_LIMIT_FILTER_NAME)).assertSuccess();
+        operations.add(GZIP_PAGE_FILTER_ADDRESS).assertSuccess();
+
+        operations.batch(new Batch()
+                .add(ERROR_PAGE_FILTER_ADDRESS, Values.of("code", 404))
+                .add(HOST_ADDRESS.and("filter-ref", ERROR_PAGE_FILTER_NAME))).assertSuccess();
+
+        operations.batch(new Batch()
+                .add(REWRITE_FILTER_ADDRESS, Values.of("target", "foo"))
+                .add(HOST_ADDRESS.and("filter-ref", REWRITE_FILTER_NAME))).assertSuccess();
+
+
+        operations.batch(new Batch()
+                .add(REQUEST_LIMIT_FILTER_ADDRESS, Values.of("max-concurrent-requests", 42))
+                .add(HOST_ADDRESS.and("filter-ref", REQUEST_LIMIT_FILTER_NAME))).assertSuccess();
 
         administration.reloadIfRequired();
     }
@@ -93,11 +108,14 @@ public class HostTestCase extends UndertowTestCaseAbstract {
     @AfterClass
     public static void tearDown() throws InterruptedException, IOException, TimeoutException, OperationException {
         //remove references to filters first
+        operations.removeIfExists(HOST_ADDRESS.and("filter-ref", REWRITE_FILTER_NAME));
+        operations.removeIfExists(HOST_ADDRESS.and("filter-ref", GZIP_PAGE_FILTER_NAME));
         operations.removeIfExists(HOST_ADDRESS.and("filter-ref", ERROR_PAGE_FILTER_NAME));
         operations.removeIfExists(HOST_ADDRESS.and("filter-ref", REQUEST_LIMIT_FILTER_NAME));
 
         administration.reloadIfRequired();
 
+        operations.removeIfExists(REWRITE_FILTER_ADDRESS);
         operations.removeIfExists(ERROR_PAGE_FILTER_ADDRESS);
         operations.removeIfExists(REQUEST_LIMIT_FILTER_ADDRESS);
         operations.removeIfExists(HOST_ADDRESS);
@@ -135,7 +153,7 @@ public class HostTestCase extends UndertowTestCaseAbstract {
     public void addHTTPServerHostInGUI() throws Exception {
         String webModule = "webModule_" + RandomStringUtils.randomAlphanumeric(6);
         ConfigFragment config = page.getConfigFragment();
-        WizardWindow wizard = config.getResourceManager().addResource();
+        WizardWindow wizard = page.getResourceManager().addResource();
 
         Editor editor = wizard.getEditor();
         editor.text("name", HOST_TBA);
@@ -146,7 +164,7 @@ public class HostTestCase extends UndertowTestCaseAbstract {
         boolean result = wizard.finish();
 
         Assert.assertTrue("Window should be closed", result);
-        Assert.assertTrue("HTTP server host should be present in table", config.resourceIsPresent(HOST_TBA));
+        Assert.assertTrue("HTTP server host should be present in table", page.getResourceManager().isResourcePresent(HOST_TBA));
         ResourceVerifier verifier = new ResourceVerifier(HOST_TBA_ADDRESS, client);
         verifier.verifyExists();
         verifier.verifyAttribute(DEFAULT_RESPONSE_CODE, DEFAULT_RESPONSE_CODE_VALUE);
@@ -156,12 +174,11 @@ public class HostTestCase extends UndertowTestCaseAbstract {
 
     @Test
     public void removeHTTPServerHostInGUI() throws Exception {
-        ConfigFragment config = page.getConfigFragment();
-        config.getResourceManager()
+        page.getResourceManager()
                 .removeResource(HOST_TBR)
                 .confirm();
 
-        Assert.assertFalse("Host server host should not be present in table", config.resourceIsPresent(HOST_TBR));
+        Assert.assertFalse("Host server host should not be present in table", page.getResourceManager().isResourcePresent(HOST_TBR));
         new ResourceVerifier(HOST_TBR_ADDRESS, client).verifyDoesNotExist(); //HTTP server host should not be present on the server
     }
 
@@ -169,17 +186,32 @@ public class HostTestCase extends UndertowTestCaseAbstract {
     public void checkReferencesToFilters() throws IOException {
         page.switchToReferenceToFilterSubTab();
 
-        ResourceTableFragment table = page.filterReferenceTable();
+        Assert.assertTrue("Filter reference " + ERROR_PAGE_FILTER_NAME + " is not present in table!",
+                page.getConfigFragment().getResourceManager().isResourcePresent(ERROR_PAGE_FILTER_NAME));
 
-        Assert.assertEquals("There is incorrect count of rows in reference table!",
-                2, table.getAllRows().size());
+        Assert.assertTrue("Filter reference  " + REQUEST_LIMIT_FILTER_NAME + " is not present in table!",
+                page.getConfigFragment().getResourceManager().isResourcePresent(REQUEST_LIMIT_FILTER_NAME));
+    }
 
-        Assert.assertNotNull("Filter reference " + ERROR_PAGE_FILTER_NAME + " is not present in table!",
-                table.getRowByText(0, ERROR_PAGE_FILTER_NAME));
+    @Test
+    public void addReferenceToFilter() throws IOException {
+        page.switchToReferenceToFilterSubTab();
+        page.addReferenceToFilter(GZIP_PAGE_FILTER_NAME);
 
-        Assert.assertNotNull("Filter reference  " + REQUEST_LIMIT_FILTER_NAME + " is not present in table!",
-                table.getRowByText(0, REQUEST_LIMIT_FILTER_NAME));
+        Assert.assertTrue("Filter reference  " + GZIP_PAGE_FILTER_NAME + " is not present in table!",
+                page.getConfigFragment().getResourceManager().isResourcePresent(GZIP_PAGE_FILTER_NAME));
 
+    }
+
+    @Test
+    public void removeReferenceToFilter() throws IOException {
+        page.switchToReferenceToFilterSubTab();
+        ResourceManager manager = page.getConfigFragment().getResourceManager();
+
+        manager.removeResource(REWRITE_FILTER_NAME).confirmAndDismissReloadRequiredMessage();
+
+        Assert.assertFalse("Filter reference  " + REWRITE_FILTER_NAME + " is present in table!",
+                manager.isResourcePresent(REWRITE_FILTER_NAME));
     }
 
 }
