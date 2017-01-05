@@ -8,7 +8,8 @@ import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
-import org.jboss.hal.testsuite.page.config.UndertowHTTPPage;
+import org.jboss.hal.testsuite.fragment.shared.table.ResourceTableFragment;
+import org.jboss.hal.testsuite.page.config.UndertowHostPage;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
@@ -16,6 +17,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.OperationException;
 import org.wildfly.extras.creaper.core.online.operations.Values;
@@ -27,8 +30,10 @@ import java.util.concurrent.TimeoutException;
 @Category(Shared.class)
 public class HostTestCase extends UndertowTestCaseAbstract {
 
+    private static final Logger logger = LoggerFactory.getLogger(HostTestCase.class);
+
     @Page
-    UndertowHTTPPage page;
+    private UndertowHostPage page;
 
     private static final String ALIAS = "alias";
     private static final String DEFAULT_RESPONSE_CODE = "default-response-code";
@@ -45,7 +50,12 @@ public class HostTestCase extends UndertowTestCaseAbstract {
     private static final String HOST_TBR = "host-btr_" + RandomStringUtils.randomAlphanumeric(5);
     private static final String HOST_TBA = "host-tba_" + RandomStringUtils.randomAlphanumeric(5);
 
-    private static final Address HTTP_SERVER_ADDRESS = UNDERTOW_ADDRESS.and("server", HTTP_SERVER);
+    private static final String ERROR_PAGE_FILTER_NAME = "ErrorFilterReferenceADD_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final Address ERROR_PAGE_FILTER_ADDRESS = UndertowConstants.UNDERTOW_FILTERS_ADDRESS.and("error-page", ERROR_PAGE_FILTER_NAME);
+    private static final String REQUEST_LIMIT_FILTER_NAME = "ReqLimitFilterReferenceADD_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final Address REQUEST_LIMIT_FILTER_ADDRESS = UndertowConstants.UNDERTOW_FILTERS_ADDRESS.and("request-limit", REQUEST_LIMIT_FILTER_NAME);
+
+    private static final Address HTTP_SERVER_ADDRESS = UndertowConstants.UNDERTOW_ADDRESS.and("server", HTTP_SERVER);
 
     private static final Address HOST_ADDRESS = HTTP_SERVER_ADDRESS.and("host", HOST);
     private static final Address HOST_TBR_ADDRESS = HTTP_SERVER_ADDRESS.and("host", HOST_TBR);
@@ -60,6 +70,15 @@ public class HostTestCase extends UndertowTestCaseAbstract {
                 .randomAlphanumeric(6))).assertSuccess();
         operations.add(HOST_TBR_ADDRESS, Values.of(defaultWebModule, "defaultWebModule-tbr-" + RandomStringUtils
                 .randomAlphanumeric(6))).assertSuccess();
+
+        administration.reloadIfRequired();
+
+        //host filter references
+        operations.add(ERROR_PAGE_FILTER_ADDRESS, Values.of("code", 404)).assertSuccess();
+        operations.add(HOST_ADDRESS.and("filter-ref", ERROR_PAGE_FILTER_NAME)).assertSuccess();
+        operations.add(REQUEST_LIMIT_FILTER_ADDRESS, Values.of("max-concurrent-requests", 42)).assertSuccess();
+        operations.add(HOST_ADDRESS.and("filter-ref", REQUEST_LIMIT_FILTER_NAME)).assertSuccess();
+
         administration.reloadIfRequired();
     }
 
@@ -73,6 +92,14 @@ public class HostTestCase extends UndertowTestCaseAbstract {
 
     @AfterClass
     public static void tearDown() throws InterruptedException, IOException, TimeoutException, OperationException {
+        //remove references to filters first
+        operations.removeIfExists(HOST_ADDRESS.and("filter-ref", ERROR_PAGE_FILTER_NAME));
+        operations.removeIfExists(HOST_ADDRESS.and("filter-ref", REQUEST_LIMIT_FILTER_NAME));
+
+        administration.reloadIfRequired();
+
+        operations.removeIfExists(ERROR_PAGE_FILTER_ADDRESS);
+        operations.removeIfExists(REQUEST_LIMIT_FILTER_ADDRESS);
         operations.removeIfExists(HOST_ADDRESS);
         operations.removeIfExists(HOST_TBA_ADDRESS);
         operations.removeIfExists(HOST_TBR_ADDRESS);
@@ -137,4 +164,22 @@ public class HostTestCase extends UndertowTestCaseAbstract {
         Assert.assertFalse("Host server host should not be present in table", config.resourceIsPresent(HOST_TBR));
         new ResourceVerifier(HOST_TBR_ADDRESS, client).verifyDoesNotExist(); //HTTP server host should not be present on the server
     }
+
+    @Test
+    public void checkReferencesToFilters() throws IOException {
+        page.switchToReferenceToFilterSubTab();
+
+        ResourceTableFragment table = page.filterReferenceTable();
+
+        Assert.assertEquals("There is incorrect count of rows in reference table!",
+                2, table.getAllRows().size());
+
+        Assert.assertNotNull("Filter reference " + ERROR_PAGE_FILTER_NAME + " is not present in table!",
+                table.getRowByText(0, ERROR_PAGE_FILTER_NAME));
+
+        Assert.assertNotNull("Filter reference  " + REQUEST_LIMIT_FILTER_NAME + " is not present in table!",
+                table.getRowByText(0, REQUEST_LIMIT_FILTER_NAME));
+
+    }
+
 }

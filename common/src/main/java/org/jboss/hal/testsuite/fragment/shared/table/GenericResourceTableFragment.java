@@ -140,28 +140,27 @@ public class GenericResourceTableFragment<T extends ResourceTableRowFragment> ex
      */
     public T getRowByText(int col, String text) {
 
-        By selector = this.getRowByTextSelector(col, text);
         T row = null;
 
         if (this.hasPager()) {
             this.getPager().goToFirstPage();
             do {
-                List<WebElement> rowsWithText = root.findElements(selector);
+                List<T> rowsWithText = findVisibleRowsByCellValueAtIndex(col, text);
 
                 if (rowsWithText.isEmpty()) {
-                    log.trace("Row with text <{}> at column {} not found on this page of table.", text, col);
+                    log.debug("Row with text <{}> at column {} not found on this page of table.", text, col);
                 } else {
                     log.debug("Row with text <{}> at column {} found.", text, col);
-                    row = Graphene.createPageFragment(type, rowsWithText.get(0));
+                    row = rowsWithText.get(0);
                     break;
                 }
 
-                log.trace("Trying to move to next page");
+                log.debug("Trying to move to next page");
             } while (this.getPager().goToNextPage());
         } else {
-            List<WebElement> rowsWithText = root.findElements(selector);
+            List<T> rowsWithText = findVisibleRowsByCellValueAtIndex(col, text);
             if (!rowsWithText.isEmpty()) {
-                row = Graphene.createPageFragment(type, rowsWithText.get(0));
+                row = rowsWithText.get(0);
             }
         }
 
@@ -185,8 +184,11 @@ public class GenericResourceTableFragment<T extends ResourceTableRowFragment> ex
 
         if (row != null) {
             row.click();
-            // TODO: replace timeout waiting
-            Graphene.waitModel().withTimeout(1500, TimeUnit.MILLISECONDS);
+            Graphene.waitModel().withTimeout(1500, TimeUnit.MILLISECONDS)
+                    .until()
+                    .element(row.getRoot())
+                    .attribute("class")
+                    .contains(ResourceTableRowFragment.ROW_SELECTED_CLASS);
         }
         return row;
     }
@@ -210,10 +212,10 @@ public class GenericResourceTableFragment<T extends ResourceTableRowFragment> ex
         return pager;
     }
 
-    private List<WebElement> getRowElements(boolean fail) {
+    private List<WebElement> getRowElements() {
         // TODO: workaround - there is no cellTableRow class, thus odd and even row need to be selected separately
         By selector = new ByJQuery("tr.cellTableEvenRow, tr.cellTableOddRow");
-        List<WebElement> rowElements = root.findElements(selector);
+        List<WebElement> rowElements = getTableRoot().findElements(selector);
 
         if (rowElements.isEmpty()) {
             log.warn("Table is empty");
@@ -222,22 +224,15 @@ public class GenericResourceTableFragment<T extends ResourceTableRowFragment> ex
         return rowElements;
     }
 
-    private List<WebElement> getRowElements() {
-        return getRowElements(true);
-    }
+    private List<T> findVisibleRowsByCellValueAtIndex(int columnIndex, String cellValue) {
 
-    private By getRowByTextSelector(int col, String text) {
-        // TODO: workaround - there is no cellTableRow class ...
-        // TODO: find a better way than xpath
-        // TODO: remove this method after resolving previous issues
-        String row = "tr[contains(@class, 'cellTableEvenRow') or " +
-                "contains(@class, 'cellTableOddRow')]";
-        String cell = "td[contains(@class, 'cellTableCell')]";
-        String containsText = "*[contains(text(), '" + text + "')]";
-        By selector = By.xpath(".//" + row + "//" + cell + "[" + (col + 1) + "]" +
-                "/descendant-or-self::" + containsText + "/ancestor::" + row);
+        List<T> rows = getVisibleRows().stream()
+                .filter(item -> item.getCellValue(columnIndex).equals(cellValue))
+                .collect(Collectors.toList());
 
-        return selector;
+        log.debug("Found {} rows with text '{}' at column {}", rows.size(), cellValue, columnIndex);
+
+        return rows;
     }
 
     /**
@@ -252,5 +247,9 @@ public class GenericResourceTableFragment<T extends ResourceTableRowFragment> ex
         values.addAll(rows.stream().map(row -> row.getCellValue(col)).collect(Collectors.toList()));
 
         return values;
+    }
+
+    private WebElement getTableRoot() {
+        return getRoot().findElement(SELECTOR);
     }
 }

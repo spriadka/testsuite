@@ -20,17 +20,45 @@ import java.util.List;
  */
 public class ResourceManager extends BaseFragment {
 
+    /**
+     * Get resource table on page
+     * @return {@link ResourceTableFragment} if found
+     */
     public ResourceTableFragment getResourceTable() {
-        String cssClass = PropUtils.get("resourcetable.class");
-        By selector = ByJQuery.selector("." + cssClass + ":visible");
-        WebElement tableRoot = getRoot().findElement(selector);
-        ResourceTableFragment table = Graphene.createPageFragment(ResourceTableFragment.class, tableRoot);
-
-        return table;
+        return getResourceTableInElement((WebElement) null);
     }
 
     /**
-     * Select resource based on its name in firt column of resource table.
+     * Get resource table in element
+     * @param element element containing resource table
+     * @return {@link ResourceTableFragment} if found
+     */
+    public ResourceTableFragment getResourceTableInElement(WebElement element) {
+        String cssClass = PropUtils.get("resourcetable.class");
+        By selector = ByJQuery.selector("table:has('." + cssClass + ":visible')");
+
+        WebElement tableRoot;
+
+        if (element == null) {
+            tableRoot = getRoot().findElement(selector);
+        } else {
+            tableRoot = element.findElement(selector);
+        }
+
+        return Graphene.createPageFragment(ResourceTableFragment.class, tableRoot);
+    }
+
+    /**
+     * Get resource table in element defined by {@link By} selector
+     * @param elementSelector selector describing element containing resource table
+     * @return {@link ResourceTableFragment} if found
+     */
+    public ResourceTableFragment getResourceTableInElement(By elementSelector) {
+        return getResourceTableInElement(getRoot().findElement(elementSelector));
+    }
+
+    /**
+     * Select resource based on its name in first column of resource table.
      *
      * @param name Name of the resource.
      */
