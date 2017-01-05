@@ -9,14 +9,14 @@ import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Standalone;
 import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.page.runtime.MessagingPreparedTransactionsPage;
-import org.jboss.hal.testsuite.util.AssertionErrorCollector;
 import org.jboss.hal.testsuite.util.PathOperations;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.junit.rules.ErrorCollector;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
 import org.slf4j.Logger;
@@ -39,6 +39,8 @@ import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
 
+import static org.hamcrest.core.IsEqual.equalTo;
+
 /**
  * Test class testing rollback and commit of prepared transactions in Web Console.
  */
@@ -54,6 +56,9 @@ public class TransactionCommitAndRollbackTestCase {
 
     @Page
     private MessagingPreparedTransactionsPage page;
+
+    @Rule
+    public ErrorCollector collector = new ErrorCollector();
 
     private static final OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
     private static final Operations operations = new Operations(client);
@@ -132,18 +137,11 @@ public class TransactionCommitAndRollbackTestCase {
         }
 
         //check if finished successfully
-        AssertionErrorCollector assertionErrorCollector = new AssertionErrorCollector();
         for (PreparedTransactionTestCell transactionTestCell : TRANSACTIONS_TEST_DATA) {
-            try {
-                Assert.assertTrue(
-                        "Transaction " + transactionTestCell.getXId() + " should be " +
-                        (transactionTestCell.getPerformedAction().equals(PerformedAction.COMMIT) ? "committed" : "rolled back") +
-                         " successfully.", transactionTestCell.getFinishedSuccessfully());
-            } catch (AssertionError error) {
-                assertionErrorCollector.collect(error);
-            }
+            collector.checkThat("Transaction " + transactionTestCell.getXId() + " should be " +
+                    (transactionTestCell.getPerformedAction().equals(PerformedAction.COMMIT) ? "committed" : "rolled back") +
+                    " successfully.", transactionTestCell.getFinishedSuccessfully(), equalTo(true));
         }
-        assertionErrorCollector.report();
     }
 
     private static final class LogListenerForRollbackAndCommit extends TailerListenerAdapter {
