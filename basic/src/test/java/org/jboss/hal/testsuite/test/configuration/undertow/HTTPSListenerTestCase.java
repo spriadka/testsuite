@@ -43,7 +43,6 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
     private static final String BUFFER_POOL = "buffer-pool";
     private static final String DECODE_URL = "decode-url";
     private static final String ENABLE_HTTP2 = "enable-http2";
-    private static final String ENABLED = "enabled";
     private static final String MAX_BUFFERED_REQUEST_SIZE = "max-buffered-request-size";
     private static final String MAX_CONNECTIONS = "max-connections";
     private static final String MAX_COOKIES = "max-cookies";
