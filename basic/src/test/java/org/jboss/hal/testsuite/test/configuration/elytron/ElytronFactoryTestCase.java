@@ -49,7 +49,7 @@ public class ElytronFactoryTestCase extends AbstractElytronTestCase {
             AGGREGATE_HTTP_SERVER_FACTORY = "aggregate-http-server-mechanism-factory",
             AGGREGATE_SASL_SERVER_LABEL = "Aggregate SASL Server",
             AGGREGATE_SASL_SERVER_FACTORY = "aggregate-sasl-server-factory",
-            PROVIDER_FILTERING_SASL_SERVER_LABEL = "Mechanism Provider Filtering Sasl",
+            PROVIDER_FILTERING_SASL_SERVER_LABEL = "Mechanism Provider Filtering SASL",
             PROVIDER_FILTERING_SASL_SERVER_FACTORY = "mechanism-provider-filtering-sasl-server-factory",
             KERBEROS_SECURITY_LABEL = "Kerberos Security", KERBEROS_SECURITY_FACTORY = "kerberos-security-factory",
             SASL_SERVER_FACTORY = "sasl-server-factory", NAME = "name", MODULE = "module", PROPERTIES = "properties",
