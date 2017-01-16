@@ -20,7 +20,7 @@ public abstract class AbstractTestConnectionTestCase {
     /**
      * Hook which method will be executed after test connection was performed in wizard
      */
-    protected interface Hook {
+    protected interface AfterConnectionTestHook {
         void afterConnectionWasTested(DatasourceWizard wizard);
     }
 
@@ -41,7 +41,7 @@ public abstract class AbstractTestConnectionTestCase {
      * Tests connection in datasource view
      * @param expected true if connection is expected to succeed, false otherwise
      */
-    protected void testConnection(boolean expected) {
+    protected void testConnectionInDatasourceView(boolean expected) {
         DatasourceConfigArea config = datasourcesPage.getConfig();
         ConnectionConfig connection = config.connectionConfig();
         TestConnectionWindow window = connection.testConnection();
@@ -56,7 +56,7 @@ public abstract class AbstractTestConnectionTestCase {
      * @param expected true if connection is expected to succeed, false otherwise
      * @param hook hook which will be executed after test connection is performed
      */
-    protected void testConnectionInWizard(String name, String url, boolean expected, Hook hook) {
+    protected void testConnectionInWizard(String name, String url, boolean expected, AfterConnectionTestHook hook) {
         DatasourceWizard wizard = datasourcesPage.getDatasourceWizard();
         DatasourceWizard.DatasourceType type = DatasourceWizard.DatasourceType.NON_XA;
         Editor editor = wizard.getEditor();
@@ -87,7 +87,7 @@ public abstract class AbstractTestConnectionTestCase {
      * @param name name of datasource
      * @param url connection url
      * @param expected true if connection is expected to succeed, false otherwise
-     * @see AbstractTestConnectionTestCase#testConnectionInWizard(String, String, boolean, Hook)
+     * @see AbstractTestConnectionTestCase#testConnectionInWizard(String, String, boolean, AfterConnectionTestHook)
      */
     protected void testConnectionInWizardAndCancel(String name, String url, boolean expected) {
         testConnectionInWizard(name, url, expected, (DatasourceWizard wizard) ->
@@ -99,7 +99,7 @@ public abstract class AbstractTestConnectionTestCase {
      * @param name name of datasource
      * @param url connection url
      * @param expected true if connection is expected to succeed, false otherwise
-     * @see AbstractTestConnectionTestCase#testConnectionInWizard(String, String, boolean, Hook)
+     * @see AbstractTestConnectionTestCase#testConnectionInWizard(String, String, boolean, AfterConnectionTestHook)
      */
     protected void testConnectionInWizardAndClose(String name, String url, boolean expected) {
         testConnectionInWizard(name, url, expected, (DatasourceWizard wizard) ->
@@ -111,7 +111,7 @@ public abstract class AbstractTestConnectionTestCase {
      * @param name name of datasource
      * @param url connection url
      * @param expected true if connection is expected to succeed, false otherwise
-     * @see AbstractTestConnectionTestCase#testConnectionInWizard(String, String, boolean, Hook)
+     * @see AbstractTestConnectionTestCase#testConnectionInWizard(String, String, boolean, AfterConnectionTestHook)
      */
     protected void testConnectionInWizardAndSave(String name, String url, boolean expected) {
         testConnectionInWizard(name, url, expected, (DatasourceWizard wizard) -> {
@@ -127,7 +127,7 @@ public abstract class AbstractTestConnectionTestCase {
      * @param expected true if connection is expected to succeed, false otherwise
      * @param hook hook which will be executed after test connection is performed
      */
-    protected void testXAConnectionInWizard(String name, String url, boolean expected, Hook hook) {
+    protected void testXAConnectionInWizard(String name, String url, boolean expected, AfterConnectionTestHook hook) {
         DatasourceWizard wizard = datasourcesPage.getDatasourceWizard();
         DatasourceWizard.DatasourceType type = DatasourceWizard.DatasourceType.XA;
         Editor editor = wizard.getEditor();
@@ -159,7 +159,7 @@ public abstract class AbstractTestConnectionTestCase {
      * @param name name of datasource
      * @param url connection url
      * @param expected true if connection is expected to succeed, false otherwise
-     * @see AbstractTestConnectionTestCase#testXAConnectionInWizard(String, String, boolean, Hook)
+     * @see AbstractTestConnectionTestCase#testXAConnectionInWizard(String, String, boolean, AfterConnectionTestHook)
      */
     protected void testXAConnectionInWizardAndCancel(String name, String url, boolean expected) {
         testXAConnectionInWizard(name, url, expected, (DatasourceWizard wizard) ->
@@ -171,7 +171,7 @@ public abstract class AbstractTestConnectionTestCase {
      * @param name name of datasource
      * @param url connection url
      * @param expected true if connection is expected to succeed, false otherwise
-     * @see AbstractTestConnectionTestCase#testXAConnectionInWizard(String, String, boolean, Hook)
+     * @see AbstractTestConnectionTestCase#testXAConnectionInWizard(String, String, boolean, AfterConnectionTestHook)
      */
     protected void testXAConnectionInWizardAndClose(String name, String url, boolean expected) {
         testXAConnectionInWizard(name, url, expected, (DatasourceWizard wizard) ->
@@ -183,7 +183,7 @@ public abstract class AbstractTestConnectionTestCase {
      * @param name name of datasource
      * @param url connection url
      * @param expected true if connection is expected to succeed, false otherwise
-     * @see AbstractTestConnectionTestCase#testXAConnectionInWizard(String, String, boolean, Hook)
+     * @see AbstractTestConnectionTestCase#testXAConnectionInWizard(String, String, boolean, AfterConnectionTestHook)
      */
     protected void testXAConnectionInWizardAndSave(String name, String url, boolean expected) {
         testXAConnectionInWizard(name, url, expected, (DatasourceWizard wizard) -> {

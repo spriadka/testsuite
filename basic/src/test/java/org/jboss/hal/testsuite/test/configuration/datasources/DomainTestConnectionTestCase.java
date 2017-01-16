@@ -8,6 +8,7 @@ import org.jboss.hal.testsuite.category.Domain;
 import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.page.config.DatasourcesPage;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -31,20 +32,18 @@ public class DomainTestConnectionTestCase extends AbstractTestConnectionTestCase
             VALID_URL = "jdbc:h2:mem:test2;DB_CLOSE_DELAY=-1",
             INVALID_URL = "invalidUrl";
 
-    private static OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
     private static OnlineManagementClient fullHaClient = ManagementClientProvider.withProfile("full-ha");
-    private static Administration administration = new Administration(client);
+    private static Administration administration = new Administration(fullHaClient);
     private static Operations fullHaOperations = new Operations(fullHaClient);
-    private static DataSourcesOperations dsOps = new DataSourcesOperations(client);
 
     @AfterClass
-    public static void tearDown() throws InterruptedException, TimeoutException, IOException {
-        try {
-            administration.reloadIfRequired();
-        } finally {
-            IOUtils.closeQuietly(client);
-            IOUtils.closeQuietly(fullHaClient);
-        }
+    public static void afterClass() throws InterruptedException, TimeoutException, IOException {
+        IOUtils.closeQuietly(fullHaClient);
+    }
+
+    @After
+    public void after() throws InterruptedException, TimeoutException, IOException {
+        administration.reloadIfRequired();
     }
 
     @Test

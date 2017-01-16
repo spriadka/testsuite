@@ -72,13 +72,13 @@ public class TestConnectionTestCase extends AbstractTestConnectionTestCase {
     @Test
     public void validDatasource() {
         datasourcesPage.invokeViewDatasource(DS_NAME_VALID);
-        testConnection(true);
+        testConnectionInDatasourceView(true);
     }
 
     @Test
     public void invalidDatasource() {
         datasourcesPage.invokeViewDatasource(DS_NAME_INVALID);
-        testConnection(false);
+        testConnectionInDatasourceView(false);
     }
 
     /**
@@ -161,13 +161,13 @@ public class TestConnectionTestCase extends AbstractTestConnectionTestCase {
     @Test
     public void validXADatasource() {
         datasourcesPage.invokeViewXADatasource(XA_DS_NAME_VALID);
-        testConnection(true);
+        testConnectionInDatasourceView(true);
     }
 
     @Test
     public void invalidXADatasource() {
         datasourcesPage.invokeViewXADatasource(XA_DS_NAME_INVALID);
-        testConnection(false);
+        testConnectionInDatasourceView(false);
     }
 
     @Test

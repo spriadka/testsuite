@@ -95,7 +95,7 @@ public class WindowFragment extends BaseFragment {
         closed = true;
     }
 
-    public void clickCancel() {
+    protected void clickCancel() {
         String label = PropUtils.get("modals.window.cancel.label");
         clickButton(label);
     }
