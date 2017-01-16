@@ -110,7 +110,7 @@ public class DatasourcesTestCase {
         editor.text("name", addressName);
         editor.text("jndiName", "java:/" + addressName);
         wizard.next();
-        wizard.switchToDetectedDriver();
+        wizard.switchToDetectedDriverUnchecked();
         wizard.getResourceTable().selectRowByText(0, "h2");
         wizard.next();
         editor.text("connectionUrl", "url");

@@ -27,6 +27,13 @@ public class WizardWindow extends WindowFragment {
         Console.withBrowser(browser).waitUntilFinished();
     }
 
+    public void back() {
+        String label = PropUtils.get("modals.wizard.back.label");
+        clickButton(label);
+
+        Console.withBrowser(browser).waitUntilFinished();
+    }
+
     /**
      * Clicks Save button and waits unit the wizard window is closed.
      *
@@ -64,6 +71,17 @@ public class WizardWindow extends WindowFragment {
      */
     public boolean finishAndDismissReloadRequiredWindow() {
         chooseAndClickFinishingButton();
+        dismissReloadRequiredWindow();
+        return isWizardClosed();
+    }
+
+    /**
+     * Clicks cancel button, dismiss 'Reload required' window if appears and waits unit the wizard
+     * window is closed.
+     * @return true if window is not present after the button was clicked
+     */
+    public boolean cancelAndDismissReloadRequiredWindow() {
+        clickCancel();
         dismissReloadRequiredWindow();
         return isWizardClosed();
     }
