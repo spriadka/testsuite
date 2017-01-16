@@ -11,11 +11,12 @@ import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.page.runtime.MessagingPreparedTransactionsPage;
 import org.jboss.hal.testsuite.util.PathOperations;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
+import org.junit.rules.ErrorCollector;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
 import org.slf4j.Logger;
@@ -28,8 +29,6 @@ import org.wildfly.extras.creaper.core.online.operations.Values;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.LinkedList;
-import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -39,7 +38,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
+
+import static org.hamcrest.core.IsEqual.equalTo;
 
 /**
  * Test class testing rollback and commit of prepared transactions in Web Console.
@@ -56,6 +56,9 @@ public class TransactionCommitAndRollbackTestCase {
 
     @Page
     private MessagingPreparedTransactionsPage page;
+
+    @Rule
+    public ErrorCollector collector = new ErrorCollector();
 
     private static final OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
     private static final Operations operations = new Operations(client);
@@ -134,16 +137,10 @@ public class TransactionCommitAndRollbackTestCase {
         }
 
         //check if finished successfully
-        List<AssertionError> errors = new LinkedList<>();
         for (PreparedTransactionTestCell transactionTestCell : TRANSACTIONS_TEST_DATA) {
-            try {
-                Assert.assertTrue(transactionTestCell.getFinishedSuccessfully());
-            } catch (AssertionError error) {
-                errors.add(error);
-            }
-        }
-        if (errors.size() > 0) {
-            throw new AssertionError(errors.stream().map(AssertionError::getMessage).collect(Collectors.joining(", ")));
+            collector.checkThat("Transaction " + transactionTestCell.getXId() + " should be " +
+                    (transactionTestCell.getPerformedAction().equals(PerformedAction.COMMIT) ? "committed" : "rolled back") +
+                    " successfully.", transactionTestCell.getFinishedSuccessfully(), equalTo(true));
         }
     }
 

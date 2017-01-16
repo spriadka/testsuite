@@ -27,8 +27,7 @@ public class GenericResourceTableFragment<T extends ResourceTableRowFragment> ex
     private static final Logger log = LoggerFactory.getLogger(ResourceTableFragment.class);
 
     public static final By SELECTOR = By.className(PropUtils.get("resourcetable.class"));
-    private static final By SELECTOR_PAGER
-            = By.xpath("./following::table[contains(@class, '" + PagerFragment.CLASS_NAME_PAGER + "')]");
+    private static final By SELECTOR_PAGER = ByJQuery.selector("." + PagerFragment.CLASS_NAME_PAGER + ":visible");
     private PagerFragment pager = null;
 
     /**
