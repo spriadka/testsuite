@@ -72,7 +72,7 @@ public abstract class MetricsPage extends BasePage {
                     .step(FinderNames.SERVER, FinderNames.STANDALONE_SERVER);
         }
         navigation = navigation.step(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
-                .step(FinderNames.SUBSYSTEM, "Transactions");
+                .step(FinderNames.SUBSYSTEM, subsystemLabel);
 
         navigation.selectRow().invoke("View");
         Application.waitUntilVisible();
