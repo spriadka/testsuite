@@ -5,7 +5,9 @@ import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.page.config.TransactionsPage;
+import org.jboss.hal.testsuite.page.runtime.TransactionsMetricsPage;
 import org.jboss.hal.testsuite.util.ConfigChecker;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -17,19 +19,24 @@ import org.junit.runner.RunWith;
 @Category(Shared.class)
 public class TransactionsTestCase extends TransactionsTestCaseAbstract {
 
-    private final String DEFAULT_TIMEOUT_ATTR = "default-timeout";
-    private final String ENABLE_TSM_STATUS_ATTR = "enable-tsm-status";
-    private final String JTS_ATTR = "jts";
-    private final String NODE_IDENTIFIER_ATTR = "node-identifier";
-    private final String STATISTICS_ENABLED_ATTR = "statistics-enabled";
-    private final String SOCKET_BINDING_ATTR = "socket-binding";
-    private final String STATUS_SOCKET_BINDING_ATTR = "status-socket-binding";
-    private final String RECOVERY_LISTENER_ATTR = "recovery-listener";
-    private final String OBJECT_STORE_PATH_ATTR = "object-store-path";
-    private final String OBJECT_STORE_RELATIVE_TO_ATTR = "object-store-relative-to";
+    private static final String
+        DEFAULT_TIMEOUT_ATTR = "default-timeout",
+        ENABLE_TSM_STATUS_ATTR = "enable-tsm-status",
+        JTS_ATTR = "jts",
+        NODE_IDENTIFIER_ATTR = "node-identifier",
+        STATISTICS_ENABLED_ATTR = "statistics-enabled",
+        SOCKET_BINDING_ATTR = "socket-binding",
+        STATUS_SOCKET_BINDING_ATTR = "status-socket-binding",
+        RECOVERY_LISTENER_ATTR = "recovery-listener",
+        OBJECT_STORE_PATH_ATTR = "object-store-path",
+        OBJECT_STORE_RELATIVE_TO_ATTR = "object-store-relative-to",
+        STATUS = "Status";
 
     @Page
     public TransactionsPage page;
+
+    @Page
+    public TransactionsMetricsPage metricsPage;
 
     @Before
     public void before() {
@@ -39,11 +46,15 @@ public class TransactionsTestCase extends TransactionsTestCaseAbstract {
     @Test
     public void setStatisticsToTrue() throws Exception {
         editCheckboxAndVerify(TRANSACTIONS_ADDRESS, STATISTICS_ENABLED_ATTR, true);
+        metricsPage.navigate();
+        Assert.assertEquals("ON", metricsPage.getGeneralStatisticsMetricsArea().getMetric(STATUS));
     }
 
     @Test
     public void setStatisticsToFalse() throws Exception {
-        editCheckboxAndVerify(TRANSACTIONS_ADDRESS, STATISTICS_ENABLED_ATTR, true);
+        editCheckboxAndVerify(TRANSACTIONS_ADDRESS, STATISTICS_ENABLED_ATTR, false);
+        metricsPage.navigate();
+        Assert.assertEquals("OFF", metricsPage.getGeneralStatisticsMetricsArea().getMetric(STATUS));
     }
 
     @Test

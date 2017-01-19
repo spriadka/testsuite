@@ -10,6 +10,10 @@ import org.jboss.hal.testsuite.page.MetricsPage;
 @Location("#tx-metrics")
 public class TransactionsMetricsPage extends MetricsPage {
 
+    public void navigate() {
+        navigate2runtimeSubsystem("Transactions");
+    }
+
     public MetricsAreaFragment getSuccessRationMetricsArea() {
         return getMetricsArea("Success Ratio");
     }
@@ -17,4 +21,9 @@ public class TransactionsMetricsPage extends MetricsPage {
     public MetricsAreaFragment getFailureOriginMetricsArea() {
         return getMetricsArea("Failure Origin");
     }
+
+    public MetricsAreaFragment getGeneralStatisticsMetricsArea() {
+        return getMetricsArea("General Statistics");
+    }
+
 }

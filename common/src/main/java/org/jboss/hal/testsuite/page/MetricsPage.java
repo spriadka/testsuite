@@ -3,7 +3,12 @@ package org.jboss.hal.testsuite.page;
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.hal.testsuite.cli.Library;
 import org.jboss.hal.testsuite.finder.Application;
+import org.jboss.hal.testsuite.finder.FinderNames;
+import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.fragment.MetricsAreaFragment;
+import org.jboss.hal.testsuite.page.runtime.DomainRuntimeEntryPoint;
+import org.jboss.hal.testsuite.page.runtime.StandaloneRuntimeEntryPoint;
+import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.jboss.hal.testsuite.util.PropUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
@@ -16,6 +21,8 @@ import java.util.stream.Collectors;
  * @author mkrajcov <mkrajcov@redhat.com>
  */
 public abstract class MetricsPage extends BasePage {
+
+    public static final String MONITORED_SERVER = "server-one";
 
     public MetricsAreaFragment getMetricsArea(String title) {
         //////add property
@@ -46,5 +53,28 @@ public abstract class MetricsPage extends BasePage {
         WebElement refreshLink = viewPanel.findElement(By.className("html-link"));
         refreshLink.click();
         Library.letsSleep(500);
+    }
+
+    /**
+     * Navigate in Runtime menu to the subsystem identified by provided label. For domain navigate to the subsystem
+     * in {@link #MONITORED_SERVER}.
+     * @param subsystemLabel
+     */
+    protected void navigate2runtimeSubsystem(String subsystemLabel) {
+        FinderNavigation navigation;
+        if (ConfigUtils.isDomain()) {
+            navigation = new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
+                    .step(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
+                    .step(FinderNames.HOST, ConfigUtils.getDefaultHost())
+                    .step(FinderNames.SERVER, MONITORED_SERVER);
+        } else {
+            navigation = new FinderNavigation(browser, StandaloneRuntimeEntryPoint.class)
+                    .step(FinderNames.SERVER, FinderNames.STANDALONE_SERVER);
+        }
+        navigation = navigation.step(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
+                .step(FinderNames.SUBSYSTEM, "Transactions");
+
+        navigation.selectRow().invoke("View");
+        Application.waitUntilVisible();
     }
 }
