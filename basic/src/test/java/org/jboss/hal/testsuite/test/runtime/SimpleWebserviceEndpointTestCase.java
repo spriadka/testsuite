@@ -12,7 +12,6 @@ import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.creaper.command.DeployCommand;
 import org.jboss.hal.testsuite.creaper.command.UndeployCommand;
 import org.jboss.hal.testsuite.fragment.MetricsAreaFragment;
-import org.jboss.hal.testsuite.fragment.MetricsFragment;
 import org.jboss.hal.testsuite.fragment.shared.FormItemTableFragment;
 import org.jboss.hal.testsuite.page.config.TreeNavigationPage;
 import org.jboss.hal.testsuite.page.runtime.DeploymentsPage;
@@ -55,7 +54,6 @@ public class SimpleWebserviceEndpointTestCase {
     private static final String RESPONSES = "Responses";
     private static final String NUMBER_OF_REQUEST = "Number of request";
     private static final String FAULTS = "Faults";
-    private static final int DELTA = 3;
 
     private static final OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
     private static final Operations operations = new Operations(client);
@@ -221,15 +219,8 @@ public class SimpleWebserviceEndpointTestCase {
     @Test
     public void webServiceRequestsMetrics() throws Exception {
         verifier.verifyExists();
-
-        MetricsAreaFragment wsrMetricsArea = wsePage.getWebServiceRequestMetricsArea();
-        double expectedResponsesPercentage = wsrMetricsArea.getPercentage(RESPONSES, NUMBER_OF_REQUEST);
-        double expectedFaultsPercentage = wsrMetricsArea.getPercentage(FAULTS, NUMBER_OF_REQUEST);
-        MetricsFragment responsesMetrics = wsrMetricsArea.getMetricsFragment(RESPONSES);
-        MetricsFragment faultsMetrics = wsrMetricsArea.getMetricsFragment(FAULTS);
-
-        assertEquals(expectedResponsesPercentage, responsesMetrics.getPercentage(), DELTA);
-        assertEquals(expectedFaultsPercentage, faultsMetrics.getPercentage(), DELTA);
+        new MetricGraphVerifier(wsePage.getWebServiceRequestMetricsArea(), NUMBER_OF_REQUEST)
+                .verifyRatio(RESPONSES).verifyRatio(FAULTS);
     }
 
     //Utils
@@ -258,8 +249,5 @@ public class SimpleWebserviceEndpointTestCase {
         }
     }
 
-
 }
-
-
 
