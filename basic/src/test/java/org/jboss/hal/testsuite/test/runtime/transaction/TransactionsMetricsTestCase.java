@@ -11,6 +11,7 @@ import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.fragment.MetricsAreaFragment;
 import org.jboss.hal.testsuite.page.runtime.TransactionsMetricsPage;
+import org.jboss.hal.testsuite.test.runtime.MetricGraphVerifier;
 import org.jboss.hal.testsuite.test.runtime.deployments.DeploymentsOperations;
 import org.jboss.hal.testsuite.test.runtime.transaction.beans.StatisticsBean;
 import org.jboss.hal.testsuite.test.runtime.transaction.beans.StatisticsRemote;
@@ -155,10 +156,11 @@ public class TransactionsMetricsTestCase {
                 (long) successRatioArea.getMetricNumber(NUMBER_OF_TIMED_OUT_TRANSACTIONS_LABEL));
         verifier.verifyAttribute(NUMBER_OF_HEURISTICS,
                 (long) successRatioArea.getMetricNumber(NUMBER_OF_HEURISTICS_LABEL));
-        assertGraphPercentage(successRatioArea, NUMBER_OF_COMMITTED_TRANSACTIONS_LABEL, NUMBER_OF_TRANSACTIONS_LABEL);
-        assertGraphPercentage(successRatioArea, NUMBER_OF_ABORTED_TRANSACTIONS_LABEL, NUMBER_OF_TRANSACTIONS_LABEL);
-        assertGraphPercentage(successRatioArea, NUMBER_OF_TIMED_OUT_TRANSACTIONS_LABEL, NUMBER_OF_TRANSACTIONS_LABEL);
-        assertGraphPercentage(successRatioArea, NUMBER_OF_HEURISTICS_LABEL, NUMBER_OF_TRANSACTIONS_LABEL);
+        new MetricGraphVerifier(successRatioArea, NUMBER_OF_TRANSACTIONS_LABEL)
+                .verifyRatio(NUMBER_OF_COMMITTED_TRANSACTIONS_LABEL)
+                .verifyRatio(NUMBER_OF_ABORTED_TRANSACTIONS_LABEL)
+                .verifyRatio(NUMBER_OF_TIMED_OUT_TRANSACTIONS_LABEL)
+                .verifyRatio(NUMBER_OF_HEURISTICS_LABEL);
 
         assertEquals(numberOf(NUMBER_OF_SYSTEM_ROLLBACKS)
                 + numberOf(NUMBER_OF_APPLICATION_ROLLBACKS)
@@ -170,15 +172,10 @@ public class TransactionsMetricsTestCase {
                 (long) failureOriginArea.getMetricNumber(NUMBER_OF_APPLICATION_ROLLBACKS_LABEL));
         verifier.verifyAttribute(NUMBER_OF_RESOURCE_ROLLBACKS,
                 (long) failureOriginArea.getMetricNumber(NUMBER_OF_RESOURCE_ROLLBACKS_LABEL));
-        assertGraphPercentage(failureOriginArea, NUMBER_OF_SYSTEM_ROLLBACKS_LABEL, TOTAL_FAILURES_LABEL);
-        assertGraphPercentage(failureOriginArea, NUMBER_OF_APPLICATION_ROLLBACKS_LABEL, TOTAL_FAILURES_LABEL);
-        assertGraphPercentage(failureOriginArea, NUMBER_OF_RESOURCE_ROLLBACKS_LABEL, TOTAL_FAILURES_LABEL);
-    }
-
-    private void assertGraphPercentage(MetricsAreaFragment area, String dividendLabel, String divisorLabel) {
-        double expectedPercentage = area.getPercentage(dividendLabel, divisorLabel);
-        double actualPercentage = area.getMetricsFragment(dividendLabel).getPercentage();
-        assertEquals(expectedPercentage, actualPercentage, DELTA);
+        new MetricGraphVerifier(failureOriginArea, TOTAL_FAILURES_LABEL)
+                .verifyRatio(NUMBER_OF_SYSTEM_ROLLBACKS_LABEL)
+                .verifyRatio(NUMBER_OF_APPLICATION_ROLLBACKS_LABEL)
+                .verifyRatio(NUMBER_OF_RESOURCE_ROLLBACKS_LABEL);
     }
 
     private void callEjbs() throws Exception {
