@@ -29,7 +29,7 @@ public abstract class MetricsPage extends BasePage {
         By selector = By.xpath(".//table[contains(@class, '" + PropUtils.get("metrics.container.class") + "')][.//h3[text()='" + title + "']]");
         WebElement element = null;
         try {
-            element = getContentRoot().findElement(selector);
+            element = getContentRoot().findElements(selector).stream().filter(el -> el.isDisplayed()).findFirst().get();
         } catch (NoSuchElementException exc) {
             return null;
         }

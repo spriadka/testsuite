@@ -21,8 +21,6 @@ import static org.junit.Assert.assertTrue;
  */
 public class DeploymentsOperations {
 
-    private static final String COMMAND_UNDEPLOY = "undeploy %s";
-
     private OnlineManagementClient client;
     private Operations operations;
 

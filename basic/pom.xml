@@ -32,6 +32,10 @@
       <artifactId>jboss-ejb3-ext-api</artifactId>
     </dependency>
     <dependency>
+      <groupId>javax.persistence</groupId>
+      <artifactId>persistence-api</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.wildfly</groupId>
       <artifactId>wildfly-client-all</artifactId>
     </dependency>

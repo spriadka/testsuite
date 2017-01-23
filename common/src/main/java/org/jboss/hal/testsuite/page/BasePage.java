@@ -7,6 +7,7 @@ import org.jboss.arquillian.graphene.findby.FindByJQuery;
 import org.jboss.hal.testsuite.cli.Library;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.AlertFragment;
+import org.jboss.hal.testsuite.fragment.ConfigAreaFragment;
 import org.jboss.hal.testsuite.fragment.MessageListEntry;
 import org.jboss.hal.testsuite.fragment.NavigationFragment;
 import org.jboss.hal.testsuite.fragment.NotificationCenterFragment;
@@ -322,6 +323,53 @@ public abstract class BasePage {
         WebElement back = browser.findElement(By.className(PropUtils.get("icon.backarrows.class")));
         back.click();
         Console.withBrowser(browser).waitUntilLoaded();
+    }
+
+    /**
+     * Returns the ConfigArea portion of page as given implementation.
+     * Not reliable - you might need to override this method.
+     *
+     * @param clazz
+     * @param <T>
+     * @return
+     */
+    public <T extends ConfigAreaFragment> T getConfig(Class<T> clazz) {
+
+        WebElement configRoot = null;
+        try {
+            String cssClass = PropUtils.get("configarea.class");
+            By selector = ByJQuery.selector("." + cssClass + ":visible");
+            configRoot = getContentRoot().findElement(selector);
+        } catch (NoSuchElementException e) { // TODO: this part should be removed once ensured the ID is everywhere
+            List<WebElement> elements = getContentRoot().findElements(getConfigSelector());
+
+            for (WebElement element : elements) {
+                if (element.isDisplayed()) {
+                    configRoot = element;
+                }
+            }
+        }
+
+        T config = Graphene.createPageFragment(clazz, configRoot);
+        return config;
+    }
+
+    private By getConfigSelector() {
+        String selectionLabel =
+                ".//div[contains(@class, 'content-group-label') and (contains(text(), 'Selection') or contains(text(), 'Details'))]";
+        By selector = By.xpath(selectionLabel + "/following::*[contains(@class, 'rhs-content-panel')]");
+
+        return selector;
+    }
+
+    /**
+     * Returns the default implementation of ConfigArea portion of page.
+     * Not reliable - you might need to override this method.
+     *
+     * @return
+     */
+    public ConfigAreaFragment getConfig() {
+        return getConfig(ConfigAreaFragment.class);
     }
 
 }
