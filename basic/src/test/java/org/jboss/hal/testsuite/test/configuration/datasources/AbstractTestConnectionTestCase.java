@@ -103,7 +103,7 @@ public abstract class AbstractTestConnectionTestCase {
      */
     protected void testConnectionInWizardAndClose(String name, String url, boolean expected) {
         testConnectionInWizard(name, url, expected, (DatasourceWizard wizard) ->
-                datasourcesPage.getDatasourceWizard().close());
+                datasourcesPage.getDatasourceWizard().closeAndDismissReloadRequiredWindow());
     }
 
     /**
@@ -175,7 +175,7 @@ public abstract class AbstractTestConnectionTestCase {
      */
     protected void testXAConnectionInWizardAndClose(String name, String url, boolean expected) {
         testXAConnectionInWizard(name, url, expected, (DatasourceWizard wizard) ->
-                datasourcesPage.getDatasourceWizard().close());
+                datasourcesPage.getDatasourceWizard().closeAndDismissReloadRequiredWindow());
     }
 
     /**

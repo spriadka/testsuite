@@ -86,6 +86,17 @@ public class WizardWindow extends WindowFragment {
         return isWizardClosed();
     }
 
+    /**
+     * Clicks cross in top right corner, dismiss 'Reload required' window if appears and waits unit the wizard
+     * window is closed.
+     * @return true if window is not present after the button was clicked
+     */
+    public boolean closeAndDismissReloadRequiredWindow() {
+        clickWindowCloseButton();
+        dismissReloadRequiredWindow();
+        return isWizardClosed();
+    }
+
     private void clickDoneButton() {
         String label = PropUtils.get("modals.wizard.done.label");
         clickButton(label);

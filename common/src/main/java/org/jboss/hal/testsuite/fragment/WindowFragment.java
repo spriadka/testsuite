@@ -70,16 +70,22 @@ public class WindowFragment extends BaseFragment {
      * Closes wizard by clicking on cross in top right corner
      */
     public void close() {
-        By selector = By.className(PropUtils.get("modals.window.close.class"));
-        WebElement close = root.findElement(selector);
-
         int windowCount = Console.withBrowser(browser).getWindowCount();
 
-        close.click();
+        clickWindowCloseButton();
 
         waitUntilClosed(windowCount, true);
 
         closed = true;
+    }
+
+    /**
+     * Just clicks cross in top right corner of the window
+     */
+    protected void clickWindowCloseButton() {
+        By selector = By.className(PropUtils.get("modals.window.close.class"));
+        WebElement close = root.findElement(selector);
+        close.click();
     }
 
     public WindowState clickSave() {
