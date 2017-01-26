@@ -130,21 +130,17 @@ public class RewriteFilterTestCase {
                 .verifyAttribute(REDIRECT, !originalValue);
 
         Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
-        administration.reload();
-
-        //workaround for https://issues.jboss.org/browse/HAL-1235
-        page.navigate();
-        page.selectFilterType("Rewrite");
-        page.getResourceManager().selectByName(FILTER_NAME);
+        administration.reloadIfRequired();
 
         new ConfigChecker.Builder(client, FILTER_ADDRESS)
                 .configFragment(page.getConfigFragment())
                 .editAndSave(ConfigChecker.InputType.CHECKBOX, REDIRECT, originalValue)
                 .verifyFormSaved();
 
-        administration.reload();
+        administration.reloadIfRequired();
 
-        new ResourceVerifier(FILTER_ADDRESS, client).verifyAttribute(REDIRECT, originalValue);
+        new ResourceVerifier(FILTER_ADDRESS, client).verifyAttribute(REDIRECT, originalValue,
+                "Setting back to original value failed probably because of https://issues.jboss.org/browse/HAL-1235");
     }
 
 }

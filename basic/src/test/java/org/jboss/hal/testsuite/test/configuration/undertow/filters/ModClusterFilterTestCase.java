@@ -136,7 +136,6 @@ public class ModClusterFilterTestCase {
         Editor editor = wizardWindow.getEditor();
 
         editor.text("name", FILTER_TBA_NAME);
-        editor.text(ADVERTISE_SOCKET_BINDING, SOCKET_BINDING_RESOURCE_5);
         editor.text(MANAGEMENT_SOCKET_BINDING, SOCKET_BINDING_RESOURCE_6);
 
         wizardWindow.finish();
@@ -213,21 +212,17 @@ public class ModClusterFilterTestCase {
                 .verifyAttribute(ENABLE_HTTP2, !originalValue);
 
         Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
-        administration.reload();
-
-        //workaround for https://issues.jboss.org/browse/HAL-1235
-        page.navigate();
-        page.selectFilterType("ModCluster");
-        page.getResourceManager().selectByName(FILTER_NAME);
+        administration.reloadIfRequired();
 
         new ConfigChecker.Builder(client, FILTER_ADDRESS)
                 .configFragment(page.getConfigFragment())
                 .editAndSave(ConfigChecker.InputType.CHECKBOX, ENABLE_HTTP2, originalValue)
                 .verifyFormSaved();
 
-        administration.reload();
+        administration.reloadIfRequired();
 
-        new ResourceVerifier(FILTER_ADDRESS, client).verifyAttribute(ENABLE_HTTP2, originalValue);
+        new ResourceVerifier(FILTER_ADDRESS, client).verifyAttribute(ENABLE_HTTP2, originalValue,
+                "Setting back to original value failed probably because of https://issues.jboss.org/browse/HAL-1235");
     }
 
 }
