@@ -124,7 +124,8 @@ public class PagerFragment extends BaseFragment {
      */
     private int getNthNumberFromInfo(int idx) {
         WebElement pageInfoTd = getNthCell(IDX_PAGER_INFO);
-        String text = pageInfoTd.getText();
+        //workaround - #getText() doesn't seem to be reliable in this case
+        String text = pageInfoTd.findElement(By.tagName("div")).getAttribute("innerHTML");
 
         if (text.matches(PAGER_INFO_PATTERN)) {
             return Integer.parseInt(text.replaceFirst(PAGER_INFO_PATTERN, "$" + idx));

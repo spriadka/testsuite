@@ -12,26 +12,49 @@ import org.jboss.hal.testsuite.fragment.shared.table.ResourceTableRowFragment;
 import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.PropUtils;
 import org.openqa.selenium.By;
+import org.openqa.selenium.NotFoundException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-/**
- * @author jcechace
- */
 public class ResourceManager extends BaseFragment {
+
+    private static final Logger log = LoggerFactory.getLogger(ResourceManager.class);
+
+    private static final By RHS_CONTENT_PANEL_SELECTOR = ByJQuery.selector(".rhs-content-panel:visible");
+    private static final By BOTTOM_CONFIG_SELECTOR = ByJQuery.selector("table.fill-layout-width:visible");
+    private static final By WIZARD_TABLE_SELECTOR = ByJQuery.selector(".default-cell-table.master_detail-master");
+    private static final By POPUP_LAYOUT_WIDTH_SELECTOR = ByJQuery.selector("table.fill-popupLayout-width:visible");
 
     /**
      * Get resource table on page
      * @return {@link ResourceTableFragment} if found
      */
     public ResourceTableFragment getResourceTable() {
-        String cssClass = PropUtils.get("resourcetable.class");
-        By selector = ByJQuery.selector("table:has('." + cssClass + ":visible')");
 
-        WebElement tableRoot = getRoot().findElement(selector);
+        WebElement tableRoot;
+        if (!getRoot().findElements(RHS_CONTENT_PANEL_SELECTOR).isEmpty()) {
+            log.debug("Found table at top of page!");
+            tableRoot = getRoot().findElement(RHS_CONTENT_PANEL_SELECTOR);
+        } else if (!getRoot().findElements(BOTTOM_CONFIG_SELECTOR).isEmpty()) {
+            // when table root is in bottom config, there is no rhs-content-panel
+            log.debug("Found table in config!");
+            tableRoot = getRoot().findElement(BOTTOM_CONFIG_SELECTOR);
+        } else if (root.getAttribute("class").equals("default-window") && //root is wizard
+                !getRoot().findElements(WIZARD_TABLE_SELECTOR).isEmpty()) {
+            // when table is in wizard
+            log.debug("Found table in wizard!");
+            tableRoot = getRoot().findElement(WIZARD_TABLE_SELECTOR);
+        } else if (!getRoot().findElements(POPUP_LAYOUT_WIDTH_SELECTOR).isEmpty()) {
+            log.debug("Found table using non-standard selector '{}'!", POPUP_LAYOUT_WIDTH_SELECTOR.toString());
+            tableRoot = getRoot().findElement(POPUP_LAYOUT_WIDTH_SELECTOR);
+        } else {
+            throw new NotFoundException("No resource table was found within specified root!");
+        }
 
         return Graphene.createPageFragment(ResourceTableFragment.class, tableRoot);
     }

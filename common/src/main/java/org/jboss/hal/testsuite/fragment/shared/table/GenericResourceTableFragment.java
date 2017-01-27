@@ -6,6 +6,7 @@ import org.jboss.hal.testsuite.fragment.BaseFragment;
 import org.jboss.hal.testsuite.fragment.PagerFragment;
 import org.jboss.hal.testsuite.util.PropUtils;
 import org.openqa.selenium.By;
+import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,8 +27,8 @@ public class GenericResourceTableFragment<T extends ResourceTableRowFragment> ex
 
     private static final Logger log = LoggerFactory.getLogger(ResourceTableFragment.class);
 
-    public static final By SELECTOR = By.className(PropUtils.get("resourcetable.class"));
-    private static final By SELECTOR_PAGER = ByJQuery.selector("." + PagerFragment.CLASS_NAME_PAGER + ":visible");
+    public static final By SELECTOR = ByJQuery.selector("." + PropUtils.get("resourcetable.class") + ":visible");
+    public static final By SELECTOR_PAGER = ByJQuery.selector("." + PagerFragment.CLASS_NAME_PAGER + ":visible");
     private PagerFragment pager = null;
 
     /**
@@ -197,6 +198,7 @@ public class GenericResourceTableFragment<T extends ResourceTableRowFragment> ex
      * @return whether this table has pager associated with it
      */
     public boolean hasPager() {
+        log.info("PAGER: {}", root.getAttribute("innerHTML"));
         return !root.findElements(SELECTOR_PAGER).isEmpty();
     }
 
@@ -250,6 +252,10 @@ public class GenericResourceTableFragment<T extends ResourceTableRowFragment> ex
     }
 
     private WebElement getTableRoot() {
-        return getRoot().findElement(SELECTOR);
+        try {
+            return getRoot().findElement(SELECTOR);
+        } catch (NoSuchElementException ignored) {
+            return getRoot();
+        }
     }
 }
