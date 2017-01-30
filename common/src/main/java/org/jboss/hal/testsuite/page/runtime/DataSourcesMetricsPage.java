@@ -34,4 +34,8 @@ public class DataSourcesMetricsPage extends MetricsPage {
     public void switchToPoolStatistics() {
         getConfig().switchTo("Pool Statistics");
     }
+
+    public void refresh() {
+        clickButton("Refresh");
+    }
 }

@@ -105,7 +105,7 @@ public class XaDatasourceMetricsTestCase {
         page.navigateToXADataSources();
         verifyMetrics();
         callEjb();
-        page.switchToStatistics().refreshStats();
+        page.switchToStatistics().refresh();
         verifyMetrics();
     }
 
