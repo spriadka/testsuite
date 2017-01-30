@@ -2,7 +2,6 @@ package org.jboss.hal.testsuite.test.runtime.transaction;
 
 import org.apache.commons.io.IOUtils;
 import org.jboss.arquillian.container.test.api.RunAsClient;
-import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.dmr.ModelNode;
@@ -24,7 +23,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
-import org.openqa.selenium.WebDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wildfly.extras.creaper.core.CommandFailedException;
@@ -82,7 +80,6 @@ public class TransactionsMetricsTestCase {
             TXN_RUNTIME_ADDRESS = isDomain() ?
                     Address.host(getDefaultHost()).and(SERVER, MONITORED_SERVER).and(SUBSYSTEM, TRANSACTIONS)
                     : TXN_ADDRESS;
-    public static final int DELTA = 3;
 
     private static final OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
     private static final Operations ops = new Operations(client);
@@ -90,9 +87,6 @@ public class TransactionsMetricsTestCase {
     private static final Administration adminOps = new Administration(client);
 
     private static ModelNode originallyStatisticEnabled;
-
-    @Drone
-    private WebDriver browser;
 
     @Page
     private TransactionsMetricsPage tmPage;

@@ -12,11 +12,30 @@ public class DataSourcesMetricsPage extends MetricsPage {
         navigate2runtimeSubsystem("Datasources");
     }
 
+    public DataSourcesMetricsPage navigateToXADataSources() {
+        navigate();
+        switchTab("XA Data Sources");
+        return this;
+    }
+
     public MetricsAreaFragment getConnectionPoolMetricsArea() {
         return getMetricsArea("Connection Pool");
     }
 
     public MetricsAreaFragment getPreparedStatementCacheMetricsArea() {
         return getMetricsArea("Prepared Statement Cache");
+    }
+
+    public DataSourcesMetricsPage switchToStatistics() {
+        getConfig().switchTo("Statistics");
+        return this;
+    }
+
+    public void switchToPoolStatistics() {
+        getConfig().switchTo("Pool Statistics");
+    }
+
+    public void refresh() {
+        clickButton("Refresh");
     }
 }
