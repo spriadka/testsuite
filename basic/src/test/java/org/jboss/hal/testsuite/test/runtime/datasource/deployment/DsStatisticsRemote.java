@@ -1,4 +1,4 @@
-package org.jboss.hal.testsuite.test.runtime.datasource.beans;
+package org.jboss.hal.testsuite.test.runtime.datasource.deployment;
 
 import javax.ejb.Remote;
 
