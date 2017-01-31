@@ -7,7 +7,6 @@ import org.apache.commons.io.IOUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.openqa.selenium.WebDriver;
 import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
 import org.wildfly.extras.creaper.core.online.operations.OperationException;
@@ -27,18 +26,9 @@ public abstract class AbstractElytronTestCase {
     @Drone
     protected WebDriver browser;
 
-    @BeforeClass
-    public static void parentBeforeClass() throws IOException, InterruptedException, TimeoutException {
-        elyOps.enableElytronSubsystem();
-    }
-
     @AfterClass
     public static void parentAfterClass() throws IOException, OperationException, InterruptedException, TimeoutException {
-        try {
-            elyOps.disableElytronSubsystem();
-        } finally {
-            IOUtils.closeQuietly(client);
-        }
+        IOUtils.closeQuietly(client);
     }
 
 }
