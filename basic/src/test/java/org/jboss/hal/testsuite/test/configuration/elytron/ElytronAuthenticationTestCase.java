@@ -6,6 +6,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.graphene.page.Page;
@@ -56,9 +57,10 @@ public class ElytronAuthenticationTestCase extends AbstractElytronTestCase {
     }
 
     @AfterClass
-    public static void afterClass() throws IOException {
+    public static void afterClass() throws IOException, InterruptedException, TimeoutException {
         ops.remove(securityDomainAddress);
         ops.remove(securityRealmAddress);
+        adminOps.reloadIfRequired();
     }
 
     private static Address createSecurityRealm(String realmName) throws Exception {
@@ -162,7 +164,8 @@ public class ElytronAuthenticationTestCase extends AbstractElytronTestCase {
                     Values.of(HTTP_SERVER_MECHANISM_FACTORY, factoryName1).and(SECURITY_DOMAIN, SECURITY_DOMAIN_NAME))
                     .assertSuccess();
 
-            page.navigateToApplication().selectFactory(HTTP_AUTHENTICATION_LABEL);
+            page.navigateToApplication().selectFactory(HTTP_AUTHENTICATION_LABEL).getResourceManager()
+                    .selectByName(authenticationName);
 
             new ConfigChecker.Builder(client, authenticationAddress).configFragment(page.getConfigFragment())
                     .editAndSave(InputType.TEXT, HTTP_SERVER_MECHANISM_FACTORY, factoryName2).verifyFormSaved()
@@ -198,8 +201,9 @@ public class ElytronAuthenticationTestCase extends AbstractElytronTestCase {
                     Values.of(HTTP_SERVER_MECHANISM_FACTORY, factoryName).and(SECURITY_DOMAIN, SECURITY_DOMAIN_NAME))
                     .assertSuccess();
 
-            page.navigateToApplication().selectFactory(HTTP_AUTHENTICATION_LABEL)
-                    .switchToConfigAreaTab(MECHANISM_CONFIGURATIONS_LABEL);
+            page.navigateToApplication().selectFactory(HTTP_AUTHENTICATION_LABEL).getResourceManager()
+                    .selectByName(authenticationName);
+            page.switchToConfigAreaTab(MECHANISM_CONFIGURATIONS_LABEL);
 
             WizardWindow wizard = page.getConfigAreaResourceManager().addResource();
             Editor editor = wizard.getEditor();
@@ -244,8 +248,9 @@ public class ElytronAuthenticationTestCase extends AbstractElytronTestCase {
                     .and(SECURITY_DOMAIN, SECURITY_DOMAIN_NAME).and(MECHANISM_CONFIGURATIONS, initConfigurationsNode))
                     .assertSuccess();
 
-            page.navigateToApplication().selectFactory(HTTP_AUTHENTICATION_LABEL)
-                    .switchToConfigAreaTab(MECHANISM_CONFIGURATIONS_LABEL);
+            page.navigateToApplication().selectFactory(HTTP_AUTHENTICATION_LABEL).getResourceManager()
+                    .selectByName(authenticationName);
+            page.switchToConfigAreaTab(MECHANISM_CONFIGURATIONS_LABEL);
 
             page.getConfigAreaResourceManager().removeResource(configurationString)
                     .confirmAndDismissReloadRequiredMessage().assertClosed();
@@ -346,7 +351,8 @@ public class ElytronAuthenticationTestCase extends AbstractElytronTestCase {
                     Values.of(SASL_SERVER_FACTORY, factoryName1).and(SECURITY_DOMAIN, SECURITY_DOMAIN_NAME))
                     .assertSuccess();
 
-            page.navigateToApplication().selectFactory(SASL_AUTHENTICATION_LABEL);
+            page.navigateToApplication().selectFactory(SASL_AUTHENTICATION_LABEL).getResourceManager()
+                    .selectByName(authenticationName);
 
             new ConfigChecker.Builder(client, authenticationAddress).configFragment(page.getConfigFragment())
                     .editAndSave(InputType.TEXT, SASL_SERVER_FACTORY, factoryName2).verifyFormSaved()
@@ -382,8 +388,9 @@ public class ElytronAuthenticationTestCase extends AbstractElytronTestCase {
                     Values.of(SASL_SERVER_FACTORY, factoryName).and(SECURITY_DOMAIN, SECURITY_DOMAIN_NAME))
                     .assertSuccess();
 
-            page.navigateToApplication().selectFactory(SASL_AUTHENTICATION_LABEL)
-                    .switchToConfigAreaTab(MECHANISM_CONFIGURATIONS_LABEL);
+            page.navigateToApplication().selectFactory(SASL_AUTHENTICATION_LABEL).getResourceManager()
+                    .selectByName(authenticationName);
+            page.switchToConfigAreaTab(MECHANISM_CONFIGURATIONS_LABEL);
 
             WizardWindow wizard = page.getConfigAreaResourceManager().addResource();
             Editor editor = wizard.getEditor();
@@ -429,8 +436,9 @@ public class ElytronAuthenticationTestCase extends AbstractElytronTestCase {
                     .and(SECURITY_DOMAIN, SECURITY_DOMAIN_NAME).and(MECHANISM_CONFIGURATIONS, initConfigurationsNode))
                     .assertSuccess();
 
-            page.navigateToApplication().selectFactory(SASL_AUTHENTICATION_LABEL)
-                    .switchToConfigAreaTab(MECHANISM_CONFIGURATIONS_LABEL);
+            page.navigateToApplication().selectFactory(SASL_AUTHENTICATION_LABEL).getResourceManager()
+                    .selectByName(authenticationName);
+            page.switchToConfigAreaTab(MECHANISM_CONFIGURATIONS_LABEL);
 
             page.getConfigAreaResourceManager().removeResource(configurationString)
                     .confirmAndDismissReloadRequiredMessage().assertClosed();
