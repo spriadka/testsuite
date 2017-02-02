@@ -6,6 +6,7 @@ import static org.jboss.hal.testsuite.test.configuration.elytron.ElytronOperatio
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.graphene.page.Page;
@@ -59,7 +60,7 @@ public class ElytronFactoryTestCase extends AbstractElytronTestCase {
             SASL_SERVER_FACTORIES = "sasl-server-factories", PROVIDER_NAME = "provider-name",
             VERSION_COMPARISON = "version-comparison", MECHANISM_NAME = "mechanism-name",
             PROVIDER_VERSION = "provider-version", MECHANISM_OIDS = "mechanism-oids", PATH = "path",
-            PRINCIPAL = "principal", REQUEST_LIFETIME = "request-lifetime", SERVER = "server",
+            PRINCIPAL = "principal", REQUEST_LIFETIME = "request-lifetime", SERVER = "server", PROVIDERS = "providers",
             PROVIDER_LOADER_NAME_1 = RandomStringUtils.randomAlphanumeric(5),
             PROVIDER_LOADER_NAME_2 = RandomStringUtils.randomAlphanumeric(5);
 
@@ -73,9 +74,10 @@ public class ElytronFactoryTestCase extends AbstractElytronTestCase {
     }
 
     @AfterClass
-    public static void afterClass() throws IOException {
+    public static void afterClass() throws IOException, InterruptedException, TimeoutException {
         elyOps.removeProviderLoader(PROVIDER_LOADER_NAME_1);
         elyOps.removeProviderLoader(PROVIDER_LOADER_NAME_2);
+        adminOps.reloadIfRequired();
     }
 
     @Test
@@ -264,7 +266,7 @@ public class ElytronFactoryTestCase extends AbstractElytronTestCase {
             wizard = page.getResourceManager().addResource();
             editor = wizard.getEditor();
             editor.text(NAME, factoryName2);
-            editor.text(PROVIDER_LOADER, PROVIDER_LOADER_NAME_1);
+            editor.text(PROVIDERS, PROVIDER_LOADER_NAME_1);
             closed = wizard.finish();
 
             assertTrue("Dialog should be closed!", closed);
@@ -273,7 +275,7 @@ public class ElytronFactoryTestCase extends AbstractElytronTestCase {
             assertTrue("Newly created Provider HTTP Server Factory should be present in the table!",
                     page.resourceIsPresentInMainTable(factoryName2));
             new ResourceVerifier(factory2address, client)
-                    .verifyExists().verifyAttribute(PROVIDER_LOADER, PROVIDER_LOADER_NAME_1);
+                    .verifyExists().verifyAttribute(PROVIDERS, PROVIDER_LOADER_NAME_1);
         } finally {
             ops.removeIfExists(factory1address);
             ops.removeIfExists(factory2address);
@@ -287,13 +289,13 @@ public class ElytronFactoryTestCase extends AbstractElytronTestCase {
         final Address factoryAddress = elyOps.getElytronAddress(PROVIDER_HTTP_SERVER_MECHANISM_FACTORY, factoryName);
 
         try {
-            ops.add(factoryAddress, Values.of(PROVIDER_LOADER, PROVIDER_LOADER_NAME_1)).assertSuccess();
+            ops.add(factoryAddress, Values.of(PROVIDERS, PROVIDER_LOADER_NAME_1)).assertSuccess();
 
             page.navigateToApplication().selectFactory(PROVIDER_HTTP_SERVER_LABEL);
 
             new ConfigChecker.Builder(client, factoryAddress).configFragment(page.getConfigFragment())
-                    .editAndSave(InputType.TEXT, PROVIDER_LOADER, PROVIDER_LOADER_NAME_2).verifyFormSaved()
-                    .verifyAttribute(PROVIDER_LOADER, PROVIDER_LOADER_NAME_2);
+                    .editAndSave(InputType.TEXT, PROVIDERS, PROVIDER_LOADER_NAME_2).verifyFormSaved()
+                    .verifyAttribute(PROVIDERS, PROVIDER_LOADER_NAME_2);
         } finally {
             ops.removeIfExists(factoryAddress);
             adminOps.reloadIfRequired();
@@ -346,7 +348,7 @@ public class ElytronFactoryTestCase extends AbstractElytronTestCase {
             wizard = page.getResourceManager().addResource();
             editor = wizard.getEditor();
             editor.text(NAME, factoryName2);
-            editor.text(PROVIDER_LOADER, PROVIDER_LOADER_NAME_1);
+            editor.text(PROVIDERS, PROVIDER_LOADER_NAME_1);
             closed = wizard.finish();
 
             assertTrue("Dialog should be closed!", closed);
@@ -355,7 +357,7 @@ public class ElytronFactoryTestCase extends AbstractElytronTestCase {
             assertTrue("Newly created Provider SASL Server Factory should be present in the table!",
                     page.resourceIsPresentInMainTable(factoryName2));
             new ResourceVerifier(factory2address, client)
-                    .verifyExists().verifyAttribute(PROVIDER_LOADER, PROVIDER_LOADER_NAME_1);
+                    .verifyExists().verifyAttribute(PROVIDERS, PROVIDER_LOADER_NAME_1);
         } finally {
             ops.removeIfExists(factory1address);
             ops.removeIfExists(factory2address);
@@ -369,13 +371,13 @@ public class ElytronFactoryTestCase extends AbstractElytronTestCase {
         final Address factoryAddress = elyOps.getElytronAddress(PROVIDER_SASL_SERVER_FACTORY, factoryName);
 
         try {
-            ops.add(factoryAddress, Values.of(PROVIDER_LOADER, PROVIDER_LOADER_NAME_1)).assertSuccess();
+            ops.add(factoryAddress, Values.of(PROVIDERS, PROVIDER_LOADER_NAME_1)).assertSuccess();
 
             page.navigateToApplication().selectFactory(PROVIDER_SASL_SERVER_LABEL);
 
             new ConfigChecker.Builder(client, factoryAddress).configFragment(page.getConfigFragment())
-                    .editAndSave(InputType.TEXT, PROVIDER_LOADER, PROVIDER_LOADER_NAME_2).verifyFormSaved()
-                    .verifyAttribute(PROVIDER_LOADER, PROVIDER_LOADER_NAME_2);
+                    .editAndSave(InputType.TEXT, PROVIDERS, PROVIDER_LOADER_NAME_2).verifyFormSaved()
+                    .verifyAttribute(PROVIDERS, PROVIDER_LOADER_NAME_2);
         } finally {
             ops.removeIfExists(factoryAddress);
             adminOps.reloadIfRequired();
