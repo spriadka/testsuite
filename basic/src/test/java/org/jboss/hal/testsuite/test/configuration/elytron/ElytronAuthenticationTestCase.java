@@ -19,6 +19,7 @@ import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
 import org.jboss.hal.testsuite.page.config.elytron.FactoryPage;
 import org.jboss.hal.testsuite.util.ConfigChecker;
 import org.jboss.hal.testsuite.util.ConfigChecker.InputType;
+import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -64,9 +65,10 @@ public class ElytronAuthenticationTestCase extends AbstractElytronTestCase {
     }
 
     private static Address createSecurityRealm(String realmName) throws Exception {
+        String configDir = "jboss." + (ConfigUtils.isDomain() ? "domain" : "server") + ".config.dir";
         Address realmAddress = elyOps.getElytronAddress("properties-realm", realmName);
         ModelNode userPropertiesNode = new ModelNodePropertiesBuilder().addProperty("path", "mgmt-users.properties")
-                .addProperty("relative-to", "jboss.server.config.dir").build();
+                .addProperty("relative-to", configDir).build();
         ops.add(realmAddress, Values.of("users-properties", userPropertiesNode)).assertSuccess();
         return realmAddress;
     }
