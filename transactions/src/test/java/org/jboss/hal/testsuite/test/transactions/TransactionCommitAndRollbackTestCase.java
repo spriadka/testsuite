@@ -11,6 +11,7 @@ import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.page.runtime.MessagingPreparedTransactionsPage;
 import org.jboss.hal.testsuite.util.PathOperations;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -63,8 +64,10 @@ public class TransactionCommitAndRollbackTestCase {
     private static final OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
     private static final Operations operations = new Operations(client);
 
-    private static final Address TRANSACTIONS_LOGGER_ADDRESS = Address.subsystem("logging").and("logger",
-            "org.apache.activemq.artemis.core.transaction.impl.TransactionImpl");
+    private static final Address
+            TRANSACTIONS_LOGGER_ADDRESS = Address.subsystem("logging").and("logger",
+                "org.apache.activemq.artemis.core.transaction.impl.TransactionImpl"),
+            DEFAULT_MESSAGING_SERVER_ADDRESS = Address.subsystem("messaging-activemq").and("server", "default");
 
     private static Path serverLog;
 
@@ -89,8 +92,9 @@ public class TransactionCommitAndRollbackTestCase {
     }
 
     /**
-     * Unique identifiers of prepared transactions as they appear in UI. This ID is visible in logs and in Web Console
-     * UI. In case of prepared journal update it needs to be updated according to displayed ids in Web Console again.
+     * Unique identifiers of prepared transactions (transactions encoded as base64) as they appear in UI. This ID is
+     * visible in logs and in Web Console UI. In case of prepared journal update it needs to be updated according to
+     * displayed ids in Web Console again.
      */
     private static String[] TRANSACTIONS_XID = new String[]{
             "AAAAAAAAAAAAAP__CigFZuOgfONXxVvAAAASdQAAAAEAAAAAAAAAAAAAAAAAAP__CigFZuOgfONXxVvAAAASdDEHAgIA",
@@ -102,17 +106,36 @@ public class TransactionCommitAndRollbackTestCase {
             "AAAAAAAAAAAAAP__CigFZtXWO0pXxVwMAAAFsgAAAAEAAAAAAAAAAAAAAAAAAP__CigFZtXWO0pXxVwMAAAFrTEHAgIA"
     };
 
-    private static final Vector<PreparedTransactionTestCell> TRANSACTIONS_TEST_DATA = new Vector<PreparedTransactionTestCell>() {
+    private static final Vector<PreparedTransactionTestCell> GUI_TRANSACTIONS_TEST_DATA = new Vector<PreparedTransactionTestCell>() {
         {
         add(new PreparedTransactionTestCell(TRANSACTIONS_XID[0], PerformedAction.ROLLBACK));
         add(new PreparedTransactionTestCell(TRANSACTIONS_XID[1], PerformedAction.COMMIT));
         add(new PreparedTransactionTestCell(TRANSACTIONS_XID[2], PerformedAction.COMMIT));
         add(new PreparedTransactionTestCell(TRANSACTIONS_XID[3], PerformedAction.ROLLBACK));
-        add(new PreparedTransactionTestCell(TRANSACTIONS_XID[4], PerformedAction.COMMIT));
-        add(new PreparedTransactionTestCell(TRANSACTIONS_XID[5], PerformedAction.ROLLBACK));
-        add(new PreparedTransactionTestCell(TRANSACTIONS_XID[6], PerformedAction.COMMIT));
         }
     };
+
+    private void performActionOnTransactionAndVerifyInGUI(String transactionXID, PerformedAction action) throws IOException {
+        Assert.assertNotNull(page.getResourceManager().getResourceTable().getRowByText(0, transactionXID));
+
+        Assert.assertTrue("Operation " + action.getCliOperationName() + " in CLI did not went well! Is the base64 xID right?",
+                operations.invoke(action.getCliOperationName(),
+                        DEFAULT_MESSAGING_SERVER_ADDRESS, Values.of("transaction-as-base-64", transactionXID)).booleanValue());
+
+        page.refresh();
+
+        Assert.assertNull("Committed transaction should not be present in table after refresh",
+                page.getResourceManager().getResourceTable().getRowByText(0, transactionXID));
+    }
+
+    @Test
+    public void performActionOnTransactionsInCLIAndRefresh() throws IOException {
+        performActionOnTransactionAndVerifyInGUI(TRANSACTIONS_XID[4], PerformedAction.COMMIT);
+        performActionOnTransactionAndVerifyInGUI(TRANSACTIONS_XID[5], PerformedAction.ROLLBACK);
+
+        Assert.assertNotNull("Transaction '" + TRANSACTIONS_XID[6] + "' should be present in table!",
+                page.getResourceManager().getResourceTable().getRowByText(0, TRANSACTIONS_XID[6]));
+    }
 
     @Test
     public void testTransactionsRollbackAndCommit() throws InterruptedException, ExecutionException, TimeoutException {
@@ -123,7 +146,7 @@ public class TransactionCommitAndRollbackTestCase {
         try {
             logger.debug("Starting tailer to monitor logfile!");
             tailerFuture = executor.submit(tailer);
-            for (PreparedTransactionTestCell transactionTestCell : TRANSACTIONS_TEST_DATA) {
+            for (PreparedTransactionTestCell transactionTestCell : GUI_TRANSACTIONS_TEST_DATA) {
                 page.selectPreparedTransaction(transactionTestCell.getXId());
                 page.clickButton(transactionTestCell.getPerformedAction().getButtonText());
             }
@@ -137,7 +160,7 @@ public class TransactionCommitAndRollbackTestCase {
         }
 
         //check if finished successfully
-        for (PreparedTransactionTestCell transactionTestCell : TRANSACTIONS_TEST_DATA) {
+        for (PreparedTransactionTestCell transactionTestCell : GUI_TRANSACTIONS_TEST_DATA) {
             collector.checkThat("Transaction " + transactionTestCell.getXId() + " should be " +
                     (transactionTestCell.getPerformedAction().equals(PerformedAction.COMMIT) ? "committed" : "rolled back") +
                     " successfully.", transactionTestCell.getFinishedSuccessfully(), equalTo(true));
@@ -149,7 +172,7 @@ public class TransactionCommitAndRollbackTestCase {
         @Override
         public void handle(String line) {
             logger.debug("Line handled by tailer: '{}'", line);
-            for (PreparedTransactionTestCell transactionTestCell : TRANSACTIONS_TEST_DATA) {
+            for (PreparedTransactionTestCell transactionTestCell : GUI_TRANSACTIONS_TEST_DATA) {
                 if (transactionTestCell.matchesLogLinePattern(line)) {
                     transactionTestCell.setFinishedSuccessfully();
                 }
@@ -161,15 +184,17 @@ public class TransactionCommitAndRollbackTestCase {
      * Action performed on prepared transaction
      */
     private enum PerformedAction {
-        ROLLBACK("TransactionImpl::rollback::TransactionImpl", "Rollback"),
-        COMMIT("TransactionImpl::commit::TransactionImpl", "Commit");
+        ROLLBACK("TransactionImpl::rollback::TransactionImpl", "Rollback", "rollback-prepared-transaction"),
+        COMMIT("TransactionImpl::commit::TransactionImpl", "Commit", "commit-prepared-transaction");
 
         private String logLinePattern;
         private String buttonText;
+        private String cliOperationName;
 
-        PerformedAction(String logLinePattern, String buttonText) {
+        PerformedAction(String logLinePattern, String buttonText, String cliOperationName) {
             this.logLinePattern = logLinePattern;
             this.buttonText = buttonText;
+            this.cliOperationName = cliOperationName;
         }
 
         /**
@@ -186,6 +211,10 @@ public class TransactionCommitAndRollbackTestCase {
          */
         public String getButtonText() {
             return buttonText;
+        }
+
+        public String getCliOperationName() {
+            return cliOperationName;
         }
     }
 
