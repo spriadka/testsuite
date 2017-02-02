@@ -127,14 +127,14 @@ public class SocketBindingsTestCase {
                         .finish();
 
         assertTrue("Window should be closed", result);
-        assertTrue("Socket Binding should be present in table", fragment.resourceIsPresent(INBOUND_TBA_NAME));
+        assertTrue("Socket Binding should be present in table", page.getResourceManager().isResourcePresent(INBOUND_TBA_NAME));
         new ResourceVerifier(DMR_INBOUND_TBA, client).verifyExists();
     }
 
     @Test
     public void changeInboundPort() throws Exception {
         InboundSocketBindingFragment fragment = page.switchToInbound();
-        fragment.selectSocketBinding(INBOUND_NAME);
+        page.getResourceManager().selectByName(INBOUND_NAME);
 
         new ConfigChecker.Builder(client, DMR_INBOUND)
                 .configFragment(fragment)
@@ -146,7 +146,7 @@ public class SocketBindingsTestCase {
     @Test
     public void changeInboundMulticastPort() throws Exception {
         InboundSocketBindingFragment fragment = page.switchToInbound();
-        fragment.selectSocketBinding(INBOUND_NAME);
+        page.getResourceManager().selectByName(INBOUND_NAME);
 
         By disclosure = ByJQuery.selector("a.header:has(td:contains('Multicast'):visible)");
         fragment.getRoot().findElement(disclosure).click();
@@ -165,8 +165,8 @@ public class SocketBindingsTestCase {
 
     @Test
     public void removeInboundSocketBinding() throws Exception {
-        InboundSocketBindingFragment fragment = page.switchToInbound();
-        fragment.removeSocketBinding(INBOUND_TBR_NAME);
+        page.switchToInbound();
+        page.getResourceManager().removeResource(INBOUND_TBR_NAME).confirmAndDismissReloadRequiredMessage();
 
         new ResourceVerifier(DMR_INBOUND_TBR, client).verifyDoesNotExist();
     }
@@ -182,7 +182,7 @@ public class SocketBindingsTestCase {
         boolean result = wizard.finish();
 
         assertTrue("Window should be closed", result);
-        assertTrue("Socket Binding should be present in table", fragment.resourceIsPresent(OUTBOUND_LOCAL_NAME));
+        assertTrue("Socket Binding should be present in table", page.getResourceManager().isResourcePresent(OUTBOUND_LOCAL_NAME));
         new ResourceVerifier(DMR_OUTBOUND_LOCAL, client).verifyExists();
     }
 
@@ -198,7 +198,7 @@ public class SocketBindingsTestCase {
         boolean result = wizard.finish();
 
         assertTrue("Window should be closed", result);
-        assertTrue("Socket Binding should be present in table", fragment.resourceIsPresent(OUTBOUND_REMOTE_NAME));
+        assertTrue("Socket Binding should be present in table", page.getResourceManager().isResourcePresent(OUTBOUND_REMOTE_NAME));
         new ResourceVerifier(DMR_OUTBOUND_REMOTE, client).verifyExists();
     }
 
