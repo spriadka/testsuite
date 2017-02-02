@@ -6,6 +6,7 @@ import static org.jboss.hal.testsuite.test.configuration.elytron.ElytronOperatio
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.graphene.page.Page;
@@ -59,7 +60,7 @@ public class ElytronFactoryTestCase extends AbstractElytronTestCase {
             SASL_SERVER_FACTORIES = "sasl-server-factories", PROVIDER_NAME = "provider-name",
             VERSION_COMPARISON = "version-comparison", MECHANISM_NAME = "mechanism-name",
             PROVIDER_VERSION = "provider-version", MECHANISM_OIDS = "mechanism-oids", PATH = "path",
-            PRINCIPAL = "principal", REQUEST_LIFETIME = "request-lifetime", SERVER = "server",
+            PRINCIPAL = "principal", REQUEST_LIFETIME = "request-lifetime", SERVER = "server", PROVIDERS = "providers",
             PROVIDER_LOADER_NAME_1 = RandomStringUtils.randomAlphanumeric(5),
             PROVIDER_LOADER_NAME_2 = RandomStringUtils.randomAlphanumeric(5);
 
@@ -73,9 +74,10 @@ public class ElytronFactoryTestCase extends AbstractElytronTestCase {
     }
 
     @AfterClass
-    public static void afterClass() throws IOException {
+    public static void afterClass() throws IOException, InterruptedException, TimeoutException {
         elyOps.removeProviderLoader(PROVIDER_LOADER_NAME_1);
         elyOps.removeProviderLoader(PROVIDER_LOADER_NAME_2);
+        adminOps.reloadIfRequired();
     }
 
     @Test
@@ -129,7 +131,8 @@ public class ElytronFactoryTestCase extends AbstractElytronTestCase {
         try {
             ops.add(factoryAddress, Values.of(MODULE, MODULE_NAME_1)).assertSuccess();
 
-            page.navigateToApplication().selectFactory(SERVICE_LOADER_HTTP_SERVER_LABEL);
+            page.navigateToApplication().selectFactory(SERVICE_LOADER_HTTP_SERVER_LABEL).getResourceManager()
+                    .selectByName(factoryName);
 
             new ConfigChecker.Builder(client, factoryAddress).configFragment(page.getConfigFragment())
                     .editAndSave(InputType.TEXT, MODULE, MODULE_NAME_2).verifyFormSaved()
@@ -209,7 +212,8 @@ public class ElytronFactoryTestCase extends AbstractElytronTestCase {
         try {
             ops.add(factoryAddress, Values.of(MODULE, MODULE_NAME_1)).assertSuccess();
 
-            page.navigateToApplication().selectFactory(SERVICE_LOADER_SASL_SERVER_LABEL);
+            page.navigateToApplication().selectFactory(SERVICE_LOADER_SASL_SERVER_LABEL).getResourceManager()
+                    .selectByName(factoryName);
 
             new ConfigChecker.Builder(client, factoryAddress).configFragment(page.getConfigFragment())
                     .editAndSave(InputType.TEXT, MODULE, MODULE_NAME_2).verifyFormSaved()
@@ -264,7 +268,7 @@ public class ElytronFactoryTestCase extends AbstractElytronTestCase {
             wizard = page.getResourceManager().addResource();
             editor = wizard.getEditor();
             editor.text(NAME, factoryName2);
-            editor.text(PROVIDER_LOADER, PROVIDER_LOADER_NAME_1);
+            editor.text(PROVIDERS, PROVIDER_LOADER_NAME_1);
             closed = wizard.finish();
 
             assertTrue("Dialog should be closed!", closed);
@@ -273,7 +277,7 @@ public class ElytronFactoryTestCase extends AbstractElytronTestCase {
             assertTrue("Newly created Provider HTTP Server Factory should be present in the table!",
                     page.resourceIsPresentInMainTable(factoryName2));
             new ResourceVerifier(factory2address, client)
-                    .verifyExists().verifyAttribute(PROVIDER_LOADER, PROVIDER_LOADER_NAME_1);
+                    .verifyExists().verifyAttribute(PROVIDERS, PROVIDER_LOADER_NAME_1);
         } finally {
             ops.removeIfExists(factory1address);
             ops.removeIfExists(factory2address);
@@ -287,13 +291,14 @@ public class ElytronFactoryTestCase extends AbstractElytronTestCase {
         final Address factoryAddress = elyOps.getElytronAddress(PROVIDER_HTTP_SERVER_MECHANISM_FACTORY, factoryName);
 
         try {
-            ops.add(factoryAddress, Values.of(PROVIDER_LOADER, PROVIDER_LOADER_NAME_1)).assertSuccess();
+            ops.add(factoryAddress, Values.of(PROVIDERS, PROVIDER_LOADER_NAME_1)).assertSuccess();
 
-            page.navigateToApplication().selectFactory(PROVIDER_HTTP_SERVER_LABEL);
+            page.navigateToApplication().selectFactory(PROVIDER_HTTP_SERVER_LABEL).getResourceManager()
+                    .selectByName(factoryName);
 
             new ConfigChecker.Builder(client, factoryAddress).configFragment(page.getConfigFragment())
-                    .editAndSave(InputType.TEXT, PROVIDER_LOADER, PROVIDER_LOADER_NAME_2).verifyFormSaved()
-                    .verifyAttribute(PROVIDER_LOADER, PROVIDER_LOADER_NAME_2);
+                    .editAndSave(InputType.TEXT, PROVIDERS, PROVIDER_LOADER_NAME_2).verifyFormSaved()
+                    .verifyAttribute(PROVIDERS, PROVIDER_LOADER_NAME_2);
         } finally {
             ops.removeIfExists(factoryAddress);
             adminOps.reloadIfRequired();
@@ -346,7 +351,7 @@ public class ElytronFactoryTestCase extends AbstractElytronTestCase {
             wizard = page.getResourceManager().addResource();
             editor = wizard.getEditor();
             editor.text(NAME, factoryName2);
-            editor.text(PROVIDER_LOADER, PROVIDER_LOADER_NAME_1);
+            editor.text(PROVIDERS, PROVIDER_LOADER_NAME_1);
             closed = wizard.finish();
 
             assertTrue("Dialog should be closed!", closed);
@@ -355,7 +360,7 @@ public class ElytronFactoryTestCase extends AbstractElytronTestCase {
             assertTrue("Newly created Provider SASL Server Factory should be present in the table!",
                     page.resourceIsPresentInMainTable(factoryName2));
             new ResourceVerifier(factory2address, client)
-                    .verifyExists().verifyAttribute(PROVIDER_LOADER, PROVIDER_LOADER_NAME_1);
+                    .verifyExists().verifyAttribute(PROVIDERS, PROVIDER_LOADER_NAME_1);
         } finally {
             ops.removeIfExists(factory1address);
             ops.removeIfExists(factory2address);
@@ -369,13 +374,14 @@ public class ElytronFactoryTestCase extends AbstractElytronTestCase {
         final Address factoryAddress = elyOps.getElytronAddress(PROVIDER_SASL_SERVER_FACTORY, factoryName);
 
         try {
-            ops.add(factoryAddress, Values.of(PROVIDER_LOADER, PROVIDER_LOADER_NAME_1)).assertSuccess();
+            ops.add(factoryAddress, Values.of(PROVIDERS, PROVIDER_LOADER_NAME_1)).assertSuccess();
 
-            page.navigateToApplication().selectFactory(PROVIDER_SASL_SERVER_LABEL);
+            page.navigateToApplication().selectFactory(PROVIDER_SASL_SERVER_LABEL).getResourceManager()
+                    .selectByName(factoryName);
 
             new ConfigChecker.Builder(client, factoryAddress).configFragment(page.getConfigFragment())
-                    .editAndSave(InputType.TEXT, PROVIDER_LOADER, PROVIDER_LOADER_NAME_2).verifyFormSaved()
-                    .verifyAttribute(PROVIDER_LOADER, PROVIDER_LOADER_NAME_2);
+                    .editAndSave(InputType.TEXT, PROVIDERS, PROVIDER_LOADER_NAME_2).verifyFormSaved()
+                    .verifyAttribute(PROVIDERS, PROVIDER_LOADER_NAME_2);
         } finally {
             ops.removeIfExists(factoryAddress);
             adminOps.reloadIfRequired();
@@ -530,7 +536,8 @@ public class ElytronFactoryTestCase extends AbstractElytronTestCase {
                     Values.of(HTTP_SERVER_MECHANISM_FACTORY, httpServerFactoryName1).and(PROPERTIES, initialProps))
                     .assertSuccess();
 
-            page.navigateToApplication().selectFactory(CONFIGURABLE_HTTP_SERVER_LABEL);
+            page.navigateToApplication().selectFactory(CONFIGURABLE_HTTP_SERVER_LABEL).getResourceManager()
+                    .selectByName(configurableFactoryName);
 
             new ConfigChecker.Builder(client, configurableFactoryAddress).configFragment(page.getConfigFragment())
                     .editAndSave(InputType.TEXT, HTTP_SERVER_MECHANISM_FACTORY, httpServerFactoryName2)
@@ -565,8 +572,9 @@ public class ElytronFactoryTestCase extends AbstractElytronTestCase {
             ops.add(configurableFactoryAddress, Values.of(HTTP_SERVER_MECHANISM_FACTORY, httpServerFactoryName))
                     .assertSuccess();
 
-            page.navigateToApplication().selectFactory(CONFIGURABLE_HTTP_SERVER_LABEL)
-                    .switchToConfigAreaTab(FILTERS_LABEL);
+            page.navigateToApplication().selectFactory(CONFIGURABLE_HTTP_SERVER_LABEL).getResourceManager()
+                    .selectByName(configurableFactoryName);
+            page.switchToConfigAreaTab(FILTERS_LABEL);
 
             WizardWindow wizard = page.getConfigAreaResourceManager().addResource();
             Editor editor = wizard.getEditor();
@@ -610,8 +618,9 @@ public class ElytronFactoryTestCase extends AbstractElytronTestCase {
                     Values.of(HTTP_SERVER_MECHANISM_FACTORY, httpServerFactoryName).and(FILTERS_ATTR, filtersNode))
                     .assertSuccess();
 
-            page.navigateToApplication().selectFactory(CONFIGURABLE_HTTP_SERVER_LABEL)
-                    .switchToConfigAreaTab(FILTERS_LABEL);
+            page.navigateToApplication().selectFactory(CONFIGURABLE_HTTP_SERVER_LABEL).getResourceManager()
+                    .selectByName(configurableFactoryName);
+            page.switchToConfigAreaTab(FILTERS_LABEL);
 
             page.getConfigAreaResourceManager().removeResource(patternFilterValue)
                     .confirmAndDismissReloadRequiredMessage().assertClosed();
@@ -759,7 +768,8 @@ public class ElytronFactoryTestCase extends AbstractElytronTestCase {
                     Values.of(SASL_SERVER_FACTORY, saslServerFactoryName1).and(PROPERTIES, initialProps))
                     .assertSuccess();
 
-            page.navigateToApplication().selectFactory(CONFIGURABLE_SASL_SERVER_LABEL);
+            page.navigateToApplication().selectFactory(CONFIGURABLE_SASL_SERVER_LABEL).getResourceManager()
+                    .selectByName(configurableFactoryName);
 
             new ConfigChecker.Builder(client, configurableFactoryAddress).configFragment(page.getConfigFragment())
                     .editAndSave(InputType.TEXT, SASL_SERVER_FACTORY, saslServerFactoryName2)
@@ -803,8 +813,9 @@ public class ElytronFactoryTestCase extends AbstractElytronTestCase {
             ops.add(httpServerFactoryAddress, Values.of(MODULE, MODULE_NAME_1)).assertSuccess();
             ops.add(configurableFactoryAddress, Values.of(SASL_SERVER_FACTORY, saslServerFactoryName)).assertSuccess();
 
-            page.navigateToApplication().selectFactory(CONFIGURABLE_SASL_SERVER_LABEL)
-                    .switchToConfigAreaTab(FILTERS_LABEL);
+            page.navigateToApplication().selectFactory(CONFIGURABLE_SASL_SERVER_LABEL).getResourceManager()
+                    .selectByName(configurableFactoryName);
+            page.switchToConfigAreaTab(FILTERS_LABEL);
 
             WizardWindow wizard = page.getConfigAreaResourceManager().addResource();
             Editor editor = wizard.getEditor();
@@ -872,8 +883,9 @@ public class ElytronFactoryTestCase extends AbstractElytronTestCase {
                     Values.of(SASL_SERVER_FACTORY, saslServerFactoryName).and(FILTERS_ATTR, filtersNode))
                     .assertSuccess();
 
-            page.navigateToApplication().selectFactory(CONFIGURABLE_SASL_SERVER_LABEL)
-                    .switchToConfigAreaTab(FILTERS_LABEL);
+            page.navigateToApplication().selectFactory(CONFIGURABLE_SASL_SERVER_LABEL).getResourceManager()
+                    .selectByName(configurableFactoryName);
+            page.switchToConfigAreaTab(FILTERS_LABEL);
 
             page.getConfigAreaResourceManager().removeResource(predefinedFilterValue)
                     .confirmAndDismissReloadRequiredMessage().assertClosed();
@@ -962,7 +974,8 @@ public class ElytronFactoryTestCase extends AbstractElytronTestCase {
             ops.add(aggregateFactoryAddress, Values.of(HTTP_SERVER_FACTORIES, initialHttpFactoriesNode))
                     .assertSuccess();
 
-            page.navigateToApplication().selectFactory(AGGREGATE_HTTP_SERVER_LABEL);
+            page.navigateToApplication().selectFactory(AGGREGATE_HTTP_SERVER_LABEL).getResourceManager()
+                    .selectByName(aggregateFactoryName);
 
             new ConfigChecker.Builder(client, aggregateFactoryAddress).configFragment(page.getConfigFragment())
                     .editAndSave(InputType.TEXT, HTTP_SERVER_FACTORIES, newHttpServerFactoryNamesSeparatedByNewLine)
@@ -1084,7 +1097,8 @@ public class ElytronFactoryTestCase extends AbstractElytronTestCase {
             ops.add(aggregateFactoryAddress, Values.of(SASL_SERVER_FACTORIES, initialHttpFactoriesNode))
                     .assertSuccess();
 
-            page.navigateToApplication().selectFactory(AGGREGATE_SASL_SERVER_LABEL);
+            page.navigateToApplication().selectFactory(AGGREGATE_SASL_SERVER_LABEL).getResourceManager()
+                    .selectByName(aggregateFactoryName);
 
             new ConfigChecker.Builder(client, aggregateFactoryAddress).configFragment(page.getConfigFragment())
                     .editAndSave(InputType.TEXT, SASL_SERVER_FACTORIES, newHttpServerFactoryNamesSeparatedByNewLine)
@@ -1252,7 +1266,8 @@ public class ElytronFactoryTestCase extends AbstractElytronTestCase {
             ops.add(filteringSaslFactoryAddress,
                     Values.of(SASL_SERVER_FACTORY, saslFactoryName1).and(FILTERS_ATTR, filtersNode)).assertSuccess();
 
-            page.navigateToApplication().selectFactory(PROVIDER_FILTERING_SASL_SERVER_LABEL);
+            page.navigateToApplication().selectFactory(PROVIDER_FILTERING_SASL_SERVER_LABEL).getResourceManager()
+                    .selectByName(filteringSaslFactoryName);
 
             new ConfigChecker.Builder(client, filteringSaslFactoryAddress).configFragment(page.getConfigFragment())
                     .editAndSave(InputType.TEXT, SASL_SERVER_FACTORY, saslFactoryName2)
@@ -1298,8 +1313,9 @@ public class ElytronFactoryTestCase extends AbstractElytronTestCase {
                     Values.of(SASL_SERVER_FACTORY, saslFactoryName).and(FILTERS_ATTR, initialFiltersNode))
                     .assertSuccess();
 
-            page.navigateToApplication().selectFactory(PROVIDER_FILTERING_SASL_SERVER_LABEL)
-                    .switchToConfigAreaTab(FILTERS_LABEL);
+            page.navigateToApplication().selectFactory(PROVIDER_FILTERING_SASL_SERVER_LABEL).getResourceManager()
+                    .selectByName(filteringSaslFactoryName);
+            page.switchToConfigAreaTab(FILTERS_LABEL);
 
             WizardWindowWithOptionalFields wizard = page.getConfigAreaResourceManager()
                     .addResource(WizardWindowWithOptionalFields.class);
@@ -1355,8 +1371,9 @@ public class ElytronFactoryTestCase extends AbstractElytronTestCase {
                     Values.of(SASL_SERVER_FACTORY, saslFactoryName).and(FILTERS_ATTR, initialFiltersNode))
                     .assertSuccess();
 
-            page.navigateToApplication().selectFactory(PROVIDER_FILTERING_SASL_SERVER_LABEL)
-                    .switchToConfigAreaTab(FILTERS_LABEL);
+            page.navigateToApplication().selectFactory(PROVIDER_FILTERING_SASL_SERVER_LABEL).getResourceManager()
+                    .selectByName(filteringSaslFactoryName);
+            page.switchToConfigAreaTab(FILTERS_LABEL);
 
             page.getConfigAreaResourceManager().removeResource(providerName1)
                     .confirmAndDismissReloadRequiredMessage().assertClosed();
@@ -1437,7 +1454,8 @@ public class ElytronFactoryTestCase extends AbstractElytronTestCase {
                     Values.of(MECHANISM_OIDS, initialOidsNode).and(PATH, pathValue).and(PRINCIPAL, principalValue))
                     .assertSuccess();
 
-            page.navigateToApplication().selectFactory(KERBEROS_SECURITY_LABEL);
+            page.navigateToApplication().selectFactory(KERBEROS_SECURITY_LABEL).getResourceManager()
+                    .selectByName(factoryName);
 
             new ConfigChecker.Builder(client, factoryAddress).configFragment(page.getConfigFragment())
                     .editAndSave(InputType.TEXT, MECHANISM_OIDS, newOidsSeparatedByNewLine).verifyFormSaved()
