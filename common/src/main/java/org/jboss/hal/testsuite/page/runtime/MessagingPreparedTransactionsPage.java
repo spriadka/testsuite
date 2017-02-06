@@ -28,4 +28,8 @@ public class MessagingPreparedTransactionsPage extends ConfigurationPage impleme
     public void selectPreparedTransaction(String xId) {
         getResourceManager().selectByName(xId);
     }
+
+    public void refresh() {
+        clickButton("Refresh");
+    }
 }
