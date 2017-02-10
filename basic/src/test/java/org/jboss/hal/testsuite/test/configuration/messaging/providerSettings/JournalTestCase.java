@@ -53,7 +53,7 @@ public class JournalTestCase extends AbstractMessagingTestCase {
     @Before
     public void before() {
         page.invokeProviderSettings(SERVER_NAME);
-        page.switchToJournalTab();
+        page.providerSettingsWindow().switchToJournalTab();
     }
 
     @After

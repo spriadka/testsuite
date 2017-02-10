@@ -9,6 +9,7 @@ import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.WindowFragment;
 import org.jboss.hal.testsuite.fragment.config.messaging.AddMessagingProviderWindow;
 import org.jboss.hal.testsuite.fragment.config.messaging.MessagingConfigArea;
+import org.jboss.hal.testsuite.fragment.config.messaging.ProviderSettingsWindow;
 import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConfigPropertiesFragment;
 import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConfigPropertyWizard;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
@@ -89,19 +90,24 @@ public class MessagingPage extends ConfigPage implements Navigatable {
         invokeActionOnMessagingProviderRow("Provider Settings", providerName);
     }
 
-    public void switchToSecurityTab() {
-        WebElement security = browser.findElement(ByJQuery.selector("div.gwt-Label:contains(Security)"));
-        security.click();
+    private void switchToTabInConfig(String label) {
+        getConfig().switchTo(label);
     }
 
-    public void switchToJournalTab() {
-        WebElement security = browser.findElement(ByJQuery.selector("div.gwt-Label:contains(Journal)"));
-        security.click();
+    //Provider settings pop up
+
+    public ProviderSettingsWindow providerSettingsWindow() {
+        return Console.withBrowser(browser).openedWindow(ProviderSettingsWindow.class);
     }
+
+    //Bridges
 
     public void switchToConnectionManagementTab() {
-        WebElement security = browser.findElement(ByJQuery.selector("div.gwt-Label:contains(Connection Management):visible"));
-        security.click();
+        switchToTabInConfig("Connection Management");
+    }
+
+    public void switchToCredentialReference() {
+        switchToTabInConfig("Credential Reference");
     }
 
     public void switchToDiscovery() {

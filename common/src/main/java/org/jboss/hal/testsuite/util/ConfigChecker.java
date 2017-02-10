@@ -22,17 +22,17 @@
 
 package org.jboss.hal.testsuite.util;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.TimeoutException;
-
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.junit.Assert;
 import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
 import org.wildfly.extras.creaper.core.online.operations.Address;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.TimeoutException;
 
 /**
  * Abstraction for editing of {@link ConfigFragment} fields and verification of successful save.
@@ -48,8 +48,18 @@ public final class ConfigChecker {
      * @return {@link ResourceVerifier} to facilitate the subsequent verification compared to model
      */
     public ResourceVerifier verifyFormSaved() throws Exception {
-        Assert.assertTrue("Configuration should switch into read-only mode.", saved);
+        return verifyFormSaved("");
+    }
+
+    /**
+     * Verifies that form switch back to read-only mode.
+     * @param errorMessageSuffix is intended to be used for e.g. passing related tracked issue.
+     * @return {@link ResourceVerifier} to facilitate the subsequent verification compared to model
+     */
+    public ResourceVerifier verifyFormSaved(String errorMessageSuffix) {
+        Assert.assertTrue("Configuration should switch into read-only mode! " + errorMessageSuffix, saved);
         return new ResourceVerifier(resourceAddress, client);
+
     }
 
     /**

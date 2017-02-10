@@ -11,6 +11,7 @@ import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.page.config.JMSBridgePage;
 import org.jboss.hal.testsuite.util.ConfigChecker;
 import org.jboss.hal.testsuite.util.Console;
+import org.jboss.hal.testsuite.util.ElytronIntegrationChecker;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -25,6 +26,7 @@ import org.wildfly.extras.creaper.core.CommandFailedException;
 import org.wildfly.extras.creaper.core.online.ModelNodeResult;
 import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
 import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.OperationException;
 import org.wildfly.extras.creaper.core.online.operations.Operations;
 import org.wildfly.extras.creaper.core.online.operations.ReadAttributeOption;
 import org.wildfly.extras.creaper.core.online.operations.Values;
@@ -66,6 +68,7 @@ public class JMSBridgeAttributesTestCase {
     private static final OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
     private static final Administration administration = new Administration(client);
     private static final Operations operations = new Operations(client);
+    private static final ElytronIntegrationChecker elytronChecker = new ElytronIntegrationChecker(client);
 
     private static final String
             IN_QUEUE_NAME = "InQueue",
@@ -494,6 +497,42 @@ public class JMSBridgeAttributesTestCase {
         } finally {
             operations.writeAttribute(JMS_BRIDGE_ADDRESS, SUBSCRIPTION_NAME_IDENTIFIER, origValue);
         }
+    }
+
+    @Test
+    public void editSourceCredentialReferenceClearText() throws Exception {
+        page.switchToSourceCredentialReference();
+        elytronChecker.setClearTextCredentialReferenceAndVerify(JMS_BRIDGE_ADDRESS, page.getConfigFragment(), "source-credential-reference");
+    }
+
+    @Test
+    public void editSourceCredentialReferenceStoreReference() throws Exception {
+        page.switchToSourceCredentialReference();
+        elytronChecker.setCredentialStoreCredentialReferenceAndVerify(JMS_BRIDGE_ADDRESS, page.getConfigFragment(), "source-credential-reference");
+    }
+
+    @Test
+    public void editSourceCredentialReferenceIllegalCombination() throws IOException, OperationException {
+        page.switchToSourceCredentialReference();
+        elytronChecker.testIllegalCombinationCredentialReferenceAttributes(JMS_BRIDGE_ADDRESS, page.getConfigFragment(), "source-credential-reference");
+    }
+
+    @Test
+    public void editTargetCredentialReferenceClearText() throws Exception {
+        page.switchToTargetCredentialReference();
+        elytronChecker.setClearTextCredentialReferenceAndVerify(JMS_BRIDGE_ADDRESS, page.getConfigFragment(), "target-credential-reference");
+    }
+
+    @Test
+    public void editTargetCredentialReferenceStoreReference() throws Exception {
+        page.switchToTargetCredentialReference();
+        elytronChecker.setCredentialStoreCredentialReferenceAndVerify(JMS_BRIDGE_ADDRESS, page.getConfigFragment(), "target-credential-reference");
+    }
+
+    @Test
+    public void editTargetCredentialReferenceIllegalCombination() throws IOException, OperationException {
+        page.switchToTargetCredentialReference();
+        elytronChecker.testIllegalCombinationCredentialReferenceAttributes(JMS_BRIDGE_ADDRESS, page.getConfigFragment(), "target-credential-reference");
     }
 
 }

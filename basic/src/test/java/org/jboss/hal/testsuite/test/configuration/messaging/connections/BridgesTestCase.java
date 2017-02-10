@@ -10,6 +10,7 @@ import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.jboss.hal.testsuite.page.config.MessagingPage;
 import org.jboss.hal.testsuite.test.configuration.messaging.AbstractMessagingTestCase;
 import org.jboss.hal.testsuite.util.ConfigChecker;
+import org.jboss.hal.testsuite.util.ElytronIntegrationChecker;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -18,6 +19,8 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.wildfly.extras.creaper.commands.messaging.AddQueue;
 import org.wildfly.extras.creaper.commands.messaging.RemoveQueue;
 import org.wildfly.extras.creaper.core.CommandFailedException;
@@ -34,6 +37,8 @@ import java.util.concurrent.TimeoutException;
 @Category(Shared.class)
 public class BridgesTestCase extends AbstractMessagingTestCase {
 
+    private static final Logger log = LoggerFactory.getLogger(BridgesTestCase.class);
+
     private static final String BRIDGE = "bridge_" + RandomStringUtils.randomAlphanumeric(5);
     private static final String BRIDGE_TBA = "bridge-TBA_" + RandomStringUtils.randomAlphanumeric(5);
     private static final String BRIDGE_TBR = "bridge-TBR_" + RandomStringUtils.randomAlphanumeric(5);
@@ -47,8 +52,12 @@ public class BridgesTestCase extends AbstractMessagingTestCase {
     private static final String QUEUE_EDIT_BRIDGE = "testQueue_" + RandomStringUtils.randomAlphanumeric(5);
     private static final String DISCOVERY_GROUP_EDIT = "discoveryGroupBridges_" + RandomStringUtils.randomAlphanumeric(5);
 
+    private static ElytronIntegrationChecker elytronChecker;
+
     @BeforeClass
     public static void setUp() throws Exception {
+        elytronChecker = new ElytronIntegrationChecker(client);
+
         //add queues
         List<String> entriesQueueCreateBridge = Collections.singletonList(QUEUE_CREATE_BRIDGE);
         List<String> entriesQueueEditBridge = Collections.singletonList(QUEUE_EDIT_BRIDGE);
@@ -160,6 +169,24 @@ public class BridgesTestCase extends AbstractMessagingTestCase {
     public void updateBridgeReconnectAttempts() throws Exception {
         page.switchToConnectionManagementTab();
         editTextAndVerify(BRIDGE_ADDRESS, "reconnectAttempts", "reconnect-attempts", -1);
+    }
+
+    @Test
+    public void setCredentialReferenceToClearText() throws Exception {
+        page.switchToCredentialReference();
+        elytronChecker.setClearTextCredentialReferenceAndVerify(BRIDGE_ADDRESS, page.getConfigFragment());
+    }
+
+    @Test
+    public void setCredentialReferenceToCredentialStore() throws Exception {
+        page.switchToCredentialReference();
+        elytronChecker.setCredentialStoreCredentialReferenceAndVerify(BRIDGE_ADDRESS, page.getConfigFragment());
+    }
+
+    @Test
+    public void testIllegalCombinationsForCredentialReference() throws IOException, OperationException {
+        page.switchToCredentialReference();
+        elytronChecker.testIllegalCombinationCredentialReferenceAttributes(BRIDGE_ADDRESS, page.getConfigFragment());
     }
 
     @Test

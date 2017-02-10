@@ -58,6 +58,14 @@ public class JMSBridgePage extends MessagingPage implements Navigatable {
         getConfig().getTabByLabel("Target Context").click();
     }
 
+    public void switchToTargetCredentialReference() {
+        getConfig().getTabByLabel("Target Credential Reference").click();
+    }
+
+    public void switchToSourceCredentialReference() {
+        getConfig().getTabByLabel("Source Credential Reference").click();
+    }
+
     public WizardWindow openAddContextPropertyWindow() {
         getConfig().clickButton("Add");
         return Console.withBrowser(browser).openedWindow(WizardWindow.class);
