@@ -74,6 +74,10 @@ public class ModelNodeGenerator {
             return addProperty(key, new ModelNode(value));
         }
 
+        public ModelNodePropertiesBuilder addUndefinedProperty(String key) {
+            return addProperty(key, new ModelNode());
+        }
+
         public ModelNode build() {
             if (propertyMap.isEmpty()) {
                 throw new IllegalStateException("You have to add any property first!");

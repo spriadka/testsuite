@@ -42,6 +42,7 @@ public interface FinderNames {
     String SERVER = "Server";
     String SERVER_GROUP = "Server Group";
     String SERVER_GROUPS = "Server Groups";
+    String SETTINGS = "Settings";
     String STANDALONE_SERVER = "Standalone Server";
     String SUBSYSTEM = "Subsystem";
     String SUBSYSTEMS = "Subsystems";

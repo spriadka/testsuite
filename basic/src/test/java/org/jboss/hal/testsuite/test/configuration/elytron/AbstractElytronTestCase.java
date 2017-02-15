@@ -21,7 +21,8 @@ public abstract class AbstractElytronTestCase {
     protected static final Administration adminOps = new Administration(client);
     protected static final String
         MODULE_NAME_1 = "org.jboss.as.cli",
-        MODULE_NAME_2 = "org.jboss.as.controller";
+        MODULE_NAME_2 = "org.jboss.as.controller",
+        NAME = "name", ATTRIBUTES_LABEL = "Attributes", PROVIDER_NAME = "provider-name";
 
     @Drone
     protected WebDriver browser;
