@@ -23,10 +23,13 @@
 package org.jboss.hal.testsuite.util;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
+import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.junit.Assert;
 import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
 import org.wildfly.extras.creaper.core.online.operations.Address;
@@ -62,44 +65,54 @@ public final class ConfigChecker {
             throws IOException, InterruptedException, TimeoutException {
         this.client = builder.client;
         this.resourceAddress = builder.resourceAddress;
-        Object attrValue = getAttrValue(builder.attrValue, builder.inputType);
-        edit(builder.config, builder.inputType, builder.identifier, attrValue);
+        Editor editor = builder.config.edit();
+        for (Input input : builder.inputList) {
+            enter(editor, input);
+        }
+        this.saved = builder.config.save();
+        if (!this.saved) {
+            builder.config.cancel(); // cleanup
+        }
     }
 
-    private Object getAttrValue(Object attrValue, InputType inputType) {
-        switch (inputType) {
+    private String getStringAttrValue(Input input) {
+        switch (input.inputType) {
             case TEXT: case SELECT:
-                if (attrValue instanceof String) {
-                    return attrValue;
-                } else if (attrValue instanceof Long) {
-                    return String.valueOf((long) attrValue);
-                } else if (attrValue instanceof Integer) {
-                    return String.valueOf((int) attrValue);
+                if (input.attrValue instanceof String) {
+                    return (String) input.attrValue;
+                } else if (input.attrValue instanceof Long) {
+                    return String.valueOf((long) input.attrValue);
+                } else if (input.attrValue instanceof Integer) {
+                    return String.valueOf((int) input.attrValue);
                 } else {
-                    throw new IllegalArgumentException(attrValue + " should be String, Integer or Long!");
-                }
-            case CHECKBOX:
-                if (attrValue instanceof Boolean) {
-                    return attrValue;
-                } else {
-                    throw new IllegalArgumentException(attrValue + " should be Boolean!");
+                    throw new IllegalArgumentException(input.attrValue + " should be String, Integer or Long!");
                 }
             default:
-                throw new IllegalArgumentException("Not yet supported inputType: " + inputType);
+                throw new IllegalArgumentException("Not supported inputType: " + input.inputType);
         }
     }
 
-    private void edit(ConfigFragment config, InputType inputType, String identifier, Object attrValue) throws IOException, InterruptedException, TimeoutException {
-        switch (inputType) {
-            case TEXT:
-                saved = config.editTextAndSave(identifier, (String) attrValue); break;
+    private boolean getBooleanAttrValue(Input input) {
+        switch (input.inputType) {
             case CHECKBOX:
-                saved = config.editCheckboxAndSave(identifier, (Boolean) attrValue); break;
-            case SELECT:
-                saved = config.selectOptionAndSave(identifier, (String) attrValue); break;
+                if (input.attrValue instanceof Boolean) {
+                    return (boolean) input.attrValue;
+                } else {
+                    throw new IllegalArgumentException(input.attrValue + " should be Boolean!");
+                }
+            default:
+                throw new IllegalArgumentException("Not supported inputType: " + input.inputType);
         }
-        if (!saved) {
-            config.cancel(); // cleanup
+    }
+
+    private void enter(Editor editor, Input input) throws IOException, InterruptedException, TimeoutException {
+        switch (input.inputType) {
+            case TEXT:
+                editor.text(input.identifier, getStringAttrValue(input)); break;
+            case CHECKBOX:
+                editor.checkbox(input.identifier, getBooleanAttrValue(input)); break;
+            case SELECT:
+                editor.select(input.identifier, getStringAttrValue(input)); break;
         }
     }
 
@@ -111,9 +124,7 @@ public final class ConfigChecker {
         private final OnlineManagementClient client;
         private final Address resourceAddress;
         private ConfigFragment config;
-        private InputType inputType;
-        private String identifier;
-        private Object attrValue;
+        private List<Input> inputList;
 
         public Builder(OnlineManagementClient client, Address resourceAddress) {
             this.client = client;
@@ -129,17 +140,47 @@ public final class ConfigChecker {
         }
 
         /**
-         * Edits field identified by <b>{@code attrName}</b> with <b>{@code attrValue}</b> and try to save.
+         * Set field identified by <b>{@code identifier}</b> to be edited with <b>{@code attrValue}</b>. Can be called
+         * multiple times. The actual edit will be performed as soon as client calls the {@link #andSave()} </b>
          */
-        public ConfigChecker editAndSave(InputType inputType, String identifier, Object attrValue) throws IOException,
-            InterruptedException, TimeoutException {
+        public Builder edit(InputType inputType, String identifier, Object attrValue) {
+            if (this.inputList == null) {
+                this.inputList = new ArrayList<>();
+            }
+            this.inputList.add(new Input(inputType, identifier, attrValue));
+            return this;
+        }
+
+        /**
+         * Actually perform fields edit and try to save the form.
+         */
+        public ConfigChecker andSave() throws IOException, InterruptedException, TimeoutException {
             if (config == null) {
                 throw new IllegalStateException("ConfigFragment has to be set!");
             }
+            if (inputList == null) {
+                throw new IllegalStateException("Input has to be set!");
+            }
+            return new ConfigChecker(this);
+        }
+
+        /**
+         * Edits field identified by <b>{@code identifier}</b> with <b>{@code attrValue}</b> and try to save.
+         */
+        public ConfigChecker editAndSave(InputType inputType, String identifier, Object attrValue) throws IOException,
+            InterruptedException, TimeoutException {
+            return edit(inputType, identifier, attrValue).andSave();
+        }
+    }
+
+    private static class Input {
+        private InputType inputType;
+        private String identifier;
+        private Object attrValue;
+        private Input(InputType inputType, String identifier, Object attrValue) {
             this.inputType = inputType;
             this.identifier = identifier;
             this.attrValue = attrValue;
-            return new ConfigChecker(this);
         }
     }
 }
