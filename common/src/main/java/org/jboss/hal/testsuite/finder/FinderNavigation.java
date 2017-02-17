@@ -91,7 +91,7 @@ public class FinderNavigation {
      * @param clickDelay milis to wait after every row click
      */
     public FinderNavigation(final WebDriver browser, final Class<? extends BasePage> page, final long clickDelay) {
-        this(browser, page, ()-> {
+        this(browser, page, () -> {
             try {
                 Thread.sleep(clickDelay);
             } catch (InterruptedException e) {
@@ -239,11 +239,19 @@ public class FinderNavigation {
     }
 
     /**
-     * Select current row, click View and wait for application detail to open.
+     * Select current row, click View and wait for configured model timeout for application detail to open.
      */
     public void openApplication() {
         this.selectRow().invoke(FinderNames.VIEW);
         Application.waitUntilVisible();
+    }
+
+    /**
+     * Select current row, click View and wait for <i>timeout</i> seconds for application detail to open.
+     */
+    public void openApplication(int timeout) {
+        this.selectRow().invoke(FinderNames.VIEW);
+        Application.waitUntilVisible(timeout);
     }
 
     private By columnSelector(String name) {
