@@ -132,7 +132,7 @@ public class JGroupAbstractTestCase {
 
     @Test
     public void socketBindingEditInvalid() throws Exception {
-        verifyValueIsNotSaved(TRANSPORT_ADDRESS, "SocketBinding", "socket-binding", RandomStringUtils.randomAlphabetic(6));
+        verifyValueIsNotSaved(TRANSPORT_ADDRESS, "socketBinding", "socket-binding", RandomStringUtils.randomAlphabetic(6));
     }
 
     @Test
