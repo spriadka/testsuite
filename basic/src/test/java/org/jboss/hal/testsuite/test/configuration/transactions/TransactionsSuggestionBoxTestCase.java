@@ -128,7 +128,7 @@ public class TransactionsSuggestionBoxTestCase extends TransactionsTestCaseAbstr
 
     @Test
     public void recoverySocketBindingFilter_http() throws IOException {
-        page.switchToProcessID();
+        page.switchToRecovery();
         getRecoverySocketBindingSuggestionChecker()
                 .filterSuggestions("http")
                 .verifyOnlyRelevantSuggestionWereSuggested();
@@ -136,7 +136,7 @@ public class TransactionsSuggestionBoxTestCase extends TransactionsTestCaseAbstr
 
     @Test
     public void recoverySocketBindingFilter_https() throws IOException {
-        page.switchToProcessID();
+        page.switchToRecovery();
         getRecoverySocketBindingSuggestionChecker()
                 .filterSuggestions("https")
                 .verifyOnlyRelevantSuggestionWereSuggested();
@@ -144,7 +144,7 @@ public class TransactionsSuggestionBoxTestCase extends TransactionsTestCaseAbstr
 
     @Test
     public void recoverySocketBindingFilter_EMPTY() throws IOException {
-        page.switchToProcessID();
+        page.switchToRecovery();
         getRecoverySocketBindingSuggestionChecker()
                 .filterSuggestions("")
                 .verifyOnlyRelevantSuggestionWereSuggested();
@@ -152,7 +152,7 @@ public class TransactionsSuggestionBoxTestCase extends TransactionsTestCaseAbstr
 
     @Test
     public void recoverySocketBindingFilterCommonForAllOptions() throws IOException {
-        page.switchToProcessID();
+        page.switchToRecovery();
         getRecoverySocketBindingSuggestionChecker()
                 .filterSuggestions("s")
                 .verifyOnlyRelevantSuggestionWereSuggested();
@@ -160,7 +160,7 @@ public class TransactionsSuggestionBoxTestCase extends TransactionsTestCaseAbstr
 
     @Test
     public void recoverySocketBindingFilter_http_Append_STAR() throws IOException {
-        page.switchToProcessID();
+        page.switchToRecovery();
         getRecoverySocketBindingSuggestionChecker()
                 .filterSuggestions("http")
                 .verifyOnlyRelevantSuggestionWereSuggested();
@@ -172,7 +172,7 @@ public class TransactionsSuggestionBoxTestCase extends TransactionsTestCaseAbstr
 
     @Test
     public void recoverySocketBindingFilter_txn() throws IOException {
-        page.switchToProcessID();
+        page.switchToRecovery();
         getRecoverySocketBindingSuggestionChecker()
                 .filterSuggestions("txn")
                 .verifyOnlyRelevantSuggestionWereSuggested();
@@ -180,7 +180,7 @@ public class TransactionsSuggestionBoxTestCase extends TransactionsTestCaseAbstr
 
     @Test
     public void recoverySocketBindingFilter_txn_RemoveSymbol() throws IOException {
-        page.switchToProcessID();
+        page.switchToRecovery();
         getRecoverySocketBindingSuggestionChecker()
                 .filterSuggestions("txn")
                 .verifyOnlyRelevantSuggestionWereSuggested();
@@ -192,7 +192,7 @@ public class TransactionsSuggestionBoxTestCase extends TransactionsTestCaseAbstr
 
     @Test
     public void recoverySocketBindingFilterSymbolBySymbol_https() throws IOException {
-        page.switchToProcessID();
+        page.switchToRecovery();
         final String https = "https";
         for (int i = 0; i < https.length(); i++) {
             getRecoverySocketBindingSuggestionChecker()
