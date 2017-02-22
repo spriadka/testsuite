@@ -46,8 +46,7 @@ public class AddressSettingsTestCase extends AbstractMessagingTestCase {
 
     @Before
     public void before() {
-        page.navigateToMessaging();
-        page.selectQueuesAndTopics();
+        page.viewQueuesAndTopics("default");
         page.switchToAddressSettings();
         page.selectInTable(PATTERN);
     }

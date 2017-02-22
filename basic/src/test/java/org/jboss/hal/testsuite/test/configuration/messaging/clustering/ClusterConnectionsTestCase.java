@@ -52,8 +52,7 @@ public class ClusterConnectionsTestCase extends AbstractMessagingTestCase {
 
     @Before
     public void before() {
-        page.navigateToMessaging();
-        page.selectView("Clustering");
+        page.viewClusteringSettings("default");
         page.switchToConnections();
         page.selectInTable(CC_NAME, 0);
     }

@@ -65,8 +65,7 @@ public class InVMConnectorTestCase extends AbstractMessagingTestCase {
 
     @Before
     public void before() {
-        page.navigateToMessaging();
-        page.selectConnectionsView();
+        page.viewConnectionSettings("default");
         page.switchToConnector();
         page.switchToInVmType();
         page.selectInTable(IN_VM_CONNECTOR);

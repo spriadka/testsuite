@@ -2,13 +2,12 @@ package org.jboss.hal.testsuite.page.config;
 
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.ByJQuery;
-import org.jboss.hal.testsuite.cli.Library;
 import org.jboss.hal.testsuite.finder.Application;
+import org.jboss.hal.testsuite.finder.FinderFragment;
 import org.jboss.hal.testsuite.finder.FinderNames;
-import org.jboss.hal.testsuite.finder.FinderNavigation;
-import org.jboss.hal.testsuite.finder.Row;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.WindowFragment;
+import org.jboss.hal.testsuite.fragment.config.messaging.AddMessagingProviderWindow;
 import org.jboss.hal.testsuite.fragment.config.messaging.MessagingConfigArea;
 import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConfigPropertiesFragment;
 import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConfigPropertyWizard;
@@ -17,7 +16,6 @@ import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
 import org.jboss.hal.testsuite.fragment.shared.util.ResourceManager;
 import org.jboss.hal.testsuite.page.ConfigPage;
 import org.jboss.hal.testsuite.page.Navigatable;
-import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.PropUtils;
 import org.openqa.selenium.By;
@@ -25,19 +23,13 @@ import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.ui.Select;
 
-
-
-/**
- * Created by pcyprian on 2.9.15.
- */
 public class MessagingPage extends ConfigPage implements Navigatable {
 
     protected static final String
         MESSAGING_PROVIDER_LABEL = "Messaging Provider",
-        MESSAGING_SUBSYSTEM_LABEL = "Messaging",
+        MESSAGING_SUBSYSTEM_LABEL = "Messaging - ActiveMQ",
         JMS_BRIDGE_LABEL = "JMS Bridge",
         SETTINGS_LABEL = "Settings";
-    private FinderNavigation navigation;
 
     public ConfigFragment getConfigFragment() {
         WebElement editPanel = browser.findElement(ByJQuery.selector(".master_detail-detail:visible"));
@@ -49,67 +41,52 @@ public class MessagingPage extends ConfigPage implements Navigatable {
         return  Graphene.createPageFragment(ConfigFragment.class, editPanel);
     }
 
-    public void navigateToMessagingProvider() {
-        if (ConfigUtils.isDomain()) {
-            navigation = new FinderNavigation(browser, DomainConfigEntryPoint.class)
-                    .step(FinderNames.CONFIGURATION, FinderNames.PROFILES)
-                    .step(FinderNames.PROFILE, ConfigUtils.getDefaultProfile());
-        } else {
-            navigation = new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
-                    .step(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS);
-        }
-        navigation.step(FinderNames.SUBSYSTEM, MESSAGING_SUBSYSTEM_LABEL);
-        navigation.step(SETTINGS_LABEL, MESSAGING_PROVIDER_LABEL);
+    private void invokeActionOnMessagingProviderColumn(String action) {
+       FinderFragment finderFragment = getSubsystemNavigation(MESSAGING_SUBSYSTEM_LABEL)
+                .step(SETTINGS_LABEL, MESSAGING_PROVIDER_LABEL)
+                .step(MESSAGING_PROVIDER_LABEL)
+                .selectColumn();
+       Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
+       finderFragment.invoke(action);
     }
 
-    public void selectProvider(String provider) {
-        navigateToMessagingProvider();
-        navigation.step(MESSAGING_PROVIDER_LABEL, provider);
+    private void invokeActionOnMessagingProviderRow(String action, String name) {
+       FinderFragment finderFragment = getSubsystemNavigation(MESSAGING_SUBSYSTEM_LABEL)
+                .step(SETTINGS_LABEL, MESSAGING_PROVIDER_LABEL)
+                .step(MESSAGING_PROVIDER_LABEL, name)
+                .selectRow();
+       Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
+       finderFragment.invoke(action);
     }
 
-    public void navigateToMessaging() {
-        selectProvider("default");
+    public ConfirmationWindow removeMessagingProvider(String name) {
+        invokeActionOnMessagingProviderRow(FinderNames.REMOVE, name);
+        return Console.withBrowser(browser).openedWindow(ConfirmationWindow.class);
     }
 
-    public void selectView(String view) {
-        Row row = navigation.selectRow();
-        Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
-        row.invoke(view);
+    public void viewClusteringSettings(String name) {
+        invokeActionOnMessagingProviderRow("Clustering", name);
         Application.waitUntilVisible();
     }
 
-    public void selectConnectionsView() {
-        selectView("Connections");
+    public void viewConnectionSettings(String name) {
+        invokeActionOnMessagingProviderRow("Connections", name);
+        Application.waitUntilVisible();
     }
 
-    public void selectQueuesAndTopics() {
-        selectView("Queues/Topics");
+    public void viewQueuesAndTopics(String name) {
+        invokeActionOnMessagingProviderRow("Queues/Topics", name);
+        Application.waitUntilVisible();
     }
 
-    public void makeNavigation() {
-        navigation.selectRow();
-        Library.letsSleep(1000);
+    public AddMessagingProviderWindow addMessagingProvider() {
+        invokeActionOnMessagingProviderColumn(FinderNames.ADD);
+        return Console.withBrowser(browser).openedWindow(AddMessagingProviderWindow.class);
     }
 
-    public void createProvider(String name, boolean enabledSecurity, String secirityDomain, String clusterUser, String clusterPassword) {
-        WebElement add = browser.findElement(ByJQuery.selector("div.btn,.primary"));
-        add.click();
-        getWindowFragment().getEditor().text("name", name);
-        getWindowFragment().getEditor().checkbox("security-enabled", enabledSecurity);
-        getWindowFragment().getEditor().text("security-domain", secirityDomain);
-        getWindowFragment().getEditor().text("cluster-user", clusterUser);
-        getWindowFragment().getEditor().text("cluster-password", clusterPassword);
-        getWindowFragment().clickButton("Save");
-    }
 
-    public void removeProvider() {
-        navigation.selectRow().invoke("Remove");
-        getWindowFragment().clickButton("Confirm");
-    }
-
-    public void invokeProviderSettings() {
-        navigation.selectRow().invoke("Provider Settings");
-        Library.letsSleep(1000);
+    public void invokeProviderSettings(String providerName) {
+        invokeActionOnMessagingProviderRow("Provider Settings", providerName);
     }
 
     public void switchToSecurityTab() {

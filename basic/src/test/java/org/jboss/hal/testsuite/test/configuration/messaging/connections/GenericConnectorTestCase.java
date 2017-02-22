@@ -67,8 +67,7 @@ public class GenericConnectorTestCase extends AbstractMessagingTestCase {
 
     @Before
     public void before() {
-        page.navigateToMessaging();
-        page.selectConnectionsView();
+        page.viewConnectionSettings("default");
         page.switchToConnector();
         page.switchToGenericType();
         page.selectInTable(GENERIC_CONNECTOR);

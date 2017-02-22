@@ -62,8 +62,7 @@ public class RemoteConnectorTestCase extends AbstractMessagingTestCase {
 
     @Before
     public void before() {
-        page.navigateToMessaging();
-        page.selectConnectionsView();
+        page.viewConnectionSettings("default");
         page.switchToConnector();
         page.selectInTable(REMOTE_CONNECTOR);
     }

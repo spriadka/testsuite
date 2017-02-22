@@ -69,8 +69,7 @@ public class DiscoveryGroupsTestCase extends AbstractMessagingTestCase {
 
     @Before
     public void before() {
-        page.navigateToMessaging();
-        page.selectView("Clustering");
+        page.viewClusteringSettings("default");
         page.switchToDiscovery();
         page.selectInTable(DG_NAME, 0);
     }

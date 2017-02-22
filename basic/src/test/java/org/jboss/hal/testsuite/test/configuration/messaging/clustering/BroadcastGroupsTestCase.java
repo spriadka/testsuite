@@ -57,8 +57,7 @@ public class BroadcastGroupsTestCase extends AbstractMessagingTestCase {
 
     @Before
     public void before() {
-        page.selectProvider(SERVER_NAME);
-        page.selectView("Clustering");
+        page.viewClusteringSettings(SERVER_NAME);
         page.selectInTable(BG_NAME, 0);
     }
     @AfterClass

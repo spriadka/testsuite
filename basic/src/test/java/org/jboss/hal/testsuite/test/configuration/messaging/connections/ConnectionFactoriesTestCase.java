@@ -1,4 +1,4 @@
-package org.jboss.hal.testsuite.test.configuration.messaging.destinations;
+package org.jboss.hal.testsuite.test.configuration.messaging.connections;
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.arquillian.graphene.page.Page;
@@ -48,8 +48,7 @@ public class ConnectionFactoriesTestCase extends AbstractMessagingTestCase {
 
     @Before
     public void before() {
-        page.navigateToMessaging();
-        page.selectConnectionsView();
+        page.viewConnectionSettings("default");
         page.switchToConnectionFactories();
     }
 

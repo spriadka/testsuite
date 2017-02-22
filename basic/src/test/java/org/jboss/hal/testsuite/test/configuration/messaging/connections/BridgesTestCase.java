@@ -66,8 +66,7 @@ public class BridgesTestCase extends AbstractMessagingTestCase {
 
     @Before
     public void before() {
-        page.navigateToMessaging();
-        page.selectConnectionsView();
+        page.viewConnectionSettings("default");
         page.switchToBridges();
         page.selectInTable(BRIDGE);
     }

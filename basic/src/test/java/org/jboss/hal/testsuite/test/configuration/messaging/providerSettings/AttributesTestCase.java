@@ -37,8 +37,7 @@ public class AttributesTestCase extends AbstractMessagingTestCase {
 
     @Before
     public void before() {
-        page.selectProvider(SERVER_NAME);
-        page.invokeProviderSettings();
+        page.invokeProviderSettings(SERVER_NAME);
     }
 
     @After

@@ -68,8 +68,7 @@ public class GenericAcceptorTestCase extends AbstractMessagingTestCase {
 
     @Before
     public void before() {
-        page.navigateToMessaging();
-        page.selectConnectionsView();
+        page.viewConnectionSettings("default");
         page.switchToAcceptor();
         page.switchToGenericType();
         page.selectInTable(GENERIC_ACCEPTOR);

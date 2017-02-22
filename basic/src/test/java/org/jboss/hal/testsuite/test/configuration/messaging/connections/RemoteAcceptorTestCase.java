@@ -61,8 +61,7 @@ public class RemoteAcceptorTestCase extends AbstractMessagingTestCase {
 
     @Before
     public void before() {
-        page.navigateToMessaging();
-        page.selectConnectionsView();
+        page.viewConnectionSettings("default");
         page.switchToAcceptor();
         page.switchToRemoteType();
         page.selectInTable(REMOTE_ACCEPTOR);
