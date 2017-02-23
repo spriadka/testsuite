@@ -12,11 +12,13 @@ import org.jboss.hal.testsuite.creaper.command.RemoveSocketBinding;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
 import org.jboss.hal.testsuite.page.config.UndertowFiltersPage;
+import org.jboss.hal.testsuite.test.configuration.undertow.UndertowOperations;
 import org.jboss.hal.testsuite.util.ConfigChecker;
 import org.jboss.hal.testsuite.util.Console;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
@@ -48,13 +50,36 @@ public class ModClusterFilterTestCase {
             SOCKET_BINDING_RESOURCE_4 = "socket-binding_4_" + RandomStringUtils.randomAlphanumeric(7),
             SOCKET_BINDING_RESOURCE_5 = "socket-binding_5_" + RandomStringUtils.randomAlphanumeric(7),
             SOCKET_BINDING_RESOURCE_6 = "socket-binding_6_" + RandomStringUtils.randomAlphanumeric(7),
+            SOCKET_BINDING_RESOURCE_7 = "socket-binding_7_" + RandomStringUtils.randomAlphanumeric(7),
+            SOCKET_BINDING_RESOURCE_8 = "socket-binding_8_" + RandomStringUtils.randomAlphanumeric(7),
 
+            ADVERTISE_FREQUENCY = "advertise-frequency",
+            ADVERTISE_PATH = "advertise-path",
+            ADVERTISE_PROTOCOL = "advertise-protocol",
             ADVERTISE_SOCKET_BINDING = "advertise-socket-binding",
-            MANAGEMENT_SOCKET_BINDING = "management-socket-binding",
-            HTTP2_MAX_FRAME_SIZE = "http2-max-frame-size",
+            BROKEN_NODE_TIMEOUT = "broken-node-timeout",
+            CACHED_CONNECTIONS_PER_THREAD = "cached-connections-per-thread",
+            CONNECTION_IDLE_TIMEOUT = "connection-idle-timeout",
+            CONNECTIONS_PER_THREAD = "connections-per-thread",
             ENABLE_HTTP2 = "enable-http2",
+            HEALTH_CHECK_INTERVAL = "health-check-interval",
+            HTTP2_ENABLE_PUSH = "http2-enable-push",
+            HTTP2_HEADER_TABLE_SIZE = "http2-header-table-size",
+            HTTP2_INITIAL_WINDOW_SIZE = "http2-header-table-size",
+            HTTP2_MAX_CONCURRENT_STREAMS = "http2-max-concurrent-streams",
+            HTTP2_MAX_FRAME_SIZE = "http2-max-frame-size",
+            HTTP2_MAX_HEADER_LIST_SIZE = "http2-max-header-list-size",
+            MANAGEMENT_ACCESS_PREDICATE = "management-access-predicate",
+            MANAGEMENT_SOCKET_BINDING = "management-socket-binding",
+            MAX_AJP_ACCESS_SIZE = "max-ajp-packet-size",
+            MAX_REQUEST_TIME = "max-request-time",
             MAX_RETRIES = "max-retries",
             REQUEST_QUEUE_SIZE = "request-queue-size",
+            SECURITY_KEY = "security-key",
+            SECURITY_REALM = "security-realm",
+            SSL_CONTEXT = "ssl-context",
+            USE_ALIAS = "use-alias",
+            WORKER = "worker",
 
             FILTER_NAME = "mod-cluster-filter_" + RandomStringUtils.randomAlphanumeric(5),
             FILTER_TBA_NAME = "mod-cluster-filter_TBA_" + RandomStringUtils.randomAlphanumeric(5),
@@ -70,6 +95,7 @@ public class ModClusterFilterTestCase {
     private static final OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
     private static final Administration administration = new Administration(client);
     private static final Operations operations = new Operations(client);
+    private static final UndertowOperations undertowOps = new UndertowOperations(client);
 
     @BeforeClass
     public static void beforeClass() throws IOException, CommandFailedException {
@@ -89,6 +115,12 @@ public class ModClusterFilterTestCase {
                 .multicastAddress("224.0.0.1")
                 .build());
         client.apply(new AddSocketBinding.Builder(SOCKET_BINDING_RESOURCE_6)
+                .multicastAddress("224.0.0.1")
+                .build());
+        client.apply(new AddSocketBinding.Builder(SOCKET_BINDING_RESOURCE_7)
+                .multicastAddress("224.0.0.1")
+                .build());
+        client.apply(new AddSocketBinding.Builder(SOCKET_BINDING_RESOURCE_8)
                 .multicastAddress("224.0.0.1")
                 .build());
 
@@ -119,10 +151,15 @@ public class ModClusterFilterTestCase {
             client.apply(new RemoveSocketBinding(SOCKET_BINDING_RESOURCE_4));
             client.apply(new RemoveSocketBinding(SOCKET_BINDING_RESOURCE_5));
             client.apply(new RemoveSocketBinding(SOCKET_BINDING_RESOURCE_6));
+            client.apply(new RemoveSocketBinding(SOCKET_BINDING_RESOURCE_7));
+            client.apply(new RemoveSocketBinding(SOCKET_BINDING_RESOURCE_8));
+
 
             operations.removeIfExists(FILTER_ADDRESS);
             operations.removeIfExists(FILTER_TBA_ADDRESS);
             operations.removeIfExists(FILTER_TBR_ADDRESS);
+
+            undertowOps.cleanupReferences();
             administration.reloadIfRequired();
         } finally {
             client.close();
@@ -136,7 +173,7 @@ public class ModClusterFilterTestCase {
         Editor editor = wizardWindow.getEditor();
 
         editor.text("name", FILTER_TBA_NAME);
-        editor.text(MANAGEMENT_SOCKET_BINDING, SOCKET_BINDING_RESOURCE_6);
+        editor.text(MANAGEMENT_SOCKET_BINDING, undertowOps.createSocketBinding());
 
         wizardWindow.finish();
 
@@ -153,6 +190,197 @@ public class ModClusterFilterTestCase {
     }
 
     @Test
+    public void editAdvertiseFrequency() throws Exception {
+        page.getResourceManager().selectByName(FILTER_NAME);
+
+        int value = 42;
+        new ConfigChecker.Builder(client, FILTER_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .editAndSave(ConfigChecker.InputType.TEXT, ADVERTISE_FREQUENCY, String.valueOf(value))
+                .verifyFormSaved()
+                .verifyAttribute(ADVERTISE_FREQUENCY, value);
+    }
+
+    @Test
+    public void editAdvertiseFrequencyInvalid() throws Exception {
+        page.getResourceManager().selectByName(FILTER_NAME);
+
+        String value = "foobar";
+        new ConfigChecker.Builder(client, FILTER_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .editAndSave(ConfigChecker.InputType.TEXT, ADVERTISE_FREQUENCY, value)
+                .verifyFormNotSaved();
+    }
+
+    @Test
+    public void editAdvertiseFrequencyNegative() throws Exception {
+        page.getResourceManager().selectByName(FILTER_NAME);
+
+        int value = -10;
+        new ConfigChecker.Builder(client, FILTER_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .editAndSave(ConfigChecker.InputType.TEXT, ADVERTISE_FREQUENCY, String.valueOf(value))
+                .verifyFormNotSaved();
+    }
+
+    @Test
+    public void editAdvertisePath() throws Exception {
+        page.getResourceManager().selectByName(FILTER_NAME);
+
+        String value = "foobar" + RandomStringUtils.randomAlphanumeric(7);
+        new ConfigChecker.Builder(client, FILTER_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .editAndSave(ConfigChecker.InputType.TEXT, ADVERTISE_PATH, value)
+                .verifyFormSaved()
+                .verifyAttribute(ADVERTISE_PATH, value);
+    }
+
+    @Test
+    public void editAdvertiseProtocol() throws Exception {
+        page.getResourceManager().selectByName(FILTER_NAME);
+
+        String value = "foobar" + RandomStringUtils.randomAlphanumeric(7);
+        new ConfigChecker.Builder(client, FILTER_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .editAndSave(ConfigChecker.InputType.TEXT, ADVERTISE_PROTOCOL, value)
+                .verifyFormSaved()
+                .verifyAttribute(ADVERTISE_PROTOCOL, value);
+    }
+
+    @Test
+    public void editAdvertiseSocketBinding() throws Exception {
+        page.getResourceManager().selectByName(FILTER_NAME);
+
+        String value = SOCKET_BINDING_RESOURCE_7;
+        new ConfigChecker.Builder(client, FILTER_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .editAndSave(ConfigChecker.InputType.TEXT, ADVERTISE_SOCKET_BINDING, value)
+                .verifyFormSaved()
+                .verifyAttribute(ADVERTISE_SOCKET_BINDING, value);
+    }
+
+    @Test
+    public void editBrokenNodeTimeout() throws Exception {
+        page.getResourceManager().selectByName(FILTER_NAME);
+
+        int value = 42;
+        new ConfigChecker.Builder(client, FILTER_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .editAndSave(ConfigChecker.InputType.TEXT, BROKEN_NODE_TIMEOUT, String.valueOf(value))
+                .verifyFormSaved()
+                .verifyAttribute(BROKEN_NODE_TIMEOUT, value);
+    }
+
+    @Test
+    public void editBrokenNodeTimeoutInvalid() throws Exception {
+        page.getResourceManager().selectByName(FILTER_NAME);
+
+        String value = "foo";
+        new ConfigChecker.Builder(client, FILTER_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .editAndSave(ConfigChecker.InputType.TEXT, BROKEN_NODE_TIMEOUT, value)
+                .verifyFormNotSaved();
+    }
+
+    @Test
+    public void editCachedConnectionsPerThread() throws Exception {
+        page.getResourceManager().selectByName(FILTER_NAME);
+
+        int value = 42;
+        new ConfigChecker.Builder(client, FILTER_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .editAndSave(ConfigChecker.InputType.TEXT, CACHED_CONNECTIONS_PER_THREAD, String.valueOf(value))
+                .verifyFormSaved()
+                .verifyAttribute(CACHED_CONNECTIONS_PER_THREAD, value);
+    }
+
+    @Test
+    public void editCachedConnectionIdleTimeout() throws Exception {
+        page.getResourceManager().selectByName(FILTER_NAME);
+
+        int value = 42;
+        new ConfigChecker.Builder(client, FILTER_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .editAndSave(ConfigChecker.InputType.TEXT, CONNECTION_IDLE_TIMEOUT, String.valueOf(value))
+                .verifyFormSaved()
+                .verifyAttribute(CONNECTION_IDLE_TIMEOUT, value);
+    }
+
+    @Test
+    public void editConnectionsPerThread() throws Exception {
+        page.getResourceManager().selectByName(FILTER_NAME);
+
+        int value = 42;
+        new ConfigChecker.Builder(client, FILTER_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .editAndSave(ConfigChecker.InputType.TEXT, CONNECTIONS_PER_THREAD, String.valueOf(value))
+                .verifyFormSaved()
+                .verifyAttribute(CONNECTIONS_PER_THREAD, value);
+    }
+
+    @Test
+    public void toggleEnableHTTP2() throws Exception {
+        page.getResourceManager().selectByName(FILTER_NAME);
+
+        toggleCheckbox(ENABLE_HTTP2);
+    }
+
+    @Test
+    public void editHealthCheckInterval() throws Exception {
+        page.getResourceManager().selectByName(FILTER_NAME);
+
+        int value = 42;
+        new ConfigChecker.Builder(client, FILTER_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .editAndSave(ConfigChecker.InputType.TEXT, HEALTH_CHECK_INTERVAL, String.valueOf(value))
+                .verifyFormSaved()
+                .verifyAttribute(HEALTH_CHECK_INTERVAL, value);
+    }
+
+    @Test
+    public void toggleHTTP2EnablePush() throws Exception {
+        page.getResourceManager().selectByName(FILTER_NAME);
+
+        toggleCheckbox(HTTP2_ENABLE_PUSH);
+    }
+
+    @Test
+    public void editHTTP2HeaderTableSize() throws Exception {
+        page.getResourceManager().selectByName(FILTER_NAME);
+
+        int value = 42;
+        new ConfigChecker.Builder(client, FILTER_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .editAndSave(ConfigChecker.InputType.TEXT, HTTP2_HEADER_TABLE_SIZE, String.valueOf(value))
+                .verifyFormSaved()
+                .verifyAttribute(HTTP2_HEADER_TABLE_SIZE, value);
+    }
+
+    @Test
+    public void editHTTP2InitialWindowSize() throws Exception {
+        page.getResourceManager().selectByName(FILTER_NAME);
+
+        int value = 42;
+        new ConfigChecker.Builder(client, FILTER_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .editAndSave(ConfigChecker.InputType.TEXT, HTTP2_INITIAL_WINDOW_SIZE, String.valueOf(value))
+                .verifyFormSaved()
+                .verifyAttribute(HTTP2_INITIAL_WINDOW_SIZE, value);
+    }
+
+    @Test
+    public void editHTTP2MaxConcurrentStreams() throws Exception {
+        page.getResourceManager().selectByName(FILTER_NAME);
+
+        int value = 42;
+        new ConfigChecker.Builder(client, FILTER_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .editAndSave(ConfigChecker.InputType.TEXT, HTTP2_MAX_CONCURRENT_STREAMS, String.valueOf(value))
+                .verifyFormSaved()
+                .verifyAttribute(HTTP2_MAX_CONCURRENT_STREAMS, value);
+    }
+
+    @Test
     public void editHTTP2MaxFrameSize() throws Exception {
         page.getResourceManager().selectByName(FILTER_NAME);
 
@@ -162,6 +390,71 @@ public class ModClusterFilterTestCase {
                 .editAndSave(ConfigChecker.InputType.TEXT, HTTP2_MAX_FRAME_SIZE, String.valueOf(value))
                 .verifyFormSaved()
                 .verifyAttribute(HTTP2_MAX_FRAME_SIZE, value);
+    }
+
+    @Test
+    public void editHTTP2MaxHeaderListSize() throws Exception {
+        page.getResourceManager().selectByName(FILTER_NAME);
+
+        int value = 42;
+        new ConfigChecker.Builder(client, FILTER_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .editAndSave(ConfigChecker.InputType.TEXT, HTTP2_MAX_HEADER_LIST_SIZE, String.valueOf(value))
+                .verifyFormSaved()
+                .verifyAttribute(HTTP2_MAX_HEADER_LIST_SIZE, value);
+    }
+
+    @Test
+    public void editManagementAccessPredicate() throws Exception {
+        /*known predicates are [auth-required, method, secure, path-suffix, directory, max-content-size, idempotent,
+         path, path-prefix, contains, regex, min-content-size, file, equals, exists, path-template, dispatcher]*/
+        page.getResourceManager().selectByName(FILTER_NAME);
+
+        String value = "auth-required";
+        new ConfigChecker.Builder(client, FILTER_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .editAndSave(ConfigChecker.InputType.TEXT, MANAGEMENT_ACCESS_PREDICATE, value)
+                .verifyFormSaved();
+
+        administration.reloadIfRequired();
+
+       new ResourceVerifier(FILTER_ADDRESS, client).verifyAttribute(MANAGEMENT_ACCESS_PREDICATE, value);
+    }
+
+    @Test
+    public void editManagementSocketBinding() throws Exception {
+        page.getResourceManager().selectByName(FILTER_NAME);
+
+        String value = SOCKET_BINDING_RESOURCE_8;
+        new ConfigChecker.Builder(client, FILTER_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .editAndSave(ConfigChecker.InputType.TEXT, MANAGEMENT_SOCKET_BINDING, value)
+                .verifyFormSaved()
+                .verifyAttribute(MANAGEMENT_SOCKET_BINDING, value);
+    }
+
+    @Test
+    public void editMaxAJPPacketSize() throws Exception {
+        page.getResourceManager().selectByName(FILTER_NAME);
+
+        int value = 42;
+        new ConfigChecker.Builder(client, FILTER_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .editAndSave(ConfigChecker.InputType.TEXT, MAX_AJP_ACCESS_SIZE, String.valueOf(value))
+                .verifyFormSaved()
+                .verifyAttribute(MAX_AJP_ACCESS_SIZE, value);
+    }
+
+    @Test
+    public void editMaxRequestTime() throws Exception {
+        page.getResourceManager().selectByName(FILTER_NAME);
+
+        int value = 42;
+        new ConfigChecker.Builder(client, FILTER_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .editAndSave(ConfigChecker.InputType.TEXT, MAX_REQUEST_TIME, String.valueOf(value))
+                .verifyFormSaved()
+                .verifyAttribute(MAX_REQUEST_TIME, value);
     }
 
     @Test
@@ -200,23 +493,78 @@ public class ModClusterFilterTestCase {
     }
 
     @Test
-    public void toggleEnableHTTP2() throws Exception {
+    public void editSecurityKey() throws Exception {
         page.getResourceManager().selectByName(FILTER_NAME);
 
-        boolean originalValue = operations.readAttribute(FILTER_ADDRESS, ENABLE_HTTP2).booleanValue();
+        String value = "top-secret-key" + RandomStringUtils.randomAlphanumeric(7);
+        new ConfigChecker.Builder(client, FILTER_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .editAndSave(ConfigChecker.InputType.TEXT, SECURITY_KEY, value)
+                .verifyFormSaved()
+                .verifyAttribute(SECURITY_KEY, value);
+    }
+
+    @Test
+    public void editSecurityRealm() throws Exception {
+        page.getResourceManager().selectByName(FILTER_NAME);
+
+        String securityRealm = undertowOps.createSecurityRealm();
 
         new ConfigChecker.Builder(client, FILTER_ADDRESS)
                 .configFragment(page.getConfigFragment())
-                .editAndSave(ConfigChecker.InputType.CHECKBOX, ENABLE_HTTP2, !originalValue)
+                .editAndSave(ConfigChecker.InputType.TEXT, SECURITY_REALM, securityRealm)
                 .verifyFormSaved()
-                .verifyAttribute(ENABLE_HTTP2, !originalValue);
+                .verifyAttribute(SECURITY_REALM, securityRealm);
+    }
+
+    //TODO - make this part of elytron tests or wait till elytron tests are merged and use new API for this.
+    @Ignore("Need to use Elytron subsystem to define ssl context.")
+    @Test
+    public void editSSLContext() throws Exception {
+        page.getResourceManager().selectByName(FILTER_NAME);
+
+        String value = "ssl-context" + RandomStringUtils.randomAlphanumeric(7);
+        new ConfigChecker.Builder(client, FILTER_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .editAndSave(ConfigChecker.InputType.TEXT, SSL_CONTEXT, value)
+                .verifyFormSaved()
+                .verifyAttribute(SSL_CONTEXT, value);
+    }
+
+    @Test
+    public void toggleUseAlias() throws Exception {
+        page.getResourceManager().selectByName(FILTER_NAME);
+
+        toggleCheckbox(USE_ALIAS);
+    }
+
+    @Test
+    public void editWorker() throws Exception {
+        page.getResourceManager().selectByName(FILTER_NAME);
+
+        String value = "my-worker" + RandomStringUtils.randomAlphanumeric(7);
+        new ConfigChecker.Builder(client, FILTER_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .editAndSave(ConfigChecker.InputType.TEXT, WORKER, value)
+                .verifyFormSaved()
+                .verifyAttribute(WORKER, value);
+    }
+
+    public void toggleCheckbox(String identifier) throws Exception {
+        boolean originalValue = operations.readAttribute(FILTER_ADDRESS, identifier).booleanValue();
+
+        new ConfigChecker.Builder(client, FILTER_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .editAndSave(ConfigChecker.InputType.CHECKBOX, identifier, !originalValue)
+                .verifyFormSaved()
+                .verifyAttribute(identifier, !originalValue);
 
         Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
         administration.reloadIfRequired();
 
         new ConfigChecker.Builder(client, FILTER_ADDRESS)
                 .configFragment(page.getConfigFragment())
-                .editAndSave(ConfigChecker.InputType.CHECKBOX, ENABLE_HTTP2, originalValue)
+                .editAndSave(ConfigChecker.InputType.CHECKBOX, identifier, originalValue)
                 .verifyFormSaved();
 
         administration.reloadIfRequired();
@@ -224,5 +572,7 @@ public class ModClusterFilterTestCase {
         new ResourceVerifier(FILTER_ADDRESS, client).verifyAttribute(ENABLE_HTTP2, originalValue,
                 "Setting back to original value failed probably because of https://issues.jboss.org/browse/HAL-1235");
     }
+
+
 
 }

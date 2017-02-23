@@ -5,7 +5,6 @@ import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
-import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
 import org.jboss.hal.testsuite.page.config.UndertowHTTPPage;
@@ -390,8 +389,7 @@ public class HTTPListenerTestCase extends UndertowTestCaseAbstract {
     @Test
     public void addHTTPListenerInGUI() throws Exception {
         String socketBinding = undertowOps.createSocketBinding();
-        ConfigFragment config = page.getConfigFragment();
-        WizardWindow wizard = config.getResourceManager().addResource();
+        WizardWindow wizard = page.getResourceManager().addResource();
 
         Editor editor = wizard.getEditor();
         editor.text("name", HTTP_LISTENER_TBA);
@@ -399,7 +397,7 @@ public class HTTPListenerTestCase extends UndertowTestCaseAbstract {
         boolean result = wizard.finishAndDismissReloadRequiredWindow();
 
         Assert.assertTrue("Window should be closed", result);
-        Assert.assertTrue("HTTP listener should be present in table", config.resourceIsPresent(HTTP_LISTENER_TBA));
+        Assert.assertTrue("HTTP listener should be present in table", page.getResourceManager().isResourcePresent(HTTP_LISTENER_TBA));
         ResourceVerifier verifier = new ResourceVerifier(HTTP_LISTENER_TBA_ADDRESS, client);
         verifier.verifyExists();
         verifier.verifyAttribute(SOCKET_BINDING, socketBinding);
@@ -407,12 +405,11 @@ public class HTTPListenerTestCase extends UndertowTestCaseAbstract {
 
     @Test
     public void removeHTTPListenerInGUI() throws Exception {
-        ConfigFragment config = page.getConfigFragment();
-        config.getResourceManager()
+        page.getResourceManager()
                 .removeResource(HTTP_LISTENER_TBR)
                 .confirmAndDismissReloadRequiredMessage();
 
-        Assert.assertFalse("HTTP listener host should not be present in table", config.resourceIsPresent(HTTP_LISTENER_TBR));
+        Assert.assertFalse("HTTP listener host should not be present in table", page.getResourceManager().isResourcePresent(HTTP_LISTENER_TBR));
         new ResourceVerifier(HTTP_LISTENER_TBR_ADDRESS, client).verifyDoesNotExist(); //HTTP server host should not be present on the server
     }
 

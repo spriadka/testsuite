@@ -205,7 +205,7 @@ public class MailTestCase {
         administration.reloadIfRequired();
 
         assertTrue("Window should be closed", wizard.isClosed());
-        assertTrue("Mail server should be present in table", fragment.resourceIsPresent(TYPE.toUpperCase()));
+        assertTrue("Mail server should be present in table", page.getResourceManager().isResourcePresent(TYPE.toUpperCase()));
 
         new ResourceVerifier(SERVER_ADDRESS, client).verifyExists();
     }

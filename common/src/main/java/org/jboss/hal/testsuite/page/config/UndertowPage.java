@@ -20,8 +20,12 @@ import org.openqa.selenium.WebElement;
  */
 public class UndertowPage extends ConfigurationPage implements Navigatable {
 
-    private static final By CONTENT_ROOT = ByJQuery.selector("." + PropUtils.get("page.content.rhs.class")
-            + ":visible:has(." + PropUtils.get("configarea.content.class") + ":visible)");
+    private static final String
+            TAB_PANEL_CLASS = PropUtils.get("page.tabpanel.class"),
+            CONFIG_AREA_CLASS = PropUtils.get("configarea.content.class");
+
+    private static final By CONTENT_ROOT = ByJQuery.selector("table." + TAB_PANEL_CLASS + ":has(." + CONFIG_AREA_CLASS + ":visible):visible");
+
 
     public void navigate() {
         FinderNavigation navigation;
@@ -50,8 +54,7 @@ public class UndertowPage extends ConfigurationPage implements Navigatable {
 
     @Override
     public ConfigAreaFragment getConfig() {
-        By selector = CONTENT_ROOT;
-        WebElement root = browser.findElement(selector);
+        WebElement root = browser.findElement(CONTENT_ROOT);
         return Graphene.createPageFragment(ConfigAreaFragment.class, root);
     }
 

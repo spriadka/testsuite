@@ -1,10 +1,11 @@
 package org.jboss.hal.testsuite.fragment;
 
-import java.util.List;
 import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.hal.testsuite.util.PropUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
+
+import java.util.List;
 
 /**
  * @author jbliznak@redhat.com
@@ -17,7 +18,7 @@ public class PagerFragment extends BaseFragment {
     public static final int IDX_PAGER_INFO = 2;
     public static final int IDX_NEXT_PAGE = 3;
     public static final int IDX_LAST_PAGE = 4;
-    public static final String PAGER_INFO_PATTERN = "(\\d+).+(\\d+).+(\\d+)";
+    public static final String PAGER_INFO_PATTERN = "(\\d+)-(\\d+) of (\\d+)";
     public static final int IDX_RECORDS_FROM = 1;
     public static final int IDX_RECORDS_TO = 2;
     public static final int IDX_RECORDS_TOTAL = 3;
@@ -123,7 +124,8 @@ public class PagerFragment extends BaseFragment {
      */
     private int getNthNumberFromInfo(int idx) {
         WebElement pageInfoTd = getNthCell(IDX_PAGER_INFO);
-        String text = pageInfoTd.getText();
+        //workaround - #getText() doesn't seem to be reliable in this case
+        String text = pageInfoTd.findElement(By.tagName("div")).getAttribute("innerHTML");
 
         if (text.matches(PAGER_INFO_PATTERN)) {
             return Integer.parseInt(text.replaceFirst(PAGER_INFO_PATTERN, "$" + idx));

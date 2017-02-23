@@ -5,7 +5,6 @@ import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
-import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
 import org.jboss.hal.testsuite.page.config.UndertowHTTPPage;
@@ -369,16 +368,15 @@ public class AJPListenerTestCase extends UndertowTestCaseAbstract {
 
     @Test
     public void addAJPListenerInGUI() throws Exception {
-        ConfigFragment config = page.getConfigFragment();
         String socketBinding = undertowOps.createSocketBinding();
-        WizardWindow wizard = config.getResourceManager().addResource();
+        WizardWindow wizard = page.getResourceManager().addResource();
         Editor editor = wizard.getEditor();
         editor.text("name", AJP_LISTENER_TBA);
         editor.text(SOCKET_BINDING, socketBinding);
         boolean result = wizard.finishAndDismissReloadRequiredWindow();
 
         Assert.assertTrue("Window should be closed", result);
-        Assert.assertTrue("AJP listener should be present in table", config.resourceIsPresent(AJP_LISTENER_TBA));
+        Assert.assertTrue("AJP listener should be present in table", page.getResourceManager().isResourcePresent(AJP_LISTENER_TBA));
         new ResourceVerifier(AJP_LISTENER_ADDRESS_TBA, client)
                 .verifyExists()
                 .verifyAttribute(SOCKET_BINDING, socketBinding);
@@ -386,12 +384,11 @@ public class AJPListenerTestCase extends UndertowTestCaseAbstract {
 
     @Test
     public void removeAJPListenerInGUI() throws Exception {
-        ConfigFragment config = page.getConfigFragment();
-        config.getResourceManager()
+        page.getResourceManager()
                 .removeResource(AJP_LISTENER_TBR)
                 .confirmAndDismissReloadRequiredMessage();
 
-        Assert.assertFalse("AJP listener host should not be present in table", config.resourceIsPresent(AJP_LISTENER_TBR));
+        Assert.assertFalse("AJP listener host should not be present in table", page.getResourceManager().isResourcePresent(AJP_LISTENER_TBR));
         new ResourceVerifier(AJP_LISTENER_ADDRESS_TBR, client).verifyDoesNotExist(); //HTTP server host should not be present on the server
     }
 

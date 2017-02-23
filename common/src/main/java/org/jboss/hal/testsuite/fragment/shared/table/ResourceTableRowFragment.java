@@ -13,6 +13,8 @@ import java.util.concurrent.TimeUnit;
 
 public class ResourceTableRowFragment extends BaseFragment {
 
+    public static final String ROW_SELECTED_CLASS = "cellTableSelectedRow";
+
     public String getCellValue(int index) {
         WebElement cell = getCell(index);
 
@@ -48,5 +50,13 @@ public class ResourceTableRowFragment extends BaseFragment {
         link.click();
 
         Graphene.waitGui().withTimeout(1500, TimeUnit.MILLISECONDS);
+    }
+
+    /**
+     * Checks if row is in selected state
+     * @return true, if this row is selected, false otherwise.
+     */
+    public boolean isSelected() {
+        return getRoot().getAttribute("class").contains(ROW_SELECTED_CLASS);
     }
 }
