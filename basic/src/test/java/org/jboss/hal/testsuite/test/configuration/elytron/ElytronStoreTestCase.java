@@ -174,7 +174,7 @@ public class ElytronStoreTestCase extends AbstractElytronTestCase {
     @Test
     public void addCredentialStoreTest() throws Exception {
         final String credentialStoreName = RandomStringUtils.randomAlphanumeric(5),
-                uriValue = "cr-store://test/" + RandomStringUtils.randomAlphanumeric(5) + ".jceks?create.storage=true",
+                uriValue = getCredentialStoreUriTestValue(),
                 password = RandomStringUtils.randomAlphanumeric(5);
         final Address credentialStoreAddress = elyOps.getElytronAddress(CREDENTIAL_STORE, credentialStoreName);
         final ModelNode expectedCredentialReferenceNode = new ModelNodePropertiesBuilder()
@@ -207,7 +207,7 @@ public class ElytronStoreTestCase extends AbstractElytronTestCase {
     @Test
     public void removeCredentialStoreTest() throws Exception {
         final String credentialStoreName = RandomStringUtils.randomAlphanumeric(5),
-                uriValue = "cr-store://test/" + RandomStringUtils.randomAlphanumeric(5) + ".jceks?create.storage=true",
+                uriValue = getCredentialStoreUriTestValue(),
                 password = RandomStringUtils.randomAlphanumeric(5);
         final Address credentialStoreAddress = elyOps.getElytronAddress(CREDENTIAL_STORE, credentialStoreName);
         final ModelNode credentialReferenceNode = new ModelNodePropertiesBuilder().addProperty(CLEAR_TEXT, password)
@@ -234,7 +234,7 @@ public class ElytronStoreTestCase extends AbstractElytronTestCase {
     @Test
     public void editCredentialStoreAttributesTest() throws Exception {
         final String credentialStoreName = RandomStringUtils.randomAlphanumeric(5),
-                uriValue = "cr-store://test/" + RandomStringUtils.randomAlphanumeric(5) + ".jceks?create.storage=true",
+                uriValue = getCredentialStoreUriTestValue(),
                 password = RandomStringUtils.randomAlphanumeric(5),
                 jbossHomeDir = "jboss.home.dir",
                 providerNameValue = RandomStringUtils.randomAlphanumeric(5);
@@ -267,7 +267,7 @@ public class ElytronStoreTestCase extends AbstractElytronTestCase {
     @Test
     public void editCredentialStoreCredentialReferenceTest() throws Exception {
         final String credentialStoreName = RandomStringUtils.randomAlphanumeric(5),
-                uriValue = "cr-store://test/" + RandomStringUtils.randomAlphanumeric(5) + ".jceks?create.storage=true",
+                uriValue = getCredentialStoreUriTestValue(),
                 initialPassword = RandomStringUtils.randomAlphanumeric(5),
                 newPassword = RandomStringUtils.randomAlphanumeric(5),
                 aliasValue = RandomStringUtils.randomAlphanumeric(5),
@@ -540,6 +540,10 @@ public class ElytronStoreTestCase extends AbstractElytronTestCase {
             this.name = dirContextName;
             this.address = dirContextAddress;
         }
+    }
+
+    private String getCredentialStoreUriTestValue() {
+        return "cr-store://test/" + RandomStringUtils.randomAlphanumeric(5) + ".jceks?create=true";
     }
 
 }
