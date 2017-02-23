@@ -52,6 +52,10 @@ public class ResourceTableRowFragment extends BaseFragment {
         Graphene.waitGui().withTimeout(1500, TimeUnit.MILLISECONDS);
     }
 
+    /**
+     * Checks if row is in selected state
+     * @return true, if this row is selected, false otherwise.
+     */
     public boolean isSelected() {
         return getRoot().getAttribute("class").contains(ROW_SELECTED_CLASS);
     }
