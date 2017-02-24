@@ -131,7 +131,7 @@ public class DomainRuntimeAccessErrorTestCase {
                 .step(FinderNames.HOST, "master")
                 .step(FinderNames.SERVER, "server-one")
                 .step(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
-                .step(FinderNames.SUBSYSTEM, "Webservices");
+                .step(FinderNames.SUBSYSTEM, "Web Services");
         navigateToPageAndStorePathOnError(navigation, acc, pathSubsystem + "/WebServices");
 
         assertTrue("Insufficient privileges on following paths " + getPathsWithError(acc), acc.isEmpty());
