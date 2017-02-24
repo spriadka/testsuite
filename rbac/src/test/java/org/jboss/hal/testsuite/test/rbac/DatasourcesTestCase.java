@@ -117,6 +117,7 @@ public class DatasourcesTestCase {
         Assert.assertEquals(fillSensitive, editor.getText("username").isEnabled());
         Assert.assertEquals(fillSensitive, editor.getText("password").isEnabled());
         wizard.next();
+        wizard.next();
         wizard.finish();
     }
 
