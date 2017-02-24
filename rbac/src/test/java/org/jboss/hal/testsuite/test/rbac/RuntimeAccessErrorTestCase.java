@@ -111,7 +111,7 @@ public class RuntimeAccessErrorTestCase {
         navigation = new FinderNavigation(browser, StandaloneRuntimeEntryPoint.class)
                 .step(FinderNames.SERVER, FinderNames.STANDALONE_SERVER)
                 .step(FinderNames.MONITOR, FinderNames.SUBSYSTEMS)
-                .step(FinderNames.SUBSYSTEM, "Webservices");
+                .step(FinderNames.SUBSYSTEM, "Web Services");
         navigateToPageAndStorePathOnError(navigation, acc, pathSubsystem + "/WebServices");
 
         assertTrue("Insufficient privileges on following paths " + getPathsWithError(acc), acc.isEmpty());
