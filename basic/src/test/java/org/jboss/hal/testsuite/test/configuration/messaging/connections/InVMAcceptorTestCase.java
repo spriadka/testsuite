@@ -66,8 +66,7 @@ public class InVMAcceptorTestCase extends AbstractMessagingTestCase {
 
     @Before
     public void before() {
-        page.navigateToMessaging();
-        page.selectConnectionsView();
+        page.viewConnectionSettings("default");
         page.switchToAcceptor();
         page.switchToInVmType();
         page.selectInTable(IN_VM_ACCEPTOR);

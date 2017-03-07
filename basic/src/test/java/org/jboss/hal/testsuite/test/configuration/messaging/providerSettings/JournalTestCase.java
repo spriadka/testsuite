@@ -1,8 +1,5 @@
 package org.jboss.hal.testsuite.test.configuration.messaging.providerSettings;
 
-import static org.apache.commons.lang.RandomStringUtils.randomAlphanumeric;
-import static org.jboss.hal.testsuite.util.ConfigChecker.InputType.TEXT;
-
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Shared;
@@ -26,6 +23,9 @@ import org.wildfly.extras.creaper.core.online.operations.Values;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
+
+import static org.apache.commons.lang.RandomStringUtils.randomAlphanumeric;
+import static org.jboss.hal.testsuite.util.ConfigChecker.InputType.TEXT;
 
 @RunWith(Arquillian.class)
 @Category(Shared.class)
@@ -52,8 +52,7 @@ public class JournalTestCase extends AbstractMessagingTestCase {
 
     @Before
     public void before() {
-        page.selectProvider(SERVER_NAME);
-        page.invokeProviderSettings();
+        page.invokeProviderSettings(SERVER_NAME);
         page.switchToJournalTab();
     }
 

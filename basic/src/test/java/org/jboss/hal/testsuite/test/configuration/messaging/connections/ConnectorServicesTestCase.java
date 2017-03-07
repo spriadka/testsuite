@@ -72,8 +72,7 @@ public class ConnectorServicesTestCase extends AbstractMessagingTestCase {
 
     @Before
     public void before() {
-        page.navigateToMessaging();
-        page.selectConnectionsView();
+        page.viewConnectionSettings("default");
         page.switchToConnectorServices();
         page.selectInTable(CONNECTOR_SERVICE);
     }

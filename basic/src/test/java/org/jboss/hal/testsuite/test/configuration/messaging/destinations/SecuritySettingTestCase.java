@@ -63,8 +63,7 @@ public class SecuritySettingTestCase extends AbstractMessagingTestCase {
 
     @Before
     public void before() {
-        page.navigateToMessaging();
-        page.selectQueuesAndTopics();
+        page.viewQueuesAndTopics("default");
         page.switchToSecuritySettings();
         page.selectInTable(PATTERN);
     }
