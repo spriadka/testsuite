@@ -173,7 +173,7 @@ public class ElementaryAccessControlTestCase {
         java.util.concurrent.TimeoutException {
         ConfigFragment security = getConfig("Security");
         if (read) {
-            WebElement username = getElementByLabel("Username");
+            WebElement username = getElementByLabel("User name");
             boolean enabled = username.isEnabled();
             assertEquals("Input element is enabled: " + enabled + ", but expected is " + read, read, enabled);
             if (enabled) {
@@ -183,7 +183,7 @@ public class ElementaryAccessControlTestCase {
         }
         if (write) {
             Editor editor = security.edit();
-            editor.text("username", "sa");
+            editor.text("user-name", "sa");
             security.save();
             Library.letsSleep(1000);
             verifier.verifyAttribute(address, "user-name", "sa");
