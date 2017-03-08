@@ -5,6 +5,8 @@ import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.fragment.config.remoting.HttpConnectorWizard;
 import org.jboss.hal.testsuite.fragment.config.remoting.LocalOutboundConnectionWizard;
 import org.jboss.hal.testsuite.fragment.config.remoting.NativeConnectorWizard;
+import org.jboss.hal.testsuite.fragment.config.remoting.OutboundConnectionWizard;
+import org.jboss.hal.testsuite.fragment.config.remoting.RemoteOutboundConnectionWizard;
 import org.jboss.hal.testsuite.page.ConfigPage;
 import org.jboss.hal.testsuite.util.Console;
 
@@ -44,6 +46,14 @@ public class RemotingSubsystemPage extends ConfigPage {
 
     public LocalOutboundConnectionWizard addLocalOutboundConnection() {
         return getResourceManager().addResource(LocalOutboundConnectionWizard.class);
+    }
+
+    public RemoteOutboundConnectionWizard addRemoteOutboundConnection() {
+        return getResourceManager().addResource(RemoteOutboundConnectionWizard.class);
+    }
+
+    public OutboundConnectionWizard addOutboundConnection() {
+        return getResourceManager().addResource(OutboundConnectionWizard.class);
     }
 
 }
