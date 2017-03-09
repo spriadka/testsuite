@@ -8,7 +8,7 @@ import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
-import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
+import org.jboss.hal.testsuite.fragment.WindowFragment;
 import org.jboss.hal.testsuite.page.runtime.DomainRuntimeEntryPoint;
 import org.jboss.hal.testsuite.util.Authentication;
 import org.jboss.hal.testsuite.util.Console;
@@ -128,9 +128,7 @@ public class ServerManagementTestCase {
                 .step(FinderNames.SERVER, server);
 
         try {
-           navigation.selectRow().invoke(serverState.uiOption);
-           Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm().assertClosed();
-           Console.withBrowser(browser).waitUntilLoaded();
+           navigation.selectRow().invoke(serverState.changeStateOption);
         } catch (NoSuchElementException ex) {
             buttonVisibility = false;
         } catch (TimeoutException ex) {
@@ -141,10 +139,15 @@ public class ServerManagementTestCase {
                 + "' but should be '" + serverShouldBeVisible + "'.", serverShouldBeVisible, serverVisibility);
 
         if (serverShouldBeVisible) {
-            assertEquals("Missing " + serverState.uiOption + " option for server '" + server + "' of host '" + host
+            assertEquals("Missing " + serverState.changeStateOption + " option for server '" + server + "' of host '" + host
                     + "'.", buttonShouldBeVisible, buttonVisibility);
 
             if (buttonShouldBeVisible) {
+                WindowFragment confirmationWindow = Console.withBrowser(browser).openedWindow();
+                confirmationWindow.clickButton(serverState.confirmationLabel);
+                confirmationWindow.waitUntilClosed();
+                Console.withBrowser(browser).waitUntilLoaded();
+
                 Address address = ops.getServerAddress(host, server);
                 new ResourceVerifier(address, client, ResourceVerifier.LONG_TIMEOUT)
                     .verifyAttribute(Constants.SERVER_STATE, serverState.dmrAttrValue);
@@ -154,12 +157,13 @@ public class ServerManagementTestCase {
     }
 
     private enum ServerState {
-        RUNNING("Start", "running"), STOPPED("Stop", "STOPPED");
+        RUNNING("Start", "Confirm", "running"), STOPPED("Stop", "Stop Server", "STOPPED");
 
-        String uiOption, dmrAttrValue;
+        String changeStateOption, confirmationLabel, dmrAttrValue;
 
-        ServerState(String uiOption, String dmrAttrValue) {
-            this.uiOption = uiOption;
+        ServerState(String changeStateOption, String confirmationLabel, String dmrAttrValue) {
+            this.changeStateOption = changeStateOption;
+            this.confirmationLabel = confirmationLabel;
             this.dmrAttrValue = dmrAttrValue;
         }
     }
