@@ -1,31 +1,28 @@
 package org.jboss.hal.testsuite.test.rbac;
 
+import org.apache.commons.io.IOUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
-import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Domain;
 import org.jboss.hal.testsuite.cli.TimeoutException;
-import org.jboss.hal.testsuite.dmr.Dispatcher;
-import org.jboss.hal.testsuite.dmr.ResourceAddress;
-import org.jboss.hal.testsuite.dmr.ResourceVerifier;
+import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
+import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
-import org.jboss.hal.testsuite.fragment.ConfigFragment;
+import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
+import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
 import org.jboss.hal.testsuite.page.runtime.DomainRuntimeEntryPoint;
 import org.jboss.hal.testsuite.util.Authentication;
 import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.RbacRole;
 import org.junit.AfterClass;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
-import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-
+import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
+import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.openqa.selenium.NoSuchElementException;
 
 import static junit.framework.TestCase.assertEquals;
@@ -39,32 +36,24 @@ public class ServerGroupTestCase {
 
     private FinderNavigation navigation;
 
-    private ResourceAddress address;
-    static Dispatcher dispatcher;
-    static ResourceVerifier verifier;
-
-    @BeforeClass
-    public static void beforeClass() {
-        dispatcher = new Dispatcher();
-        verifier  = new ResourceVerifier(dispatcher);
-    }
+    private static OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
 
     @AfterClass
     public static void afterClass() {
-        dispatcher.close();
+        IOUtils.closeQuietly(client);
     }
 
     @Drone
     private WebDriver browser;
 
     @Test
-    public void administrator() {
+    public void administrator() throws Exception {
         Authentication.with(browser).authenticate(RbacRole.ADMINISTRATOR);
         checkStandardButtons(true);
         checkRemoveButtonForGroup("main-server-group", true);
         checkRemoveButtonForGroup("mainmaster-server-group", true);
         checkRemoveButtonForGroup("other-server-group", true);
-        addServerGroup(true);
+        addServerGroup();
     }
 
     @Test
@@ -136,21 +125,24 @@ public class ServerGroupTestCase {
         assertEquals("Problem with visibility of buttons add and remove. ", unvisible, !visible);
     }
 
-    public void addServerGroup(boolean shouldSucceed) {
+    public void addServerGroup() throws Exception {
+        Address serverGroupAddress = Address.of("server-group", "my-server-group");
+        ResourceVerifier serverGroupVerifier = new ResourceVerifier(serverGroupAddress, client);
+
         navigation = new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
                 .step(FinderNames.BROWSE_DOMAIN_BY, FinderNames.SERVER_GROUPS)
                 .step(FinderNames.SERVER_GROUP);
 
         navigation.selectColumn().invoke("Add");
 
-        getWindowFragment().getEditor().text("name", "my-server-group");
-        getWindowFragment().getEditor().select("profileName", "default");
-        getWindowFragment().getEditor().select("socketBinding", "standard-sockets");
-        getWindowFragment().clickButton("Save");
+        WizardWindow wizard = Console.withBrowser(browser).openedWizard();
+        Editor editor = wizard.getEditor();
+        editor.text("name", "my-server-group");
+        editor.select("profileName", "default");
+        editor.select("socketBinding", "standard-sockets");
 
-        address = new ResourceAddress(new ModelNode("/server-group=my-server-group"));
-
-        verifier.verifyResource(address, shouldSucceed);
+        wizard.assertFinish(true);
+        serverGroupVerifier.verifyExists();
 
         navigation = new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
                 .step(FinderNames.BROWSE_DOMAIN_BY, FinderNames.SERVER_GROUPS)
@@ -163,13 +155,9 @@ public class ServerGroupTestCase {
         } catch (TimeoutException ignored) {
         }
 
-        verifier.verifyResource(address, false);
+        serverGroupVerifier.verifyDoesNotExist();
     }
 
-    private ConfigFragment getWindowFragment() {
-        WebElement editPanel = browser.findElement(By.className("default-window-content"));
-        return  Graphene.createPageFragment(ConfigFragment.class, editPanel);
-    }
 }
 
 
