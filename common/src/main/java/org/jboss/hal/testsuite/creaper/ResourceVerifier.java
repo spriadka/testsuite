@@ -118,7 +118,7 @@ public class ResourceVerifier {
         });
 
         ModelNodeResult actualResult = ops.readAttribute(resourceAddress, attributeName);
-        actualResult.assertDefinedValue();
+        actualResult.assertDefinedValue(errorMessageSuffix);
         Assert.assertEquals("Attribute value is different in model! " + errorMessageSuffix,
                 expectedValue, actualResult.value());
         return this;

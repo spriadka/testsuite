@@ -47,6 +47,8 @@ public class DatasourceNonXAPolicyTestCase {
     private final ResourceVerifier verifier = new ResourceVerifier(datasourceAddress, client);
     private final ModelNodeGenerator nodeGenerator = new ModelNodeGenerator();
 
+    private static final String POOL_SAVE_FAIL_MESSAGE = "Probably caused by https://issues.jboss.org/browse/HAL-1311";
+
     @AfterClass
     public static void tearDown() {
         try {
@@ -85,7 +87,9 @@ public class DatasourceNonXAPolicyTestCase {
         boolean finished = editPanelFragment.save();
         assertTrue("Config should be saved and closed.", finished);
 
-        verifier.verifyAttribute("capacity-decrementer-class", "org.jboss.jca.core.connectionmanager.pool.capacity.WatermarkDecrementer");
+        verifier.verifyAttribute("capacity-decrementer-class",
+                "org.jboss.jca.core.connectionmanager.pool.capacity.WatermarkDecrementer",
+                POOL_SAVE_FAIL_MESSAGE);
     }
 
     @Test
@@ -100,7 +104,7 @@ public class DatasourceNonXAPolicyTestCase {
         assertTrue("Config should be saved and closed.", finished);
 
         ModelNode expectedPropertiesNode = nodeGenerator.createObjectNodeWithPropertyChild(propertyKey, propertyValue);
-        verifier.verifyAttribute("capacity-decrementer-properties", expectedPropertiesNode);
+        verifier.verifyAttribute("capacity-decrementer-properties", expectedPropertiesNode, POOL_SAVE_FAIL_MESSAGE);
     }
 
     @Test
@@ -130,13 +134,14 @@ public class DatasourceNonXAPolicyTestCase {
     @Test
     @InSequence(4)
     public void setIncrementerClass() throws Exception {
+        final String value = "org.jboss.jca.core.connectionmanager.pool.capacity.WatermarkIncrementer";
         ConfigFragment editPanelFragment = jcaPage.getConfigFragment();
-        editPanelFragment.getEditor(). select("capacityIncrementerClass", "org.jboss.jca.core.connectionmanager.pool.capacity.SizeIncrementer");
+        editPanelFragment.getEditor(). select("capacityIncrementerClass", value);
 
         boolean finished = editPanelFragment.save();
         assertTrue("Config should be saved and closed.", finished);
 
-        verifier.verifyAttribute("capacity-incrementer-class", "org.jboss.jca.core.connectionmanager.pool.capacity.SizeIncrementer");
+        verifier.verifyAttribute("capacity-incrementer-class", value, POOL_SAVE_FAIL_MESSAGE);
     }
 
     @Test
@@ -151,7 +156,7 @@ public class DatasourceNonXAPolicyTestCase {
         assertTrue("Config should be saved and closed.", finished);
 
         ModelNode expectedPropertiesNode = nodeGenerator.createObjectNodeWithPropertyChild(propertyKey, propertyValue);
-        verifier.verifyAttribute("capacity-incrementer-properties", expectedPropertiesNode);
+        verifier.verifyAttribute("capacity-incrementer-properties", expectedPropertiesNode, POOL_SAVE_FAIL_MESSAGE);
     }
 
     @Test
@@ -175,7 +180,7 @@ public class DatasourceNonXAPolicyTestCase {
         boolean finished = editPanelFragment.save();
         assertTrue("Config should be saved and closed.", finished);
 
-        verifier.verifyAttributeIsUndefined("capacity-incrementer-class");
+        verifier.verifyAttributeIsUndefined("capacity-incrementer-class", POOL_SAVE_FAIL_MESSAGE);
     }
 
 }
