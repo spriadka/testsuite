@@ -30,9 +30,8 @@ public class ServletJSPSettingsTestCase extends UndertowTestCaseAbstract {
     private static final String JAVA_ENCODING = "java-encoding";
     private static final String MAPPED_FILE = "mapped-file";
     private static final String SCRATCH_DIR = "scratch-dir";
-    //it is important to distinguish UI and model identifier for smap because of similarity with dump-smap UI identifier
     private static final String SMAP_ATTR = "smap";
-    private static final String SMAP = "_smap";
+    private static final String SMAP = "smap";
     private static final String SOURCE_VM = "source-vm";
     private static final String TAG_POOLING = "tag-pooling";
     private static final String TARGET_VM = "target-vm";
