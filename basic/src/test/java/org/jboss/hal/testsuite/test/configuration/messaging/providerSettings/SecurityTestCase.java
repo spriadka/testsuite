@@ -7,6 +7,7 @@ import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.page.config.MessagingPage;
 import org.jboss.hal.testsuite.test.configuration.messaging.AbstractMessagingTestCase;
+import org.jboss.hal.testsuite.util.ConfigChecker;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -14,6 +15,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
+import org.wildfly.extras.creaper.core.online.ModelNodeResult;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.OperationException;
 
@@ -23,7 +25,14 @@ import java.util.concurrent.TimeoutException;
 @RunWith(Arquillian.class)
 @Category(Shared.class)
 public class SecurityTestCase extends AbstractMessagingTestCase {
-    private static final String SERVER_NAME  = "test-provider_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String
+            SERVER_NAME  = "test-provider_" + RandomStringUtils.randomAlphanumeric(5),
+            CLUSTER_USER = "cluster-user",
+            CLUSTER_PASSWORD = "cluster-password",
+            SECURITY_ENABLED = "security-enabled",
+            SECURITY_INVALIDATION_INTERVAL = "security-invalidation-interval",
+            SECURITY_DOMAIN = "security-domain",
+            NOT_SAVED_FAIL_MESSAGE = "Probably caused by https://issues.jboss.org/browse/HAL-1310";
 
     private static final Address SERVER_ADDRESS = MESSAGING_SUBSYSTEM.and("server", SERVER_NAME);
 
@@ -45,7 +54,7 @@ public class SecurityTestCase extends AbstractMessagingTestCase {
     @Before
     public void before() {
         page.invokeProviderSettings(SERVER_NAME);
-        page.switchToSecurityTab();
+        page.providerSettingsWindow().switchToSecurityTab().maximize();
     }
 
     @After
@@ -55,26 +64,63 @@ public class SecurityTestCase extends AbstractMessagingTestCase {
 
     @Test
     public void updateClusterUser() throws Exception {
-        editTextAndVerify(SERVER_ADDRESS, "cluster-user", "TESTER");
+        final String value = "TESTER";
+        new ConfigChecker.Builder(client, SERVER_ADDRESS)
+                .configFragment(page.providerSettingsWindow().getConfigFragment())
+                .editAndSave(ConfigChecker.InputType.TEXT, CLUSTER_USER, value)
+                .verifyFormSaved(NOT_SAVED_FAIL_MESSAGE)
+                .verifyAttribute(CLUSTER_USER, value);
     }
 
     @Test
     public void updateClusterPassword() throws Exception {
-        editTextAndVerify(SERVER_ADDRESS, "cluster-password", "TESTER.PASSWORD");
+        final String value = "TESTER.PASSWORD";
+        new ConfigChecker.Builder(client, SERVER_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .editAndSave(ConfigChecker.InputType.TEXT, CLUSTER_PASSWORD, value)
+                .verifyFormSaved(NOT_SAVED_FAIL_MESSAGE)
+                .verifyAttribute(CLUSTER_PASSWORD, value);
     }
 
     @Test
-    public void updateSecurityEnabled() throws Exception {
-        editCheckboxAndVerify(SERVER_ADDRESS, "security-enabled", false);
+    public void toggleSecurityEnabled() throws Exception {
+        final ModelNodeResult originalModelNodeResult = operations.readAttribute(SERVER_ADDRESS, SECURITY_ENABLED);
+        originalModelNodeResult.assertSuccess();
+        final boolean originalValue = originalModelNodeResult.booleanValue();
+        try {
+            new ConfigChecker.Builder(client, SERVER_ADDRESS)
+                    .configFragment(page.getConfigFragment())
+                    .editAndSave(ConfigChecker.InputType.CHECKBOX, SECURITY_ENABLED, !originalValue)
+                    .verifyFormSaved(NOT_SAVED_FAIL_MESSAGE)
+                    .verifyAttribute(SECURITY_ENABLED, !originalValue);
+
+            new ConfigChecker.Builder(client, SERVER_ADDRESS)
+                    .configFragment(page.getConfigFragment())
+                    .editAndSave(ConfigChecker.InputType.CHECKBOX, SECURITY_ENABLED, originalValue)
+                    .verifyFormSaved(NOT_SAVED_FAIL_MESSAGE)
+                    .verifyAttribute(SECURITY_ENABLED, originalValue);
+        } finally {
+            operations.writeAttribute(SERVER_ADDRESS, SECURITY_ENABLED, originalModelNodeResult.value()).assertSuccess();
+        }
     }
 
     @Test
     public void updateSecurityInvalidationInterval() throws Exception {
-        editTextAndVerify(SERVER_ADDRESS, "security-invalidation-interval", 10L);
+        final long value = 10L;
+        new ConfigChecker.Builder(client, SERVER_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .editAndSave(ConfigChecker.InputType.TEXT, SECURITY_INVALIDATION_INTERVAL, String.valueOf(value))
+                .verifyFormSaved(NOT_SAVED_FAIL_MESSAGE)
+                .verifyAttribute(SECURITY_INVALIDATION_INTERVAL, value);
     }
 
     @Test
     public void updateSecurityDomain() throws Exception {
-        editTextAndVerify(SERVER_ADDRESS, "security-domain", "jboss-web-policy");
+        final String value = "jboss-web-policy";
+        new ConfigChecker.Builder(client, SERVER_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .editAndSave(ConfigChecker.InputType.TEXT, SECURITY_DOMAIN, value)
+                .verifyFormSaved(NOT_SAVED_FAIL_MESSAGE)
+                .verifyAttribute(SECURITY_DOMAIN, value);
     }
 }
