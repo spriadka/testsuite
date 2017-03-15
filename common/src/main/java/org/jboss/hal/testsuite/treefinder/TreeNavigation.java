@@ -52,7 +52,7 @@ public class TreeNavigation {
      */
     public TreeNavigationGroup navigateToTreeItem() {
         TreeNavigationGroup current = new TreeNavigationGroup(root.findElement(ByJQuery.selector("> div:nth-child(2)")));
-        logger.debug("Top level {}: '{}'", TreeNavigationGroup.class.getSimpleName(), current.getRoot().getAttribute("innerHTML"));
+        logger.trace("Top level {}: '{}'", TreeNavigationGroup.class.getSimpleName(), current.getRoot().getAttribute("innerHTML"));
         for (String step : steps) {
             logger.debug("Navigating to next subtree with root label '{}'.", step);
             current = current.openSubTreeIfNotOpen().getDirectChildByLabel(step);
