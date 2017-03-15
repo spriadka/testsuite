@@ -198,7 +198,6 @@ public class GenericResourceTableFragment<T extends ResourceTableRowFragment> ex
      * @return whether this table has pager associated with it
      */
     public boolean hasPager() {
-        log.info("PAGER: {}", root.getAttribute("innerHTML"));
         return !root.findElements(SELECTOR_PAGER).isEmpty();
     }
 
