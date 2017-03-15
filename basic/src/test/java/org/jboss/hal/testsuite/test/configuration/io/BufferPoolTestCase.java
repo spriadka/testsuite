@@ -144,7 +144,7 @@ public class BufferPoolTestCase {
     public void toggleDirectBuffers() throws Exception {
         final ModelNodeResult originalNodeResult = operations.readAttribute(BUFFER_POOL_ADDRESS, DIRECT_BUFFERS);
         originalNodeResult.assertSuccess();
-        final boolean originalValue = !originalNodeResult.hasDefinedValue() || originalNodeResult.booleanValue();
+        final boolean originalValue = originalNodeResult.hasDefinedValue() && originalNodeResult.booleanValue();
         try {
             new ConfigChecker.Builder(client, BUFFER_POOL_ADDRESS)
                     .configFragment(page.getConfigFragment())
