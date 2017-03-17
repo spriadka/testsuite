@@ -7,6 +7,7 @@ import org.jboss.hal.testsuite.finder.FinderFragment;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.WindowFragment;
+import org.jboss.hal.testsuite.fragment.config.messaging.AddBridgeWizard;
 import org.jboss.hal.testsuite.fragment.config.messaging.AddMessagingProviderWindow;
 import org.jboss.hal.testsuite.fragment.config.messaging.MessagingConfigArea;
 import org.jboss.hal.testsuite.fragment.config.messaging.ProviderSettingsWindow;
@@ -179,15 +180,8 @@ public class MessagingPage extends ConfigPage implements Navigatable {
         switchType("Remote");
     }
 
-    public void addBridge(String name, String queue, String address, String connector) {
-        clickButton("Add");
-        WindowFragment window = Console.withBrowser(browser).openedWindow();
-        Editor editor = window.getEditor();
-        editor.text("name", name);
-        editor.text("queueName", queue);
-        editor.text("forwardingAddress", address);
-        editor.text("staticConnectors", connector);
-        window.clickButton("Save");
+    public AddBridgeWizard addBridge() {
+        return getResourceManager().addResource(AddBridgeWizard.class);
     }
 
     public void addBroadcastGroup(String name, String binding) {

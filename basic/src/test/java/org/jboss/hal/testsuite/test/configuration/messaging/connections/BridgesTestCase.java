@@ -46,18 +46,16 @@ public class BridgesTestCase extends AbstractMessagingTestCase {
     private static final Address BRIDGE_ADDRESS = DEFAULT_MESSAGING_SERVER.and("bridge", BRIDGE);
     private static final Address BRIDGE_TBR_ADDRESS = DEFAULT_MESSAGING_SERVER.and("bridge", BRIDGE_TBR);
     private static final Address BRIDGE_TBA_ADDRESS = DEFAULT_MESSAGING_SERVER.and("bridge", BRIDGE_TBA);
+    private static final Address BRIDGE_TBA_2_ADDRESS = DEFAULT_MESSAGING_SERVER.and("bridge", "bridge-TBA_2_" + RandomStringUtils.randomAlphanumeric(5));
+    private static final Address BRIDGE_TBA_3_ADDRESS = DEFAULT_MESSAGING_SERVER.and("bridge", "bridge-TBA_3_" + RandomStringUtils.randomAlphanumeric(5));
 
     private static final String CONNECTOR = "http-connector";
     private static final String QUEUE_CREATE_BRIDGE = "testQueue_" + RandomStringUtils.randomAlphanumeric(5);
     private static final String QUEUE_EDIT_BRIDGE = "testQueue_" + RandomStringUtils.randomAlphanumeric(5);
     private static final String DISCOVERY_GROUP_EDIT = "discoveryGroupBridges_" + RandomStringUtils.randomAlphanumeric(5);
 
-    private static ElytronIntegrationChecker elytronChecker;
-
     @BeforeClass
     public static void setUp() throws Exception {
-        elytronChecker = new ElytronIntegrationChecker(client);
-
         //add queues
         List<String> entriesQueueCreateBridge = Collections.singletonList(QUEUE_CREATE_BRIDGE);
         List<String> entriesQueueEditBridge = Collections.singletonList(QUEUE_EDIT_BRIDGE);
@@ -89,6 +87,8 @@ public class BridgesTestCase extends AbstractMessagingTestCase {
         //remove bridges
         operations.removeIfExists(BRIDGE_ADDRESS);
         operations.removeIfExists(BRIDGE_TBA_ADDRESS);
+        operations.removeIfExists(BRIDGE_TBA_2_ADDRESS);
+        operations.removeIfExists(BRIDGE_TBA_3_ADDRESS);
         operations.removeIfExists(BRIDGE_TBR_ADDRESS);
         //remove queues
         client.apply(new RemoveQueue(QUEUE_CREATE_BRIDGE));
@@ -96,9 +96,34 @@ public class BridgesTestCase extends AbstractMessagingTestCase {
     }
 
     @Test
-    public void addBridge() throws Exception {
-        page.addBridge(BRIDGE_TBA, QUEUE_CREATE_BRIDGE, "testAddress", CONNECTOR);
-        new ResourceVerifier(BRIDGE_TBA_ADDRESS, client).verifyExists();
+    public void addBridgeWithDiscoveryGroup() throws Exception {
+        page.addBridge()
+                .name(BRIDGE_TBA)
+                .queueName(QUEUE_CREATE_BRIDGE)
+                .discoveryGroup("foobar")
+                .saveAndDismissReloadRequiredWindow();
+        new ResourceVerifier(BRIDGE_TBA_ADDRESS, client).verifyExists("Probably fails because of https://issues.jboss.org/browse/HAL-1317");
+    }
+
+    @Test
+    public void addBridgeWithStaticConnectors() throws Exception {
+        page.addBridge()
+                .name(BRIDGE_TBA_2_ADDRESS.getLastPairValue())
+                .queueName(QUEUE_CREATE_BRIDGE)
+                .staticConnectors("foo", "bar", "qux", "qiz")
+                .saveAndDismissReloadRequiredWindow();
+        new ResourceVerifier(BRIDGE_TBA_2_ADDRESS, client).verifyExists("Probably fails because of https://issues.jboss.org/browse/HAL-1317");
+    }
+
+    @Test
+    public void addBridgeWithDiscoveryGroupAndForwardAddressDefined() throws Exception {
+        page.addBridge()
+                .name(BRIDGE_TBA_3_ADDRESS.getLastPairValue())
+                .queueName(QUEUE_CREATE_BRIDGE)
+                .discoveryGroup("foobar")
+                .forwardAddress("quz")
+                .saveAndDismissReloadRequiredWindow();
+        new ResourceVerifier(BRIDGE_TBA_3_ADDRESS, client).verifyExists();
     }
 
     @Test
@@ -174,19 +199,31 @@ public class BridgesTestCase extends AbstractMessagingTestCase {
     @Test
     public void setCredentialReferenceToClearText() throws Exception {
         page.switchToCredentialReference();
-        elytronChecker.setClearTextCredentialReferenceAndVerify(BRIDGE_ADDRESS, page.getConfigFragment());
+        new ElytronIntegrationChecker.Builder(client)
+                .address(BRIDGE_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .build()
+                .setClearTextCredentialReferenceAndVerify("Probably fails because of https://issues.jboss.org/browse/HAL-1318");
     }
 
     @Test
     public void setCredentialReferenceToCredentialStore() throws Exception {
         page.switchToCredentialReference();
-        elytronChecker.setCredentialStoreCredentialReferenceAndVerify(BRIDGE_ADDRESS, page.getConfigFragment());
+        new ElytronIntegrationChecker.Builder(client)
+                .address(BRIDGE_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .build()
+                .setCredentialStoreCredentialReferenceAndVerify("Probably fails because of https://issues.jboss.org/browse/HAL-1318");
     }
 
     @Test
-    public void testIllegalCombinationsForCredentialReference() throws IOException, OperationException {
+    public void testIllegalCombinationsForCredentialReference() throws Exception {
         page.switchToCredentialReference();
-        elytronChecker.testIllegalCombinationCredentialReferenceAttributes(BRIDGE_ADDRESS, page.getConfigFragment());
+        new ElytronIntegrationChecker.Builder(client)
+                .address(BRIDGE_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .build()
+                .testIllegalCombinationCredentialReferenceAttributes();
     }
 
     @Test
