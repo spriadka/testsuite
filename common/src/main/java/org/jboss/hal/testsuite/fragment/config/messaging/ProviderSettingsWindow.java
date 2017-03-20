@@ -35,9 +35,7 @@ public class ProviderSettingsWindow extends WindowFragment {
     }
 
     public ProviderSettingsWindow maximize() {
-        WebElement element = root.findElement(By.className("icon-resize-full"));
-        Graphene.waitModel(browser).until().element(element).is().visible();
-        element.click();
+        maximizeWindow();
         return this;
     }
 

@@ -88,6 +88,12 @@ public class WindowFragment extends BaseFragment {
         close.click();
     }
 
+    public void maximizeWindow() {
+        WebElement element = root.findElement(By.className("icon-resize-full"));
+        Graphene.waitGui(browser).until().element(element).is().visible();
+        element.click();
+    }
+
     public WindowState clickSave() {
         String label = PropUtils.get("modals.window.save.label");
         clickButton(label);
