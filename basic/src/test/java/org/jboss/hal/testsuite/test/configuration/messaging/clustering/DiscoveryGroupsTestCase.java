@@ -83,27 +83,27 @@ public class DiscoveryGroupsTestCase extends AbstractMessagingTestCase {
 
     @Test
     public void updateDiscoveryGroupSocketBinding() throws Exception {
-        editTextAndVerify(DG_ADDRESS, "socketBinding", "socket-binding", socketBindings.get(3));
+        editTextAndVerify(DG_ADDRESS, "socket-binding", socketBindings.get(3));
     }
 
     @Test
     public void updateDiscoveryGroupRefreshTimeout() throws Exception {
-        editTextAndVerify(DG_ADDRESS, "refreshTimeout", "refresh-timeout", 2000L);
+        editTextAndVerify(DG_ADDRESS, "refresh-timeout", 2000L);
     }
 
     @Test
     public void updateBroadcastGroupRefreshTimeoutNegativeValue() {
-        verifyIfErrorAppears("refreshTimeout", "-1");
+        verifyIfErrorAppears("refresh-timeout", "-1");
     }
 
     @Test
     public void updateDiscoveryGroupInitialTimeout() throws Exception {
-        editTextAndVerify(DG_ADDRESS, "initialWaitTimeout", "initial-wait-timeout", 200L);
+        editTextAndVerify(DG_ADDRESS, "initial-wait-timeout", 200L);
     }
 
     @Test
     public void updateBroadcastGroupInitialTimeoutNegativeValue() {
-        verifyIfErrorAppears("initialWaitTimeout", "-1");
+        verifyIfErrorAppears("initial-wait-timeout", "-1");
     }
 
     @Test

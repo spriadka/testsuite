@@ -208,7 +208,7 @@ public class MessagingPage extends ConfigPage implements Navigatable {
     public void addDiscoveryGroup(String name, String binding) {
         clickButton("Add");
         getWindowFragment().getEditor().text("name", name);
-        getWindowFragment().getEditor().text("socketBinding", binding);
+        getWindowFragment().getEditor().text("socket-binding", binding);
         getWindowFragment().clickButton("Save");
     }
 
