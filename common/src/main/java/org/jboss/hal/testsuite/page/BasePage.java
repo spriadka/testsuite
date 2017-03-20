@@ -119,6 +119,7 @@ public abstract class BasePage {
 
     private WebElement getSubTab(String identifier) {
         By selector = ByJQuery.selector("div.inline-link:contains('" + identifier + "'):visible");
+        Graphene.waitGui().until().element(selector).is().visible();
         return browser.findElement(selector);
     }
 
