@@ -133,12 +133,12 @@ public class BridgesTestCase extends AbstractMessagingTestCase {
 
     @Test
     public void updateBridgeQueue() throws Exception {
-        editTextAndVerify(BRIDGE_ADDRESS, "queueName", "queue-name", QUEUE_EDIT_BRIDGE);
+        editTextAndVerify(BRIDGE_ADDRESS, "queue-name", QUEUE_EDIT_BRIDGE);
     }
 
     @Test
     public void updateBridgeForwardingAddress() throws Exception {
-        editTextAndVerify(BRIDGE_ADDRESS, "forwardingAddress", "forwarding-address", "127.0.0.1");
+        editTextAndVerify(BRIDGE_ADDRESS, "forwarding-address", "127.0.0.1");
     }
 
     @Test
@@ -146,7 +146,7 @@ public class BridgesTestCase extends AbstractMessagingTestCase {
         try {
             new ConfigChecker.Builder(client, BRIDGE_ADDRESS)
                     .configFragment(page.getConfigFragment())
-                    .editAndSave(ConfigChecker.InputType.TEXT, "transformerClass", "clazz")
+                    .editAndSave(ConfigChecker.InputType.TEXT, "transformer-class-name", "clazz")
                     .verifyFormSaved()
                     .verifyAttribute("transformer-class-name", "clazz");
         } finally {
@@ -161,8 +161,8 @@ public class BridgesTestCase extends AbstractMessagingTestCase {
             ConfigFragment editPanelFragment = page.getConfigFragment();
             Editor editor = editPanelFragment.edit();
 
-            editor.text("staticConnectors", "");
-            editor.text("discoveryGroup", DISCOVERY_GROUP_EDIT);
+            editor.text("static-connectors", "");
+            editor.text("discovery-group", DISCOVERY_GROUP_EDIT);
             boolean finished = editPanelFragment.save();
 
             Assert.assertTrue("Config should be saved and closed.", finished);
@@ -181,19 +181,19 @@ public class BridgesTestCase extends AbstractMessagingTestCase {
     @Test
     public void updateBridgeRetryInterval() throws Exception {
         page.switchToConnectionManagementTab();
-        editTextAndVerify(BRIDGE_ADDRESS, "retryInterval", "retry-interval", 1L);
+        editTextAndVerify(BRIDGE_ADDRESS, "retry-interval", 1L);
     }
 
     @Test
     public void updateBridgeRetryIntervalWrongValue() {
         page.switchToConnectionManagementTab();
-        verifyIfErrorAppears("retryInterval", "-10");
+        verifyIfErrorAppears("retry-interval", "-10");
     }
 
     @Test
     public void updateBridgeReconnectAttempts() throws Exception {
         page.switchToConnectionManagementTab();
-        editTextAndVerify(BRIDGE_ADDRESS, "reconnectAttempts", "reconnect-attempts", -1);
+        editTextAndVerify(BRIDGE_ADDRESS, "reconnect-attempts", -1);
     }
 
     @Test
@@ -235,8 +235,7 @@ public class BridgesTestCase extends AbstractMessagingTestCase {
     private static void createBridge(Address address) throws Exception {
         operations.add(address, Values.empty()
                 .andList("static-connectors", CONNECTOR)
-                .and("queue-name", QUEUE_CREATE_BRIDGE));
-        new ResourceVerifier(address, client).verifyExists();
+                .and("queue-name", QUEUE_CREATE_BRIDGE)).assertSuccess();
     }
 
 }
