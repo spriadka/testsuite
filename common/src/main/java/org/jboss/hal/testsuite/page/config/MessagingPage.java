@@ -8,6 +8,7 @@ import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.WindowFragment;
 import org.jboss.hal.testsuite.fragment.config.messaging.AddBridgeWizard;
+import org.jboss.hal.testsuite.fragment.config.messaging.AddClusterConnectionWizard;
 import org.jboss.hal.testsuite.fragment.config.messaging.AddMessagingProviderWindow;
 import org.jboss.hal.testsuite.fragment.config.messaging.MessagingConfigArea;
 import org.jboss.hal.testsuite.fragment.config.messaging.ProviderSettingsWindow;
@@ -140,7 +141,7 @@ public class MessagingPage extends ConfigPage implements Navigatable {
     }
 
     public void switchToConnections() {
-        switchView("Connections");
+        switchView("Cluster Connection");
     }
 
     public void switchToDiverts() {
@@ -277,14 +278,8 @@ public class MessagingPage extends ConfigPage implements Navigatable {
         getWindowFragment().clickButton("Save");
     }
 
-
-    public void addClusterConnection(String name, String dg, String connectorName, String connectorAddress) {
-        clickButton("Add");
-        getWindowFragment().getEditor().text("name", name);
-        getWindowFragment().getEditor().text("discoveryGroup", dg);
-        getWindowFragment().getEditor().text("connectorName", connectorName);
-        getWindowFragment().getEditor().text("clusterConnectionAddress", connectorAddress);
-        getWindowFragment().clickButton("Save");
+    public AddClusterConnectionWizard addClusterConnection() {
+        return getResourceManager().addResource(AddClusterConnectionWizard.class);
     }
 
     public void clickAdvanced() {

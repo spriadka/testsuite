@@ -71,35 +71,39 @@ public class ClusterConnectionsTestCase extends AbstractMessagingTestCase {
 
     @Test //https://issues.jboss.org/browse/HAL-827
     public void addClusterConnection() throws Exception {
-        page.addClusterConnection(CC_TBA_NAME, "dg-group1", "http-connector", "jms");
+        page.addClusterConnection()
+                .clusterConnectionAddress("jms")
+                .name(CC_TBA_NAME)
+                .connectorName("http-connector")
+                .saveAndDismissReloadRequiredWindow();
         administration.reloadIfRequired();
         new ResourceVerifier(CC_TBA_ADDRESS, client).verifyExists();
     }
 
     @Test
     public void updateClusterConnectionCallTimeout() throws Exception {
-        editTextAndVerify(CC_ADDRESS, "callTimeout", "call-timeout", 200L);
+        editTextAndVerify(CC_ADDRESS, "call-timeout", "call-timeout", 200L);
     }
 
     @Test
     public void updateClusterConnectionCheckPeriod() throws Exception {
-        editTextAndVerify(CC_ADDRESS, "checkPeriod", "check-period", 9001L);
+        editTextAndVerify(CC_ADDRESS, "check-period", "check-period", 9001L);
     }
 
     @Test
     public void updateClusterConnectionTTLNegativeValue() throws Exception {
-        verifyIfErrorAppears("connectionTTL", "-1");
+        verifyIfErrorAppears("connection-ttl", "-1");
     }
 
     @Test
     public void setClusterConnectionRetryIntervalToNull() throws Exception {
         //default value will be present if attribute is set to null
-        editTextAndVerify(CC_ADDRESS, "retryInterval", "retry-interval", "", 500L);
+        editTextAndVerify(CC_ADDRESS, "retry-interval", "retry-interval", "", 500L);
     }
 
     @Test
     public void updateClusterConnectionReconnectAttempts() throws Exception {
-        editTextAndVerify(CC_ADDRESS, "reconnectAttempts", "reconnect-attempts", 0);
+        editTextAndVerify(CC_ADDRESS, "reconnect-attempts", "reconnect-attempts", 0);
     }
 
     @Test
