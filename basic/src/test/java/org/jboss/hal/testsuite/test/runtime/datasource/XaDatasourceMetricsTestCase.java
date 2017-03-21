@@ -49,7 +49,6 @@ public class XaDatasourceMetricsTestCase {
             XA_DATASOURCE_JNDI_NAME = "java:jboss/datasources/" + XA_DATASOURCE_NAME,
             APP_NAME = XaDatasourceMetricsTestCase.class.getSimpleName(),
             ARCHIVE_NAME = "xa-txn",
-            PERSISTENCE_XML = "persistence.xml",
             AVAILABLE_CONNECTIONS_LABEL = "Available Connections",
             AVAILABLE_COUNT = "AvailableCount",
             ACTIVE_LABEL = "Active",
@@ -81,7 +80,7 @@ public class XaDatasourceMetricsTestCase {
         JavaArchive jar = ShrinkWrap.create(JavaArchive.class, ARCHIVE_NAME + ".jar");
         Package deploymentPackage = DsStatisticsRemote.class.getPackage();
         jar.addPackage(deploymentPackage);
-        jar.addAsManifestResource(deploymentPackage, PERSISTENCE_XML, PERSISTENCE_XML);
+        jar.addAsManifestResource("datasource/xa-persistence.xml", "persistence.xml");
         ear.addAsModule(jar);
         ear.addAsManifestResource(new StringAsset("Dependencies: com.h2database.h2\n"), "MANIFEST.MF");
         deployOps.deploy(ear);
