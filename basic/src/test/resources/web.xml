@@ -22,8 +22,8 @@
         <env-entry-type>java.lang.String</env-entry-type>
         <env-entry-value>Ahoj 2</env-entry-value>
         <injection-target>
-            <injection-target-name>string3</injection-target-name>
             <injection-target-class>org.jboss.hal.testsuite.test.runtime.SimpleWebserviceEndpointImpl</injection-target-class>
+            <injection-target-name>string3</injection-target-name>
         </injection-target>
     </env-entry>
 </web-app>
