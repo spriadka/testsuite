@@ -192,7 +192,7 @@ public class WebMetricsTestCase {
                 + DataSenderServlet.AMOUNT_OF_DATA_IN_MB_ATTR + "=" + (numberOfBytes));
         log.info("Sending request to produce {} B: GET {}", numberOfBytes, request);
 
-        try (final CloseableHttpClient client = HttpClientBuilder.create().build()) {
+        try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
             final CloseableHttpResponse response = client.execute(request);
             Assert.assertEquals(HttpURLConnection.HTTP_OK, response.getStatusLine().getStatusCode());
         }

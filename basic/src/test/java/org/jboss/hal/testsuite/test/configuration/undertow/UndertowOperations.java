@@ -125,7 +125,7 @@ public final class UndertowOperations {
 
         private final Map<ReferenceType, List<String>> references;
 
-        public ReferenceHolder() {
+        ReferenceHolder() {
             this.references = new HashMap<>();
         }
 

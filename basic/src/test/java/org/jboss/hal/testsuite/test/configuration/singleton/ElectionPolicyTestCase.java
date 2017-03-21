@@ -179,7 +179,7 @@ public class ElectionPolicyTestCase {
          * @throws CommandFailedException
          * @throws IOException
          */
-        public SocketBindingResources(OnlineManagementClient client, int count, String prefix) throws CommandFailedException, IOException {
+        SocketBindingResources(OnlineManagementClient client, int count, String prefix) throws CommandFailedException, IOException {
             this.operations = new Operations(client);
             this.count = count;
             this.prefix = prefix;

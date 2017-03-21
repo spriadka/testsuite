@@ -25,7 +25,7 @@ class JGroupsOperations {
     private OnlineManagementClient client;
     private Operations operations;
 
-    public JGroupsOperations(OnlineManagementClient client) {
+    JGroupsOperations(OnlineManagementClient client) {
         this.client = client;
         this.operations = new Operations(client);
     }
