@@ -28,8 +28,6 @@ public class CredentialReferenceTestCase extends AbstractMessagingTestCase {
 
     private static final Address SERVER_ADDRESS = MESSAGING_SUBSYSTEM.and("server", SERVER_NAME);
 
-    private static final ElytronIntegrationChecker elytronChecker = new ElytronIntegrationChecker(client);
-
     @Page
     private MessagingPage page;
 
@@ -56,16 +54,31 @@ public class CredentialReferenceTestCase extends AbstractMessagingTestCase {
 
     @Test
     public void editCredentialReferenceClearText() throws Exception {
-        elytronChecker.setClearTextCredentialReferenceAndVerify(SERVER_ADDRESS, page.getConfigFragment(), "cluster-credential-reference");
+        new ElytronIntegrationChecker.Builder(client)
+                .address(SERVER_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .credetialReferenceAttributeName("cluster-credential-reference")
+                .build()
+                .setClearTextCredentialReferenceAndVerify();
     }
 
     @Test
     public void editCredentialReferenceStoreReference() throws Exception {
-        elytronChecker.setCredentialStoreCredentialReferenceAndVerify(SERVER_ADDRESS, page.getConfigFragment(), "cluster-credential-reference");
+        new ElytronIntegrationChecker.Builder(client)
+                .address(SERVER_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .credetialReferenceAttributeName("cluster-credential-reference")
+                .build()
+                .setCredentialStoreCredentialReferenceAndVerify();
     }
 
     @Test
     public void editCredentialReferenceIllegalCombination() throws IOException, OperationException {
-        elytronChecker.testIllegalCombinationCredentialReferenceAttributes(SERVER_ADDRESS, page.getConfigFragment(), "cluster-credential-reference");
+        new ElytronIntegrationChecker.Builder(client)
+                .address(SERVER_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .credetialReferenceAttributeName("cluster-credential-reference")
+                .build()
+                .testIllegalCombinationCredentialReferenceAttributes();
     }
 }
