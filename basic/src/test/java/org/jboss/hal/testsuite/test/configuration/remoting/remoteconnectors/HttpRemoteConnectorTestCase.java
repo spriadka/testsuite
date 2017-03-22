@@ -48,7 +48,9 @@ public class HttpRemoteConnectorTestCase {
     private static final Administration administration = new Administration(client);
     private static final Operations operations = new Operations(client);
 
-    private static final String CONNECTOR_REF = "connector-ref";
+    private static final String
+            CONNECTOR_REF = "connector-ref",
+            HAL1331_FAIL_MESSAGE = "Probably fails because of https://issues.jboss.org/browse/HAL-1331";
 
     private static final Address
             REMOTING_SUBSYSTEM_ADDRESS = Address.subsystem("remoting"),
@@ -91,7 +93,8 @@ public class HttpRemoteConnectorTestCase {
                 .connectorRef(RandomStringUtils.randomAlphanumeric(7))
                 .saveAndDismissReloadRequiredWindow();
 
-        Assert.assertTrue(page.getResourceManager().isResourcePresent(HTTP_CONNECTOR_TBA_ADDRESS.getLastPairValue()));
+        Assert.assertTrue("Connector should be added in table! " + HAL1331_FAIL_MESSAGE,
+                page.getResourceManager().isResourcePresent(HTTP_CONNECTOR_TBA_ADDRESS.getLastPairValue()));
         new ResourceVerifier(HTTP_CONNECTOR_TBA_ADDRESS, client).verifyExists();
     }
 
