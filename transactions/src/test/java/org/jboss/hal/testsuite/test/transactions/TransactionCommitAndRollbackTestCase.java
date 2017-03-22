@@ -224,7 +224,7 @@ public class TransactionCommitAndRollbackTestCase {
         private final String XId;
         private final PerformedAction performedAction;
 
-        public PreparedTransactionTestCell(String XId, PerformedAction performedAction) {
+        PreparedTransactionTestCell(String XId, PerformedAction performedAction) {
             this.XId = XId;
             this.performedAction = performedAction;
         }
