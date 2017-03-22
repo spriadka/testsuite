@@ -68,7 +68,6 @@ public class JMSBridgeAttributesTestCase {
     private static final OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
     private static final Administration administration = new Administration(client);
     private static final Operations operations = new Operations(client);
-    private static final ElytronIntegrationChecker elytronChecker = new ElytronIntegrationChecker(client);
 
     private static final String
             IN_QUEUE_NAME = "InQueue",
@@ -502,37 +501,66 @@ public class JMSBridgeAttributesTestCase {
     @Test
     public void editSourceCredentialReferenceClearText() throws Exception {
         page.switchToSourceCredentialReference();
-        elytronChecker.setClearTextCredentialReferenceAndVerify(JMS_BRIDGE_ADDRESS, page.getConfigFragment(), "source-credential-reference");
+        new ElytronIntegrationChecker.Builder(client)
+                .address(JMS_BRIDGE_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .credetialReferenceAttributeName("source-credential-reference")
+                .build()
+                .setClearTextCredentialReferenceAndVerify();
     }
 
     @Test
     public void editSourceCredentialReferenceStoreReference() throws Exception {
         page.switchToSourceCredentialReference();
-        elytronChecker.setCredentialStoreCredentialReferenceAndVerify(JMS_BRIDGE_ADDRESS, page.getConfigFragment(), "source-credential-reference");
+        new ElytronIntegrationChecker.Builder(client)
+                .address(JMS_BRIDGE_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .credetialReferenceAttributeName("source-credential-reference")
+                .build()
+                .setCredentialStoreCredentialReferenceAndVerify();
     }
 
     @Test
     public void editSourceCredentialReferenceIllegalCombination() throws IOException, OperationException {
         page.switchToSourceCredentialReference();
-        elytronChecker.testIllegalCombinationCredentialReferenceAttributes(JMS_BRIDGE_ADDRESS, page.getConfigFragment(), "source-credential-reference");
+        new ElytronIntegrationChecker.Builder(client)
+                .address(JMS_BRIDGE_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .credetialReferenceAttributeName("source-credential-reference")
+                .build()
+                .testIllegalCombinationCredentialReferenceAttributes();
     }
 
     @Test
     public void editTargetCredentialReferenceClearText() throws Exception {
         page.switchToTargetCredentialReference();
-        elytronChecker.setClearTextCredentialReferenceAndVerify(JMS_BRIDGE_ADDRESS, page.getConfigFragment(), "target-credential-reference");
+        new ElytronIntegrationChecker.Builder(client)
+                .address(JMS_BRIDGE_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .credetialReferenceAttributeName("target-credential-reference")
+                .build()
+                .setClearTextCredentialReferenceAndVerify();
     }
 
     @Test
     public void editTargetCredentialReferenceStoreReference() throws Exception {
         page.switchToTargetCredentialReference();
-        elytronChecker.setCredentialStoreCredentialReferenceAndVerify(JMS_BRIDGE_ADDRESS, page.getConfigFragment(), "target-credential-reference");
+        new ElytronIntegrationChecker.Builder(client)
+                .address(JMS_BRIDGE_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .credetialReferenceAttributeName("target-credential-reference")
+                .build()
+                .setCredentialStoreCredentialReferenceAndVerify();
     }
 
     @Test
     public void editTargetCredentialReferenceIllegalCombination() throws IOException, OperationException {
         page.switchToTargetCredentialReference();
-        elytronChecker.testIllegalCombinationCredentialReferenceAttributes(JMS_BRIDGE_ADDRESS, page.getConfigFragment(), "target-credential-reference");
+        new ElytronIntegrationChecker.Builder(client)
+                .address(JMS_BRIDGE_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .credetialReferenceAttributeName("target-credential-reference")
+                .build()
+                .testIllegalCombinationCredentialReferenceAttributes();
     }
-
 }
