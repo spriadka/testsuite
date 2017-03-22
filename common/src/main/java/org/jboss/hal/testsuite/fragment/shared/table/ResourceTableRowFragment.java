@@ -29,7 +29,12 @@ public class ResourceTableRowFragment extends BaseFragment {
         By selector = By.className("cellTableCell");
         List<WebElement> cells = root.findElements(selector);
 
-        return cells.get(index);
+        try {
+            return cells.get(index);
+        } catch (IndexOutOfBoundsException e) {
+            throw new TooFewColumnsException("Cell with index " + index + " was not found on this row. There is " +
+                    "probably too few columns (" + cells.size() + ").", e);
+        }
     }
 
     /**
