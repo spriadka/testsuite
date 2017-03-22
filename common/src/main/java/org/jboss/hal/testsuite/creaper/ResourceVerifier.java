@@ -70,7 +70,7 @@ public class ResourceVerifier {
      * @param errorMessageSuffix is intended to be used for e.g. passing related tracked issue.
      */
     public ResourceVerifier verifyExists(String errorMessageSuffix) throws Exception {
-        waitFor(()-> ops.exists(resourceAddress));
+        waitFor(() -> ops.exists(resourceAddress));
 
         Assert.assertTrue("Resource '" + resourceAddress + "' should exist!" + errorMessageSuffix,
                 ops.exists(resourceAddress));
@@ -89,7 +89,7 @@ public class ResourceVerifier {
      * @param errorMessageSuffix is intended to be used for e.g. passing related tracked issue.
      */
     public ResourceVerifier verifyDoesNotExist(String errorMessageSuffix) throws Exception {
-        waitFor(()-> !ops.exists(resourceAddress));
+        waitFor(() -> !ops.exists(resourceAddress));
 
         Assert.assertFalse("Resource '" + resourceAddress + "' should NOT exist! " + errorMessageSuffix,
                 ops.exists(resourceAddress));
@@ -111,7 +111,7 @@ public class ResourceVerifier {
      */
     public ResourceVerifier verifyAttribute(String attributeName, final ModelNode expectedValue,
             String errorMessageSuffix) throws Exception {
-        waitFor(()-> {
+        waitFor(() -> {
             ModelNodeResult actualResult = ops.readAttribute(resourceAddress, attributeName);
             return actualResult.isSuccess() && actualResult.hasDefinedValue()
                     && expectedValue.equals(actualResult.value());
@@ -203,7 +203,7 @@ public class ResourceVerifier {
      */
     public ResourceVerifier verifyAttributeNotEqual(String attributeName, ModelNode notExpectedValue)
             throws Exception {
-        waitFor(()-> !attributeEquals(attributeName, notExpectedValue));
+        waitFor(() -> !attributeEquals(attributeName, notExpectedValue));
 
         Assert.assertFalse(attributeName + " should not have value " + notExpectedValue,
                 attributeEquals(attributeName, notExpectedValue));
@@ -220,7 +220,7 @@ public class ResourceVerifier {
      * @param errorMessagePrefix is intended to be used for e.g. passing related tracked issue.
      */
     public ResourceVerifier verifyAttributeIsUndefined(String attributeName, String errorMessagePrefix) throws Exception {
-        waitFor(()-> {
+        waitFor(() -> {
             ModelNodeResult actualResult = ops.readAttribute(resourceAddress, attributeName);
             return actualResult.isSuccess() && !actualResult.hasDefined(Constants.RESULT);
         });
