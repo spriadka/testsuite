@@ -5,15 +5,12 @@ import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
-import org.jboss.hal.testsuite.fragment.ConfigFragment;
-import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.jboss.hal.testsuite.page.config.MessagingPage;
 import org.jboss.hal.testsuite.test.configuration.messaging.AbstractMessagingTestCase;
 import org.jboss.hal.testsuite.util.ConfigChecker;
 import org.jboss.hal.testsuite.util.ElytronIntegrationChecker;
 import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -24,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.wildfly.extras.creaper.commands.messaging.AddQueue;
 import org.wildfly.extras.creaper.commands.messaging.RemoveQueue;
 import org.wildfly.extras.creaper.core.CommandFailedException;
+import org.wildfly.extras.creaper.core.online.ModelNodeResult;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.OperationException;
 import org.wildfly.extras.creaper.core.online.operations.Values;
@@ -49,10 +47,15 @@ public class BridgesTestCase extends AbstractMessagingTestCase {
     private static final Address BRIDGE_TBA_2_ADDRESS = DEFAULT_MESSAGING_SERVER.and("bridge", "bridge-TBA_2_" + RandomStringUtils.randomAlphanumeric(5));
     private static final Address BRIDGE_TBA_3_ADDRESS = DEFAULT_MESSAGING_SERVER.and("bridge", "bridge-TBA_3_" + RandomStringUtils.randomAlphanumeric(5));
 
-    private static final String CONNECTOR = "http-connector";
-    private static final String QUEUE_CREATE_BRIDGE = "testQueue_" + RandomStringUtils.randomAlphanumeric(5);
-    private static final String QUEUE_EDIT_BRIDGE = "testQueue_" + RandomStringUtils.randomAlphanumeric(5);
-    private static final String DISCOVERY_GROUP_EDIT = "discoveryGroupBridges_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String
+            CONNECTOR = "http-connector",
+            QUEUE_CREATE_BRIDGE = "testQueue_" + RandomStringUtils.randomAlphanumeric(5),
+            QUEUE_EDIT_BRIDGE = "testQueue_" + RandomStringUtils.randomAlphanumeric(5),
+            DISCOVERY_GROUP_EDIT = "discoveryGroupBridges_" + RandomStringUtils.randomAlphanumeric(5),
+            HAL1317_FAIL_MESSAGE = "Probably fails because of https://issues.jboss.org/browse/HAL-1317",
+            HAL1318_FAIL_MESSAGE = "Probably fails because of https://issues.jboss.org/browse/HAL-1318",
+            HAL1324_FAIL_MESSAGE = "Probably fails because of https://issues.jboss.org/browse/HAL-1324",
+            HAL1325_FAIL_MESSAGE = "Probably fails because of https://issues.jboss.org/browse/HAL-1325";
 
     @BeforeClass
     public static void setUp() throws Exception {
@@ -102,7 +105,7 @@ public class BridgesTestCase extends AbstractMessagingTestCase {
                 .queueName(QUEUE_CREATE_BRIDGE)
                 .discoveryGroup("foobar")
                 .saveAndDismissReloadRequiredWindow();
-        new ResourceVerifier(BRIDGE_TBA_ADDRESS, client).verifyExists("Probably fails because of https://issues.jboss.org/browse/HAL-1317");
+        new ResourceVerifier(BRIDGE_TBA_ADDRESS, client).verifyExists(HAL1317_FAIL_MESSAGE);
     }
 
     @Test
@@ -112,7 +115,7 @@ public class BridgesTestCase extends AbstractMessagingTestCase {
                 .queueName(QUEUE_CREATE_BRIDGE)
                 .staticConnectors("foo", "bar", "qux", "qiz")
                 .saveAndDismissReloadRequiredWindow();
-        new ResourceVerifier(BRIDGE_TBA_2_ADDRESS, client).verifyExists("Probably fails because of https://issues.jboss.org/browse/HAL-1317");
+        new ResourceVerifier(BRIDGE_TBA_2_ADDRESS, client).verifyExists(HAL1317_FAIL_MESSAGE);
     }
 
     @Test
@@ -133,12 +136,20 @@ public class BridgesTestCase extends AbstractMessagingTestCase {
 
     @Test
     public void updateBridgeQueue() throws Exception {
-        editTextAndVerify(BRIDGE_ADDRESS, "queue-name", QUEUE_EDIT_BRIDGE);
+        new ConfigChecker.Builder(client, BRIDGE_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .editAndSave(ConfigChecker.InputType.TEXT, "queue-name", QUEUE_EDIT_BRIDGE)
+                .verifyFormSaved()
+                .verifyAttribute("queue-name", QUEUE_EDIT_BRIDGE, HAL1324_FAIL_MESSAGE);
     }
 
     @Test
     public void updateBridgeForwardingAddress() throws Exception {
-        editTextAndVerify(BRIDGE_ADDRESS, "forwarding-address", "127.0.0.1");
+        new ConfigChecker.Builder(client, BRIDGE_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .editAndSave(ConfigChecker.InputType.TEXT, "forwarding-address", "127.0.0.1")
+                .verifyFormSaved()
+                .verifyAttribute("forwarding-address", "127.0.0.1", HAL1324_FAIL_MESSAGE);
     }
 
     @Test
@@ -148,7 +159,7 @@ public class BridgesTestCase extends AbstractMessagingTestCase {
                     .configFragment(page.getConfigFragment())
                     .editAndSave(ConfigChecker.InputType.TEXT, "transformer-class-name", "clazz")
                     .verifyFormSaved()
-                    .verifyAttribute("transformer-class-name", "clazz");
+                    .verifyAttribute("transformer-class-name", "clazz", HAL1324_FAIL_MESSAGE);
         } finally {
             operations.undefineAttribute(BRIDGE_ADDRESS, "transformer-class-name");
         }
@@ -158,15 +169,13 @@ public class BridgesTestCase extends AbstractMessagingTestCase {
     @Test
     public void updateBridgeDiscoveryGroup() throws Exception {
         try {
-            ConfigFragment editPanelFragment = page.getConfigFragment();
-            Editor editor = editPanelFragment.edit();
-
-            editor.text("static-connectors", "");
-            editor.text("discovery-group", DISCOVERY_GROUP_EDIT);
-            boolean finished = editPanelFragment.save();
-
-            Assert.assertTrue("Config should be saved and closed.", finished);
-            new ResourceVerifier(BRIDGE_ADDRESS, client).verifyAttribute("discovery-group", DISCOVERY_GROUP_EDIT);
+            new ConfigChecker.Builder(client, BRIDGE_ADDRESS)
+                    .configFragment(page.getConfigFragment())
+                    .edit(ConfigChecker.InputType.TEXT, "static-connectors", "")
+                    .edit(ConfigChecker.InputType.TEXT, "discovery-group", DISCOVERY_GROUP_EDIT)
+                    .andSave()
+                    .verifyFormSaved()
+                    .verifyAttribute("discovery-group", DISCOVERY_GROUP_EDIT, HAL1324_FAIL_MESSAGE);
         } finally {
             operations.undefineAttribute(BRIDGE_ADDRESS, "discovery-group");
         }
@@ -175,13 +184,23 @@ public class BridgesTestCase extends AbstractMessagingTestCase {
     @Test
     public void updateBridgePassword() throws Exception {
         page.switchToConnectionManagementTab();
-        editTextAndVerify(BRIDGE_ADDRESS, "password", "pwd1");
+        final ModelNodeResult originalModelNodeResult = operations.readAttribute(BRIDGE_ADDRESS, "password");
+        originalModelNodeResult.assertSuccess();
+        try {
+            editTextAndVerify(BRIDGE_ADDRESS, "password", "pwd1");
+        } finally {
+            operations.writeAttribute(BRIDGE_ADDRESS, "password", originalModelNodeResult.value());
+        }
     }
 
     @Test
     public void updateBridgeRetryInterval() throws Exception {
         page.switchToConnectionManagementTab();
-        editTextAndVerify(BRIDGE_ADDRESS, "retry-interval", 1L);
+        new ConfigChecker.Builder(client, BRIDGE_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .editAndSave(ConfigChecker.InputType.TEXT, "retry-interval", 1L)
+                .verifyFormSaved()
+                .verifyAttribute("retry-interval", 1L, HAL1324_FAIL_MESSAGE);
     }
 
     @Test
@@ -193,7 +212,11 @@ public class BridgesTestCase extends AbstractMessagingTestCase {
     @Test
     public void updateBridgeReconnectAttempts() throws Exception {
         page.switchToConnectionManagementTab();
-        editTextAndVerify(BRIDGE_ADDRESS, "reconnect-attempts", -1);
+        new ConfigChecker.Builder(client, BRIDGE_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .editAndSave(ConfigChecker.InputType.TEXT, "reconnect-attempts", -1)
+                .verifyFormSaved(HAL1325_FAIL_MESSAGE)
+                .verifyAttribute("reconnect-attempts", -1);
     }
 
     @Test
@@ -203,7 +226,7 @@ public class BridgesTestCase extends AbstractMessagingTestCase {
                 .address(BRIDGE_ADDRESS)
                 .configFragment(page.getConfigFragment())
                 .build()
-                .setClearTextCredentialReferenceAndVerify("Probably fails because of https://issues.jboss.org/browse/HAL-1318");
+                .setClearTextCredentialReferenceAndVerify(HAL1318_FAIL_MESSAGE);
     }
 
     @Test
@@ -213,7 +236,7 @@ public class BridgesTestCase extends AbstractMessagingTestCase {
                 .address(BRIDGE_ADDRESS)
                 .configFragment(page.getConfigFragment())
                 .build()
-                .setCredentialStoreCredentialReferenceAndVerify("Probably fails because of https://issues.jboss.org/browse/HAL-1318");
+                .setCredentialStoreCredentialReferenceAndVerify(HAL1318_FAIL_MESSAGE);
     }
 
     @Test
