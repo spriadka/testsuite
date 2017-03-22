@@ -8,6 +8,7 @@ import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.WindowFragment;
 import org.jboss.hal.testsuite.fragment.config.messaging.AddBridgeWizard;
+import org.jboss.hal.testsuite.fragment.config.messaging.AddBroadcastGroupWizard;
 import org.jboss.hal.testsuite.fragment.config.messaging.AddClusterConnectionWizard;
 import org.jboss.hal.testsuite.fragment.config.messaging.AddMessagingProviderWindow;
 import org.jboss.hal.testsuite.fragment.config.messaging.MessagingConfigArea;
@@ -185,11 +186,8 @@ public class MessagingPage extends ConfigPage implements Navigatable {
         return getResourceManager().addResource(AddBridgeWizard.class);
     }
 
-    public void addBroadcastGroup(String name, String binding) {
-        clickButton("Add");
-        getWindowFragment().getEditor().text("name", name);
-        getWindowFragment().getEditor().text("socket-binding", binding);
-        getWindowFragment().clickButton("Save");
+    public AddBroadcastGroupWizard addBroadcastGroup() {
+        return getResourceManager().addResource(AddBroadcastGroupWizard.class);
     }
 
     public void addRemoteAcceptor(String name, String socketBinding) {

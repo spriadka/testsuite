@@ -8,7 +8,9 @@ import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.page.config.MessagingPage;
 import org.jboss.hal.testsuite.test.configuration.messaging.AbstractMessagingTestCase;
+import org.jboss.hal.testsuite.util.ConfigChecker;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -27,11 +29,17 @@ import java.util.concurrent.TimeoutException;
 @RunWith(Arquillian.class)
 @Category(Shared.class)
 public class BroadcastGroupsTestCase extends AbstractMessagingTestCase {
-    private static final String SERVER_NAME = "test-server_" + RandomStringUtils.randomAlphanumeric(6);
-    private static final String CONNECTOR_NAME = "connector_" + RandomStringUtils.randomAlphanumeric(6);
-    private static final String BG_NAME = "bg-group-test_" + RandomStringUtils.randomAlphanumeric(6);
-    private static final String BG_TBR_NAME = "bg-group-test-TBR_" + RandomStringUtils.randomAlphanumeric(6);
-    private static final String BG_TBA_NAME = "bg-group-test-TBA_" + RandomStringUtils.randomAlphanumeric(6);
+    private static final String
+            SERVER_NAME = "test-server_" + RandomStringUtils.randomAlphanumeric(6),
+            CONNECTOR_NAME = "connector_" + RandomStringUtils.randomAlphanumeric(6),
+            BG_NAME = "bg-group-test_" + RandomStringUtils.randomAlphanumeric(6),
+            BG_TBR_NAME = "bg-group-test-TBR_" + RandomStringUtils.randomAlphanumeric(6),
+            BG_TBA_NAME = "bg-group-test-TBA_" + RandomStringUtils.randomAlphanumeric(6),
+            BROADCAST_PERIOD = "broadcast-period",
+            CONNECTORS = "connectors",
+            HAL1327_FAIL_MESSAGE = "Probably fails because of https://issues.jboss.org/browse/HAL-1327",
+            HAL1328_FAIL_MESSAGE = "Probably fails because of https://issues.jboss.org/browse/HAL-1328",
+            HAL1329_FAIL_MESSAGE = "Probably fails becasue of https://issues.jboss.org/browse/HAL-1329";
 
     private static final Address NEW_SERVER = MESSAGING_SUBSYSTEM.and("server", SERVER_NAME);
     private static final Address CONNECTOR_ADDRESS = NEW_SERVER.and("connector", CONNECTOR_NAME);
@@ -71,13 +79,23 @@ public class BroadcastGroupsTestCase extends AbstractMessagingTestCase {
 
     @Test
     public void addBroadcastGroup() throws Exception {
-        page.addBroadcastGroup(BG_TBA_NAME, createSocketBinding());
+        boolean isSaved = page.addBroadcastGroup()
+                .name(BG_TBA_NAME)
+                .socketBinding(createSocketBinding())
+                .saveAndDismissReloadRequiredWindow();
+        Assert.assertTrue("Form should be saved! " + HAL1327_FAIL_MESSAGE, isSaved);
         new ResourceVerifier(BG_TBA_ADDRESS, client).verifyExists();
     }
 
     @Test
     public void updateBroadcastGroupPeriod() throws Exception {
-        editTextAndVerify(BG_ADDRESS, "broadcast-period", 1000L);
+        final long value = 1000;
+
+        new ConfigChecker.Builder(client, BG_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .editAndSave(ConfigChecker.InputType.TEXT, BROADCAST_PERIOD, String.valueOf(value))
+                .verifyFormSaved(HAL1328_FAIL_MESSAGE)
+                .verifyAttribute(BROADCAST_PERIOD, value);
     }
 
     @Test
@@ -88,9 +106,13 @@ public class BroadcastGroupsTestCase extends AbstractMessagingTestCase {
 
     @Test
     public void updateBroadcastGroupConnectors() throws Exception {
-        page.getConfigFragment().editTextAndSave("connectors", CONNECTOR_NAME);
-        ModelNode expected = new ModelNode().add(CONNECTOR_NAME);
-        new ResourceVerifier(BG_ADDRESS, client).verifyAttribute("connectors", expected);
+        final ModelNode expected = new ModelNode().add(CONNECTOR_NAME);
+
+        new ConfigChecker.Builder(client, BG_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .editAndSave(ConfigChecker.InputType.TEXT, CONNECTORS, CONNECTOR_NAME)
+                .verifyFormSaved(HAL1329_FAIL_MESSAGE)
+                .verifyAttribute(CONNECTORS, expected);
     }
 
     @Test
