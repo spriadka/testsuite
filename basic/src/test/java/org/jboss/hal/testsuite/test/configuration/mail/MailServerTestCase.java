@@ -158,7 +158,7 @@ public class MailServerTestCase {
     }
 
     @Test
-    public void setInvalidCombinationToCredentialStore() throws IOException, OperationException {
+    public void setInvalidCombinationToCredentialStore() throws Exception {
         page.switchToCredentialReferenceTab();
         new ElytronIntegrationChecker.Builder(client)
                 .configFragment(page.getConfigFragment())

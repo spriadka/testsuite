@@ -26,7 +26,6 @@ import org.wildfly.extras.creaper.core.CommandFailedException;
 import org.wildfly.extras.creaper.core.online.ModelNodeResult;
 import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
 import org.wildfly.extras.creaper.core.online.operations.Address;
-import org.wildfly.extras.creaper.core.online.operations.OperationException;
 import org.wildfly.extras.creaper.core.online.operations.Operations;
 import org.wildfly.extras.creaper.core.online.operations.ReadAttributeOption;
 import org.wildfly.extras.creaper.core.online.operations.Values;
@@ -521,7 +520,7 @@ public class JMSBridgeAttributesTestCase {
     }
 
     @Test
-    public void editSourceCredentialReferenceIllegalCombination() throws IOException, OperationException {
+    public void editSourceCredentialReferenceIllegalCombination() throws Exception {
         page.switchToSourceCredentialReference();
         new ElytronIntegrationChecker.Builder(client)
                 .address(JMS_BRIDGE_ADDRESS)
@@ -554,7 +553,7 @@ public class JMSBridgeAttributesTestCase {
     }
 
     @Test
-    public void editTargetCredentialReferenceIllegalCombination() throws IOException, OperationException {
+    public void editTargetCredentialReferenceIllegalCombination() throws Exception {
         page.switchToTargetCredentialReference();
         new ElytronIntegrationChecker.Builder(client)
                 .address(JMS_BRIDGE_ADDRESS)

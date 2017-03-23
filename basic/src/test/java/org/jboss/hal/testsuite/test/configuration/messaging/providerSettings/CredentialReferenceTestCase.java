@@ -73,7 +73,7 @@ public class CredentialReferenceTestCase extends AbstractMessagingTestCase {
     }
 
     @Test
-    public void editCredentialReferenceIllegalCombination() throws IOException, OperationException {
+    public void editCredentialReferenceIllegalCombination() throws Exception {
         new ElytronIntegrationChecker.Builder(client)
                 .address(SERVER_ADDRESS)
                 .configFragment(page.getConfigFragment())

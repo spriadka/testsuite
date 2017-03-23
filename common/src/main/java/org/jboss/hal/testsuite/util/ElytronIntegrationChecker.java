@@ -6,16 +6,12 @@ import org.jboss.dmr.Property;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.dmr.ModelNodeGenerator;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
-import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.junit.Assert;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.WebElement;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wildfly.extras.creaper.core.online.ModelNodeResult;
 import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
 import org.wildfly.extras.creaper.core.online.operations.Address;
-import org.wildfly.extras.creaper.core.online.operations.OperationException;
 import org.wildfly.extras.creaper.core.online.operations.Operations;
 import org.wildfly.extras.creaper.core.online.operations.Values;
 
@@ -60,16 +56,20 @@ public class ElytronIntegrationChecker {
         final ModelNodeResult originalValue = operations.readAttribute(address, credentialReferenceAttributeName);
         originalValue.assertSuccess();
         try {
-            final Editor editor = configFragment.edit();
-            clearAllInputFields(editor);
-            editor.text(CLEAR_TEXT, clearTextValue);
+            final ResourceVerifier verifier = new ConfigChecker.Builder(client, address)
+                    .configFragment(configFragment)
+                    .edit(ConfigChecker.InputType.TEXT, ALIAS, "")
+                    .edit(ConfigChecker.InputType.TEXT, CLEAR_TEXT, clearTextValue)
+                    .edit(ConfigChecker.InputType.TEXT, STORE, "")
+                    .edit(ConfigChecker.InputType.TEXT, TYPE, "")
+                    .andSave()
+                    .verifyFormSaved(errorMessage);
 
             Assert.assertTrue("Configuration should be saved!", configFragment.save());
 
             final CredentialStoreModelNodeBuilder builder = new CredentialStoreModelNodeBuilder()
                     .clearText(clearTextValue);
 
-            final ResourceVerifier verifier = new ResourceVerifier(address, client);
             try { //workaround for https://issues.jboss.org/browse/HAL-1292
                 verifier.verifyAttribute(credentialReferenceAttributeName, builder.build(), errorMessage);
             } catch (AssertionError e) {
@@ -108,20 +108,18 @@ public class ElytronIntegrationChecker {
                 Values.of("secret-value", credentialStoreAliasValue)).assertSuccess();
         //edit form in web console and verify against model
         try {
-            final Editor editor = configFragment.edit();
-            clearAllInputFields(editor);
-            final WebElement aliasInput = editor.getText(ALIAS);
-            sendKeysLikeHuman(aliasInput, credentialStoreAliasName);
-
-            editor.text(STORE, credentialStoreName);
-
-            Assert.assertTrue("Config should be saved!", configFragment.save());
+            final ResourceVerifier verifier = new ConfigChecker.Builder(client, address)
+                    .configFragment(configFragment)
+                    .edit(ConfigChecker.InputType.TEXT, ALIAS, credentialStoreAliasName, ConfigChecker.InputMethod.HUMAN)
+                    .edit(ConfigChecker.InputType.TEXT, CLEAR_TEXT, "")
+                    .edit(ConfigChecker.InputType.TEXT, STORE, credentialStoreName)
+                    .edit(ConfigChecker.InputType.TEXT, TYPE, "")
+                    .andSave()
+                    .verifyFormSaved(errorMessage);
 
             final CredentialStoreModelNodeBuilder builder = new CredentialStoreModelNodeBuilder()
                     .aliasName(credentialStoreAliasName)
                     .storeName(credentialStoreName);
-
-            final ResourceVerifier verifier = new ResourceVerifier(address, client);
 
             try { //workaround for https://issues.jboss.org/browse/HAL-1292
                 verifier.verifyAttribute(credentialReferenceAttributeName, builder.build(), errorMessage);
@@ -129,8 +127,6 @@ public class ElytronIntegrationChecker {
                 log.warn("Attribute has probably defined explicit undefined values, trying verifying with explicitly" +
                         "defined undefined values! See https://issues.jboss.org/browse/HAL-1292.", e);
                 verifier.verifyAttribute(credentialReferenceAttributeName, builder.writeUndefinedValuesExplicitly().build(), errorMessage);
-            } catch (Exception e) {
-                e.printStackTrace();
             }
         } finally {
             //revert to original
@@ -149,17 +145,21 @@ public class ElytronIntegrationChecker {
     /**
      * Tests illegal combination of attributes for defined credential reference attribute name
      */
-    public void testIllegalCombinationCredentialReferenceAttributes(String errorMessage) throws IOException, OperationException {
+    public void testIllegalCombinationCredentialReferenceAttributes(String errorMessage) throws Exception {
         final ModelNodeResult originalValue = operations.readAttribute(address, credentialReferenceAttributeName);
         originalValue.assertSuccess();
         final String credentialStoreName = "credential-store-name_" + RandomStringUtils.randomAlphanumeric(6);
         //add credential store (in case capabilities restriction will be in place)
         final Address credentialStoreAddress = addCredentialStore(credentialStoreName);
         try {
-            Editor editor = configFragment.edit();
-            editor.text(CLEAR_TEXT, RandomStringUtils.randomAlphanumeric(6));
-            editor.text(STORE, credentialStoreName);
-            Assert.assertFalse("Form should not be saved when both clear text and store are defined! " + errorMessage, configFragment.save());
+            new ConfigChecker.Builder(client, address)
+                    .configFragment(configFragment)
+                    .edit(ConfigChecker.InputType.TEXT, ALIAS, "")
+                    .edit(ConfigChecker.InputType.TEXT, CLEAR_TEXT, RandomStringUtils.randomAlphanumeric(6))
+                    .edit(ConfigChecker.InputType.TEXT, STORE, credentialStoreName)
+                    .edit(ConfigChecker.InputType.TEXT, TYPE, "")
+                    .andSave()
+                    .verifyFormNotSaved(errorMessage);
         } finally {
             operations.writeAttribute(address, credentialReferenceAttributeName, originalValue.value());
             operations.removeIfExists(credentialStoreAddress);
@@ -169,26 +169,8 @@ public class ElytronIntegrationChecker {
     /**
      * Tests illegal combination of attributes for defined credential reference attribute name
      */
-    public void testIllegalCombinationCredentialReferenceAttributes() throws IOException, OperationException {
+    public void testIllegalCombinationCredentialReferenceAttributes() throws Exception {
         testIllegalCombinationCredentialReferenceAttributes("");
-    }
-
-    private void clearAllInputFields(Editor editor) {
-        editor.getText(ALIAS).clear();
-        editor.getText(CLEAR_TEXT).clear();
-        editor.getText(STORE).clear();
-        editor.getText(TYPE).clear();
-    }
-
-    private void sendKeysLikeHuman(WebElement element, String value) {
-        element.click();
-        element.sendKeys(Keys.chord(Keys.CONTROL, "a"));
-        Library.letsSleep(30);
-        element.sendKeys(Keys.DELETE);
-        for (char character : value.toCharArray()) {
-            element.sendKeys(String.valueOf(character));
-            Library.letsSleep(20);
-        }
     }
 
     private Address addCredentialStore(String credentialStoreName) throws IOException {

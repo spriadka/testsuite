@@ -4,7 +4,9 @@ import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.hal.testsuite.fragment.BaseFragment;
 import org.jboss.hal.testsuite.util.Console;
+import org.jboss.hal.testsuite.util.Library;
 import org.openqa.selenium.By;
+import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebElement;
@@ -48,6 +50,27 @@ public class Editor extends BaseFragment {
         Graphene.waitGui().until().element(input).value().equalTo("");
         input.sendKeys(value);
         Graphene.waitGui().until().element(input).value().equalTo(value);
+    }
+
+    /**
+     * Enters text as humanly as possible. E.g. makes pauses between characters and utilizes keyboard shortcuts. <b>
+     * Use only as a workaround when {@link #text(String, String)} is not working properly!</b>
+     * @param identifier identifier of element to be written to
+     * @param value a value to be entered
+     */
+    public void enterTextLikeHuman(String identifier, String value) {
+        WebElement element = getText(identifier);
+        if (!element.isDisplayed()) {
+            Console.withBrowser(browser).pageDown();
+        }
+        element.click();
+        element.sendKeys(Keys.chord(Keys.CONTROL, "a"));
+        Library.letsSleep(30);
+        element.sendKeys(Keys.DELETE);
+        for (char character : value.toCharArray()) {
+            element.sendKeys(String.valueOf(character));
+            Library.letsSleep(20);
+        }
     }
 
     /**

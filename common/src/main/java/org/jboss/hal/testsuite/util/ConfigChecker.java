@@ -67,7 +67,16 @@ public final class ConfigChecker {
      * @return {@link ResourceVerifier} to facilitate the subsequent verification compared to model
      */
     public ResourceVerifier verifyFormNotSaved() throws Exception {
-        Assert.assertFalse("Configuration should NOT switch into read-only mode.", saved);
+        return verifyFormNotSaved("");
+    }
+
+    /**
+     * Verifies that form doesn't switch back to read-only mode (probably due to validation error).
+     * @param errorMessageSuffix is intended to be used for e.g. passing related tracked issue.
+     * @return {@link ResourceVerifier} to facilitate the subsequent verification compared to model
+     */
+    public ResourceVerifier verifyFormNotSaved(String errorMessageSuffix) throws Exception {
+        Assert.assertFalse("Configuration should NOT switch into read-only mode. " + errorMessageSuffix, saved);
         return new ResourceVerifier(resourceAddress, client);
     }
 
@@ -118,7 +127,11 @@ public final class ConfigChecker {
     private void enter(Editor editor, Input input) throws IOException, InterruptedException, TimeoutException {
         switch (input.inputType) {
             case TEXT:
-                editor.text(input.identifier, getStringAttrValue(input)); break;
+                final String value = getStringAttrValue(input);
+                switch (input.inputMethod) {
+                    case HUMAN: editor.enterTextLikeHuman(input.identifier, value); break;
+                    case MACHINE: editor.text(input.identifier, getStringAttrValue(input)); break;
+                } break;
             case CHECKBOX:
                 editor.checkbox(input.identifier, getBooleanAttrValue(input)); break;
             case SELECT:
@@ -154,10 +167,22 @@ public final class ConfigChecker {
          * multiple times. The actual edit will be performed as soon as client calls the {@link #andSave()} </b>
          */
         public Builder edit(InputType inputType, String identifier, Object attrValue) {
+            return edit(inputType, identifier, attrValue, InputMethod.MACHINE);
+        }
+
+        /**
+         * use this method only if you need to set explicit {@link InputMethod}. Set field identified by
+         * <b>{@code identifier}</b> to be edited with <b>{@code attrValue}</b>. Can be called multiple times. The
+         * actual edit will be performed as soon as client calls the {@link #andSave()} </b>.
+         * Use this method only when {@link #edit(InputType, String, Object)} method is not working properly as a
+         * workaround.
+         * @param inputMethod Input method to be used. For example InputMethod.HUMAN to edit form like human.
+         */
+        public Builder edit(InputType inputType, String identifier, Object attrValue, InputMethod inputMethod) {
             if (this.inputList == null) {
                 this.inputList = new ArrayList<>();
             }
-            this.inputList.add(new Input(inputType, identifier, attrValue));
+            this.inputList.add(new Input(inputType, identifier, attrValue, inputMethod));
             return this;
         }
 
@@ -183,14 +208,21 @@ public final class ConfigChecker {
         }
     }
 
+    public enum InputMethod {
+        MACHINE, HUMAN
+    }
+
     private static class Input {
         private InputType inputType;
         private String identifier;
         private Object attrValue;
-        private Input(InputType inputType, String identifier, Object attrValue) {
+        private InputMethod inputMethod;
+
+        private Input(InputType inputType, String identifier, Object attrValue, InputMethod inputMethod) {
             this.inputType = inputType;
             this.identifier = identifier;
             this.attrValue = attrValue;
+            this.inputMethod = inputMethod;
         }
     }
 }
