@@ -139,7 +139,7 @@ public class GenericResourceTableFragment<T extends ResourceTableRowFragment> ex
      * @param text text to search
      * @return first row that contains given text in given column or null if no such row found
      */
-    public T getRowByText(int col, String text) {
+    public T getRowByText(final int col, final String text) {
 
         T row = null;
 
@@ -225,7 +225,7 @@ public class GenericResourceTableFragment<T extends ResourceTableRowFragment> ex
         return rowElements;
     }
 
-    private List<T> findVisibleRowsByCellValueAtIndex(int columnIndex, String cellValue) {
+    private List<T> findVisibleRowsByCellValueAtIndex(final int columnIndex, String cellValue) {
 
         List<T> rows = getVisibleRows().stream()
                 .filter(item -> item.getCellValue(columnIndex).equals(cellValue))
