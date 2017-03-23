@@ -10,6 +10,7 @@ import org.jboss.hal.testsuite.fragment.WindowFragment;
 import org.jboss.hal.testsuite.fragment.config.messaging.AddBridgeWizard;
 import org.jboss.hal.testsuite.fragment.config.messaging.AddBroadcastGroupWizard;
 import org.jboss.hal.testsuite.fragment.config.messaging.AddClusterConnectionWizard;
+import org.jboss.hal.testsuite.fragment.config.messaging.AddDiscoveryGroupWizard;
 import org.jboss.hal.testsuite.fragment.config.messaging.AddMessagingProviderWindow;
 import org.jboss.hal.testsuite.fragment.config.messaging.MessagingConfigArea;
 import org.jboss.hal.testsuite.fragment.config.messaging.ProviderSettingsWindow;
@@ -203,11 +204,8 @@ public class MessagingPage extends ConfigPage implements Navigatable {
         addRemoteAcceptor(name, socketBinding);
     }
 
-    public void addDiscoveryGroup(String name, String binding) {
-        clickButton("Add");
-        getWindowFragment().getEditor().text("name", name);
-        getWindowFragment().getEditor().text("socket-binding", binding);
-        getWindowFragment().clickButton("Save");
+    public AddDiscoveryGroupWizard addDiscoveryGroup() {
+        return getResourceManager().addResource(AddDiscoveryGroupWizard.class);
     }
 
     public void addInVmAcceptor(String name, String server) {

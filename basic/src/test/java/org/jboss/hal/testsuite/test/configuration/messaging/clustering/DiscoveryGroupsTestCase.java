@@ -8,13 +8,12 @@ import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.page.config.MessagingPage;
 import org.jboss.hal.testsuite.test.configuration.messaging.AbstractMessagingTestCase;
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.wildfly.extras.creaper.core.CommandFailedException;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.OperationException;
@@ -25,14 +24,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 
-/**
- * Created by pcyprian on 3.9.15.
- */
 @RunWith(Arquillian.class)
 @Category(Shared.class)
 public class DiscoveryGroupsTestCase extends AbstractMessagingTestCase {
-
-    private static final Logger log = LoggerFactory.getLogger(DiscoveryGroupsTestCase.class);
 
     private static final String DG_NAME = "dg-group-test" + RandomStringUtils.randomAlphanumeric(6);
     private static final String DG_TBR_NAME = "dg-group-test" + RandomStringUtils.randomAlphanumeric(6);
@@ -41,6 +35,8 @@ public class DiscoveryGroupsTestCase extends AbstractMessagingTestCase {
     private static final Address DG_ADDRESS = DEFAULT_MESSAGING_SERVER.and("discovery-group", DG_NAME);
     private static final Address DG_TBR_ADDRESS = DEFAULT_MESSAGING_SERVER.and("discovery-group", DG_TBR_NAME);
     private static final Address DG_TBA_ADDRESS = DEFAULT_MESSAGING_SERVER.and("discovery-group", DG_TBA_NAME);
+    private static final Address DG_TBA2_ADDRESS = DEFAULT_MESSAGING_SERVER.and("discovery-group", "dg-group_TBA2_" + RandomStringUtils.randomAlphanumeric(5));
+    private static final Address DG_INV_ADDRESS = DEFAULT_MESSAGING_SERVER.and("discovery-group", "dg-group_INV_" + RandomStringUtils.randomAlphanumeric(5));
 
     private static final List<String> socketBindings = new LinkedList<>();
 
@@ -50,10 +46,8 @@ public class DiscoveryGroupsTestCase extends AbstractMessagingTestCase {
         socketBindings.add(createSocketBinding());
         socketBindings.add(createSocketBinding());
         socketBindings.add(createSocketBinding());
-        operations.add(DG_ADDRESS, Values.of("socket-binding", socketBindings.get(0)));
-        new ResourceVerifier(DG_ADDRESS, client).verifyExists();
-        operations.add(DG_TBR_ADDRESS, Values.of("socket-binding", socketBindings.get(1)));
-        new ResourceVerifier(DG_TBR_ADDRESS, client).verifyExists();
+        operations.add(DG_ADDRESS, Values.of("socket-binding", socketBindings.get(0))).assertSuccess();
+        operations.add(DG_TBR_ADDRESS, Values.of("socket-binding", socketBindings.get(1))).assertSuccess();
         administration.reloadIfRequired();
     }
 
@@ -61,7 +55,9 @@ public class DiscoveryGroupsTestCase extends AbstractMessagingTestCase {
     public static void tearDown() throws IOException, OperationException, CommandFailedException, TimeoutException, InterruptedException {
         operations.removeIfExists(DG_ADDRESS);
         operations.removeIfExists(DG_TBA_ADDRESS);
+        operations.removeIfExists(DG_TBA2_ADDRESS);
         operations.removeIfExists(DG_TBR_ADDRESS);
+        operations.removeIfExists(DG_INV_ADDRESS);
     }
 
     @Page
@@ -75,10 +71,44 @@ public class DiscoveryGroupsTestCase extends AbstractMessagingTestCase {
     }
 
     @Test
-    public void addDiscoveryGroup() {
-        page.addDiscoveryGroup(DG_NAME, socketBindings.get(2));
+    public void addDiscoveryGroupWithSocketBindingDefined() throws Exception {
+        page.addDiscoveryGroup()
+                .name(DG_TBA_ADDRESS.getLastPairValue())
+                .socketBinding(socketBindings.get(2))
+                .saveAndDismissReloadRequiredWindowWithState()
+                .assertWindowClosed();
 
-        new ResourceVerifier(DG_ADDRESS, client);
+        Assert.assertTrue("Discovery group should be present!",
+                page.getResourceManager().isResourcePresent(DG_TBA_ADDRESS.getLastPairValue()));
+
+        new ResourceVerifier(DG_TBA_ADDRESS, client).verifyExists();
+    }
+
+    @Test
+    public void addDiscoveryGroupWithJGroupsChannelDefined() throws Exception {
+        page.addDiscoveryGroup()
+                .name(DG_TBA2_ADDRESS.getLastPairValue())
+                .jgroupsChannel("ee")
+                .saveAndDismissReloadRequiredWindowWithState()
+                .assertWindowClosed();
+
+        Assert.assertTrue("Discovery group should be present!",
+                page.getResourceManager().isResourcePresent(DG_TBA2_ADDRESS.getLastPairValue()));
+
+        new ResourceVerifier(DG_TBA2_ADDRESS, client).verifyExists();
+    }
+
+    @Test
+    public void addDiscoveryGroupWithOnlyNameDefined() throws Exception {
+        page.addDiscoveryGroup()
+                .name(DG_INV_ADDRESS.getLastPairValue())
+                .saveAndDismissReloadRequiredWindowWithState()
+                .assertWindowOpen();
+
+        Assert.assertFalse("Discovery group should NOT be present!",
+                page.getResourceManager().isResourcePresent(DG_INV_ADDRESS.getLastPairValue()));
+
+        new ResourceVerifier(DG_INV_ADDRESS, client).verifyDoesNotExist();
     }
 
     @Test

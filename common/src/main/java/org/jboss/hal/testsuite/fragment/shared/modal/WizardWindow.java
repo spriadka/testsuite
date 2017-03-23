@@ -36,12 +36,20 @@ public class WizardWindow extends WindowFragment {
 
     /**
      * Clicks Save button and waits unit the wizard window is closed.
-     *
      * @return true if window is not present after the button was clicked
      */
     public boolean save() {
         clickSave();
         return isWizardClosed();
+    }
+
+    /**
+     * Clicks Save button and waits unit the wizard window is closed.
+     * @return state describing whether wizard is closed or not
+     */
+    public State saveWithState() {
+        clickSave();
+        return getWizardState();
     }
 
     /**
@@ -55,13 +63,31 @@ public class WizardWindow extends WindowFragment {
     }
 
     /**
+     * Clicks Save button, dismiss 'Reload required' window if appears and waits unit the wizard window is closed.
+     * @return state describing whether wizard is closed or not
+     */
+    public State saveAndDismissReloadRequiredWindowWithState() {
+        clickSave();
+        dismissReloadRequiredWindow();
+        return getWizardState();
+    }
+
+    /**
      * Clicks either Finish, Done or Save button and waits unit the wizard window is closed.
-     *
      * @return true if window is not present after the button was clicked
      */
     public boolean finish() {
         chooseAndClickFinishingButton();
         return isWizardClosed();
+    }
+
+    /**
+     * Clicks either Finish, Done or Save button and waits unit the wizard window is closed.
+     * @return state describing whether wizard is closed or not
+     */
+    public State finishWithState() {
+        chooseAndClickFinishingButton();
+        return getWizardState();
     }
 
     /**
@@ -76,6 +102,17 @@ public class WizardWindow extends WindowFragment {
     }
 
     /**
+     * Clicks either Finish, Done or Save button, dismiss 'Reload required' window if appears and waits unit the wizard
+     * window is closed.
+     * @return state describing whether wizard is closed or not
+     */
+    public State finishAndDismissReloadRequiredWindowWithState() {
+        chooseAndClickFinishingButton();
+        dismissReloadRequiredWindow();
+        return getWizardState();
+    }
+
+    /**
      * Clicks cancel button, dismiss 'Reload required' window if appears and waits unit the wizard
      * window is closed.
      * @return true if window is not present after the button was clicked
@@ -87,6 +124,17 @@ public class WizardWindow extends WindowFragment {
     }
 
     /**
+     * Clicks cancel button, dismiss 'Reload required' window if appears and waits unit the wizard
+     * window is closed.
+     * @return state describing whether wizard is closed or not
+     */
+    public State cancelAndDismissReloadRequiredWindowWithState() {
+        clickCancel();
+        dismissReloadRequiredWindow();
+        return getWizardState();
+    }
+
+    /**
      * Clicks cross in top right corner, dismiss 'Reload required' window if appears and waits unit the wizard
      * window is closed.
      * @return true if window is not present after the button was clicked
@@ -95,6 +143,17 @@ public class WizardWindow extends WindowFragment {
         clickWindowCloseButton();
         dismissReloadRequiredWindow();
         return isWizardClosed();
+    }
+
+    /**
+     * Clicks cross in top right corner, dismiss 'Reload required' window if appears and waits unit the wizard
+     * window is closed.
+     * @return state describing whether wizard is closed or not
+     */
+    public State closeAndDismissReloadRequiredWindowWithState() {
+        clickWindowCloseButton();
+        dismissReloadRequiredWindow();
+        return getWizardState();
     }
 
     private void clickDoneButton() {
@@ -138,7 +197,6 @@ public class WizardWindow extends WindowFragment {
 
     /**
      * Calls  {@link #finish() finish} method and asserts the output
-     *
      * @param expected <code>true</code>if wizard is expected to finish, <code>false</code> otherwise
      */
     public void assertFinish(boolean expected) {
@@ -158,5 +216,36 @@ public class WizardWindow extends WindowFragment {
         By selector = By.className(PropUtils.get("modals.window.spinner.class"));
         Graphene.waitGui().withTimeout(1200, TimeUnit.MILLISECONDS);
         Graphene.waitModel().until().element(root, selector).is().not().visible();
+    }
+
+    /**
+     * Providing information about state of wizard (open/closed)
+     */
+    public static final class State {
+
+        private final InnerState state;
+
+        private State(InnerState state) {
+            this.state = state;
+        }
+
+        public void assertWindowClosed() {
+            Assert.assertEquals("Wizard was supposed to finish, the window should be closed.",
+                    InnerState.CLOSED, state);
+        }
+
+        public void assertWindowOpen() {
+            Assert.assertEquals("Wizard was supposed to fail, the window should be open.",
+                    InnerState.OPEN, state);
+        }
+
+    }
+
+    private State getWizardState() {
+        return new State(isWizardClosed() ? InnerState.CLOSED : InnerState.OPEN);
+    }
+
+    private enum InnerState {
+        CLOSED, OPEN
     }
 }
