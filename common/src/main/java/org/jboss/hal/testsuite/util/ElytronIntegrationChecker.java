@@ -6,7 +6,6 @@ import org.jboss.dmr.Property;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.dmr.ModelNodeGenerator;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
-import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wildfly.extras.creaper.core.online.ModelNodeResult;
@@ -64,8 +63,6 @@ public class ElytronIntegrationChecker {
                     .edit(ConfigChecker.InputType.TEXT, TYPE, "")
                     .andSave()
                     .verifyFormSaved(errorMessage);
-
-            Assert.assertTrue("Configuration should be saved!", configFragment.save());
 
             final CredentialStoreModelNodeBuilder builder = new CredentialStoreModelNodeBuilder()
                     .clearText(clearTextValue);

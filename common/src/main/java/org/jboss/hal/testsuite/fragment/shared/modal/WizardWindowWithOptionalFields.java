@@ -10,6 +10,8 @@ import org.openqa.selenium.WebElement;
  */
 public class WizardWindowWithOptionalFields extends WizardWindow {
 
+    private boolean isOptionalFieldsTabOpened;
+
     /**
      * Opens tab in wizard window. E.g. tab labeled 'Optional Fields' when adding new resource.
      */
@@ -23,5 +25,13 @@ public class WizardWindowWithOptionalFields extends WizardWindow {
                 .element(ByJQuery.selector(".form-edit-panel .gwt-DisclosurePanel tr:nth-child(2)"))
                 .is()
                 .visible();
+
+        isOptionalFieldsTabOpened = true;
+    }
+
+    public void openOptionalFieldsTabIfNotAlreadyOpened() {
+        if (!isOptionalFieldsTabOpened) {
+            openOptionalFieldsTab();
+        }
     }
 }
