@@ -29,9 +29,35 @@ public class PathOperations {
      * @return full path
      * @throws IOException when some IO error occurs during reading of attribute
      */
-    public String resolveFullPath(final String pathName) throws IOException {
+    public String resolveFullPathForStandaloneServer(final String pathName) throws IOException {
+        return resolveFullPathForResource(pathName, Address.root());
+    }
+
+    /**
+     * Resolve full filesystem path of path defined by /path=&lt;pathName&gt;. Path is resolved recursively until relative-to
+     * attribute is specified.
+     *
+     * @param pathName name of path in configuration
+     * @param serverName name of server used for path resolving
+     * @return full path
+     * @throws IOException when some IO error occurs during reading of attribute
+     */
+    public String resolveFullPathForDomainServerOnDefaultHost(final String pathName, final String serverName) throws IOException {
+        return resolveFullPathForResource(pathName, Address.host(ConfigUtils.getDefaultHost()).and("server", serverName));
+    }
+
+    /**
+     * Resolve full filesystem path of path defined by /path=&lt;pathName&gt;. Path is resolved recursively until relative-to
+     * attribute is specified.
+     *
+     * @param pathName name of path in configuration
+     * @param resourceAddress address of resource used for resolving
+     * @return full path
+     * @throws IOException when some IO error occurs during reading of attribute
+     */
+    public String resolveFullPathForResource(final String pathName, final Address resourceAddress) throws IOException {
         log.debug("Resolving full path of '" + pathName + "'");
-        Address pathAddress = Address.of("path", pathName);
+        Address pathAddress = resourceAddress.and("path", pathName);
         String path = ops.readAttribute(pathAddress, "path").stringValue();
         log.debug("Resolved path: " + path);
         ModelNodeResult relativeTo = ops.readAttribute(pathAddress, "relative-to");
@@ -40,7 +66,7 @@ public class PathOperations {
         if (relativeTo.isFailed() || !relativeTo.hasDefinedValue()) {
             resolved = Paths.get(path);
         } else {
-            resolved = Paths.get(resolveFullPath(relativeTo.stringValue()), path);
+            resolved = Paths.get(resolveFullPathForResource(relativeTo.stringValue(), resourceAddress), path);
         }
 
         log.debug("Resolved FULL path: " + path);
@@ -48,7 +74,12 @@ public class PathOperations {
     }
 
     public Path getServerLogFile() throws IOException {
-        return Paths.get(this.resolveFullPath("jboss.server.log.dir"),
+        return Paths.get(this.resolveFullPathForStandaloneServer("jboss.server.log.dir"),
                 ops.readChildrenNames(Address.subsystem("logging"), "log-file").listValue().get(0).asString());
+    }
+
+    public Path getServerLogFileForDomainServerOnDefaultHost(String serverName) throws IOException {
+        return Paths.get(this.resolveFullPathForDomainServerOnDefaultHost("jboss.server.log.dir", serverName),
+                ops.readChildrenNames(Address.host(ConfigUtils.getDefaultHost()).and("server", serverName).and("subsystem", "logging"), "log-file").listValue().get(0).asString());
     }
 }

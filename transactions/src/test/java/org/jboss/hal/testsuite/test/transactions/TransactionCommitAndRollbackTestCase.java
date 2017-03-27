@@ -6,9 +6,10 @@ import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.hal.testsuite.category.Standalone;
+import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.page.runtime.MessagingPreparedTransactionsPage;
+import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.jboss.hal.testsuite.util.PathOperations;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -22,6 +23,7 @@ import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wildfly.extras.creaper.core.online.ModelNodeResult;
 import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.OperationException;
@@ -47,7 +49,7 @@ import static org.hamcrest.core.IsEqual.equalTo;
  */
 @RunWith(Arquillian.class)
 @RunAsClient
-@Category(Standalone.class)
+@Category(Shared.class)
 public class TransactionCommitAndRollbackTestCase {
 
     private static final Logger logger = LoggerFactory.getLogger(TransactionCommitAndRollbackTestCase.class);
@@ -64,17 +66,25 @@ public class TransactionCommitAndRollbackTestCase {
     private static final OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
     private static final Operations operations = new Operations(client);
 
+    private static final String DEFAULT_DOMAIN_SERVER_NAME = "server-one";
+
     private static final Address
             TRANSACTIONS_LOGGER_ADDRESS = Address.subsystem("logging").and("logger",
                 "org.apache.activemq.artemis.core.transaction.impl.TransactionImpl"),
-            DEFAULT_MESSAGING_SERVER_ADDRESS = Address.subsystem("messaging-activemq").and("server", "default");
+            DEFAULT_MESSAGING_SERVER_ADDRESS = ConfigUtils.isDomain() ?
+                    Address.host("master").and("server", DEFAULT_DOMAIN_SERVER_NAME).and("subsystem", "messaging-activemq").and("server", "default") :
+                    Address.subsystem("messaging-activemq").and("server", "default");
 
     private static Path serverLog;
 
     @BeforeClass
     public static void beforeClass() throws IOException {
         operations.add(TRANSACTIONS_LOGGER_ADDRESS, Values.of("level", "TRACE"));
-        serverLog = new PathOperations(client).getServerLogFile();
+        if (ConfigUtils.isDomain()) {
+            serverLog = new PathOperations(client).getServerLogFileForDomainServerOnDefaultHost(DEFAULT_DOMAIN_SERVER_NAME);
+        } else {
+            serverLog = new PathOperations(client).getServerLogFile();
+        }
     }
 
     @AfterClass
@@ -118,10 +128,22 @@ public class TransactionCommitAndRollbackTestCase {
     private void performActionOnTransactionAndVerifyInGUI(String transactionXID, PerformedAction action) throws IOException {
         Assert.assertNotNull(page.getResourceManager().getResourceTable().getRowByText(0, transactionXID));
 
-        Assert.assertTrue("Operation " + action.getCliOperationName() + " in CLI did not went well! Is the base64 xID right?",
-                operations.invoke(action.getCliOperationName(),
-                        DEFAULT_MESSAGING_SERVER_ADDRESS, Values.of("transaction-as-base-64", transactionXID)).booleanValue());
+        //perform operation for desired transaction defined by xID
+        final ModelNodeResult result = operations.invoke(action.getCliOperationName(),
+                DEFAULT_MESSAGING_SERVER_ADDRESS, Values.of("transaction-as-base-64", transactionXID));
 
+        //verify operation was successful
+        result.assertSuccess("Operation '" + action.getCliOperationName() + "' should perform successfully on " + transactionXID);
+
+        //verify that there is result present
+        result.assertDefinedValue("There should be defined value for XID '" + transactionXID + "'!");
+
+        /*verify that the result has expected value operation returns boolean value which determines whether the
+        rollback/commit itself was successful*/
+        Assert.assertTrue("Operation " + action.getCliOperationName() +
+                        " in CLI did not went well! Is the base64 xID right?", result.booleanValue());
+
+        //refresh table containing transactions in GUI
         page.refresh();
 
         Assert.assertNull("Committed transaction should not be present in table after refresh",
