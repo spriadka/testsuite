@@ -46,4 +46,13 @@ public abstract class AbstractElytronConfigPage<PARTICULAR_PAGE extends Abstract
         By configAreaContentSelector = ByJQuery.selector("." + PropUtils.get("configarea.content.class") + ":visible");
         return Graphene.createPageFragment(ResourceManager.class, browser.findElement(configAreaContentSelector));
     }
+
+    /**
+     * Select particular Elytron resource in the list on the left side of the application detail.
+     */
+    @SuppressWarnings("unchecked")
+    public PARTICULAR_PAGE selectResource(String resourceLabel) {
+        switchSubTab(resourceLabel);
+        return (PARTICULAR_PAGE) this;
+    }
 }

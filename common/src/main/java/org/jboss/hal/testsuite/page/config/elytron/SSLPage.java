@@ -13,9 +13,4 @@ public class SSLPage extends AbstractElytronConfigPage<SSLPage> {
         return this;
     }
 
-    public SSLPage selectResource(String resourceLabel) {
-        switchSubTab(resourceLabel);
-        return this;
-    }
-
 }
