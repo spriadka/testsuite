@@ -20,7 +20,9 @@ import org.junit.runner.RunWith;
 import org.wildfly.extras.creaper.commands.undertow.AddUndertowListener;
 import org.wildfly.extras.creaper.commands.undertow.SslVerifyClient;
 import org.wildfly.extras.creaper.core.CommandFailedException;
+import org.wildfly.extras.creaper.core.online.ModelNodeResult;
 import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.Batch;
 import org.wildfly.extras.creaper.core.online.operations.OperationException;
 import org.wildfly.extras.creaper.core.online.operations.ReadAttributeOption;
 
@@ -35,35 +37,38 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
     private UndertowHTTPPage page;
 
     //identifiers
-    private static final String ALLOW_ENCODED_SLASH = "allow-encoded-slash";
-    private static final String ALLOW_EQUALS_IN_COOKIE_VALUE = "allow-equals-in-cookie-value";
-    private static final String ALWAYS_SET_KEEP_ALIVE = "always-set-keep-alive";
-    private static final String BUFFER_PIPELINED_DATA = "buffer-pipelined-data";
-    private static final String BUFFER_POOL = "buffer-pool";
-    private static final String DECODE_URL = "decode-url";
-    private static final String ENABLE_HTTP2 = "enable-http2";
-    private static final String MAX_BUFFERED_REQUEST_SIZE = "max-buffered-request-size";
-    private static final String MAX_CONNECTIONS = "max-connections";
-    private static final String MAX_COOKIES = "max-cookies";
-    private static final String MAX_HEADER_SIZE = "max-header-size";
-    private static final String MAX_HEADERS = "max-headers";
-    private static final String MAX_PARAMETERS = "max-parameters";
-    private static final String MAX_POST_SIZE = "max-post-size";
-    private static final String NO_REQUEST_TIMEOUT = "no-request-timeout";
-    private static final String READ_TIMEOUT = "read-timeout";
-    private static final String RECEIVE_BUFFER = "receive-buffer";
-    private static final String RECORD_REQUEST_START_TIME = "record-request-start-time";
-    private static final String REQUEST_PARSE_TIMEOUT = "request-parse-timeout";
-    private static final String RESOLVE_PEER_ADDRESS = "resolve-peer-address";
-    private static final String SEND_BUFFER = "send-buffer";
-    private static final String SOCKET_BINDING = "socket-binding";
-    private static final String SSL_SESSION_CACHE_SIZE = "ssl-session-cache-size";
-    private static final String SSL_SESSION_TIMEOUT = "ssl-session-timeout";
-    private static final String TCP_BACKLOG = "tcp-backlog";
-    private static final String TCP_KEEP_ALIVE = "tcp-keep-alive";
-    private static final String URL_CHARSET = "url-charset";
-    private static final String WORKER = "worker";
-    private static final String WRITE_TIMEOUT = "write-timeout";
+    private static final String
+            ALLOW_ENCODED_SLASH = "allow-encoded-slash",
+            ALLOW_EQUALS_IN_COOKIE_VALUE = "allow-equals-in-cookie-value",
+            ALWAYS_SET_KEEP_ALIVE = "always-set-keep-alive",
+            BUFFER_PIPELINED_DATA = "buffer-pipelined-data",
+            BUFFER_POOL = "buffer-pool",
+            DECODE_URL = "decode-url",
+            ENABLE_HTTP2 = "enable-http2",
+            MAX_BUFFERED_REQUEST_SIZE = "max-buffered-request-size",
+            MAX_CONNECTIONS = "max-connections",
+            MAX_COOKIES = "max-cookies",
+            MAX_HEADER_SIZE = "max-header-size",
+            MAX_HEADERS = "max-headers",
+            MAX_PARAMETERS = "max-parameters",
+            MAX_POST_SIZE = "max-post-size",
+            NO_REQUEST_TIMEOUT = "no-request-timeout",
+            READ_TIMEOUT = "read-timeout",
+            RECEIVE_BUFFER = "receive-buffer",
+            RECORD_REQUEST_START_TIME = "record-request-start-time",
+            REQUEST_PARSE_TIMEOUT = "request-parse-timeout",
+            RESOLVE_PEER_ADDRESS = "resolve-peer-address",
+            SECURITY_REALM = "security-realm",
+            SSL_CONTEXT = "ssl-context",
+            SEND_BUFFER = "send-buffer",
+            SOCKET_BINDING = "socket-binding",
+            SSL_SESSION_CACHE_SIZE = "ssl-session-cache-size",
+            SSL_SESSION_TIMEOUT = "ssl-session-timeout",
+            TCP_BACKLOG = "tcp-backlog",
+            TCP_KEEP_ALIVE = "tcp-keep-alive",
+            URL_CHARSET = "url-charset",
+            WORKER = "worker",
+            WRITE_TIMEOUT = "write-timeout";
 
     //values
     private static final String HTTP_SERVER = "undertow-http-server-https-listener_" + RandomStringUtils.randomAlphanumeric(5);
@@ -332,6 +337,67 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
                     .verifyAttribute(SOCKET_BINDING, socketBinding);
         } finally {
             operations.writeAttribute(HTTPS_LISTENER_ADDRESS, SOCKET_BINDING, originalSocketBindingValue);
+        }
+    }
+
+    @Test
+    public void editSSLContextSecurityRealmInvalidCombination() throws Exception {
+        final UndertowElytronOperations undertowElytronOperations = new UndertowElytronOperations(client);
+        final Address keyStoreAddress = undertowElytronOperations.createKeyStore(),
+                keyManagerAddress = undertowElytronOperations.createKeyManager(keyStoreAddress),
+                serverSSLContextAddress = undertowElytronOperations.createServerSSLContext(keyManagerAddress);
+
+        final ModelNodeResult sslContextModelNodeResult = operations.readAttribute(HTTPS_LISTENER_ADDRESS, SSL_CONTEXT),
+                securityRealmModelNodeResult = operations.readAttribute(HTTPS_LISTENER_ADDRESS, SECURITY_REALM);
+        sslContextModelNodeResult.assertSuccess();
+        securityRealmModelNodeResult.assertSuccess();
+
+        try {
+            new ConfigChecker.Builder(client, HTTPS_LISTENER_ADDRESS)
+                    .configFragment(page.getConfigFragment())
+                    .edit(ConfigChecker.InputType.TEXT, SSL_CONTEXT, serverSSLContextAddress.getLastPairValue())
+                    .edit(ConfigChecker.InputType.TEXT, SECURITY_REALM, RandomStringUtils.randomAlphanumeric(7))
+                    .andSave()
+                    .verifyFormNotSaved("Probably fails because of https://issues.jboss.org/browse/HAL-1340");
+        } finally {
+            operations.batch(new Batch()
+                    .writeAttribute(HTTPS_LISTENER_ADDRESS, SSL_CONTEXT, sslContextModelNodeResult.value())
+                    .writeAttribute(HTTPS_LISTENER_ADDRESS, SECURITY_REALM, securityRealmModelNodeResult.value()))
+                    .assertSuccess();
+            operations.removeIfExists(serverSSLContextAddress);
+            operations.removeIfExists(keyManagerAddress);
+            operations.removeIfExists(keyStoreAddress);
+        }
+    }
+
+    @Test
+    public void editSSLContext() throws Exception {
+        final UndertowElytronOperations undertowElytronOperations = new UndertowElytronOperations(client);
+        final Address keyStoreAddress = undertowElytronOperations.createKeyStore(),
+                keyManagerAddress = undertowElytronOperations.createKeyManager(keyStoreAddress),
+                serverSSLContextAddress = undertowElytronOperations.createServerSSLContext(keyManagerAddress);
+
+        final ModelNodeResult sslContextModelNodeResult = operations.readAttribute(HTTPS_LISTENER_ADDRESS, SSL_CONTEXT),
+                securityRealmModelNodeResult = operations.readAttribute(HTTPS_LISTENER_ADDRESS, SECURITY_REALM);
+        sslContextModelNodeResult.assertSuccess();
+        securityRealmModelNodeResult.assertSuccess();
+
+        try {
+            new ConfigChecker.Builder(client, HTTPS_LISTENER_ADDRESS)
+                    .configFragment(page.getConfigFragment())
+                    .edit(ConfigChecker.InputType.TEXT, SSL_CONTEXT, serverSSLContextAddress.getLastPairValue())
+                    .edit(ConfigChecker.InputType.TEXT, SECURITY_REALM, "")
+                    .andSave()
+                    .verifyFormSaved()
+                    .verifyAttribute(SSL_CONTEXT, serverSSLContextAddress.getLastPairValue());
+        } finally {
+            operations.batch(new Batch()
+                    .writeAttribute(HTTPS_LISTENER_ADDRESS, SSL_CONTEXT, sslContextModelNodeResult.value())
+                    .writeAttribute(HTTPS_LISTENER_ADDRESS, SECURITY_REALM, securityRealmModelNodeResult.value()))
+                    .assertSuccess();
+            operations.removeIfExists(serverSSLContextAddress);
+            operations.removeIfExists(keyManagerAddress);
+            operations.removeIfExists(keyStoreAddress);
         }
     }
 

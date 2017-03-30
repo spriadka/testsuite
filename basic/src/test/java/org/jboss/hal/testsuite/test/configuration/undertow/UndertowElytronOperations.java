@@ -1,4 +1,4 @@
-package org.jboss.hal.testsuite.test.configuration.undertow.applicationsecuritydomain;
+package org.jboss.hal.testsuite.test.configuration.undertow;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.dmr.ModelNode;
@@ -12,7 +12,7 @@ import org.wildfly.extras.creaper.core.online.operations.Values;
 
 import java.io.IOException;
 
-class ApplicationSecurityDomainOperations {
+public class UndertowElytronOperations {
 
     private final Operations operations;
     private final ElytronOperations elyOps;
@@ -35,12 +35,12 @@ class ApplicationSecurityDomainOperations {
             MODULE_NAME_1 = "org.jboss.as.cli";
 
 
-    ApplicationSecurityDomainOperations(OnlineManagementClient client) {
+    public UndertowElytronOperations(OnlineManagementClient client) {
         this.operations = new Operations(client);
         this.elyOps = new ElytronOperations(client);
     }
 
-    Address createSecurityRealm() throws IOException {
+    public Address createSecurityRealm() throws IOException {
         String configDir = "jboss." + (ConfigUtils.isDomain() ? "domain" : "server") + ".config.dir";
         Address realmAddress = elyOps.getElytronAddress("properties-realm", RandomStringUtils.randomAlphanumeric(7));
         ModelNode userPropertiesNode = new ModelNodeGenerator.ModelNodePropertiesBuilder().addProperty("path", "mgmt-users.properties")
@@ -49,7 +49,7 @@ class ApplicationSecurityDomainOperations {
         return realmAddress;
     }
 
-    Address createSecurityDomain(String realmName) throws IOException {
+    public Address createSecurityDomain(String realmName) throws IOException {
         Address domainAddress = elyOps.getElytronAddress(SECURITY_DOMAIN, RandomStringUtils.randomAlphanumeric(7));
         ModelNode realmsNode = new ModelNodeGenerator.ModelNodeListBuilder()
                 .addNode(new ModelNodeGenerator.ModelNodePropertiesBuilder().addProperty("realm", realmName).build()).build();
@@ -57,7 +57,7 @@ class ApplicationSecurityDomainOperations {
         return domainAddress;
     }
 
-    Address createHTTPAuthentication(String serviceLoaderFactoryName, String securityDomainName) throws IOException {
+    public Address createHTTPAuthentication(String serviceLoaderFactoryName, String securityDomainName) throws IOException {
         final String authenticationName = RandomStringUtils.randomAlphanumeric(7);
         final Address authenticationAddress = elyOps.getElytronAddress(HTTP_AUTHENTICATION_FACTORY, authenticationName);
 
@@ -68,13 +68,13 @@ class ApplicationSecurityDomainOperations {
         return authenticationAddress;
     }
 
-    Address createServiceLoaderFactory() throws IOException {
+    public Address createServiceLoaderFactory() throws IOException {
         final Address factoryAddress = elyOps.getElytronAddress(SERVICE_LOADER_HTTP_SERVER_MECHANISM_FACTORY, RandomStringUtils.randomAlphanumeric(7));
-        operations.add(factoryAddress, Values.of(MODULE, MODULE_NAME_1));
+        operations.add(factoryAddress, Values.of(MODULE, MODULE_NAME_1)).assertSuccess();
         return factoryAddress;
     }
 
-    Address createKeyStore() throws IOException {
+    public Address createKeyStore() throws IOException {
         final String keyStoreName = RandomStringUtils.randomAlphanumeric(5),
                 password = RandomStringUtils.randomAlphanumeric(5);
         final Address keyStoreAddress = elyOps.getElytronAddress(KEY_STORE, keyStoreName);
@@ -85,25 +85,50 @@ class ApplicationSecurityDomainOperations {
         return keyStoreAddress;
     }
 
-    Address createKeyManager(Address keyStoreAddress) throws IOException {
+    public Address createKeyManager(Address keyStoreAddress) throws IOException {
         final String algorithmValue = "PKIX";
         final Address keyManagerAddress = elyOps.getElytronAddress(KEY_MANAGERS, RandomStringUtils.randomAlphanumeric(7));
         operations.add(keyManagerAddress, Values.of(ALGORITHM, algorithmValue)
                 .and(KEY_STORE, keyStoreAddress.getLastPairValue())
                 .and(CREDENTIAL_REFERENCE, new ModelNodeGenerator.ModelNodePropertiesBuilder()
                         .addProperty(CLEAR_TEXT, RandomStringUtils.randomAlphanumeric(7))
-                        .build()));
+                        .build()))
+                .assertSuccess();
         return keyManagerAddress;
     }
 
-    Address createClientSSLContext(Address keyManagerAddress) throws IOException {
-        final Address clientSSLContextAddress = elyOps.getElytronAddress(CLIENT_SSL_CONTEXT, RandomStringUtils.randomAlphanumeric(7));
+    public Address createClientSSLContext(Address keyManagerAddress) throws IOException {
+        return createSSLContext(keyManagerAddress, SSLContext.CLIENT);
+    }
+
+    public Address createServerSSLContext(Address keyManagerAddress) throws IOException {
+        return createSSLContext(keyManagerAddress, SSLContext.SERVER);
+    }
+
+    private Address createSSLContext(Address keyManagerAddress, SSLContext type) throws IOException {
+        final Address clientSSLContextAddress = elyOps.getElytronAddress(type.getAttributeName(), RandomStringUtils.randomAlphanumeric(7));
         final ModelNode protocolList = new ModelNodeGenerator.ModelNodeListBuilder(new ModelNode(TLS_V11))
                 .addNode(new ModelNode(TLS_V12))
                 .build();
 
-        operations.add(clientSSLContextAddress, Values.of(KEY_MANAGERS, keyManagerAddress.getLastPairValue()).and(PROTOCOLS, protocolList));
+        operations.add(clientSSLContextAddress, Values.of(KEY_MANAGERS, keyManagerAddress.getLastPairValue()).and(PROTOCOLS, protocolList))
+                .assertSuccess();
         return clientSSLContextAddress;
+    }
+
+    private enum SSLContext {
+        CLIENT(CLIENT_SSL_CONTEXT),
+        SERVER("server-ssl-context");
+
+        final String attrinuteName;
+
+        SSLContext(String attributeName) {
+            this.attrinuteName = attributeName;
+        }
+
+        public String getAttributeName() {
+            return attrinuteName;
+        }
     }
 
 

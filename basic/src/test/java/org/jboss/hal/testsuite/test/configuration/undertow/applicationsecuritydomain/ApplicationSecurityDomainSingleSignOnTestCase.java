@@ -11,6 +11,7 @@ import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.dmr.ModelNodeGenerator;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.page.config.ApplicationSecurityDomainPage;
+import org.jboss.hal.testsuite.test.configuration.undertow.UndertowElytronOperations;
 import org.jboss.hal.testsuite.util.ConfigChecker;
 import org.jboss.hal.testsuite.util.ElytronIntegrationChecker;
 import org.junit.AfterClass;
@@ -45,7 +46,7 @@ public class ApplicationSecurityDomainSingleSignOnTestCase {
     private static final OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
     private static final Administration administration = new Administration(client);
     private static final Operations operations = new Operations(client);
-    private static final ApplicationSecurityDomainOperations securityDomainOperations = new ApplicationSecurityDomainOperations(client);
+    private static final UndertowElytronOperations securityDomainOperations = new UndertowElytronOperations(client);
 
     private static final String
             APPLICATION_SECURITY_DOMAIN = "application-security-domain",

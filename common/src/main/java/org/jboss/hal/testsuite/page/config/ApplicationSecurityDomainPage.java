@@ -12,6 +12,9 @@ import org.jboss.hal.testsuite.util.Console;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
+/**
+ * Class representing page for setting Application Security Domain in Undertow subsystem
+ */
 public class ApplicationSecurityDomainPage extends ConfigurationPage {
 
     public void navigate() {
