@@ -117,11 +117,28 @@ public abstract class BasePage {
         Console.withBrowser(browser).waitUntilLoaded();
     }
 
+    public void switchSubTabByExactText(String identifier) {
+        List<WebElement> subTabs = getSubTabs(identifier);
+        for (WebElement subTab : subTabs) {
+            if (subTab.getText().equals(identifier)) {
+                subTab.click();
+                Graphene.waitGui().until().element(subTab).attribute("class").contains("link-bar-active");
+                Console.withBrowser(browser).waitUntilLoaded();
+            }
+        }
+    }
+
     private WebElement getSubTab(String identifier) {
         By selector = ByJQuery.selector("div.inline-link:contains('" + identifier + "'):visible");
         Graphene.waitGui().until().element(selector).is().visible();
         return browser.findElement(selector);
     }
+
+    private List<WebElement> getSubTabs(String identifier) {
+        By selector = ByJQuery.selector("div.inline-link:contains('" + identifier + "'):visible");
+        return browser.findElements(selector);
+    }
+
 
     // TODO: tab management refactoring is needed
 
