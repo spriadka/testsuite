@@ -39,6 +39,10 @@
       <groupId>org.wildfly</groupId>
       <artifactId>wildfly-client-all</artifactId>
     </dependency>
+    <dependency>
+      <groupId>org.wildfly.core</groupId>
+      <artifactId>wildfly-elytron</artifactId>
+    </dependency>
   </dependencies>
 
 </project>

@@ -149,6 +149,13 @@
         <version>10.1.0.Final</version>
       </dependency>
 
+      <!-- Elytron subsystem dependency -->
+      <dependency>
+        <groupId>org.wildfly.core</groupId>
+        <artifactId>wildfly-elytron</artifactId>
+        <version>3.0.0.Beta11</version>
+      </dependency>
+
     </dependencies>
 
   </dependencyManagement>
