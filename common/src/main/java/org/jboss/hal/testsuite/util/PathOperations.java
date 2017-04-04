@@ -82,4 +82,16 @@ public class PathOperations {
         return Paths.get(this.resolveFullPathForDomainServerOnDefaultHost("jboss.server.log.dir", serverName),
                 ops.readChildrenNames(Address.host(ConfigUtils.getDefaultHost()).and("server", serverName).and("subsystem", "logging"), "log-file").listValue().get(0).asString());
     }
+
+    /**
+     * @return path to modules directory
+     */
+    public Path getModulesPath() throws IOException {
+        String
+            jbossHomeDir = "jboss.home.dir",
+            jbossHomeDirPath = ConfigUtils.isDomain() ?
+                resolveFullPathForDomainServerOnDefaultHost(jbossHomeDir, "server-one") :
+                resolveFullPathForStandaloneServer(jbossHomeDir);
+        return Paths.get(jbossHomeDirPath, "modules");
+    }
 }
