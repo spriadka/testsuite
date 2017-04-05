@@ -155,15 +155,14 @@ public class ElytronStoreTestCase extends AbstractElytronTestCase {
                     .edit(TEXT, CLEAR_TEXT, "").edit(TEXT, STORE, storeValue).edit(TEXT, ALIAS, aliasValue).andSave()
                     .verifyFormSaved()
                     .verifyAttribute(CREDENTIAL_REFERENCE, new ModelNodePropertiesBuilder()
-                            .addUndefinedProperty(CLEAR_TEXT).addProperty(STORE, storeValue)
-                            .addProperty(ALIAS, aliasValue).addUndefinedProperty(TYPE).build());
+                            .addProperty(ALIAS, aliasValue)
+                            .addProperty(STORE, storeValue).build());
 
             new ConfigChecker.Builder(client, keyStoreAddress).configFragment(page.getConfigFragment())
                     .edit(TEXT, CLEAR_TEXT, newPassword).edit(TEXT, STORE, "").edit(TEXT, ALIAS, "").andSave()
                     .verifyFormSaved()
                     .verifyAttribute(CREDENTIAL_REFERENCE, new ModelNodePropertiesBuilder()
-                            .addProperty(CLEAR_TEXT, newPassword).addUndefinedProperty(STORE)
-                            .addUndefinedProperty(ALIAS).addUndefinedProperty(TYPE).build());
+                            .addProperty(CLEAR_TEXT, newPassword).build());
 
         } finally {
             ops.removeIfExists(keyStoreAddress);
@@ -288,15 +287,14 @@ public class ElytronStoreTestCase extends AbstractElytronTestCase {
                     .edit(TEXT, CLEAR_TEXT, "").edit(TEXT, STORE, storeValue).edit(TEXT, ALIAS, aliasValue).andSave()
                     .verifyFormSaved()
                     .verifyAttribute(CREDENTIAL_REFERENCE, new ModelNodePropertiesBuilder()
-                            .addUndefinedProperty(CLEAR_TEXT).addProperty(STORE, storeValue)
-                            .addProperty(ALIAS, aliasValue).addUndefinedProperty(TYPE).build());
+                            .addProperty(ALIAS, aliasValue)
+                            .addProperty(STORE, storeValue).build());
 
             new ConfigChecker.Builder(client, credentialStoreAddress).configFragment(page.getConfigFragment())
                     .edit(TEXT, CLEAR_TEXT, newPassword).edit(TEXT, STORE, "").edit(TEXT, ALIAS, "").andSave()
                     .verifyFormSaved()
                     .verifyAttribute(CREDENTIAL_REFERENCE, new ModelNodePropertiesBuilder()
-                            .addProperty(CLEAR_TEXT, newPassword).addUndefinedProperty(STORE)
-                            .addUndefinedProperty(ALIAS).addUndefinedProperty(TYPE).build());
+                            .addProperty(CLEAR_TEXT, newPassword).build());
 
         } finally {
             ops.removeIfExists(credentialStoreAddress);
