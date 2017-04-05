@@ -26,7 +26,6 @@ public class ElytronPropertiesSecurityRealmTestCase extends AbstractElytronTestC
             USERS_PROPERTIES = "users-properties",
             GROUPS_PROPERTIES = "groups-properties",
             GROUPS_ATTRIBUTE = "groups-attribute",
-            USERS_PROPERTIES_PATH = "users-properties-path",
             PROPERTIES_REALM = "properties-realm",
             DIGEST_REALM_NAME = "digest-realm-name",
             PATH = "path",
