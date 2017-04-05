@@ -591,7 +591,8 @@ public class ElytronFactoryTestCase extends AbstractElytronTestCase {
                     .build();
 
             new ResourceVerifier(configurableFactoryAddress, client)
-                    .verifyExists().verifyAttribute(FILTERS_ATTR, expectedFiltersNode);
+                    .verifyExists().verifyAttribute(FILTERS_ATTR, expectedFiltersNode,
+                            "See https://issues.jboss.org/browse/HAL-1315");
         } finally {
             ops.removeIfExists(configurableFactoryAddress);
             ops.removeIfExists(httpServerFactoryAddress);

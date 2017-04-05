@@ -227,7 +227,8 @@ public class ElytronSecurityDomainTestCase extends AbstractElytronTestCase {
             page.getConfigAreaResourceManager().removeResource(LOCAL_REALM_NAME).confirm().assertClosed();
             assertTrue("Default '" + LOCAL_REALM_NAME + "' realm should not be able to be removed and thus should be "
                     + "still present in the table!", page.resourceIsPresentInConfigAreaTable(LOCAL_REALM_NAME));
-            page.getConfigAreaResourceManager().removeResource(APPLICATION_REALM_NAME).confirm().assertClosed();
+            page.getConfigAreaResourceManager().removeResource(APPLICATION_REALM_NAME)
+                    .confirmAndDismissReloadRequiredMessage().assertClosed();
             assertFalse("Deleted '" + APPLICATION_REALM_NAME + "' should not be present in the table any more!",
                     page.resourceIsPresentInConfigAreaTable(APPLICATION_REALM_NAME));
 
