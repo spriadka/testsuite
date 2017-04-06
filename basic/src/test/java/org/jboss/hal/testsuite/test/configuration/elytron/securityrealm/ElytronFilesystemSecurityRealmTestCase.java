@@ -17,7 +17,7 @@ import org.wildfly.extras.creaper.core.online.operations.Values;
 import java.io.IOException;
 
 @RunWith(Arquillian.class)
-public class FilesystemSecurityRealmTestCase extends AbstractElytronTestCase {
+public class ElytronFilesystemSecurityRealmTestCase extends AbstractElytronTestCase {
 
     private static final String
             PATH = "path",
@@ -29,7 +29,7 @@ public class FilesystemSecurityRealmTestCase extends AbstractElytronTestCase {
     private SecurityRealmPage page;
 
     @Test
-    public void testAddPropertiesSecurityRealm() throws Exception {
+    public void testAddFilesystemSecurityRealm() throws Exception {
         final Address realmAddress = elyOps.getElytronAddress(FILESYSTEM_REALM, RandomStringUtils.randomAlphabetic(7));
         final String pathValue = RandomStringUtils.randomAlphanumeric(7);
 
@@ -51,6 +51,30 @@ public class FilesystemSecurityRealmTestCase extends AbstractElytronTestCase {
                     .verifyAttribute(PATH, pathValue);
         } finally {
             ops.removeIfExists(realmAddress);
+            adminOps.reloadIfRequired();
+        }
+    }
+
+    @Test
+    public void testRemoveFilesystemSecurityRealm() throws Exception {
+        final Address securityRealmAddress = elyOps.getElytronAddress(FILESYSTEM_REALM, RandomStringUtils.randomAlphanumeric(7));
+
+        try {
+            createFilesystemSecurityRealm(securityRealmAddress);
+
+            page.navigate();
+            page.switchToFilesystemRealms()
+                    .getResourceManager()
+                    .removeResource(securityRealmAddress.getLastPairValue())
+                    .confirmAndDismissReloadRequiredMessage()
+                    .assertClosed();
+
+            Assert.assertFalse(page.getResourceManager().isResourcePresent(securityRealmAddress.getLastPairValue()));
+
+            new ResourceVerifier(securityRealmAddress, client).verifyDoesNotExist();
+
+        } finally {
+            ops.removeIfExists(securityRealmAddress);
             adminOps.reloadIfRequired();
         }
     }

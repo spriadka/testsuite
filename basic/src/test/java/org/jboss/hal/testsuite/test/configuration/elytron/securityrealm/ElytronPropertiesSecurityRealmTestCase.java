@@ -47,7 +47,7 @@ public class ElytronPropertiesSecurityRealmTestCase extends AbstractElytronTestC
                     .usersPropertiesPath("mgmt-users.properties")
                     .relativeTo("jboss.server.config.dir")
                     .saveWithState()
-                    .assertWindowClosed();
+                    .assertWindowClosed("Failed probably because of https://issues.jboss.org/browse/HAL-1347");
 
             Assert.assertTrue("Resource should be present in table!",
                     page.getResourceManager().isResourcePresent(realmAddress.getLastPairValue()));
@@ -55,6 +55,29 @@ public class ElytronPropertiesSecurityRealmTestCase extends AbstractElytronTestC
             new ResourceVerifier(realmAddress, client).verifyExists();
         } finally {
             ops.removeIfExists(realmAddress);
+            adminOps.reloadIfRequired();
+        }
+    }
+
+    @Test
+    public void testRemovePropertiesSecurityRealm() throws Exception {
+        final Address securityRealmAddress = elyOps.getElytronAddress(PROPERTIES_REALM, RandomStringUtils.randomAlphanumeric(7));
+
+        try {
+            createPropertiesSecurityRealm(securityRealmAddress);
+
+            page.navigate();
+            page.getResourceManager()
+                    .removeResource(securityRealmAddress.getLastPairValue())
+                    .confirmAndDismissReloadRequiredMessage()
+                    .assertClosed();
+
+            Assert.assertFalse(page.getResourceManager().isResourcePresent(securityRealmAddress.getLastPairValue()));
+
+            new ResourceVerifier(securityRealmAddress, client).verifyDoesNotExist();
+
+        } finally {
+            ops.removeIfExists(securityRealmAddress);
             adminOps.reloadIfRequired();
         }
     }

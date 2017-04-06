@@ -20,4 +20,34 @@ public class SecurityRealmPage extends ConfigPage {
         switchSubTab("Filesystem Realm");
         return this;
     }
+
+    public SecurityRealmPage switchToJDBCRealms() {
+        switchSubTab("JDBC Realm");
+        return this;
+    }
+
+    public SecurityRealmPage switchToKeyStoreRealms() {
+        switchSubTab("Key Store Realm");
+        return this;
+    }
+
+    public SecurityRealmPage switchToLDAPRealms() {
+        switchSubTab("LDAP Realm");
+        return this;
+    }
+
+    public SecurityRealmPage switchToAggregateRealms() {
+        switchSubTab("Aggregate Realm");
+        return this;
+    }
+
+    public SecurityRealmPage switchToIdentityRealms() {
+        switchSubTab("Identity Realm");
+        return this;
+    }
+
+    public SecurityRealmPage switchToTokenRealms() {
+        switchSubTab("Token Realm");
+        return this;
+    }
 }
