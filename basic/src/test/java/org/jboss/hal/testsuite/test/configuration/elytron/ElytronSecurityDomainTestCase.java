@@ -90,6 +90,8 @@ public class ElytronSecurityDomainTestCase extends AbstractElytronTestCase {
                     .verifyAttribute(PERMISSION_MAPPER, DEFAULT_PERMISSION_MAPPER_NAME)
                     .verifyAttribute(REALMS, new ModelNodeListBuilder().addNode(new ModelNodePropertiesBuilder()
                                     .addProperty(REALM, LOCAL_REALM_NAME)
+                                    .addUndefinedProperty(PRINCIPAL_TRANSFORMER)
+                                    .addUndefinedProperty(ROLE_DECODER)
                                     .addProperty(ROLE_MAPPER, SUPER_USER_MAPPER_NAME)
                                     .build()).build());
         } finally {
