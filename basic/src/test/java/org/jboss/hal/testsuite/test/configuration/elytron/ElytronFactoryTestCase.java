@@ -576,7 +576,9 @@ public class ElytronFactoryTestCase extends AbstractElytronTestCase {
                     .selectByName(configurableFactoryName);
             page.switchToConfigAreaTab(FILTERS_LABEL);
 
-            WizardWindow wizard = page.getConfigAreaResourceManager().addResource();
+            WizardWindowWithOptionalFields wizard = page.getConfigAreaResourceManager()
+                    .addResource(WizardWindowWithOptionalFields.class);
+            wizard.openOptionalFieldsTab();
             Editor editor = wizard.getEditor();
             editor.text(PATTERN_FILTER, patternFilterValue);
             editor.checkbox(ENABLING, true);
