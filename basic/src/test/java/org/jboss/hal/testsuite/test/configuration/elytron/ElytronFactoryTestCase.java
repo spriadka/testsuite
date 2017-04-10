@@ -1403,14 +1403,9 @@ public class ElytronFactoryTestCase extends AbstractElytronTestCase {
     @Test
     public void addKerberosSecurityFactoryTest() throws Exception {
         final String factoryName = "factoryName_" + RandomStringUtils.randomAlphanumeric(5),
-                oid1 = "1.2.840.113554.1.2.2",
-                oid2 = "1.3.6.1.5.5.2",
-                oidsSeparatedByNewLine = oid1 + "\n" + oid2,
                 pathValue = "path_" + RandomStringUtils.randomAlphanumeric(5),
                 principalValue = "principal_" + RandomStringUtils.randomAlphanumeric(5);
         final Address factoryAddress = elyOps.getElytronAddress(KERBEROS_SECURITY_FACTORY, factoryName);
-        final ModelNode expectedOidsNode = new ModelNodeListBuilder().addNode(new ModelNode(oid1))
-                .addNode(new ModelNode(oid2)).build();
 
         page.navigateToApplication().selectFactory(KERBEROS_SECURITY_LABEL);
 
@@ -1418,7 +1413,6 @@ public class ElytronFactoryTestCase extends AbstractElytronTestCase {
             WizardWindow wizard = page.getResourceManager().addResource();
             Editor editor = wizard.getEditor();
             editor.text(NAME, factoryName);
-            editor.text(MECHANISM_OIDS, oidsSeparatedByNewLine);
             editor.text(PATH, pathValue);
             editor.text(PRINCIPAL, principalValue);
             boolean closed = wizard.finish();
@@ -1427,7 +1421,7 @@ public class ElytronFactoryTestCase extends AbstractElytronTestCase {
             assertTrue("Created factory should be present in the table!",
                     page.resourceIsPresentInMainTable(factoryName));
             new ResourceVerifier(factoryAddress, client).verifyExists()
-                    .verifyAttribute(MECHANISM_OIDS, expectedOidsNode).verifyAttribute(PATH, pathValue)
+                    .verifyAttribute(PATH, pathValue)
                     .verifyAttribute(PRINCIPAL, principalValue);
 
         } finally {
