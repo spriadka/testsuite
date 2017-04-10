@@ -18,6 +18,7 @@ import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
 import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindowWithOptionalFields;
 import org.jboss.hal.testsuite.page.config.elytron.SSLPage;
 import org.jboss.hal.testsuite.util.ConfigChecker;
+import org.jboss.hal.testsuite.util.ElytronIntegrationChecker;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
@@ -31,8 +32,8 @@ public class ElytronStoreTestCase extends AbstractElytronTestCase {
     private static final String KEY_STORE = "key-store", KEY_STORE_LABEL = "Key Store", TYPE = "type", JKS = "jks",
             CREDENTIAL_REFERENCE = "credential-reference", CLEAR_TEXT = "clear-text",
             CREDENTIAL_REFERENCE_CLEAR_TEXT_IDENTIFIER = "credential-reference-clear-text",
-            CREDENTIAL_REFERENCE_LABEL = "Credential Reference", ALIAS_FILTER = "alias-filter", ALIAS = "alias",
-            STORE = "store", CREDENTIAL_STORE = "credential-store", CREDENTIAL_STORE_LABEL = "Credential Store",
+            CREDENTIAL_REFERENCE_LABEL = "Credential Reference", ALIAS_FILTER = "alias-filter",
+            CREDENTIAL_STORE = "credential-store", CREDENTIAL_STORE_LABEL = "Credential Store",
             URI = "uri", RELATIVE_TO = "relative-to", FILTERING_KEY_STORE = "filtering-key-store",
             FILTERING_KEY_STORE_LABEL = "Filtering Key Store", LDAP_KEY_STORE = "ldap-key-store",
             LDAP_KEY_STORE_LABEL = "Ldap Key Store", DIR_CONTEXT = "dir-context", SEARCH_PATH = "search-path",
@@ -135,10 +136,7 @@ public class ElytronStoreTestCase extends AbstractElytronTestCase {
     @Test
     public void editKeyStoreCredentialReferenceTest() throws Exception {
         final String keyStoreName = RandomStringUtils.randomAlphanumeric(5),
-                initialPassword = RandomStringUtils.randomAlphanumeric(5),
-                newPassword = RandomStringUtils.randomAlphanumeric(5),
-                aliasValue = RandomStringUtils.randomAlphanumeric(5),
-                storeValue = RandomStringUtils.randomAlphanumeric(5);
+                initialPassword = RandomStringUtils.randomAlphanumeric(5);
         final Address keyStoreAddress = elyOps.getElytronAddress(KEY_STORE, keyStoreName);
         final ModelNode initialCredentialReferenceNode = new ModelNodePropertiesBuilder()
                 .addProperty(CLEAR_TEXT, initialPassword).build();
@@ -151,18 +149,11 @@ public class ElytronStoreTestCase extends AbstractElytronTestCase {
                     .selectByName(keyStoreName);
             page.switchToConfigAreaTab(CREDENTIAL_REFERENCE_LABEL);
 
-            new ConfigChecker.Builder(client, keyStoreAddress).configFragment(page.getConfigFragment())
-                    .edit(TEXT, CLEAR_TEXT, "").edit(TEXT, STORE, storeValue).edit(TEXT, ALIAS, aliasValue).andSave()
-                    .verifyFormSaved()
-                    .verifyAttribute(CREDENTIAL_REFERENCE, new ModelNodePropertiesBuilder()
-                            .addProperty(ALIAS, aliasValue)
-                            .addProperty(STORE, storeValue).build());
-
-            new ConfigChecker.Builder(client, keyStoreAddress).configFragment(page.getConfigFragment())
-                    .edit(TEXT, CLEAR_TEXT, newPassword).edit(TEXT, STORE, "").edit(TEXT, ALIAS, "").andSave()
-                    .verifyFormSaved()
-                    .verifyAttribute(CREDENTIAL_REFERENCE, new ModelNodePropertiesBuilder()
-                            .addProperty(CLEAR_TEXT, newPassword).build());
+            ElytronIntegrationChecker credentialReferenceChecker = new ElytronIntegrationChecker.Builder(client)
+                    .address(keyStoreAddress).configFragment(page.getConfigFragment()).build();
+            credentialReferenceChecker.setCredentialStoreCredentialReferenceAndVerify();
+            credentialReferenceChecker.testIllegalCombinationCredentialReferenceAttributes();
+            credentialReferenceChecker.setClearTextCredentialReferenceAndVerify();
 
         } finally {
             ops.removeIfExists(keyStoreAddress);
@@ -267,10 +258,7 @@ public class ElytronStoreTestCase extends AbstractElytronTestCase {
     public void editCredentialStoreCredentialReferenceTest() throws Exception {
         final String credentialStoreName = RandomStringUtils.randomAlphanumeric(5),
                 uriValue = getCredentialStoreUriTestValue(),
-                initialPassword = RandomStringUtils.randomAlphanumeric(5),
-                newPassword = RandomStringUtils.randomAlphanumeric(5),
-                aliasValue = RandomStringUtils.randomAlphanumeric(5),
-                storeValue = RandomStringUtils.randomAlphanumeric(5);
+                initialPassword = RandomStringUtils.randomAlphanumeric(5);
         final Address credentialStoreAddress = elyOps.getElytronAddress(CREDENTIAL_STORE, credentialStoreName);
         final ModelNode initialCredentialReferenceNode = new ModelNodePropertiesBuilder()
                 .addProperty(CLEAR_TEXT, initialPassword).build();
@@ -283,18 +271,11 @@ public class ElytronStoreTestCase extends AbstractElytronTestCase {
                     .selectByName(credentialStoreName);
             page.switchToConfigAreaTab(CREDENTIAL_REFERENCE_LABEL);
 
-            new ConfigChecker.Builder(client, credentialStoreAddress).configFragment(page.getConfigFragment())
-                    .edit(TEXT, CLEAR_TEXT, "").edit(TEXT, STORE, storeValue).edit(TEXT, ALIAS, aliasValue).andSave()
-                    .verifyFormSaved()
-                    .verifyAttribute(CREDENTIAL_REFERENCE, new ModelNodePropertiesBuilder()
-                            .addProperty(ALIAS, aliasValue)
-                            .addProperty(STORE, storeValue).build());
-
-            new ConfigChecker.Builder(client, credentialStoreAddress).configFragment(page.getConfigFragment())
-                    .edit(TEXT, CLEAR_TEXT, newPassword).edit(TEXT, STORE, "").edit(TEXT, ALIAS, "").andSave()
-                    .verifyFormSaved()
-                    .verifyAttribute(CREDENTIAL_REFERENCE, new ModelNodePropertiesBuilder()
-                            .addProperty(CLEAR_TEXT, newPassword).build());
+            ElytronIntegrationChecker credentialReferenceChecker = new ElytronIntegrationChecker.Builder(client)
+                    .address(credentialStoreAddress).configFragment(page.getConfigFragment()).build();
+            credentialReferenceChecker.setCredentialStoreCredentialReferenceAndVerify();
+            credentialReferenceChecker.testIllegalCombinationCredentialReferenceAttributes();
+            credentialReferenceChecker.setClearTextCredentialReferenceAndVerify();
 
         } finally {
             ops.removeIfExists(credentialStoreAddress);
