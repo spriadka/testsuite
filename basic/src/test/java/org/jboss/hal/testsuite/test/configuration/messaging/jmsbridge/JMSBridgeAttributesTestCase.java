@@ -70,9 +70,9 @@ public class JMSBridgeAttributesTestCase {
 
     private static final String
             IN_QUEUE_NAME = "InQueue",
-            IN_QUEUE_JNDI = "jms/queue/" + IN_QUEUE_NAME,
+            IN_QUEUE_JNDI = "java:/jms/queue/" + IN_QUEUE_NAME,
             OUT_QUEUE_NAME = "OutQueue",
-            OUT_QUEUE_JNDI = "jms/queue/" + OUT_QUEUE_NAME,
+            OUT_QUEUE_JNDI = "java:/jms/queue/" + OUT_QUEUE_NAME,
             LOCAL_CONNECTION_FACTORY = "java:/ConnectionFactory",
             JMS_BRIDGE_NAME = "test";
 
