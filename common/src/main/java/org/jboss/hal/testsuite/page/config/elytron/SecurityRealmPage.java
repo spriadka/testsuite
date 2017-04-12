@@ -46,6 +46,11 @@ public class SecurityRealmPage extends ConfigPage {
         return this;
     }
 
+    public SecurityRealmPage switchToCustomModifiableRealms() {
+        switchSubTab("Custom Modifiable");
+        return this;
+    }
+
     public SecurityRealmPage switchToTokenRealms() {
         switchSubTab("Token Realm");
         return this;
