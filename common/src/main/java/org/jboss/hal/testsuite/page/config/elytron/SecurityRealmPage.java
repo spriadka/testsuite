@@ -47,7 +47,12 @@ public class SecurityRealmPage extends ConfigPage {
     }
 
     public SecurityRealmPage switchToCustomModifiableRealms() {
-        switchSubTab("Custom Modifiable");
+        switchSubTab("Custom Modifiable Realm");
+        return this;
+    }
+
+    public SecurityRealmPage switchToCustomRealms() {
+        switchSubTab("Custom Realm");
         return this;
     }
 
