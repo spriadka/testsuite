@@ -21,7 +21,6 @@ import org.wildfly.extras.creaper.commands.messaging.RemoveQueue;
 import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.Operations;
-import org.wildfly.extras.creaper.core.online.operations.Values;
 import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
 
 import java.io.IOException;
@@ -140,10 +139,8 @@ public class JMSBridgeAddRemoveTestCase {
                     .maxRetries(1)
                     .qualityOfService(AddJMSBridge.QualityOfService.AT_MOST_ONCE)
                     .sourceConnectionFactory(LOCAL_CONNECTION_FACTORY)
-                    .sourceContext(Values.empty())
                     .sourceDestination(IN_QUEUE_JNDI)
                     .targetConnectionFactory(LOCAL_CONNECTION_FACTORY)
-                    .targetContext(Values.empty())
                     .targetDestination(OUT_QUEUE_JNDI)
                     .replaceExisting()
                     .build()
