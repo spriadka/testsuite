@@ -30,6 +30,13 @@ public class ElytronKeyStoreSecurityRealmTestCase extends AbstractElytronTestCas
             CLEAR_TEXT = "clear-text",
             CREDENTIAL_REFERENCE = "credential-reference";
 
+    /**
+     * @tpTestDetails Try to create Elytron Keystore security realm instance in Web Console's Elytron subsystem
+     * configuration.
+     * Validate created resource is visible in Keystore security realm table.
+     * Validate created resource is present in model.
+     * Validate attributes of created resource in model.
+     */
     @Test
     public void testAddKeystoreSecurityRealm() throws Exception {
         final Address realmAddress = elyOps.getElytronAddress(KEY_STORE_REALM, org.apache.commons.lang.RandomStringUtils.randomAlphabetic(7)),
@@ -58,6 +65,11 @@ public class ElytronKeyStoreSecurityRealmTestCase extends AbstractElytronTestCas
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron Keystore security realm instance in model and try to edit its key-store attribute
+     * value in Web Console's Elytron subsystem configuration.
+     * Validate edited attribute value in the model.
+     */
     @Test
     public void editKeyStore() throws Exception {
         final Address
@@ -85,6 +97,12 @@ public class ElytronKeyStoreSecurityRealmTestCase extends AbstractElytronTestCas
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron Keystore security realm instance in model and try to remove it in Web Console's
+     * Elytron subsystem configuration.
+     * Validate the resource is not any more visible in Keystore security realm table.
+     * Validate created resource is not any more present in the model.
+     */
     @Test
     public void testRemoveKeyStoreSecurityRealm() throws Exception {
         final Address

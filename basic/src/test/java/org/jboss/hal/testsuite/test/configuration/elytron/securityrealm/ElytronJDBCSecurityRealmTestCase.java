@@ -32,6 +32,13 @@ public class ElytronJDBCSecurityRealmTestCase extends AbstractElytronTestCase {
     @Page
     private SecurityRealmPage page;
 
+    /**
+     * @tpTestDetails Try to create Elytron JDBC security realm instance in Web Console's Elytron subsystem
+     * configuration.
+     * Validate created resource is visible in JDBC security realm table.
+     * Validate created resource is present in model.
+     * Validate attributes of created resource in model.
+     */
     @Test
     public void testAddJDBCSecurityRealm() throws Exception {
         String sqlQueryValue = "SELECT 2",
@@ -71,6 +78,12 @@ public class ElytronJDBCSecurityRealmTestCase extends AbstractElytronTestCase {
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron JDBC security realm instance in model and try to remove it in Web Console's
+     * Elytron subsystem configuration.
+     * Validate the resource is not any more visible in JDBC security realm table.
+     * Validate created resource is not any more present in the model.
+     */
     @Test
     public void testRemoveJDBCRealm() throws Exception {
         String datasourceName = null;
@@ -101,6 +114,11 @@ public class ElytronJDBCSecurityRealmTestCase extends AbstractElytronTestCase {
 
     }
 
+    /**
+     * @tpTestDetails Try to create principal query in Web Console's Elytron JDBC security realm configuration.
+     * Validate created resource is visible in principal query table.
+     * Validate created resource is present in model.
+     */
     @Test
     public void testAddPrincipalQuery() throws Exception {
         String datasourceName = null;
@@ -136,6 +154,12 @@ public class ElytronJDBCSecurityRealmTestCase extends AbstractElytronTestCase {
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron principal query of JDBC security realm instance in model and try to remove it in
+     * Web Console's Elytron JDBC security realm configuration.
+     * Validate the resource is not any more visible in principal query table.
+     * Validate created resource is not any more present in the model.
+     */
     @Test
     public void testRemovePrincipalQuery() throws Exception {
         String datasourceName = null;

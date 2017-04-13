@@ -28,6 +28,13 @@ public class ElytronFilesystemSecurityRealmTestCase extends AbstractElytronTestC
     @Page
     private SecurityRealmPage page;
 
+    /**
+     * @tpTestDetails Try to create Elytron Filesystem security realm instance in Web Console's Elytron subsystem
+     * configuration.
+     * Validate created resource is visible in Filesystem security realm table.
+     * Validate created resource is present in model.
+     * Validate attributes of created resource in model.
+     */
     @Test
     public void testAddFilesystemSecurityRealm() throws Exception {
         final Address realmAddress = elyOps.getElytronAddress(FILESYSTEM_REALM, RandomStringUtils.randomAlphabetic(7));
@@ -55,6 +62,12 @@ public class ElytronFilesystemSecurityRealmTestCase extends AbstractElytronTestC
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron Filesystem security realm instance in model and try to remove it in Web Console's
+     * Elytron subsystem configuration.
+     * Validate the resource is not any more visible in Filesystem security realm table.
+     * Validate created resource is not any more present in the model.
+     */
     @Test
     public void testRemoveFilesystemSecurityRealm() throws Exception {
         final Address securityRealmAddress = elyOps.getElytronAddress(FILESYSTEM_REALM, RandomStringUtils.randomAlphanumeric(7));
@@ -79,6 +92,11 @@ public class ElytronFilesystemSecurityRealmTestCase extends AbstractElytronTestC
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron Filesystem security realm instance in model and try to edit its levels attribute
+     * value in Web Console's Elytron subsystem configuration.
+     * Validate edited attribute value in the model.
+     */
     @Test
     public void editLevels() throws Exception {
         final Address securityRealmAddress = elyOps.getElytronAddress(FILESYSTEM_REALM, RandomStringUtils.randomAlphanumeric(7));
@@ -103,6 +121,11 @@ public class ElytronFilesystemSecurityRealmTestCase extends AbstractElytronTestC
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron Filesystem security realm instance in model and try to edit its path attribute
+     * value in Web Console's Elytron subsystem configuration.
+     * Validate edited attribute value in the model.
+     */
     @Test
     public void editPath() throws Exception {
         final Address securityRealmAddress = elyOps.getElytronAddress(FILESYSTEM_REALM, RandomStringUtils.randomAlphanumeric(7));
@@ -127,6 +150,11 @@ public class ElytronFilesystemSecurityRealmTestCase extends AbstractElytronTestC
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron Filesystem security realm instance in model and try to edit its relative-to
+     * attribute value in Web Console's Elytron subsystem configuration.
+     * Validate edited attribute value in the model.
+     */
     @Test
     public void editRelativeTo() throws Exception {
         final Address securityRealmAddress = elyOps.getElytronAddress(FILESYSTEM_REALM, RandomStringUtils.randomAlphanumeric(7));

@@ -36,6 +36,13 @@ public class ElytronTokenSecurityRealmTestCase extends AbstractElytronTestCase {
     @Page
     private SecurityRealmPage page;
 
+    /**
+     * @tpTestDetails Try to create Elytron Token security realm instance in Web Console's Elytron subsystem
+     * configuration.
+     * Validate created resource is visible in Token security realm table.
+     * Validate created resource is present in model.
+     * Validate attributes of created resource in model.
+     */
     @Test
     public void testAddTokenSecurityRealm() throws Exception {
         final Address realmAddress = elyOps.getElytronAddress(TOKEN_REALM, RandomStringUtils.randomAlphabetic(7));
@@ -63,6 +70,12 @@ public class ElytronTokenSecurityRealmTestCase extends AbstractElytronTestCase {
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron Token security realm instance in model and try to remove it in Web Console's
+     * Elytron subsystem configuration.
+     * Validate the resource is not any more visible in Token security realm table.
+     * Validate created resource is not any more present in the model.
+     */
     @Test
     public void testRemoveTokenSecurityRealm() throws Exception {
         final Address realmAddress = createTokenRealm();
@@ -84,6 +97,11 @@ public class ElytronTokenSecurityRealmTestCase extends AbstractElytronTestCase {
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron Token security realm instance in model and try to edit its case-sensitive attribute
+     * value in Web Console's Elytron subsystem configuration.
+     * Validate edited attribute value in the model.
+     */
     @Test
     public void toggleCaseSensitive() throws Exception {
         final Address realmAddress = createTokenRealm();
@@ -118,6 +136,11 @@ public class ElytronTokenSecurityRealmTestCase extends AbstractElytronTestCase {
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron Token security realm instance in model and try to edit its principal-claim
+     * attribute value in Web Console's Elytron subsystem configuration.
+     * Validate edited attribute value in the model.
+     */
     @Test
     public void editPrincipalClaim() throws Exception {
         final Address tokenRealmAddress = createTokenRealm();
@@ -143,6 +166,11 @@ public class ElytronTokenSecurityRealmTestCase extends AbstractElytronTestCase {
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron Token security realm instance in model and try to edit its jwt attribute value in
+     * Web Console's Elytron subsystem configuration while setting certificate to it.
+     * Validate edited attribute value in the model.
+     */
     @Test
     public void editJWTAttributesWithCertificate() throws Exception {
         Address tokenRealmAddress = null,
@@ -201,6 +229,11 @@ public class ElytronTokenSecurityRealmTestCase extends AbstractElytronTestCase {
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron Token security realm instance in model and try to edit its jwt attribute value in
+     * Web Console's Elytron subsystem configuration while setting public key to it.
+     * Validate edited attribute value in the model.
+     */
     @Test
     public void editJWTAttributesWithPublicKey() throws Exception {
         final Address tokenRealmAddress = createTokenRealm();
@@ -249,6 +282,11 @@ public class ElytronTokenSecurityRealmTestCase extends AbstractElytronTestCase {
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron Token security realm instance in model and try to edit its oauth2-introspection
+     * attribute value in Web Console's Elytron subsystem configuration.
+     * Validate edited attribute value in the model.
+     */
     @Test
     public void editOAuth2IntrospectionAttributes() throws Exception {
         Address tokenRealmAddress = createTokenRealm(),

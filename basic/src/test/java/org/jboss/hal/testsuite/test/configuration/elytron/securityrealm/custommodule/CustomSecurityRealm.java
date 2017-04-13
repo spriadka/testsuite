@@ -10,6 +10,9 @@ import org.wildfly.security.auth.server.SupportLevel;
 import org.wildfly.security.credential.Credential;
 import org.wildfly.security.evidence.Evidence;
 
+/**
+ * Implementation of {@link ModifiableSecurityRealm} for test purposes
+ */
 public class CustomSecurityRealm implements ModifiableSecurityRealm {
 
     @Override

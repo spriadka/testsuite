@@ -29,6 +29,13 @@ public class ElytronAggregateSecurityRealmTestCase extends AbstractElytronTestCa
             IDENTITY = "identity",
             IDENTITY_REALM = "identity-realm";
 
+    /**
+     * @tpTestDetails Try to create Elytron Aggregate security realm instance in Web Console's Elytron subsystem
+     * configuration.
+     * Validate created resource is visible in Aggregate security realm table.
+     * Validate created resource is present in model.
+     * Validate attributes of created resource in model.
+     */
     @Test
     public void testAddAggregateSecurityRealm() throws Exception {
         Address authenticationRealm = null,
@@ -68,6 +75,12 @@ public class ElytronAggregateSecurityRealmTestCase extends AbstractElytronTestCa
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron Aggregate security realm instance in model and try to remove it in Web Console's
+     * Elytron subsystem configuration.
+     * Validate the resource is not any more visible in Aggregate security realm table.
+     * Validate created resource is not any more present in the model.
+     */
     @Test
     public void testRemoveAggregateRealm() throws Exception {
         Address authenticationRealm = null,
@@ -103,6 +116,11 @@ public class ElytronAggregateSecurityRealmTestCase extends AbstractElytronTestCa
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron Aggregate security realm instance in model and try to edit its authorization-realm
+     * attribute value in Web Console's Elytron subsystem configuration.
+     * Validate edited attribute values in the model.
+     */
     @Test
     public void editAuthorizationRealm() throws Exception {
         Address authenticationRealm = null,
@@ -143,6 +161,11 @@ public class ElytronAggregateSecurityRealmTestCase extends AbstractElytronTestCa
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron Aggregate security realm instance in model and try to edit its authentication-realm
+     * attribute value in Web Console's Elytron subsystem configuration.
+     * Validate edited attribute values in the model.
+     */
     @Test
     public void editAuthenticationRealm() throws Exception {
         Address authenticationRealm = null,

@@ -24,6 +24,7 @@ public class ElytronPropertiesSecurityRealmTestCase extends AbstractElytronTestC
 
     private static final String
             USERS_PROPERTIES = "users-properties",
+            USERS_PROPERTIES_PATH = "users-properties-path",
             GROUPS_PROPERTIES = "groups-properties",
             GROUPS_ATTRIBUTE = "groups-attribute",
             PROPERTIES_REALM = "properties-realm",
@@ -35,30 +36,48 @@ public class ElytronPropertiesSecurityRealmTestCase extends AbstractElytronTestC
     @Page
     private SecurityRealmPage page;
 
+    /**
+     * @tpTestDetails Try to create Elytron Properties security realm instance in Web Console's Elytron subsystem
+     * configuration.
+     * Validate created resource is visible in Properties security realm table.
+     * Validate created resource is present in model.
+     * Validate attributes of created resource in model.
+     */
     @Test
     public void testAddPropertiesSecurityRealm() throws Exception {
-        Address realmAddress = elyOps.getElytronAddress(PROPERTIES_REALM, RandomStringUtils.randomAlphabetic(7));
+        final Address realmAddress = elyOps.getElytronAddress(PROPERTIES_REALM, RandomStringUtils.randomAlphabetic(7));
+
+        final String relativeToValue = "jboss.server.config.dir",
+                usersPropertiesPathValue = "mgmt-users.properties";
 
         page.navigate();
 
         try {
             page.getResourceManager().addResource(AddPropertiesSecurityRealmWizard.class)
                     .name(realmAddress.getLastPairValue())
-                    .usersPropertiesPath("mgmt-users.properties")
-                    .relativeTo("jboss.server.config.dir")
+                    .usersPropertiesPath(usersPropertiesPathValue)
+                    .relativeTo(relativeToValue)
                     .saveWithState()
                     .assertWindowClosed("Failed probably because of https://issues.jboss.org/browse/HAL-1347");
 
             Assert.assertTrue("Resource should be present in table!",
                     page.getResourceManager().isResourcePresent(realmAddress.getLastPairValue()));
 
-            new ResourceVerifier(realmAddress, client).verifyExists();
+            new ResourceVerifier(realmAddress, client).verifyExists()
+                    .verifyAttribute(RELATIVE_TO, relativeToValue)
+                    .verifyAttribute(USERS_PROPERTIES_PATH, usersPropertiesPathValue);
         } finally {
             ops.removeIfExists(realmAddress);
             adminOps.reloadIfRequired();
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron Properties security realm instance in model and try to remove it in Web Console's
+     * Elytron subsystem configuration.
+     * Validate the resource is not any more visible in Properties security realm table.
+     * Validate created resource is not any more present in the model.
+     */
     @Test
     public void testRemovePropertiesSecurityRealm() throws Exception {
         final Address securityRealmAddress = elyOps.getElytronAddress(PROPERTIES_REALM, RandomStringUtils.randomAlphanumeric(7));
@@ -82,6 +101,11 @@ public class ElytronPropertiesSecurityRealmTestCase extends AbstractElytronTestC
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron Properties security realm instance in model and try to edit its users-properties
+     * attribute value in Web Console's Elytron subsystem configuration.
+     * Validate edited attribute value in the model.
+     */
     @Test
     public void editUsersProperties() throws Exception {
         final Address securityRealmAddress = elyOps.getElytronAddress(PROPERTIES_REALM, RandomStringUtils.randomAlphanumeric(7));
@@ -119,6 +143,11 @@ public class ElytronPropertiesSecurityRealmTestCase extends AbstractElytronTestC
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron Properties security realm instance in model and try to edit its groups-properties
+     * attribute value in Web Console's Elytron subsystem configuration.
+     * Validate edited attribute value in the model.
+     */
     @Test
     public void editGroupsProperties() throws Exception {
         final Address securityRealmAddress = elyOps.getElytronAddress(PROPERTIES_REALM, RandomStringUtils.randomAlphanumeric(7));
@@ -151,6 +180,11 @@ public class ElytronPropertiesSecurityRealmTestCase extends AbstractElytronTestC
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron Properties security realm instance in model and try to edit its groups-attribute
+     * attribute value in Web Console's Elytron subsystem configuration.
+     * Validate edited attribute value in the model.
+     */
     @Test
     public void editGroupsAttribute() throws Exception {
         final Address securityRealmAddress = elyOps.getElytronAddress(PROPERTIES_REALM, RandomStringUtils.randomAlphanumeric(7));

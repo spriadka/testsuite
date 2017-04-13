@@ -32,6 +32,13 @@ public class ElytronIdentitySecurityRealmTestCase extends AbstractElytronTestCas
     @Page
     private SecurityRealmPage page;
 
+    /**
+     * @tpTestDetails Try to create Elytron Identity security realm instance in Web Console's Elytron subsystem
+     * configuration.
+     * Validate created resource is visible in Identity security realm table.
+     * Validate created resource is present in model.
+     * Validate attributes of created resource in model.
+     */
     @Test
     public void testAddIdentitySecurityRealm() throws Exception {
         final Address realmAddress = elyOps.getElytronAddress(IDENTITY_REALM, RandomStringUtils.randomAlphabetic(7));
@@ -59,6 +66,12 @@ public class ElytronIdentitySecurityRealmTestCase extends AbstractElytronTestCas
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron Identity security realm instance in model and try to remove it in Web Console's
+     * Elytron subsystem configuration.
+     * Validate the resource is not any more visible in Identity security realm table.
+     * Validate created resource is not any more present in the model.
+     */
     @Test
     public void testRemoveIdentitySecurityRealm() throws Exception {
         Address realmAddress = null;
@@ -83,6 +96,11 @@ public class ElytronIdentitySecurityRealmTestCase extends AbstractElytronTestCas
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron Identity security realm instance in model and try to edit its attribute-name
+     * attribute value in Web Console's Elytron subsystem configuration.
+     * Validate edited attribute value in the model.
+     */
     @Test
     public void editAttributeName() throws Exception {
         Address realmAddress = null;
@@ -110,6 +128,11 @@ public class ElytronIdentitySecurityRealmTestCase extends AbstractElytronTestCas
 
     }
 
+    /**
+     * @tpTestDetails Create Elytron Identity security realm instance in model and try to edit its identity attribute
+     * value in Web Console's Elytron subsystem configuration.
+     * Validate edited attribute value in the model.
+     */
     @Test
     public void editIdentity() throws Exception {
         Address realmAddress = null;
@@ -137,6 +160,11 @@ public class ElytronIdentitySecurityRealmTestCase extends AbstractElytronTestCas
 
     }
 
+    /**
+     * @tpTestDetails Create Elytron Identity security realm instance in model and try to edit its attribute-values
+     * attribute value in Web Console's Elytron subsystem configuration.
+     * Validate edited attribute value in the model.
+     */
     @Test
     public void editAttributeValues() throws Exception {
         Address realmAddress = null;

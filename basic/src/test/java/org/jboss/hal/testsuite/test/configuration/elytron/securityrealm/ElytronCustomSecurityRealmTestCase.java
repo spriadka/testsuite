@@ -59,6 +59,13 @@ public class ElytronCustomSecurityRealmTestCase extends AbstractElytronTestCase 
         moduleUtils.removeModule(CUSTOM_SECURITY_REALM_MODULE_PATH);
     }
 
+    /**
+     * @tpTestDetails Try to create Elytron Custom security realm instance in Web Console's Elytron subsystem
+     * configuration.
+     * Validate created resource is visible in Custom security realm table.
+     * Validate created resource is present in model.
+     * Validate attributes of created resource in model.
+     */
     @Test
     public void testAddCustomSecurityRealm() throws Exception {
         final Address securityRealmAddress = elyOps.getElytronAddress(CUSTOM_REALM, RandomStringUtils.randomAlphanumeric(7));
@@ -85,6 +92,12 @@ public class ElytronCustomSecurityRealmTestCase extends AbstractElytronTestCase 
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron Custom security realm instance in model and try to remove it in Web Console's
+     * Elytron subsystem configuration.
+     * Validate the resource is not any more visible in Custom security realm table.
+     * Validate created resource is not any more present in the model.
+     */
     @Test
     public void testRemoveCustomSecurityRealm() throws Exception {
         final Address securityRealmAddress = createCustomSecurityRealm();
@@ -105,6 +118,11 @@ public class ElytronCustomSecurityRealmTestCase extends AbstractElytronTestCase 
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron Custom security realm instance in model and try to edit its class-name attribute
+     * value in Web Console's Elytron subsystem configuration.
+     * Validate edited attribute value in the model.
+     */
     @Test
     public void editClassName() throws Exception {
         final Address securityRealmAddress = createCustomSecurityRealm();
@@ -127,6 +145,11 @@ public class ElytronCustomSecurityRealmTestCase extends AbstractElytronTestCase 
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron Custom security realm instance in model and try to edit its module attribute value
+     * in Web Console's Elytron subsystem configuration.
+     * Validate edited attribute value in the model.
+     */
     @Test
     public void editModule() throws Exception {
         final Address securityRealmAddress = createCustomSecurityRealm();
@@ -149,6 +172,11 @@ public class ElytronCustomSecurityRealmTestCase extends AbstractElytronTestCase 
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron Custom security realm instance in model and try to edit its configuration attribute
+     * value in Web Console's Elytron subsystem configuration.
+     * Validate edited attribute value in the model.
+     */
     @Test
     public void editConfiguration() throws Exception {
         final Address securityRealmAddress = createCustomSecurityRealm();

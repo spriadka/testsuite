@@ -33,6 +33,13 @@ public class ElytronLDAPSecurityRealmTestCase extends AbstractElytronTestCase {
             IDENTITY_MAPPING = "identity-mapping",
             DIR_CONTEXT = "dir-context";
 
+    /**
+     * @tpTestDetails Try to create Elytron LDAP security realm instance in Web Console's Elytron subsystem
+     * configuration.
+     * Validate created resource is visible in LDAP security realm table.
+     * Validate created resource is present in model.
+     * Validate attributes of created resource in model.
+     */
     @Test
     public void testAddLDAPSecurityRealm() throws Exception {
         final Address realmAddress = elyOps.getElytronAddress(LDAP_REALM, org.apache.commons.lang.RandomStringUtils.randomAlphabetic(7));
@@ -61,6 +68,12 @@ public class ElytronLDAPSecurityRealmTestCase extends AbstractElytronTestCase {
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron LDAP security realm instance in model and try to remove it in Web Console's
+     * Elytron subsystem configuration.
+     * Validate the resource is not any more visible in LDAP security realm table.
+     * Validate created resource is not any more present in the model.
+     */
     @Test
     public void testRemoveLDAPSecurityRealm() throws Exception {
         Address dirContextAddress = null;
@@ -91,6 +104,11 @@ public class ElytronLDAPSecurityRealmTestCase extends AbstractElytronTestCase {
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron LDAP security realm instance in model and try to edit its allow-blank-password and
+     * direct-verification attributes value in Web Console's Elytron subsystem configuration.
+     * Validate edited attributes value in the model.
+     */
     @Test
     public void toggleAllowBlankPasswordAndDirectVerification() throws Exception {
         Address dirContextAddress = null;
@@ -138,6 +156,11 @@ public class ElytronLDAPSecurityRealmTestCase extends AbstractElytronTestCase {
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron LDAP security realm instance in model and try to edit its dir-context attribute
+     * value in Web Console's Elytron subsystem configuration.
+     * Validate edited attribute value in the model.
+     */
     @Test
     public void editDirContext() throws Exception {
         Address dirContextAddress = null,
