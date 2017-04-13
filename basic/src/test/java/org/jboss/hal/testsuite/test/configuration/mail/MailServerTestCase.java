@@ -213,15 +213,39 @@ public class MailServerTestCase {
     }
 
     @Test
+    public void toggleUseTLS() throws Exception {
+        final String attributeName = "tls";
+        final ModelNodeResult nodeResult = operations.readAttribute(SERVER_ADDRESS, attributeName);
+        nodeResult.assertSuccess();
+        final boolean tlsValue = nodeResult.booleanValue();
+        try {
+            new ConfigChecker.Builder(client, SERVER_ADDRESS)
+                    .configFragment(page.getConfigFragment())
+                    .editAndSave(ConfigChecker.InputType.CHECKBOX, attributeName, !tlsValue)
+                    .verifyFormSaved()
+                    .verifyAttribute(attributeName, !tlsValue);
+
+            new ConfigChecker.Builder(client, SERVER_ADDRESS)
+                    .configFragment(page.getConfigFragment())
+                    .editAndSave(ConfigChecker.InputType.CHECKBOX, attributeName, tlsValue)
+                    .verifyFormSaved()
+                    .verifyAttribute(attributeName, tlsValue);
+        } finally {
+            operations.writeAttribute(SERVER_ADDRESS, attributeName, nodeResult.value()).assertSuccess();
+        }
+    }
+
+    @Test
     public void editSocketBinding() throws Exception {
         final String value = mailOperations.createSocketBinding(),
                 attributeName = "outbound-socket-binding-ref";
         try {
             new ConfigChecker.Builder(client, SERVER_ADDRESS)
                     .configFragment(page.getConfigFragment())
-                    .editAndSave(ConfigChecker.InputType.TEXT, "socketBinding", value)
+                    .editAndSave(ConfigChecker.InputType.TEXT, attributeName, value)
                     .verifyFormSaved()
-                    .verifyAttribute(attributeName, value);
+                    .verifyAttribute("Probably fails because of https://issues.jboss.org/browse/HAL-1349",
+                            attributeName, value);
         } finally {
             client.apply(new RemoveSocketBinding(value));
         }
