@@ -179,9 +179,9 @@ public class ElytronPropertiesSecurityRealmTestCase extends AbstractElytronTestC
         }
 
         ops.add(securityRealmAddress, Values.of(USERS_PROPERTIES, new ModelNodeGenerator.ModelNodePropertiesBuilder()
-                        .addProperty(PATH, "mgmt-users.properties")
-                        .addProperty(RELATIVE_TO, "jboss.server.config.dir")
-                        .build()))
+                .addProperty(PATH, "mgmt-users.properties")
+                .addProperty(RELATIVE_TO, "jboss.server.config.dir")
+                .build()))
                 .assertSuccess();
 
         return securityRealmAddress;

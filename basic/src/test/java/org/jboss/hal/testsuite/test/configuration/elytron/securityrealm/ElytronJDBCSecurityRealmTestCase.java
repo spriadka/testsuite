@@ -57,11 +57,11 @@ public class ElytronJDBCSecurityRealmTestCase extends AbstractElytronTestCase {
             new ResourceVerifier(realmAddress, client)
                     .verifyExists()
                     .verifyAttribute(PRINCIPAL_QUERY, new ModelNodeGenerator.ModelNodeListBuilder()
-                                    .addNode(new ModelNodeGenerator.ModelNodePropertiesBuilder()
-                                            .addProperty(DATASOURCE, datasourceName)
-                                            .addProperty(SQL, sqlQueryValue)
-                                            .build())
-                                    .build());
+                            .addNode(new ModelNodeGenerator.ModelNodePropertiesBuilder()
+                                    .addProperty(DATASOURCE, datasourceName)
+                                    .addProperty(SQL, sqlQueryValue)
+                                    .build())
+                            .build());
         } finally {
             ops.removeIfExists(realmAddress);
             if (datasourceName != null) {
@@ -197,7 +197,7 @@ public class ElytronJDBCSecurityRealmTestCase extends AbstractElytronTestCase {
         private final ModelNodeGenerator.ModelNodeListBuilder listBuilder;
         private final Address address;
 
-        private JDBCRealm (Builder builder) {
+        private JDBCRealm(Builder builder) {
             this.listBuilder = builder.listBuilder;
             this.address = builder.address;
         }

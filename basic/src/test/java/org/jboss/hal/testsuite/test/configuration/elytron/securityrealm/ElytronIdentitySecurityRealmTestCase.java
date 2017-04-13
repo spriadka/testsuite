@@ -148,7 +148,10 @@ public class ElytronIdentitySecurityRealmTestCase extends AbstractElytronTestCas
                     .getResourceManager()
                     .selectByName(realmAddress.getLastPairValue());
 
-            final String value[] = new String[]{RandomStringUtils.randomAlphanumeric(7), RandomStringUtils.randomAlphanumeric(7)};
+            final String[] value = new String[] {
+                    RandomStringUtils.randomAlphanumeric(7),
+                    RandomStringUtils.randomAlphanumeric(7)
+            };
             final ModelNodeGenerator.ModelNodeListBuilder nodeBuilder = new ModelNodeGenerator.ModelNodeListBuilder();
             Arrays.stream(value).forEach(item -> nodeBuilder.addNode(new ModelNode(item)));
 

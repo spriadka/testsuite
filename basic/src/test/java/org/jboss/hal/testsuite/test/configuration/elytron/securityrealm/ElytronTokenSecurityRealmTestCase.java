@@ -152,13 +152,14 @@ public class ElytronTokenSecurityRealmTestCase extends AbstractElytronTestCase {
                 audience = "audience",
                 certificate = "certificate",
                 certificateValue = RandomStringUtils.randomAlphanumeric(7),
-                issuer = "issuer",
-                issuerValues[] = new String[] {
+                issuer = "issuer";
+
+        final String[] issuerValues = new String[] {
                         RandomStringUtils.randomAlphanumeric(7),
                         RandomStringUtils.randomAlphanumeric(7),
                         RandomStringUtils.randomAlphanumeric(7)
                 },
-                audienceValues[] = new String[] {
+                audienceValues = new String[] {
                         RandomStringUtils.randomAlphanumeric(7),
                         RandomStringUtils.randomAlphanumeric(7),
                         RandomStringUtils.randomAlphanumeric(7)
@@ -208,13 +209,14 @@ public class ElytronTokenSecurityRealmTestCase extends AbstractElytronTestCase {
                 audience = "audience",
                 issuer = "issuer",
                 publicKey = "public-key",
-                publicKeyValue = RandomStringUtils.randomAlphanumeric(7),
-                issuerValues[] = new String[] {
+                publicKeyValue = RandomStringUtils.randomAlphanumeric(7);
+
+        final String[] issuerValues = new String[] {
                         RandomStringUtils.randomAlphanumeric(7),
                         RandomStringUtils.randomAlphanumeric(7),
                         RandomStringUtils.randomAlphanumeric(7)
                 },
-                audienceValues[] = new String[] {
+                audienceValues = new String[] {
                         RandomStringUtils.randomAlphanumeric(7),
                         RandomStringUtils.randomAlphanumeric(7),
                         RandomStringUtils.randomAlphanumeric(7)
