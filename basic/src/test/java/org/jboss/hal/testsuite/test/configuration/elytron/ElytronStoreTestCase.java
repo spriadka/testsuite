@@ -13,6 +13,7 @@ import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.dmr.ModelNodeGenerator.ModelNodePropertiesBuilder;
+import org.jboss.hal.testsuite.dmr.ModelNodeGenerator.ModelNodeListBuilder;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
 import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindowWithOptionalFields;
@@ -29,16 +30,35 @@ import org.wildfly.extras.creaper.core.online.operations.Values;
 @Category(Shared.class)
 public class ElytronStoreTestCase extends AbstractElytronTestCase {
 
-    private static final String KEY_STORE = "key-store", KEY_STORE_LABEL = "Key Store", TYPE = "type", JKS = "jks",
-            CREDENTIAL_REFERENCE = "credential-reference", CLEAR_TEXT = "clear-text",
+    private static final String
+            KEY_STORE = "key-store",
+            KEY_STORE_LABEL = "Key Store",
+            TYPE = "type",
+            JKS = "jks",
+            CREDENTIAL_REFERENCE = "credential-reference",
+            CLEAR_TEXT = "clear-text",
             CREDENTIAL_REFERENCE_CLEAR_TEXT_IDENTIFIER = "credential-reference-clear-text",
-            CREDENTIAL_REFERENCE_LABEL = "Credential Reference", ALIAS_FILTER = "alias-filter",
-            CREDENTIAL_STORE = "credential-store", CREDENTIAL_STORE_LABEL = "Credential Store",
-            URI = "uri", RELATIVE_TO = "relative-to", FILTERING_KEY_STORE = "filtering-key-store",
-            FILTERING_KEY_STORE_LABEL = "Filtering Key Store", LDAP_KEY_STORE = "ldap-key-store",
-            LDAP_KEY_STORE_LABEL = "Ldap Key Store", DIR_CONTEXT = "dir-context", SEARCH_PATH = "search-path",
-            SEARCH_RECURSIVE = "search-recursive", SEARCH_TIME_LIMIT = "search-time-limit",
-            CERTIFICATE_TYPE = "certificate-type";
+            CREDENTIAL_REFERENCE_LABEL = "Credential Reference",
+            ALIAS_FILTER = "alias-filter",
+            CREDENTIAL_STORE = "credential-store",
+            CREDENTIAL_STORE_LABEL = "Credential Store",
+            URI = "uri",
+            RELATIVE_TO = "relative-to",
+            FILTERING_KEY_STORE = "filtering-key-store",
+            FILTERING_KEY_STORE_LABEL = "Filtering Key Store",
+            LDAP_KEY_STORE = "ldap-key-store",
+            LDAP_KEY_STORE_LABEL = "Ldap Key Store",
+            DIR_CONTEXT = "dir-context",
+            SEARCH_PATH = "search-path",
+            SEARCH_RECURSIVE = "search-recursive",
+            SEARCH_TIME_LIMIT = "search-time-limit",
+            CERTIFICATE_TYPE = "certificate-type",
+            VALUE = "value",
+            NEW_ITEM_TEMPLATE = "new-item-template",
+            NEW_ITEM_TEMPLATE_LABEL = "New Item Template",
+            NEW_ITEM_PATH = "new-item-path",
+            NEW_ITEM_RDN = "new-item-rdn",
+            NEW_ITEM_ATTRIBUTES = "new-item-attributes";
 
     @Page
     private SSLPage page;
@@ -497,7 +517,95 @@ public class ElytronStoreTestCase extends AbstractElytronTestCase {
         }
     }
 
-    // TODO add test for new-item-template attribute of ldap-key-store as soon as it is added
+    /**
+     * @tpTestDetails Create Elytron LDAP key store instance in model
+     * and try to edit it's new-item-template attribute in Web Console's Elytron subsystem configuration.
+     * Validate edited attribute value in the model.
+     */
+
+    @Test
+    public void editLDAPKeyStoreNewItemTemplateTest() throws Exception {
+        final DirContext dirContext = createDirContext();
+        final String ldapKeyStoreName = RandomStringUtils.randomAlphanumeric(5),
+                searchPathValue = "dc=" + RandomStringUtils.randomAlphanumeric(5),
+                newItemPathValue = RandomStringUtils.randomAlphanumeric(5),
+                newItemRdnValue = RandomStringUtils.randomAlphanumeric(5),
+                newItemKey1 = RandomStringUtils.randomAlphanumeric(5),
+                newItemValue11 = RandomStringUtils.randomAlphanumeric(5),
+                newItemValue12 = RandomStringUtils.randomAlphanumeric(5),
+                newItemKey2 = RandomStringUtils.randomAlphanumeric(5),
+                newItemValue21 = RandomStringUtils.randomAlphanumeric(5),
+                newItemValue22 = RandomStringUtils.randomAlphanumeric(5),
+                newItemValue23 = RandomStringUtils.randomAlphanumeric(5),
+                newItemAttributesString =
+                    newItemKey1 + "=" + newItemValue11 + "," + newItemValue12 + "\n" +
+                    newItemKey2 + "=" + newItemValue21 + "," + newItemValue22 + "," + newItemValue23,
+                newItemAttributesStringEdited =
+                    newItemKey2 + "=" + newItemValue23 + "," + newItemValue12 + "," + newItemValue21;
+        final ModelNode
+                expectedNewItemTemplateNode = new ModelNodePropertiesBuilder()
+                        .addProperty(NEW_ITEM_PATH, newItemPathValue)
+                        .addProperty(NEW_ITEM_RDN, newItemRdnValue)
+                        .addProperty(NEW_ITEM_ATTRIBUTES, new ModelNodeListBuilder()
+                                .addNode(new ModelNodePropertiesBuilder()
+                                        .addProperty(NAME, newItemKey1)
+                                        .addProperty(VALUE, new ModelNodeListBuilder()
+                                                .addNode(new ModelNode(newItemValue11))
+                                                .addNode(new ModelNode(newItemValue12))
+                                                .build())
+                                        .build())
+                                .addNode(new ModelNodePropertiesBuilder()
+                                        .addProperty(NAME, newItemKey2)
+                                        .addProperty(VALUE, new ModelNodeListBuilder()
+                                                .addNode(new ModelNode(newItemValue21))
+                                                .addNode(new ModelNode(newItemValue22))
+                                                .addNode(new ModelNode(newItemValue23))
+                                                .build())
+                                        .build())
+                                .build())
+                        .build(),
+                expectedNewItemTemplateNodeEdited = new ModelNodePropertiesBuilder()
+                        .addProperty(NEW_ITEM_PATH, newItemPathValue)
+                        .addProperty(NEW_ITEM_RDN, newItemRdnValue)
+                        .addProperty(NEW_ITEM_ATTRIBUTES, new ModelNodeListBuilder()
+                                .addNode(new ModelNodePropertiesBuilder()
+                                        .addProperty(NAME, newItemKey2)
+                                        .addProperty(VALUE, new ModelNodeListBuilder()
+                                                .addNode(new ModelNode(newItemValue23))
+                                                .addNode(new ModelNode(newItemValue12))
+                                                .addNode(new ModelNode(newItemValue21))
+                                                .build())
+                                        .build())
+                                .build())
+                        .build();
+        final Address ldapKeyStoreAddress = elyOps.getElytronAddress(LDAP_KEY_STORE, ldapKeyStoreName);
+
+        try {
+            ops.add(ldapKeyStoreAddress, Values.of(DIR_CONTEXT, dirContext.name)
+                    .and(SEARCH_PATH, searchPathValue)).assertSuccess();
+
+            page.navigateToApplication().selectResource(LDAP_KEY_STORE_LABEL).getResourceManager()
+                    .selectByName(ldapKeyStoreName);
+            page.switchToConfigAreaTab(NEW_ITEM_TEMPLATE_LABEL);
+
+            new ConfigChecker.Builder(client, ldapKeyStoreAddress).configFragment(page.getConfigFragment())
+                    .edit(TEXT, NEW_ITEM_ATTRIBUTES, newItemAttributesString)
+                    .edit(TEXT, NEW_ITEM_PATH, newItemPathValue)
+                    .edit(TEXT, NEW_ITEM_RDN, newItemRdnValue)
+                    .andSave().verifyFormSaved()
+                    .verifyAttribute(NEW_ITEM_TEMPLATE, expectedNewItemTemplateNode);
+
+            new ConfigChecker.Builder(client, ldapKeyStoreAddress).configFragment(page.getConfigFragment())
+                    .editAndSave(TEXT, NEW_ITEM_ATTRIBUTES, newItemAttributesStringEdited)
+                    .verifyFormSaved()
+                    .verifyAttribute(NEW_ITEM_TEMPLATE, expectedNewItemTemplateNodeEdited);
+
+        } finally {
+            ops.removeIfExists(ldapKeyStoreAddress);
+            ops.removeIfExists(dirContext.address);
+            adminOps.reloadIfRequired();
+        }
+    }
 
     private DirContext createDirContext() throws IOException {
         final String dirContextName = RandomStringUtils.randomAlphanumeric(5),
