@@ -329,12 +329,13 @@ public class ManagedDeploymentsTestCase {
     }
 
     @Test
-    public void medBrowseContentOnUnexplodedEnabledDeploymentExpectFailure() throws Exception {
+    public void medBrowseContentOnUnexplodedEnabledDeploymentExpectSuccess() throws Exception {
         Row row = navigation.step(FinderNames.DEPLOYMENT, DEPLOYMENT_MANAGED_ENABLED_2).selectRow();
         Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
 
         row.invoke(FinderNames.BROWSE_CONTENT);
-        assertEquals("Cannot read content from an unexploded deployment", page.getAlertArea().getMessage());
+        List<String> itemsInDeploment = page.getDeploymentBrowsedContentItems();
+        ops.verifyDeploymentContentDefault(itemsInDeploment);
     }
 
     @Test
