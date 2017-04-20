@@ -29,14 +29,14 @@ import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.net.UnknownHostException;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.callback.NameCallback;
 import javax.security.auth.callback.PasswordCallback;
 import javax.security.auth.callback.UnsupportedCallbackException;
 import javax.security.sasl.RealmCallback;
+import java.io.IOException;
+import java.net.UnknownHostException;
 
 /**
  * Central class to execute {@link Operation}s.
@@ -50,7 +50,7 @@ public class Dispatcher {
 
         String[] args;
 
-        public AuthCallback(String[] args) {
+        AuthCallback(String[] args) {
             this.args = args;
         }
 
