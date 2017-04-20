@@ -54,17 +54,23 @@ public final class AddJMSBridge implements OnlineCommand {
             operations.removeIfExists(address);
         }
 
-        operations.add(address, Values.of("quality-of-service", qualityOfService.getStringValue())
+        Values params = Values.of("quality-of-service", qualityOfService.getStringValue())
                 .and("failure-retry-interval", failureRetryInterval)
                 .and("max-retries", maxRetries)
                 .and("max-batch-size", maxBatchSize)
                 .and("max-batch-time", maxBatchTime)
                 .and("source-connection-factory", sourceConnectionFactory)
                 .and("source-destination", sourceDestination)
-                .andObject("source-context", sourceContext)
                 .and("target-connection-factory", targetConnectionFactory)
-                .and("target-destination", targetDestination)
-                .andObject("target-context", targetContext));
+                .and("target-destination", targetDestination);
+        if (sourceContext != null) {
+            params.andObject("source-context", sourceContext);
+        }
+        if (targetContext != null) {
+            params.andObject("target-context", targetContext);
+        }
+
+        operations.add(address, params);
     }
 
     @Override
