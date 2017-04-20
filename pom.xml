@@ -37,6 +37,8 @@
     <take.screenshot.after.each.test>false</take.screenshot.after.each.test>
     <version.org.wildfly.extras.creaper>1.5.1-SNAPSHOT</version.org.wildfly.extras.creaper>
     <version.org.jgrapht>0.9.1</version.org.jgrapht>
+    <version.org.apache.maven.plugins.maven-checkstyle-plugin>2.17</version.org.apache.maven.plugins.maven-checkstyle-plugin>
+    <version.com.puppycrawl.tools.checkstyle>RELEASE</version.com.puppycrawl.tools.checkstyle>
   </properties>
 
 
@@ -388,29 +390,35 @@
       </plugin>
 
       <plugin>
+        <!--check style on compile-->
+        <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-checkstyle-plugin</artifactId>
+        <version>${version.org.apache.maven.plugins.maven-checkstyle-plugin}</version>
+        <dependencies>
+          <!--latest bug fixes for checkstyle plugin https://maven.apache.org/plugins/maven-checkstyle-plugin/examples/upgrading-checkstyle.html-->
+          <dependency>
+            <groupId>com.puppycrawl.tools</groupId>
+            <artifactId>checkstyle</artifactId>
+            <version>${version.com.puppycrawl.tools.checkstyle}</version>
+          </dependency>
+        </dependencies>
         <executions>
           <execution>
-            <id>check-style</id>
+            <id>check-style-aggregate</id>
             <phase>compile</phase>
             <goals>
-              <goal>checkstyle</goal>
+              <!--see https://maven.apache.org/plugins/maven-checkstyle-plugin/checkstyle-aggregate-mojo.html-->
+              <goal>checkstyle-aggregate</goal>
             </goals>
             <configuration>
-              <configLocation>checkstyle.xml</configLocation>
+              <includes>**/*.*</includes>
+              <includeTestSourceDirectory>true</includeTestSourceDirectory>
               <consoleOutput>true</consoleOutput>
               <failsOnError>true</failsOnError>
-              <useFile />
+              <configLocation>checkstyle.xml</configLocation>
             </configuration>
           </execution>
         </executions>
-        <configuration>
-          <configLocation>checkstyle.xml</configLocation>
-          <consoleOutput>true</consoleOutput>
-          <failsOnError>true</failsOnError>
-          <includeTestSourceDirectory>true</includeTestSourceDirectory>
-          <useFile />
-        </configuration>
       </plugin>
 
       <plugin>
