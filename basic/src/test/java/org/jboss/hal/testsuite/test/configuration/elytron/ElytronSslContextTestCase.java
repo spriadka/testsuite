@@ -54,7 +54,12 @@ public class ElytronSslContextTestCase extends AbstractElytronTestCase {
         TLS_V12 = "TLSv1.2",
         PROTOCOLS = "protocols",
         NEED_CLIENT_AUTH = "need-client-auth",
-        SESSION_TIMEOUT = "session-timeout";
+        SESSION_TIMEOUT = "session-timeout",
+        CERTIFICATE_REVOCATION_LIST = "certificate-revocation-list",
+        CERTIFICATE_REVOCATION_LIST_LABEL = "Certificate Revocation List",
+        PATH = "path",
+        RELATIVE_TO = "relative-to",
+        MAXIMUM_CERT_PATH = "maximum-cert-path";
 
     @Page
     private SSLPage page;
@@ -324,6 +329,58 @@ public class ElytronSslContextTestCase extends AbstractElytronTestCase {
             ops.removeIfExists(originalKeyStoreAddress);
             ops.removeIfExists(newKeyStoreAddress);
             elyOps.removeProviderLoader(newProviders);
+            adminOps.reloadIfRequired();
+        }
+    }
+
+    /**
+     * @tpTestDetails Create Elytron Trust Manager instance in model
+     * and try to edit it's certificate-revocation-list attribute in Web Console's Elytron subsystem configuration.
+     * Validate edited attribute value in the model.
+     */
+    @Test
+    public void editTrustManagerCertificateRevocationListTest() throws Exception {
+        String
+            trustManagerName = randomAlphanumeric(5),
+            pathValue = randomAlphanumeric(5),
+            newPathValue = randomAlphanumeric(5),
+            relativeToValue = randomAlphanumeric(5);
+        long maximumCertPathValue = 123L;
+        Address
+            keyStoreAddress = createKeyStore(),
+            trustManagerAddress = elyOps.getElytronAddress(TRUST_MANAGERS, trustManagerName);
+        ModelNode
+            expectedFirstCertificateRevocationListNode = new ModelNodePropertiesBuilder()
+                .addProperty(PATH, pathValue)
+                .addProperty(RELATIVE_TO, relativeToValue)
+                .build(),
+            expectedSecondCertificateRevocationListNode = new ModelNodePropertiesBuilder()
+                .addProperty(PATH, newPathValue)
+                .addProperty(RELATIVE_TO, relativeToValue)
+                .addProperty(MAXIMUM_CERT_PATH, new ModelNode(maximumCertPathValue))
+                .build();
+
+        try {
+            ops.add(trustManagerAddress, Values.of(ALGORITHM, ALGORITH_VALUE_1)
+                    .and(KEY_STORE, keyStoreAddress.getLastPairValue())).assertSuccess();
+
+            page.navigateToApplication().selectResource(TRUST_MANAGER_LABEL).getResourceManager()
+                    .selectByName(trustManagerName);
+            page.switchToConfigAreaTab(CERTIFICATE_REVOCATION_LIST_LABEL);
+
+            new ConfigChecker.Builder(client, trustManagerAddress).configFragment(page.getConfigFragment())
+                    .edit(TEXT, PATH, pathValue)
+                    .edit(TEXT, RELATIVE_TO, relativeToValue)
+                    .andSave().verifyFormSaved()
+                    .verifyAttribute(CERTIFICATE_REVOCATION_LIST, expectedFirstCertificateRevocationListNode);
+            new ConfigChecker.Builder(client, trustManagerAddress).configFragment(page.getConfigFragment())
+                    .edit(TEXT, PATH, newPathValue)
+                    .edit(TEXT, MAXIMUM_CERT_PATH, maximumCertPathValue)
+                    .andSave().verifyFormSaved()
+                    .verifyAttribute(CERTIFICATE_REVOCATION_LIST, expectedSecondCertificateRevocationListNode);
+        } finally {
+            ops.removeIfExists(trustManagerAddress);
+            ops.removeIfExists(keyStoreAddress);
             adminOps.reloadIfRequired();
         }
     }
