@@ -8,6 +8,7 @@ import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
+import org.jboss.hal.testsuite.fragment.runtime.AssignDeploymentWindow;
 import org.jboss.hal.testsuite.fragment.runtime.DeploymentWizard;
 import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
 import org.jboss.hal.testsuite.page.runtime.DomainDeploymentEntryPoint;
@@ -35,9 +36,11 @@ import static org.junit.Assert.assertEquals;
 @RunWith(Arquillian.class)
 @Category(Shared.class)
 public class ManagedDeploymentTestCase {
-    private static final String FILE_PATH = "src/test/resources/";
-    private static final String FILE_NAME = "mockWar.war";
-    private static final String RUNTIME_NAME = "rn_" + RandomStringUtils.randomAlphanumeric(5) + ".war";
+    private static final String
+        FILE_PATH = "src/test/resources/",
+        FILE_NAME = "mockWar.war",
+        RUNTIME_NAME = "rn_" + RandomStringUtils.randomAlphanumeric(5) + ".war",
+        MAIN_SERVER_GROUP = "main-server-group";
     private String NAME;
 
     private FinderNavigation navigation;
@@ -171,7 +174,7 @@ public class ManagedDeploymentTestCase {
         if (ConfigUtils.isDomain()) {
             navigation = new FinderNavigation(browser, DomainDeploymentEntryPoint.class)
                     .step(FinderNames.BROWSE_BY, "Server Groups")
-                    .step(FinderNames.SERVER_GROUP, "main-server-group")
+                    .step(FinderNames.SERVER_GROUP, MAIN_SERVER_GROUP)
                     .step("Deployment", NAME);
             navigation.selectRow().invoke("Enable");
         } else {
@@ -188,9 +191,10 @@ public class ManagedDeploymentTestCase {
                 .step(FinderNames.BROWSE_BY, "Content Repository")
                 .step("All Content", NAME);
         navigation.selectRow().invoke("Assign");
-        ConfirmationWindow window = Console.withBrowser(browser).openedWindow(ConfirmationWindow.class);
-        window.clickButton("Assign");
-        Graphene.waitGui().until().element(window.getRoot()).is().not().present();
+        Console.withBrowser(browser).openedWindow(AssignDeploymentWindow.class)
+                .selectServerGroup(MAIN_SERVER_GROUP)
+                .assign()
+                .assertClosed();
     }
 
     private void unassingDeployment() {
