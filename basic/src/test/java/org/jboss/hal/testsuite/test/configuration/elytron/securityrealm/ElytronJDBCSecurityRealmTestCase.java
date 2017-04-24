@@ -234,12 +234,12 @@ public class ElytronJDBCSecurityRealmTestCase extends AbstractElytronTestCase {
             return address;
         }
 
-        public static final class Builder {
+        private static final class Builder {
 
             private final ModelNodeGenerator.ModelNodeListBuilder listBuilder = new ModelNodeGenerator.ModelNodeListBuilder();
             private final Address address = elyOps.getElytronAddress(JDBC_REALM, RandomStringUtils.randomAlphanumeric(7));
 
-            public Builder(String sqlQuery, String datasourceName) {
+            Builder(String sqlQuery, String datasourceName) {
                 addPrincipalQuery(sqlQuery, datasourceName);
             }
 
