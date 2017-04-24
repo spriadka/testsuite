@@ -2,6 +2,7 @@ package org.jboss.hal.testsuite.fragment;
 
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.ByJQuery;
+import org.jboss.hal.testsuite.fragment.shared.util.ResourceManager;
 import org.jboss.hal.testsuite.util.PropUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
@@ -48,6 +49,8 @@ public class ConfigAreaFragment extends  BaseFragment {
         return switchTo(label, ConfigFragment.class);
     }
 
-
+    public ResourceManager getResourceManager() {
+        return Graphene.createPageFragment(ResourceManager.class, root);
+    }
 
 }

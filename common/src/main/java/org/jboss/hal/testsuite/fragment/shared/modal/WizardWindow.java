@@ -1,10 +1,10 @@
 package org.jboss.hal.testsuite.fragment.shared.modal;
 
-import org.jboss.hal.testsuite.util.Console;
-import org.junit.Assert;
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.hal.testsuite.fragment.WindowFragment;
+import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.PropUtils;
+import org.junit.Assert;
 import org.openqa.selenium.By;
 import org.openqa.selenium.TimeoutException;
 import org.openqa.selenium.WebDriverException;
@@ -230,7 +230,12 @@ public class WizardWindow extends WindowFragment {
         }
 
         public void assertWindowClosed() {
-            Assert.assertEquals("Wizard was supposed to finish, the window should be closed.",
+            assertWindowClosed(null);
+        }
+
+        public void assertWindowClosed(String messageSuffix) {
+            Assert.assertEquals("Wizard was supposed to finish, the window should be closed." +
+                            (messageSuffix == null || messageSuffix.isEmpty() ? "" : " " + messageSuffix),
                     InnerState.CLOSED, state);
         }
 

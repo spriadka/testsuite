@@ -22,15 +22,15 @@
 
 package org.jboss.hal.testsuite.dmr;
 
+import org.jboss.dmr.ModelNode;
+import org.jboss.dmr.ModelType;
+import org.jboss.hal.testsuite.creaper.ResourceVerifier;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.jboss.dmr.ModelNode;
-import org.jboss.dmr.ModelType;
-import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 
 /**
  * Intended to help with creating {@link ModelNode} objects to be used e.g. in {@link ResourceVerifier}
@@ -109,6 +109,13 @@ public class ModelNodeGenerator {
 
         public ModelNodeListBuilder addNode(ModelNode node) {
             this.nodeList.add(node);
+            return this;
+        }
+
+        public ModelNodeListBuilder addAll(String... values) {
+            for (String value : values) {
+                this.nodeList.add(new ModelNode(value));
+            }
             return this;
         }
 
