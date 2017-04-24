@@ -90,7 +90,7 @@ class OutboundSocketBindingProvider {
         private String socketBindingReference;
         private OnlineManagementClient client;
 
-        public Builder(Type type) {
+        Builder(Type type) {
             this.type = type;
         }
 
