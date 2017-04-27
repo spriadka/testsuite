@@ -1,9 +1,10 @@
 package org.jboss.hal.testsuite.test.configuration.elytron;
 
-import java.io.IOException;
 import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.Operations;
+
+import java.io.IOException;
 
 /**
  * Encapsulates Creaper operations in Elytron subsystem
@@ -31,5 +32,9 @@ public class ElytronOperations {
 
     public Address getElytronAddress(final String key, final String value) {
         return ELYTRON_SUBSYSTEM_ADDRESS.and(key, value);
+    }
+
+    public static Address getElytronSubsystemAddress() {
+        return ELYTRON_SUBSYSTEM_ADDRESS;
     }
 }
