@@ -42,7 +42,7 @@ public class ElytronStoreTestCase extends AbstractElytronTestCase {
             ALIAS_FILTER = "alias-filter",
             CREDENTIAL_STORE = "credential-store",
             CREDENTIAL_STORE_LABEL = "Credential Store",
-            URI = "uri",
+            CREATE = "create",
             RELATIVE_TO = "relative-to",
             FILTERING_KEY_STORE = "filtering-key-store",
             FILTERING_KEY_STORE_LABEL = "Filtering Key Store",
@@ -184,7 +184,6 @@ public class ElytronStoreTestCase extends AbstractElytronTestCase {
     @Test
     public void addCredentialStoreTest() throws Exception {
         final String credentialStoreName = RandomStringUtils.randomAlphanumeric(5),
-                uriValue = getCredentialStoreUriTestValue(),
                 password = RandomStringUtils.randomAlphanumeric(5);
         final Address credentialStoreAddress = elyOps.getElytronAddress(CREDENTIAL_STORE, credentialStoreName);
         final ModelNode expectedCredentialReferenceNode = new ModelNodePropertiesBuilder()
@@ -193,19 +192,17 @@ public class ElytronStoreTestCase extends AbstractElytronTestCase {
         page.navigateToApplication().selectResource(CREDENTIAL_STORE_LABEL);
 
         try {
-            WizardWindowWithOptionalFields wizard = page.getResourceManager()
-                    .addResource(WizardWindowWithOptionalFields.class);
-            wizard.openOptionalFieldsTab();
+            WizardWindow wizard = page.getResourceManager().addResource();
             Editor editor = wizard.getEditor();
             editor.text(NAME, credentialStoreName);
-            editor.text(URI, uriValue);
+            editor.checkbox(CREATE, true);
             editor.text(CREDENTIAL_REFERENCE_CLEAR_TEXT_IDENTIFIER, password);
             boolean closed = wizard.finish();
 
             assertTrue("Dialog should be closed!", closed);
             assertTrue("Created resource should be present in the table!",
                     page.resourceIsPresentInMainTable(credentialStoreName));
-            new ResourceVerifier(credentialStoreAddress, client).verifyExists().verifyAttribute(URI, uriValue)
+            new ResourceVerifier(credentialStoreAddress, client).verifyExists().verifyAttribute(CREATE, true)
                     .verifyAttribute(CREDENTIAL_REFERENCE, expectedCredentialReferenceNode);
 
         } finally {
@@ -217,7 +214,6 @@ public class ElytronStoreTestCase extends AbstractElytronTestCase {
     @Test
     public void removeCredentialStoreTest() throws Exception {
         final String credentialStoreName = RandomStringUtils.randomAlphanumeric(5),
-                uriValue = getCredentialStoreUriTestValue(),
                 password = RandomStringUtils.randomAlphanumeric(5);
         final Address credentialStoreAddress = elyOps.getElytronAddress(CREDENTIAL_STORE, credentialStoreName);
         final ModelNode credentialReferenceNode = new ModelNodePropertiesBuilder().addProperty(CLEAR_TEXT, password)
@@ -225,7 +221,7 @@ public class ElytronStoreTestCase extends AbstractElytronTestCase {
         final ResourceVerifier credentialStoreVerifier = new ResourceVerifier(credentialStoreAddress, client);
 
         try {
-            ops.add(credentialStoreAddress, Values.of(URI, uriValue).and(CREDENTIAL_REFERENCE, credentialReferenceNode))
+            ops.add(credentialStoreAddress, Values.of(CREATE, true).and(CREDENTIAL_REFERENCE, credentialReferenceNode))
                     .assertSuccess();
             credentialStoreVerifier.verifyExists();
 
@@ -244,7 +240,6 @@ public class ElytronStoreTestCase extends AbstractElytronTestCase {
     @Test
     public void editCredentialStoreAttributesTest() throws Exception {
         final String credentialStoreName = RandomStringUtils.randomAlphanumeric(5),
-                uriValue = getCredentialStoreUriTestValue(),
                 password = RandomStringUtils.randomAlphanumeric(5),
                 jbossHomeDir = "jboss.home.dir",
                 providerNameValue = RandomStringUtils.randomAlphanumeric(5);
@@ -253,7 +248,7 @@ public class ElytronStoreTestCase extends AbstractElytronTestCase {
                 .build();
 
         try {
-            ops.add(credentialStoreAddress, Values.of(URI, uriValue).and(CREDENTIAL_REFERENCE, initialCredentialReferenceNode))
+            ops.add(credentialStoreAddress, Values.of(CREATE, true).and(CREDENTIAL_REFERENCE, initialCredentialReferenceNode))
                     .assertSuccess();
 
             page.navigateToApplication().selectResource(CREDENTIAL_STORE_LABEL).getResourceManager()
@@ -277,14 +272,13 @@ public class ElytronStoreTestCase extends AbstractElytronTestCase {
     @Test
     public void editCredentialStoreCredentialReferenceTest() throws Exception {
         final String credentialStoreName = RandomStringUtils.randomAlphanumeric(5),
-                uriValue = getCredentialStoreUriTestValue(),
                 initialPassword = RandomStringUtils.randomAlphanumeric(5);
         final Address credentialStoreAddress = elyOps.getElytronAddress(CREDENTIAL_STORE, credentialStoreName);
         final ModelNode initialCredentialReferenceNode = new ModelNodePropertiesBuilder()
                 .addProperty(CLEAR_TEXT, initialPassword).build();
 
         try {
-            ops.add(credentialStoreAddress, Values.of(URI, uriValue).and(CREDENTIAL_REFERENCE, initialCredentialReferenceNode))
+            ops.add(credentialStoreAddress, Values.of(CREATE, true).and(CREDENTIAL_REFERENCE, initialCredentialReferenceNode))
                     .assertSuccess();
 
             page.navigateToApplication().selectResource(CREDENTIAL_STORE_LABEL).getResourceManager()
@@ -627,10 +621,6 @@ public class ElytronStoreTestCase extends AbstractElytronTestCase {
             this.name = dirContextName;
             this.address = dirContextAddress;
         }
-    }
-
-    private String getCredentialStoreUriTestValue() {
-        return "cr-store://test/" + RandomStringUtils.randomAlphanumeric(5) + ".jceks?create=true";
     }
 
 }

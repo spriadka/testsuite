@@ -94,7 +94,8 @@ public class ElytronIntegrationChecker {
      */
     public void setCredentialStoreCredentialReferenceAndVerify(String errorMessage) throws Exception {
         final String credentialStoreName = "credential-store_" + RandomStringUtils.randomAlphanumeric(6),
-                credentialStoreAliasName = "credential-store-alias_" + RandomStringUtils.randomAlphanumeric(6),
+                credentialStoreAliasName = "credential-store-alias_"
+                        + RandomStringUtils.randomAlphanumeric(6).toLowerCase(),
                 credentialStoreAliasValue = "alias-value_" + RandomStringUtils.randomAlphanumeric(6);
         final ModelNodeResult originalValue = operations.readAttribute(address, credentialReferenceAttributeName);
         originalValue.assertSuccess();
@@ -173,8 +174,7 @@ public class ElytronIntegrationChecker {
     private Address addCredentialStore(String credentialStoreName) throws IOException {
         final Address credentialReferenceAddress = Address.subsystem("elytron").and(CREDENTIAL_STORE, credentialStoreName);
         operations.add(credentialReferenceAddress, Values
-                .of("uri", new ModelNode("cr-store://test/" + credentialStoreName + "?keyStoreType=JCEKS;modifiable=true;create=true"))
-                .and("relative-to", "jboss.server.data.dir")
+                .of("create", true)
                 .and(CREDENTIAL_REFERENCE, new ModelNode().set(new Property(CLEAR_TEXT, new ModelNode("foobar")))
                         .asObject()))
                 .assertSuccess();
