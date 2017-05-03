@@ -2,8 +2,10 @@ package org.jboss.hal.testsuite.fragment.runtime.configurationchanges.table;
 
 import org.jboss.hal.testsuite.fragment.shared.table.GenericResourceTableFragment;
 import org.jboss.hal.testsuite.util.configurationchanges.ConfigurationChange;
+import org.jboss.hal.testsuite.util.configurationchanges.ConfigurationChangeBuilder;
 import org.jboss.hal.testsuite.util.configurationchanges.ConfigurationChangesProvider;
 
+import java.text.ParseException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,7 +23,21 @@ public class ConfigurationChangesTableFragment extends GenericResourceTableFragm
 
     public List<ConfigurationChange> getAllConfigurationChanges() {
         return getAllRows().stream()
-                .map((ConfigurationChangeRowFragment row) -> (ConfigurationChange) row)
+                .map((ConfigurationChangeRowFragment row) -> {
+                    try {
+                        return new ConfigurationChangeBuilder()
+                                .setAccessMechanism(row.getAccessMechanism())
+                                .setResourceAddress(row.getResourceAddress())
+                                .setDatetime(row.getDatetime())
+                                .setOperation(row.getOperation())
+                                .setRemoteAddress(row.getRemoteAddress())
+                                .setResult(row.getResult())
+                                .build();
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                        throw new RuntimeException(e);
+                    }
+                })
                 .collect(Collectors.toList());
     }
 

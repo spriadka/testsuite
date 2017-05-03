@@ -33,7 +33,6 @@ public class ConfigurationChangesResource implements ConfigurationChangesProvide
 
     private static final String OPERATIONS = "operations";
     private static final String OP = "operation";
-    private static final String ADDRESS = "address";
     private static final String COMPOSITE = "composite";
     private static final String STEPS = "steps";
     private static final String OP_ADDR = "address";
@@ -65,19 +64,21 @@ public class ConfigurationChangesResource implements ConfigurationChangesProvide
 
             logger.info(change.get("operations").asString());
 
-            ConfigurationChange configurationChange = new Change(
-                    parseDate(change.get("operation-date").asString()),
-                    change.get("access-mechanism").asString(),
-                    change.get("remote-address").asString(),
-                    change.get("outcome").asString(),
-                    extractOperationName(change),
-                    StringUtils.abbreviate(extractResourceAddress(change), 66)
-            );
+            ConfigurationChange configurationChange = new ConfigurationChangeBuilder()
+                    .setDatetime(parseDate(change.get("operation-date").asString()))
+                    .setAccessMechanism(change.get("access-mechanism").asString())
+                    .setRemoteAddress(change.get("remote-address").asString())
+                    .setResult(change.get("outcome").asString())
+                    .setOperation(extractOperationName(change))
+                    .setResourceAddress(StringUtils.abbreviate(extractResourceAddress(change), 66))
+                    .build();
+
             if (predicate.test(configurationChange)) {
                 changes.add(configurationChange);
             }
 
         }
+
         return changes;
     }
 
@@ -161,53 +162,5 @@ public class ConfigurationChangesResource implements ConfigurationChangesProvide
                 return false;
             }
         });
-    }
-
-    /**
-     * Basic implementation of {@link ConfigurationChange}. Serves mainly as abstraction over values from model.
-     * @see ConfigurationChange
-     */
-    private static final class Change implements ConfigurationChange {
-
-        private Date datetime;
-        private String accessMechanism;
-        private String remoteAddress;
-        private String outcome;
-        private String operation;
-        private String resourceAddress;
-
-        private Change(Date datetime, String accessMechanism, String remoteAddress, String outcome, String operation, String address) {
-            this.datetime = datetime;
-            this.accessMechanism = accessMechanism;
-            this.remoteAddress = !remoteAddress.isEmpty() ? remoteAddress.split("/")[0] : "";
-            this.outcome = outcome;
-            this.operation = operation;
-            this.resourceAddress = address;
-        }
-
-        public Date getDatetime() {
-            return datetime;
-        }
-
-        public String getAccessMechanism() {
-            return accessMechanism;
-        }
-
-        public String getRemoteAddress() {
-            return remoteAddress;
-        }
-
-        public String getResult() {
-            return outcome;
-        }
-
-        public String getOperation() {
-            return operation;
-        }
-
-        public String getResourceAddress() {
-            return resourceAddress;
-        }
-
     }
 }

@@ -4,9 +4,6 @@ import java.util.Date;
 
 /**
  * Interface describing public methods of both UI and model abstraction over configuration changes.
- *
- * @author Jan Kasik <jkasik@redhat.com>
- *         Created on 9/14/16.
  */
 public interface ConfigurationChange {
 

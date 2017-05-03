@@ -1,7 +1,6 @@
 package org.jboss.hal.testsuite.fragment.runtime.configurationchanges.table;
 
 import org.jboss.hal.testsuite.fragment.shared.table.ResourceTableRowFragment;
-import org.jboss.hal.testsuite.util.configurationchanges.ConfigurationChange;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -15,7 +14,7 @@ import java.util.TimeZone;
  * @author Jan Kasik <jkasik@redhat.com>
  *         Created on 9/12/16.
  */
-public class ConfigurationChangeRowFragment extends ResourceTableRowFragment implements ConfigurationChange {
+public class ConfigurationChangeRowFragment extends ResourceTableRowFragment {
 
     private static final int DATETIME_CELL_INDEX = 0;
     private static final int ACCESS_MECHANISM_CELL_INDEX = 1;
