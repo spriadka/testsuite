@@ -87,9 +87,9 @@ public class ElytronSslContextTestCase extends AbstractElytronTestCase {
             wizard.maximizeWindow();
             Editor editor = wizard.getEditor();
             editor.text(NAME, keyManagerName);
+            wizard.openOptionalFieldsTab();
             editor.text(ALGORITHM, ALGORITH_VALUE_1);
             editor.text(KEY_STORE, keyStoreName);
-            wizard.openOptionalFieldsTab();
             editor.text(CREDENTIAL_REFERENCE_CLEAR_TEXT_IDENTIFIER, password);
 
             assertTrue("Dialog should be closed!", wizard.finish());
