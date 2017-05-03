@@ -62,7 +62,8 @@ public class ElytronFactoryTestCase extends AbstractElytronTestCase {
             PROVIDER_VERSION = "provider-version", MECHANISM_OIDS = "mechanism-oids", PATH = "path",
             PRINCIPAL = "principal", REQUEST_LIFETIME = "request-lifetime", SERVER = "server", PROVIDERS = "providers",
             PROVIDER_LOADER_NAME_1 = RandomStringUtils.randomAlphanumeric(5),
-            PROVIDER_LOADER_NAME_2 = RandomStringUtils.randomAlphanumeric(5);
+            PROVIDER_LOADER_NAME_2 = RandomStringUtils.randomAlphanumeric(5),
+            PROVIDER_LOADER_NAME_ELYTRON = "elytron";
 
     @Page
     private FactoryPage page;
@@ -268,7 +269,7 @@ public class ElytronFactoryTestCase extends AbstractElytronTestCase {
             wizard = page.getResourceManager().addResource();
             editor = wizard.getEditor();
             editor.text(NAME, factoryName2);
-            editor.text(PROVIDERS, PROVIDER_LOADER_NAME_1);
+            editor.text(PROVIDERS, PROVIDER_LOADER_NAME_ELYTRON);
             closed = wizard.finish();
 
             assertTrue("Dialog should be closed!", closed);
@@ -277,7 +278,7 @@ public class ElytronFactoryTestCase extends AbstractElytronTestCase {
             assertTrue("Newly created Provider HTTP Server Factory should be present in the table!",
                     page.resourceIsPresentInMainTable(factoryName2));
             new ResourceVerifier(factory2address, client)
-                    .verifyExists().verifyAttribute(PROVIDERS, PROVIDER_LOADER_NAME_1);
+                    .verifyExists().verifyAttribute(PROVIDERS, PROVIDER_LOADER_NAME_ELYTRON);
         } finally {
             ops.removeIfExists(factory1address);
             ops.removeIfExists(factory2address);
@@ -291,7 +292,7 @@ public class ElytronFactoryTestCase extends AbstractElytronTestCase {
         final Address factoryAddress = elyOps.getElytronAddress(PROVIDER_HTTP_SERVER_MECHANISM_FACTORY, factoryName);
 
         try {
-            ops.add(factoryAddress, Values.of(PROVIDERS, PROVIDER_LOADER_NAME_1)).assertSuccess();
+            ops.add(factoryAddress, Values.of(PROVIDERS, PROVIDER_LOADER_NAME_ELYTRON)).assertSuccess();
 
             page.navigateToApplication().selectFactory(PROVIDER_HTTP_SERVER_LABEL).getResourceManager()
                     .selectByName(factoryName);
