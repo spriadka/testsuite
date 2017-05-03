@@ -238,10 +238,12 @@ public class ElytronSslContextTestCase extends AbstractElytronTestCase {
         page.navigateToApplication().selectResource(TRUST_MANAGER_LABEL);
 
         try {
-            WizardWindow wizard = page.getResourceManager().addResource();
+            WizardWindowWithOptionalFields wizard = page.getResourceManager()
+                    .addResource(WizardWindowWithOptionalFields.class);
             wizard.maximizeWindow();
             Editor editor = wizard.getEditor();
             editor.text(NAME, trustManagerName);
+            wizard.openOptionalFieldsTab();
             editor.text(ALGORITHM, ALGORITH_VALUE_1);
             editor.text(KEY_STORE, keyStoreName);
 
