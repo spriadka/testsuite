@@ -87,9 +87,9 @@ public class ElytronSslContextTestCase extends AbstractElytronTestCase {
             wizard.maximizeWindow();
             Editor editor = wizard.getEditor();
             editor.text(NAME, keyManagerName);
+            wizard.openOptionalFieldsTab();
             editor.text(ALGORITHM, ALGORITH_VALUE_1);
             editor.text(KEY_STORE, keyStoreName);
-            wizard.openOptionalFieldsTab();
             editor.text(CREDENTIAL_REFERENCE_CLEAR_TEXT_IDENTIFIER, password);
 
             assertTrue("Dialog should be closed!", wizard.finish());
@@ -238,10 +238,12 @@ public class ElytronSslContextTestCase extends AbstractElytronTestCase {
         page.navigateToApplication().selectResource(TRUST_MANAGER_LABEL);
 
         try {
-            WizardWindow wizard = page.getResourceManager().addResource();
+            WizardWindowWithOptionalFields wizard = page.getResourceManager()
+                    .addResource(WizardWindowWithOptionalFields.class);
             wizard.maximizeWindow();
             Editor editor = wizard.getEditor();
             editor.text(NAME, trustManagerName);
+            wizard.openOptionalFieldsTab();
             editor.text(ALGORITHM, ALGORITH_VALUE_1);
             editor.text(KEY_STORE, keyStoreName);
 
@@ -394,13 +396,11 @@ public class ElytronSslContextTestCase extends AbstractElytronTestCase {
     @Test
     public void addServerSSLContextTest() throws Exception {
         String serverSSLContextName = randomAlphanumeric(5), keyManagerName = randomAlphanumeric(5),
-                password = randomAlphanumeric(5), protocolValues = TLS_V11 + "\n" + TLS_V12;
+                password = randomAlphanumeric(5);
         Address keyStoreAddress = createKeyStore(),
                 keyManagerAddress = elyOps.getElytronAddress(KEY_MANAGERS, keyManagerName),
                 serverSSLContextAddress = elyOps.getElytronAddress(SERVER_SSL_CONTEXT, serverSSLContextName);
-        ModelNode credentialReferenceNode = new ModelNodePropertiesBuilder().addProperty(CLEAR_TEXT, password).build(),
-                expectedProtocolList = new ModelNodeListBuilder(new ModelNode(TLS_V11)).addNode(new ModelNode(TLS_V12))
-                        .build();
+        ModelNode credentialReferenceNode = new ModelNodePropertiesBuilder().addProperty(CLEAR_TEXT, password).build();
 
         page.navigateToApplication().selectResource(SERVER_SSL_CONTEXT_LABEL);
 
@@ -412,14 +412,12 @@ public class ElytronSslContextTestCase extends AbstractElytronTestCase {
             Editor editor = wizard.getEditor();
             editor.text(NAME, serverSSLContextName);
             editor.text(KEY_MANAGERS, keyManagerName);
-            editor.text(PROTOCOLS, protocolValues);
 
             assertTrue("Dialog should be closed!", wizard.finish());
             assertTrue("Created resource should be present in the table!",
                     page.resourceIsPresentInMainTable(serverSSLContextName));
             new ResourceVerifier(serverSSLContextAddress, client).verifyExists()
-                .verifyAttribute(KEY_MANAGERS, keyManagerName)
-                .verifyAttribute(PROTOCOLS, expectedProtocolList);
+                .verifyAttribute(KEY_MANAGERS, keyManagerName);
         } finally {
             ops.removeIfExists(serverSSLContextAddress);
             ops.removeIfExists(keyManagerAddress);

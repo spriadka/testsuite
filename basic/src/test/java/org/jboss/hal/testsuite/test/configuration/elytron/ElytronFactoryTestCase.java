@@ -56,13 +56,14 @@ public class ElytronFactoryTestCase extends AbstractElytronTestCase {
             SASL_SERVER_FACTORY = "sasl-server-factory", MODULE = "module", PROPERTIES = "properties",
             FILTERS_LABEL = "Filters", FILTERS_ATTR = "filters", PATTERN_FILTER = "pattern-filter",
             ENABLING = "enabling", PROTOCOL = "protocol", SERVER_NAME = "server-name",
-            PREDEFINED_FILTER = "predefined-filter", HTTP_SERVER_FACTORIES = "http-server-factories",
+            PREDEFINED_FILTER = "predefined-filter", HTTP_SERVER_MECHANISM_FACTORIES = "http-server-mechanism-factories",
             SASL_SERVER_FACTORIES = "sasl-server-factories",
             VERSION_COMPARISON = "version-comparison", MECHANISM_NAME = "mechanism-name",
             PROVIDER_VERSION = "provider-version", MECHANISM_OIDS = "mechanism-oids", PATH = "path",
             PRINCIPAL = "principal", REQUEST_LIFETIME = "request-lifetime", SERVER = "server", PROVIDERS = "providers",
             PROVIDER_LOADER_NAME_1 = RandomStringUtils.randomAlphanumeric(5),
-            PROVIDER_LOADER_NAME_2 = RandomStringUtils.randomAlphanumeric(5);
+            PROVIDER_LOADER_NAME_2 = RandomStringUtils.randomAlphanumeric(5),
+            PROVIDER_LOADER_NAME_ELYTRON = "elytron";
 
     @Page
     private FactoryPage page;
@@ -268,7 +269,7 @@ public class ElytronFactoryTestCase extends AbstractElytronTestCase {
             wizard = page.getResourceManager().addResource();
             editor = wizard.getEditor();
             editor.text(NAME, factoryName2);
-            editor.text(PROVIDERS, PROVIDER_LOADER_NAME_1);
+            editor.text(PROVIDERS, PROVIDER_LOADER_NAME_ELYTRON);
             closed = wizard.finish();
 
             assertTrue("Dialog should be closed!", closed);
@@ -277,7 +278,7 @@ public class ElytronFactoryTestCase extends AbstractElytronTestCase {
             assertTrue("Newly created Provider HTTP Server Factory should be present in the table!",
                     page.resourceIsPresentInMainTable(factoryName2));
             new ResourceVerifier(factory2address, client)
-                    .verifyExists().verifyAttribute(PROVIDERS, PROVIDER_LOADER_NAME_1);
+                    .verifyExists().verifyAttribute(PROVIDERS, PROVIDER_LOADER_NAME_ELYTRON);
         } finally {
             ops.removeIfExists(factory1address);
             ops.removeIfExists(factory2address);
@@ -291,7 +292,7 @@ public class ElytronFactoryTestCase extends AbstractElytronTestCase {
         final Address factoryAddress = elyOps.getElytronAddress(PROVIDER_HTTP_SERVER_MECHANISM_FACTORY, factoryName);
 
         try {
-            ops.add(factoryAddress, Values.of(PROVIDERS, PROVIDER_LOADER_NAME_1)).assertSuccess();
+            ops.add(factoryAddress, Values.of(PROVIDERS, PROVIDER_LOADER_NAME_ELYTRON)).assertSuccess();
 
             page.navigateToApplication().selectFactory(PROVIDER_HTTP_SERVER_LABEL).getResourceManager()
                     .selectByName(factoryName);
@@ -926,7 +927,7 @@ public class ElytronFactoryTestCase extends AbstractElytronTestCase {
             WizardWindow wizard = page.getResourceManager().addResource();
             Editor editor = wizard.getEditor();
             editor.text(NAME, aggregateFactoryName);
-            editor.text(HTTP_SERVER_FACTORIES, httpServerFactoryNamesSeparatedByNewLine);
+            editor.text(HTTP_SERVER_MECHANISM_FACTORIES, httpServerFactoryNamesSeparatedByNewLine);
             boolean closed = wizard.finish();
 
             assertTrue("Dialog should be closed!", closed);
@@ -936,7 +937,7 @@ public class ElytronFactoryTestCase extends AbstractElytronTestCase {
             ModelNode expectedHttpFactoriesNode = new ModelNodeListBuilder()
                     .addNode(new ModelNode(httpServerFactoryName1)).addNode(new ModelNode(httpServerFactoryName2))
                     .build();
-            new ResourceVerifier(aggregateFactoryAddress, client).verifyExists().verifyAttribute(HTTP_SERVER_FACTORIES,
+            new ResourceVerifier(aggregateFactoryAddress, client).verifyExists().verifyAttribute(HTTP_SERVER_MECHANISM_FACTORIES,
                     expectedHttpFactoriesNode);
         } finally {
             ops.removeIfExists(aggregateFactoryAddress);
@@ -974,15 +975,15 @@ public class ElytronFactoryTestCase extends AbstractElytronTestCase {
             ops.add(httpServerFactoryAddress2, Values.of(MODULE, MODULE_NAME_2)).assertSuccess();
             ops.add(httpServerFactoryAddress3, Values.of(PROVIDER_LOADER, PROVIDER_LOADER_NAME_1)).assertSuccess();
             ops.add(httpServerFactoryAddress4, Values.of(PROVIDER_LOADER, PROVIDER_LOADER_NAME_2)).assertSuccess();
-            ops.add(aggregateFactoryAddress, Values.of(HTTP_SERVER_FACTORIES, initialHttpFactoriesNode))
+            ops.add(aggregateFactoryAddress, Values.of(HTTP_SERVER_MECHANISM_FACTORIES, initialHttpFactoriesNode))
                     .assertSuccess();
 
             page.navigateToApplication().selectFactory(AGGREGATE_HTTP_SERVER_LABEL).getResourceManager()
                     .selectByName(aggregateFactoryName);
 
             new ConfigChecker.Builder(client, aggregateFactoryAddress).configFragment(page.getConfigFragment())
-                    .editAndSave(InputType.TEXT, HTTP_SERVER_FACTORIES, newHttpServerFactoryNamesSeparatedByNewLine)
-                    .verifyFormSaved().verifyAttribute(HTTP_SERVER_FACTORIES, expectedEditedHttpFactoriesNode);
+                    .editAndSave(InputType.TEXT, HTTP_SERVER_MECHANISM_FACTORIES, newHttpServerFactoryNamesSeparatedByNewLine)
+                    .verifyFormSaved().verifyAttribute(HTTP_SERVER_MECHANISM_FACTORIES, expectedEditedHttpFactoriesNode);
         } finally {
             ops.removeIfExists(aggregateFactoryAddress);
             ops.removeIfExists(httpServerFactoryAddress1);
@@ -1010,7 +1011,7 @@ public class ElytronFactoryTestCase extends AbstractElytronTestCase {
         try {
             ops.add(httpServerFactoryAddress1, Values.of(MODULE, MODULE_NAME_1)).assertSuccess();
             ops.add(httpServerFactoryAddress2, Values.of(PROVIDER_LOADER, PROVIDER_LOADER_NAME_1)).assertSuccess();
-            ops.add(aggregateFactoryAddress, Values.of(HTTP_SERVER_FACTORIES, httpFactoriesNode)).assertSuccess();
+            ops.add(aggregateFactoryAddress, Values.of(HTTP_SERVER_MECHANISM_FACTORIES, httpFactoriesNode)).assertSuccess();
 
             page.navigateToApplication().selectFactory(AGGREGATE_HTTP_SERVER_LABEL);
 
