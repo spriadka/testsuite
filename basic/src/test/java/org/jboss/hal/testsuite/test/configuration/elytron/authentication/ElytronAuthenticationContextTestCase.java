@@ -8,10 +8,12 @@ import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.dmr.ModelNodeGenerator;
 import org.jboss.hal.testsuite.fragment.config.elytron.authentication.AddAuthenticationContextWizard;
 import org.jboss.hal.testsuite.fragment.config.elytron.authentication.AddMatchRuleWizard;
+import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
 import org.jboss.hal.testsuite.page.config.elytron.ElytronAuthenticationPage;
 import org.jboss.hal.testsuite.test.configuration.elytron.AbstractElytronTestCase;
 import org.jboss.hal.testsuite.test.configuration.undertow.UndertowElytronOperations;
 import org.jboss.hal.testsuite.util.ConfigChecker;
+import org.jboss.hal.testsuite.util.Console;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -226,7 +228,9 @@ public class ElytronAuthenticationContextTestCase extends AbstractElytronTestCas
                     .saveAndDismissReloadRequiredWindowWithState()
                     .assertWindowClosed();
 
-            Assert.assertTrue(page.getConfig().getResourceManager().getResourceTable().getAllRows().stream()
+            Assert.assertTrue("Match rule should be present in table! Probably failed because of" +
+                            "https://issues.jboss.org/browse/HAL-1352",
+                    page.getConfig().getResourceManager().getResourceTable().getAllRows().stream()
                     .anyMatch(resourceTableRowFragment -> resourceTableRowFragment.getCellValue(0)
                             .contains(MATCH_ABSTRACT_TYPE + ": " + matchAbstractTypeValue)));
 
@@ -236,7 +240,6 @@ public class ElytronAuthenticationContextTestCase extends AbstractElytronTestCas
                             .addProperty(MATCH_ABSTRACT_TYPE_AUTHORITY, matchAbstractTypeAuthorityValue)
                             .addProperty(MATCH_HOST, matchHostValue)
                             .addProperty(MATCH_LOCAL_SECURITY_DOMAIN, matchLocalSecurityDomainValue)
-                            .addProperty(MATCH_NO_USER, new ModelNode(matchNoUserValue))
                             .addProperty(MATCH_PATH, matchPathValue)
                             .addProperty(MATCH_PORT, new ModelNode(matchPortValue))
                             .addProperty(MATCH_PROTOCOL, matchProtocolValue)
@@ -285,10 +288,18 @@ public class ElytronAuthenticationContextTestCase extends AbstractElytronTestCas
             page.switchToAuthenticationContext()
                     .getResourceManager()
                     .selectByName(authenticationContextAddress.getLastPairValue());
+
+            //Nasty hack with fixed indexes since usual way of removing doesn't work
             page.getConfig()
                     .switchTo(MATCH_RULES_LABEL)
                     .getResourceManager()
-                    .removeResource(identifyingString)
+                    .getResourceTable()
+                    .getAllRows()
+                    .get(0)
+                    .getCell(0).click();
+
+            page.getConfig().clickButton("Remove");
+            Console.withBrowser(browser).openedWindow(ConfirmationWindow.class)
                     .confirmAndDismissReloadRequiredMessage()
                     .assertClosed();
 
@@ -296,7 +307,10 @@ public class ElytronAuthenticationContextTestCase extends AbstractElytronTestCas
                     .anyMatch(resourceTableRowFragment -> resourceTableRowFragment.getCellValue(0)
                             .contains(identifyingString)));
 
-            new ResourceVerifier(authenticationContextAddress, client).verifyAttributeIsUndefined(MATCH_RULES);
+            new ResourceVerifier(authenticationContextAddress, client)
+                    .verifyListAttributeDoesNotContainValue(MATCH_RULES,
+                            new ModelNodeGenerator.ModelNodePropertiesBuilder().addProperty(MATCH_USER, matchUserValue)
+                                    .build());
         } finally {
             if (authenticationContextAddress != null) {
                 ops.removeIfExists(authenticationContextAddress);

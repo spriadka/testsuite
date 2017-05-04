@@ -9,7 +9,6 @@ import org.jboss.hal.testsuite.test.configuration.elytron.ElytronOperations;
 import org.jboss.hal.testsuite.util.ConfigChecker;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.wildfly.extras.creaper.commands.foundation.online.SnapshotBackup;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 
 import java.io.IOException;
@@ -19,6 +18,8 @@ public class DefaultAuthenticationContextTestCase extends AbstractElytronTestCas
 
     @Page
     private ElytronAuthenticationPage page;
+
+    private final ElytronAuthenticationOperations elytronAuthenticationOperations = new ElytronAuthenticationOperations(client);
 
     private static final String
         AUTHENTICATION_CONTEXT = "authentication-context",
@@ -35,17 +36,21 @@ public class DefaultAuthenticationContextTestCase extends AbstractElytronTestCas
     public void editDefaultAuthenticationContext() throws Exception {
         final Address authenticationContextAddress = createAuthenticationContext();
 
-        final SnapshotBackup snapshotBackup = new SnapshotBackup();
-        client.apply(snapshotBackup.backup());
         try {
-            page.navigate();
-            new ConfigChecker.Builder(client, ElytronOperations.getElytronSubsystemAddress())
-                    .configFragment(page.getConfigFragment())
-                    .editAndSave(ConfigChecker.InputType.TEXT, DEFAULT_AUTHENTICATION_CONTEXT, authenticationContextAddress.getLastPairValue())
-                    .verifyFormSaved()
-                    .verifyAttribute(DEFAULT_AUTHENTICATION_CONTEXT, authenticationContextAddress.getLastPairValue());
+            elytronAuthenticationOperations.performActionOnAttributeAndRevertItsValueToOriginal(
+                    ElytronOperations.getElytronSubsystemAddress(),
+                    DEFAULT_AUTHENTICATION_CONTEXT,
+                    () -> {
+                        page.navigate();
+                        new ConfigChecker.Builder(client, ElytronOperations.getElytronSubsystemAddress())
+                                .configFragment(page.getConfigFragment())
+                                .editAndSave(ConfigChecker.InputType.TEXT, DEFAULT_AUTHENTICATION_CONTEXT, authenticationContextAddress.getLastPairValue())
+                                .verifyFormSaved()
+                                .verifyAttribute(DEFAULT_AUTHENTICATION_CONTEXT, authenticationContextAddress.getLastPairValue());
+                    }
+            );
         } finally {
-            client.apply(snapshotBackup.restore());
+            ops.removeIfExists(authenticationContextAddress);
         }
     }
 
@@ -57,18 +62,22 @@ public class DefaultAuthenticationContextTestCase extends AbstractElytronTestCas
     public void editFinalProviders() throws Exception {
         final String providerLoader = RandomStringUtils.randomAlphanumeric(7);
 
-        final SnapshotBackup snapshotBackup = new SnapshotBackup();
-        client.apply(snapshotBackup.backup());
         try {
-            elyOps.addProviderLoader(providerLoader);
-            page.navigate();
-            new ConfigChecker.Builder(client, ElytronOperations.getElytronSubsystemAddress())
-                    .configFragment(page.getConfigFragment())
-                    .editAndSave(ConfigChecker.InputType.TEXT, FINAL_PROVIDERS, providerLoader)
-                    .verifyFormSaved()
-                    .verifyAttribute(FINAL_PROVIDERS, providerLoader);
+            elytronAuthenticationOperations.performActionOnAttributeAndRevertItsValueToOriginal(
+                    ElytronOperations.getElytronSubsystemAddress(),
+                    FINAL_PROVIDERS,
+                    () -> {
+                        elyOps.addProviderLoader(providerLoader);
+                        page.navigate();
+                        new ConfigChecker.Builder(client, ElytronOperations.getElytronSubsystemAddress())
+                                .configFragment(page.getConfigFragment())
+                                .editAndSave(ConfigChecker.InputType.TEXT, FINAL_PROVIDERS, providerLoader)
+                                .verifyFormSaved()
+                                .verifyAttribute(FINAL_PROVIDERS, providerLoader);
+                    }
+            );
         } finally {
-            client.apply(snapshotBackup.restore());
+            elyOps.removeProviderLoader(providerLoader);
         }
     }
 
@@ -80,18 +89,22 @@ public class DefaultAuthenticationContextTestCase extends AbstractElytronTestCas
     public void editInitialProviders() throws Exception {
         final String providerLoader = RandomStringUtils.randomAlphanumeric(7);
 
-        final SnapshotBackup snapshotBackup = new SnapshotBackup();
-        client.apply(snapshotBackup.backup());
         try {
-            elyOps.addProviderLoader(providerLoader);
-            page.navigate();
-            new ConfigChecker.Builder(client, ElytronOperations.getElytronSubsystemAddress())
-                    .configFragment(page.getConfigFragment())
-                    .editAndSave(ConfigChecker.InputType.TEXT, INITIAL_PROVIDERS, providerLoader)
-                    .verifyFormSaved()
-                    .verifyAttribute(INITIAL_PROVIDERS, providerLoader);
+            elytronAuthenticationOperations.performActionOnAttributeAndRevertItsValueToOriginal(
+                    ElytronOperations.getElytronSubsystemAddress(),
+                    INITIAL_PROVIDERS,
+                    () -> {
+                        elyOps.addProviderLoader(providerLoader);
+                        page.navigate();
+                        new ConfigChecker.Builder(client, ElytronOperations.getElytronSubsystemAddress())
+                                .configFragment(page.getConfigFragment())
+                                .editAndSave(ConfigChecker.InputType.TEXT, INITIAL_PROVIDERS, providerLoader)
+                                .verifyFormSaved()
+                                .verifyAttribute(INITIAL_PROVIDERS, providerLoader);
+                    }
+            );
         } finally {
-            client.apply(snapshotBackup.restore());
+            elyOps.removeProviderLoader(providerLoader);
         }
     }
 

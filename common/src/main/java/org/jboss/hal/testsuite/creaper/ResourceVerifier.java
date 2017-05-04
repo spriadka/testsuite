@@ -236,14 +236,24 @@ public class ResourceVerifier {
         return verifyAttributeIsUndefined(attributeName, null);
     }
 
+    private boolean isModelNodePresentInListAttributeValue(String attributeName, ModelNode value) throws IOException {
+        final ModelNodeResult modelNodeResult = ops.readAttribute(resourceAddress, attributeName);
+        return modelNodeResult.listValue().stream()
+                .peek(modelNode -> log.trace("Comparing '{}' with list member '{}'.", modelNode.toString(), value.toString()))
+                .anyMatch(modelNode -> modelNode.equals(value));
+    }
+
     /**
      * Verifies that list type attribute contains give value.
      * @param value Value which should be present in the list.
      */
-    public ResourceVerifier verifyListAttributeContainsValue(String attributeName, ModelNode value, String errorMessageSuffix) throws Exception {
+    public ResourceVerifier verifyListAttributeContainsValue(String attributeName, ModelNode value, String errorMessageSuffix)
+            throws Exception {
         waitFor(() -> {
             ModelNodeResult actualResult = ops.readAttribute(resourceAddress, attributeName);
-            return actualResult.isSuccess() && actualResult.hasDefined(Constants.RESULT);
+            return actualResult.isSuccess() &&
+                    actualResult.hasDefined(Constants.RESULT) &&
+                    isModelNodePresentInListAttributeValue(attributeName, value);
         });
 
         final ModelNodeResult modelNodeResult = ops.readAttribute(resourceAddress, attributeName);
@@ -251,12 +261,12 @@ public class ResourceVerifier {
 
         Assert.assertTrue("Given value '" + value.toString() + "' is not present in list attribute '" + attributeName + "'!" +
                         (errorMessageSuffix == null || errorMessageSuffix.isEmpty() ? "" : " " + errorMessageSuffix),
-                modelNodeResult.listValue().stream()
-                        .peek(modelNode -> log.debug("Comparing '{}' with list member '{}'.", modelNode.toString(), value.toString()))
-                        .anyMatch(modelNode -> modelNode.equals(value)));
+                isModelNodePresentInListAttributeValue(attributeName, value));
 
         return this;
     }
+
+
 
     /**
      * Verifies that list type attribute contains give value.
@@ -272,6 +282,38 @@ public class ResourceVerifier {
      */
     public ResourceVerifier verifyListAttributeContainsValue(String attributeName, String value) throws Exception {
         return verifyListAttributeContainsValue(attributeName, new ModelNode(value));
+    }
+
+    /**
+     * Verifies that list type attribute contains give value.
+     * @param value Value which should be present in the list.
+     */
+    public ResourceVerifier verifyListAttributeDoesNotContainValue(String attributeName, ModelNode value, String errorMessageSuffix)
+            throws Exception {
+        waitFor(() -> {
+            ModelNodeResult actualResult = ops.readAttribute(resourceAddress, attributeName);
+            return actualResult.isSuccess() &&
+                    actualResult.hasDefined(Constants.RESULT) &&
+                    !isModelNodePresentInListAttributeValue(attributeName, value);
+        });
+
+        final ModelNodeResult modelNodeResult = ops.readAttribute(resourceAddress, attributeName);
+        modelNodeResult.assertSuccess();
+
+        Assert.assertFalse("Given value '" + value.toString() + "' should not be present in list attribute '" + attributeName + "'!" +
+                        (errorMessageSuffix == null || errorMessageSuffix.isEmpty() ? "" : " " + errorMessageSuffix),
+                isModelNodePresentInListAttributeValue(attributeName, value));
+
+        return this;
+    }
+
+    /**
+     * Verifies that list type attribute contains give value.
+     * @param value Value which should be present in the list.
+     */
+    public ResourceVerifier verifyListAttributeDoesNotContainValue(String attributeName, ModelNode value)
+            throws Exception {
+        return verifyListAttributeDoesNotContainValue(attributeName, value, null);
     }
 
     private void waitFor(PropagationChecker checker) throws Exception {

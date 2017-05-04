@@ -15,11 +15,12 @@ import org.jboss.hal.testsuite.util.Console;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.wildfly.extras.creaper.commands.foundation.online.SnapshotBackup;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
@@ -28,6 +29,8 @@ public class ElytronAuthenticationConfigurationTestCase extends AbstractElytronT
 
     @Page
     private ElytronAuthenticationPage page;
+
+    private final ElytronAuthenticationOperations elytronAuthenticationOperations = new ElytronAuthenticationOperations(client);
 
     private static final String
             AUTHENTICATION_CONFIGURATION = "authentication-configuration",
@@ -109,32 +112,35 @@ public class ElytronAuthenticationConfigurationTestCase extends AbstractElytronT
      */
     @Test
     public void toggleAllowAllMechanisms() throws Exception {
-        final SnapshotBackup snapshotBackup = new SnapshotBackup();
-        client.apply(snapshotBackup.backup());
 
         final Address authenticationConfigurationAddress = createAuthenticationConfiguration();
         final boolean initialValue = false;
 
         try {
-            page.navigate();
-            page.switchToAuthenticationConfiguration()
-                    .getResourceManager()
-                    .selectByName(authenticationConfigurationAddress.getLastPairValue());
-            new ConfigChecker.Builder(client, authenticationConfigurationAddress)
-                    .configFragment(page.getConfigFragment())
-                    .editAndSave(ConfigChecker.InputType.CHECKBOX, ALLOW_ALL_MECHANISMS, !initialValue)
-                    .verifyFormSaved()
-                    .verifyAttribute(ALLOW_ALL_MECHANISMS, !initialValue);
+            elytronAuthenticationOperations.performActionOnAttributeAndRevertItsValueToOriginal(
+                    authenticationConfigurationAddress,
+                    ALLOW_ALL_MECHANISMS,
+                    () -> {
+                        page.navigate();
+                        page.switchToAuthenticationConfiguration()
+                                .getResourceManager()
+                                .selectByName(authenticationConfigurationAddress.getLastPairValue());
+                        new ConfigChecker.Builder(client, authenticationConfigurationAddress)
+                                .configFragment(page.getConfigFragment())
+                                .editAndSave(ConfigChecker.InputType.CHECKBOX, ALLOW_ALL_MECHANISMS, !initialValue)
+                                .verifyFormSaved()
+                                .verifyAttribute(ALLOW_ALL_MECHANISMS, !initialValue);
 
-            Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
+                        Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
 
-            new ConfigChecker.Builder(client, authenticationConfigurationAddress)
-                    .configFragment(page.getConfigFragment())
-                    .editAndSave(ConfigChecker.InputType.CHECKBOX, ALLOW_ALL_MECHANISMS, initialValue)
-                    .verifyFormSaved()
-                    .verifyAttribute(ALLOW_ALL_MECHANISMS, initialValue);
+                        new ConfigChecker.Builder(client, authenticationConfigurationAddress)
+                                .configFragment(page.getConfigFragment())
+                                .editAndSave(ConfigChecker.InputType.CHECKBOX, ALLOW_ALL_MECHANISMS, initialValue)
+                                .verifyFormSaved()
+                                .verifyAttribute(ALLOW_ALL_MECHANISMS, initialValue);                  }
+            );
         } finally {
-            client.apply(snapshotBackup.restore());
+            ops.removeIfExists(authenticationConfigurationAddress);
         }
 
     }
@@ -146,9 +152,6 @@ public class ElytronAuthenticationConfigurationTestCase extends AbstractElytronT
      */
     @Test
     public void editAllowSASLMechanisms() throws Exception {
-        final SnapshotBackup snapshotBackup = new SnapshotBackup();
-        client.apply(snapshotBackup.backup());
-
         final Address authenticationConfigurationAddress = createAuthenticationConfiguration();
 
         final String[] value = new String[]{
@@ -157,18 +160,24 @@ public class ElytronAuthenticationConfigurationTestCase extends AbstractElytronT
         };
 
         try {
-            page.navigate();
-            page.switchToAuthenticationConfiguration()
-                    .getResourceManager()
-                    .selectByName(authenticationConfigurationAddress.getLastPairValue());
-            new ConfigChecker.Builder(client, authenticationConfigurationAddress)
-                    .configFragment(page.getConfigFragment())
-                    .editAndSave(ConfigChecker.InputType.TEXT, ALLOW_SASL_MECHANISMS, String.join("\n", value))
-                    .verifyFormSaved()
-                    .verifyAttribute(ALLOW_SASL_MECHANISMS,
-                            new ModelNodeGenerator.ModelNodeListBuilder().addAll(value).build());
+            elytronAuthenticationOperations.performActionOnAttributeAndRevertItsValueToOriginal(
+                    authenticationConfigurationAddress,
+                    ALLOW_SASL_MECHANISMS,
+                    () -> {
+                        page.navigate();
+                        page.switchToAuthenticationConfiguration()
+                                .getResourceManager()
+                                .selectByName(authenticationConfigurationAddress.getLastPairValue());
+                        new ConfigChecker.Builder(client, authenticationConfigurationAddress)
+                                .configFragment(page.getConfigFragment())
+                                .editAndSave(ConfigChecker.InputType.TEXT, ALLOW_SASL_MECHANISMS, String.join("\n", value))
+                                .verifyFormSaved()
+                                .verifyAttribute(ALLOW_SASL_MECHANISMS,
+                                        new ModelNodeGenerator.ModelNodeListBuilder().addAll(value).build());
+                    }
+            );
         } finally {
-            client.apply(snapshotBackup.restore());
+            ops.removeIfExists(authenticationConfigurationAddress);
         }
     }
 
@@ -180,32 +189,35 @@ public class ElytronAuthenticationConfigurationTestCase extends AbstractElytronT
      */
     @Test
     public void toggleAnonymous() throws Exception {
-        final SnapshotBackup snapshotBackup = new SnapshotBackup();
-        client.apply(snapshotBackup.backup());
-
         final Address authenticationConfigurationAddress = createAuthenticationConfiguration();
         final boolean initialValue = false;
 
         try {
-            page.navigate();
-            page.switchToAuthenticationConfiguration()
-                    .getResourceManager()
-                    .selectByName(authenticationConfigurationAddress.getLastPairValue());
-            new ConfigChecker.Builder(client, authenticationConfigurationAddress)
-                    .configFragment(page.getConfigFragment())
-                    .editAndSave(ConfigChecker.InputType.CHECKBOX, ANONYMOUS, !initialValue)
-                    .verifyFormSaved()
-                    .verifyAttribute(ANONYMOUS, !initialValue);
+            elytronAuthenticationOperations.performActionOnAttributeAndRevertItsValueToOriginal(
+                    authenticationConfigurationAddress,
+                    ANONYMOUS,
+                    () -> {
+                        page.navigate();
+                        page.switchToAuthenticationConfiguration()
+                                .getResourceManager()
+                                .selectByName(authenticationConfigurationAddress.getLastPairValue());
+                        new ConfigChecker.Builder(client, authenticationConfigurationAddress)
+                                .configFragment(page.getConfigFragment())
+                                .editAndSave(ConfigChecker.InputType.CHECKBOX, ANONYMOUS, !initialValue)
+                                .verifyFormSaved()
+                                .verifyAttribute(ANONYMOUS, !initialValue);
 
-            Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
+                        Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
 
-            new ConfigChecker.Builder(client, authenticationConfigurationAddress)
-                    .configFragment(page.getConfigFragment())
-                    .editAndSave(ConfigChecker.InputType.CHECKBOX, ANONYMOUS, initialValue)
-                    .verifyFormSaved()
-                    .verifyAttribute(ANONYMOUS, initialValue);
+                        new ConfigChecker.Builder(client, authenticationConfigurationAddress)
+                                .configFragment(page.getConfigFragment())
+                                .editAndSave(ConfigChecker.InputType.CHECKBOX, ANONYMOUS, initialValue)
+                                .verifyFormSaved()
+                                .verifyAttribute(ANONYMOUS, initialValue);
+                    }
+            );
         } finally {
-            client.apply(snapshotBackup.restore());
+            ops.removeIfExists(authenticationConfigurationAddress);
         }
     }
 
@@ -216,26 +228,27 @@ public class ElytronAuthenticationConfigurationTestCase extends AbstractElytronT
      */
     @Test
     public void editAuthenticationName() throws Exception {
-        final SnapshotBackup snapshotBackup = new SnapshotBackup();
-        client.apply(snapshotBackup.backup());
-
         final Address authenticationConfigurationAddress = createAuthenticationConfiguration();
 
         final String value = RandomStringUtils.randomAlphabetic(7);
 
-
         try {
-            page.navigate();
-            page.switchToAuthenticationConfiguration()
-                    .getResourceManager()
-                    .selectByName(authenticationConfigurationAddress.getLastPairValue());
-            new ConfigChecker.Builder(client, authenticationConfigurationAddress)
-                    .configFragment(page.getConfigFragment())
-                    .editAndSave(ConfigChecker.InputType.TEXT, AUTHENTICATION_NAME, value)
-                    .verifyFormSaved()
-                    .verifyAttribute(AUTHENTICATION_NAME, value);
+            elytronAuthenticationOperations.performActionOnAttributeAndRevertItsValueToOriginal(
+                    authenticationConfigurationAddress,
+                    AUTHENTICATION_NAME,
+                    () -> {
+                        page.navigate();
+                        page.switchToAuthenticationConfiguration()
+                                .getResourceManager()
+                                .selectByName(authenticationConfigurationAddress.getLastPairValue());
+                        new ConfigChecker.Builder(client, authenticationConfigurationAddress)
+                                .configFragment(page.getConfigFragment())
+                                .editAndSave(ConfigChecker.InputType.TEXT, AUTHENTICATION_NAME, value)
+                                .verifyFormSaved()
+                                .verifyAttribute(AUTHENTICATION_NAME, value);                   }
+            );
         } finally {
-            client.apply(snapshotBackup.restore());
+            ops.removeIfExists(authenticationConfigurationAddress);
         }
     }
 
@@ -246,25 +259,27 @@ public class ElytronAuthenticationConfigurationTestCase extends AbstractElytronT
      */
     @Test
     public void editAuthorizationName() throws Exception {
-        final SnapshotBackup snapshotBackup = new SnapshotBackup();
-        client.apply(snapshotBackup.backup());
-
         final Address authenticationConfigurationAddress = createAuthenticationConfiguration();
 
         final String value = RandomStringUtils.randomAlphabetic(7);
 
         try {
-            page.navigate();
-            page.switchToAuthenticationConfiguration()
-                    .getResourceManager()
-                    .selectByName(authenticationConfigurationAddress.getLastPairValue());
-            new ConfigChecker.Builder(client, authenticationConfigurationAddress)
-                    .configFragment(page.getConfigFragment())
-                    .editAndSave(ConfigChecker.InputType.TEXT, AUTHORIZATION_NAME, value)
-                    .verifyFormSaved()
-                    .verifyAttribute(AUTHORIZATION_NAME, value);
+            elytronAuthenticationOperations.performActionOnAttributeAndRevertItsValueToOriginal(
+                    authenticationConfigurationAddress,
+                    AUTHORIZATION_NAME,
+                    () -> {
+                        page.navigate();
+                        page.switchToAuthenticationConfiguration()
+                                .getResourceManager()
+                                .selectByName(authenticationConfigurationAddress.getLastPairValue());
+                        new ConfigChecker.Builder(client, authenticationConfigurationAddress)
+                                .configFragment(page.getConfigFragment())
+                                .editAndSave(ConfigChecker.InputType.TEXT, AUTHORIZATION_NAME, value)
+                                .verifyFormSaved()
+                                .verifyAttribute(AUTHORIZATION_NAME, value);                  }
+            );
         } finally {
-            client.apply(snapshotBackup.restore());
+            ops.removeIfExists(authenticationConfigurationAddress);
         }
     }
 
@@ -275,27 +290,42 @@ public class ElytronAuthenticationConfigurationTestCase extends AbstractElytronT
      */
     @Test
     public void editExtends() throws Exception {
-        final SnapshotBackup snapshotBackup = new SnapshotBackup();
-        client.apply(snapshotBackup.backup());
-
-        Address authenticationConfigurationAddress,
-                extendsConfigurationAddress;
+        final Address authenticationConfigurationAddress = createAuthenticationConfiguration();
+        List<Address> removeLater = new ArrayList<>();
 
         try {
-            authenticationConfigurationAddress = createAuthenticationConfiguration();
-            extendsConfigurationAddress = createAuthenticationConfiguration();
-            page.navigate();
-            page.switchToAuthenticationConfiguration()
-                    .getResourceManager()
-                    .selectByName(authenticationConfigurationAddress.getLastPairValue());
-            new ConfigChecker.Builder(client, authenticationConfigurationAddress)
-                    .configFragment(page.getConfigFragment())
-                    .editAndSave(ConfigChecker.InputType.TEXT, EXTENDS, extendsConfigurationAddress.getLastPairValue())
-                    .verifyFormSaved()
-                    .verifyAttribute(EXTENDS, extendsConfigurationAddress.getLastPairValue());
+            elytronAuthenticationOperations.performActionOnAttributeAndRevertItsValueToOriginal(
+                    authenticationConfigurationAddress,
+                    EXTENDS,
+                    () -> {
+                        Address extendsConfigurationAddress = null;
+
+                        try {
+                            extendsConfigurationAddress = createAuthenticationConfiguration();
+
+                            page.navigate();
+                            page.switchToAuthenticationConfiguration()
+                                    .getResourceManager()
+                                    .selectByName(authenticationConfigurationAddress.getLastPairValue());
+                            new ConfigChecker.Builder(client, authenticationConfigurationAddress)
+                                    .configFragment(page.getConfigFragment())
+                                    .editAndSave(ConfigChecker.InputType.TEXT, EXTENDS, extendsConfigurationAddress.getLastPairValue())
+                                    .verifyFormSaved()
+                                    .verifyAttribute(EXTENDS, extendsConfigurationAddress.getLastPairValue());
+                        } finally {
+                            removeLater.add(extendsConfigurationAddress);
+                        }
+                    }
+            );
         } finally {
-            client.apply(snapshotBackup.restore());
+            ops.removeIfExists(authenticationConfigurationAddress);
+            for (Address address : removeLater) {
+                if (address != null) {
+                    ops.removeIfExists(address);
+                }
+            }
         }
+
     }
 
     /**
@@ -305,9 +335,6 @@ public class ElytronAuthenticationConfigurationTestCase extends AbstractElytronT
      */
     @Test
     public void editForbidSASLMechanisms() throws Exception {
-        final SnapshotBackup snapshotBackup = new SnapshotBackup();
-        client.apply(snapshotBackup.backup());
-
         final Address authenticationConfigurationAddress = createAuthenticationConfiguration();
 
         final String[] value = new String[]{
@@ -316,18 +343,24 @@ public class ElytronAuthenticationConfigurationTestCase extends AbstractElytronT
         };
 
         try {
-            page.navigate();
-            page.switchToAuthenticationConfiguration()
-                    .getResourceManager()
-                    .selectByName(authenticationConfigurationAddress.getLastPairValue());
-            new ConfigChecker.Builder(client, authenticationConfigurationAddress)
-                    .configFragment(page.getConfigFragment())
-                    .editAndSave(ConfigChecker.InputType.TEXT, FORBID_SASL_MECHANISMS, String.join("\n", value))
-                    .verifyFormSaved()
-                    .verifyAttribute(FORBID_SASL_MECHANISMS,
-                            new ModelNodeGenerator.ModelNodeListBuilder().addAll(value).build());
+            elytronAuthenticationOperations.performActionOnAttributeAndRevertItsValueToOriginal(
+                    authenticationConfigurationAddress,
+                    FORBID_SASL_MECHANISMS,
+                    () -> {
+                        page.navigate();
+                        page.switchToAuthenticationConfiguration()
+                                .getResourceManager()
+                                .selectByName(authenticationConfigurationAddress.getLastPairValue());
+                        new ConfigChecker.Builder(client, authenticationConfigurationAddress)
+                                .configFragment(page.getConfigFragment())
+                                .editAndSave(ConfigChecker.InputType.TEXT, FORBID_SASL_MECHANISMS, String.join("\n", value))
+                                .verifyFormSaved()
+                                .verifyAttribute(FORBID_SASL_MECHANISMS,
+                                        new ModelNodeGenerator.ModelNodeListBuilder().addAll(value).build());
+                    }
+            );
         } finally {
-            client.apply(snapshotBackup.restore());
+            ops.removeIfExists(authenticationConfigurationAddress);
         }
     }
 
@@ -338,25 +371,29 @@ public class ElytronAuthenticationConfigurationTestCase extends AbstractElytronT
      */
     @Test
     public void editHost() throws Exception {
-        final SnapshotBackup snapshotBackup = new SnapshotBackup();
-        client.apply(snapshotBackup.backup());
-
         final Address authenticationConfigurationAddress = createAuthenticationConfiguration();
 
         final String value = RandomStringUtils.randomAlphabetic(7);
 
         try {
-            page.navigate();
-            page.switchToAuthenticationConfiguration()
-                    .getResourceManager()
-                    .selectByName(authenticationConfigurationAddress.getLastPairValue());
-            new ConfigChecker.Builder(client, authenticationConfigurationAddress)
-                    .configFragment(page.getConfigFragment())
-                    .editAndSave(ConfigChecker.InputType.TEXT, HOST, value)
-                    .verifyFormSaved()
-                    .verifyAttribute(HOST, value);
+            elytronAuthenticationOperations.performActionOnAttributeAndRevertItsValueToOriginal(
+                    authenticationConfigurationAddress,
+                    HOST,
+                    () -> {
+                        page.navigate();
+                        page.switchToAuthenticationConfiguration()
+                                .getResourceManager()
+                                .selectByName(authenticationConfigurationAddress.getLastPairValue());
+                        new ConfigChecker.Builder(client, authenticationConfigurationAddress)
+                                .configFragment(page.getConfigFragment())
+                                .editAndSave(ConfigChecker.InputType.TEXT, HOST, value)
+                                .verifyFormSaved()
+                                .verifyAttribute(HOST, value);
+                    }
+            );
+
         } finally {
-            client.apply(snapshotBackup.restore());
+            ops.removeIfExists(authenticationConfigurationAddress);
         }
     }
 
@@ -367,9 +404,6 @@ public class ElytronAuthenticationConfigurationTestCase extends AbstractElytronT
      */
     @Test
     public void editMechanismProperties() throws Exception {
-        final SnapshotBackup snapshotBackup = new SnapshotBackup();
-        client.apply(snapshotBackup.backup());
-
         final Address authenticationConfigurationAddress = createAuthenticationConfiguration();
 
         final Map<String, ModelNode> value = new HashMap<String, ModelNode>() {
@@ -380,21 +414,28 @@ public class ElytronAuthenticationConfigurationTestCase extends AbstractElytronT
         };
 
         try {
-            page.navigate();
-            page.switchToAuthenticationConfiguration()
-                    .getResourceManager()
-                    .selectByName(authenticationConfigurationAddress.getLastPairValue());
-            new ConfigChecker.Builder(client, authenticationConfigurationAddress)
-                    .configFragment(page.getConfigFragment())
-                    .editAndSave(ConfigChecker.InputType.TEXT, MECHANISM_PROPERTIES, value.entrySet()
-                            .stream()
-                            .map(entry -> entry.getKey() + '=' + entry.getValue().asString())
-                            .collect(Collectors.joining("\n")))
-                    .verifyFormSaved()
-                    .verifyAttribute(MECHANISM_PROPERTIES,
-                            new ModelNodeGenerator().createObjectNodeWithPropertyChildren(value));
+            elytronAuthenticationOperations.performActionOnAttributeAndRevertItsValueToOriginal(
+                    authenticationConfigurationAddress,
+                    MECHANISM_PROPERTIES,
+                    () -> {
+                        page.navigate();
+                        page.switchToAuthenticationConfiguration()
+                                .getResourceManager()
+                                .selectByName(authenticationConfigurationAddress.getLastPairValue());
+                        new ConfigChecker.Builder(client, authenticationConfigurationAddress)
+                                .configFragment(page.getConfigFragment())
+                                .editAndSave(ConfigChecker.InputType.TEXT, MECHANISM_PROPERTIES, value.entrySet()
+                                        .stream()
+                                        .map(entry -> entry.getKey() + '=' + entry.getValue().asString())
+                                        .collect(Collectors.joining("\n")))
+                                .verifyFormSaved()
+                                .verifyAttribute(MECHANISM_PROPERTIES,
+                                        new ModelNodeGenerator().createObjectNodeWithPropertyChildren(value));
+                    }
+            );
+
         } finally {
-            client.apply(snapshotBackup.restore());
+            ops.removeIfExists(authenticationConfigurationAddress);
         }
     }
 
@@ -405,25 +446,28 @@ public class ElytronAuthenticationConfigurationTestCase extends AbstractElytronT
      */
     @Test
     public void editPort() throws Exception {
-        final SnapshotBackup snapshotBackup = new SnapshotBackup();
-        client.apply(snapshotBackup.backup());
-
         final Address authenticationConfigurationAddress = createAuthenticationConfiguration();
 
         final int value = 9993;
 
         try {
-            page.navigate();
-            page.switchToAuthenticationConfiguration()
-                    .getResourceManager()
-                    .selectByName(authenticationConfigurationAddress.getLastPairValue());
-            new ConfigChecker.Builder(client, authenticationConfigurationAddress)
-                    .configFragment(page.getConfigFragment())
-                    .editAndSave(ConfigChecker.InputType.TEXT, PORT, String.valueOf(value))
-                    .verifyFormSaved()
-                    .verifyAttribute(PORT, value);
+            elytronAuthenticationOperations.performActionOnAttributeAndRevertItsValueToOriginal(
+                    authenticationConfigurationAddress,
+                    PORT,
+                    () -> {
+                        page.navigate();
+                        page.switchToAuthenticationConfiguration()
+                                .getResourceManager()
+                                .selectByName(authenticationConfigurationAddress.getLastPairValue());
+                        new ConfigChecker.Builder(client, authenticationConfigurationAddress)
+                                .configFragment(page.getConfigFragment())
+                                .editAndSave(ConfigChecker.InputType.TEXT, PORT, String.valueOf(value))
+                                .verifyFormSaved()
+                                .verifyAttribute(PORT, value);
+                    }
+            );
         } finally {
-            client.apply(snapshotBackup.restore());
+            ops.removeIfExists(authenticationConfigurationAddress);
         }
     }
 
@@ -434,25 +478,28 @@ public class ElytronAuthenticationConfigurationTestCase extends AbstractElytronT
      */
     @Test
     public void editProtocol() throws Exception {
-        final SnapshotBackup snapshotBackup = new SnapshotBackup();
-        client.apply(snapshotBackup.backup());
-
         final Address authenticationConfigurationAddress = createAuthenticationConfiguration();
 
         final String value = RandomStringUtils.randomAlphabetic(7);
 
         try {
-            page.navigate();
-            page.switchToAuthenticationConfiguration()
-                    .getResourceManager()
-                    .selectByName(authenticationConfigurationAddress.getLastPairValue());
-            new ConfigChecker.Builder(client, authenticationConfigurationAddress)
-                    .configFragment(page.getConfigFragment())
-                    .editAndSave(ConfigChecker.InputType.TEXT, PROTOCOL, value)
-                    .verifyFormSaved()
-                    .verifyAttribute(PROTOCOL, value);
+            elytronAuthenticationOperations.performActionOnAttributeAndRevertItsValueToOriginal(
+                    authenticationConfigurationAddress,
+                    PROTOCOL,
+                    () -> {
+                        page.navigate();
+                        page.switchToAuthenticationConfiguration()
+                                .getResourceManager()
+                                .selectByName(authenticationConfigurationAddress.getLastPairValue());
+                        new ConfigChecker.Builder(client, authenticationConfigurationAddress)
+                                .configFragment(page.getConfigFragment())
+                                .editAndSave(ConfigChecker.InputType.TEXT, PROTOCOL, value)
+                                .verifyFormSaved()
+                                .verifyAttribute(PROTOCOL, value);
+                    }
+            );
         } finally {
-            client.apply(snapshotBackup.restore());
+            ops.removeIfExists(authenticationConfigurationAddress);
         }
     }
 
@@ -463,25 +510,28 @@ public class ElytronAuthenticationConfigurationTestCase extends AbstractElytronT
      */
     @Test
     public void editRealm() throws Exception {
-        final SnapshotBackup snapshotBackup = new SnapshotBackup();
-        client.apply(snapshotBackup.backup());
-
         final Address authenticationConfigurationAddress = createAuthenticationConfiguration();
 
         final String value = RandomStringUtils.randomAlphabetic(7);
 
         try {
-            page.navigate();
-            page.switchToAuthenticationConfiguration()
-                    .getResourceManager()
-                    .selectByName(authenticationConfigurationAddress.getLastPairValue());
-            new ConfigChecker.Builder(client, authenticationConfigurationAddress)
-                    .configFragment(page.getConfigFragment())
-                    .editAndSave(ConfigChecker.InputType.TEXT, REALM, value)
-                    .verifyFormSaved()
-                    .verifyAttribute(REALM, value);
+            elytronAuthenticationOperations.performActionOnAttributeAndRevertItsValueToOriginal(
+                    authenticationConfigurationAddress,
+                    REALM,
+                    () -> {
+                        page.navigate();
+                        page.switchToAuthenticationConfiguration()
+                                .getResourceManager()
+                                .selectByName(authenticationConfigurationAddress.getLastPairValue());
+                        new ConfigChecker.Builder(client, authenticationConfigurationAddress)
+                                .configFragment(page.getConfigFragment())
+                                .editAndSave(ConfigChecker.InputType.TEXT, REALM, value)
+                                .verifyFormSaved()
+                                .verifyAttribute(REALM, value);
+                    }
+            );
         } finally {
-            client.apply(snapshotBackup.restore());
+            ops.removeIfExists(authenticationConfigurationAddress);
         }
     }
 
@@ -492,30 +542,41 @@ public class ElytronAuthenticationConfigurationTestCase extends AbstractElytronT
      */
     @Test
     public void editSecurityDomain() throws Exception {
-        final SnapshotBackup snapshotBackup = new SnapshotBackup();
-        client.apply(snapshotBackup.backup());
-
-        Address authenticationConfigurationAddress,
-                securityDomainAddress;
+        Address authenticationConfigurationAddress = createAuthenticationConfiguration();
+        List<Address> removeLater = new ArrayList<>();
 
         try {
-            authenticationConfigurationAddress = createAuthenticationConfiguration();
+            elytronAuthenticationOperations.performActionOnAttributeAndRevertItsValueToOriginal(
+                    authenticationConfigurationAddress,
+                    SECURITY_DOMAIN,
+                    () -> {
+                        final UndertowElytronOperations undertowElytronOperations = new UndertowElytronOperations(client);
+                        final Address securityDomainAddress = undertowElytronOperations
+                                .createSecurityDomain(undertowElytronOperations.createSecurityRealm().getLastPairValue());
 
-            final UndertowElytronOperations undertowElytronOperations = new UndertowElytronOperations(client);
-            securityDomainAddress = undertowElytronOperations
-                    .createSecurityDomain(undertowElytronOperations.createSecurityRealm().getLastPairValue());
+                        try {
+                            page.navigate();
+                            page.switchToAuthenticationConfiguration()
+                                    .getResourceManager()
+                                    .selectByName(authenticationConfigurationAddress.getLastPairValue());
+                            new ConfigChecker.Builder(client, authenticationConfigurationAddress)
+                                    .configFragment(page.getConfigFragment())
+                                    .editAndSave(ConfigChecker.InputType.TEXT, SECURITY_DOMAIN, securityDomainAddress.getLastPairValue())
+                                    .verifyFormSaved()
+                                    .verifyAttribute(SECURITY_DOMAIN, securityDomainAddress.getLastPairValue());
+                        } finally {
+                            removeLater.add(securityDomainAddress);
+                        }
+                    }
+            );
 
-            page.navigate();
-            page.switchToAuthenticationConfiguration()
-                    .getResourceManager()
-                    .selectByName(authenticationConfigurationAddress.getLastPairValue());
-            new ConfigChecker.Builder(client, authenticationConfigurationAddress)
-                    .configFragment(page.getConfigFragment())
-                    .editAndSave(ConfigChecker.InputType.TEXT, SECURITY_DOMAIN, securityDomainAddress.getLastPairValue())
-                    .verifyFormSaved()
-                    .verifyAttribute(SECURITY_DOMAIN, securityDomainAddress.getLastPairValue());
         } finally {
-            client.apply(snapshotBackup.restore());
+            ops.removeIfExists(authenticationConfigurationAddress);
+            for (Address address : removeLater) {
+                if (address != null) {
+                    ops.removeIfExists(address);
+                }
+            }
         }
     }
 
