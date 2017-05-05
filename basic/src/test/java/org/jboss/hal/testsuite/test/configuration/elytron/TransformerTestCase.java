@@ -48,8 +48,6 @@ public class TransformerTestCase extends AbstractElytronTestCase {
         ARCHIVE_NAME = "elytron.customer.transformer.jar",
         CUSTOM_PRINCIPAL_TRANSFORMER = "custom-principal-transformer",
         CUSTOM_PRINCIPAL_TRANSFORMER_LABEL = "Custom",
-        CLASS_NAME = "class-name",
-        MODULE = "module",
         REGEX_VALIDATING_PRINCIPAL_TRANSFORMER = "regex-validating-principal-transformer",
         REGEX_VALIDATING_PRINCIPAL_TRANSFORMER_LABEL = "Regex Validating",
         REGEX_PRINCIPAL_TRANSFORMER = "regex-principal-transformer",

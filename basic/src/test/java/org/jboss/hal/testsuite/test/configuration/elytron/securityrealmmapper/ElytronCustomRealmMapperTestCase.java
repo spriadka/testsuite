@@ -34,11 +34,8 @@ public class ElytronCustomRealmMapperTestCase extends AbstractElytronTestCase {
     private SecurityRealmMapperPage page;
 
     private static final String
-            CONFIGURATION = "configuration",
             CUSTOM_REALM_MAPPER = "custom-realm-mapper",
-            ARCHIVE_NAME = "customrealmmappertest",
-            CLASS_NAME = "class-name",
-            MODULE = "module";
+            ARCHIVE_NAME = "customrealmmappertest";
 
     private static String customRealmMapperModuleName;
 

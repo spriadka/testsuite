@@ -34,9 +34,6 @@ public class ElytronCustomSecurityRealmTestCase extends AbstractElytronTestCase 
     private SecurityRealmPage page;
 
     private static final String
-            MODULE = "module",
-            CLASS_NAME = "class-name",
-            CONFIGURATION = "configuration",
             CUSTOM_REALM = "custom-realm",
             ARCHIVE_NAME = "elytron.securityrealm.custom.jar";
 

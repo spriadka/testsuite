@@ -34,9 +34,6 @@ public class ElytronCustomModifiableSecurityRealmTestCase extends AbstractElytro
     private SecurityRealmPage page;
 
     private static final String
-            MODULE = "module",
-            CLASS_NAME = "class-name",
-            CONFIGURATION = "configuration",
             CUSTOM_MODIFIABLE_REALM = "custom-modifiable-realm",
             ARCHIVE_NAME = "elytron.securityrealm.custommodifiable.jar";
 

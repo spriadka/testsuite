@@ -22,7 +22,12 @@ public abstract class AbstractElytronTestCase {
     protected static final String
         MODULE_NAME_1 = "org.jboss.as.cli",
         MODULE_NAME_2 = "org.jboss.as.controller",
-        NAME = "name", ATTRIBUTES_LABEL = "Attributes", PROVIDER_NAME = "provider-name";
+        NAME = "name",
+        ATTRIBUTES_LABEL = "Attributes",
+        PROVIDER_NAME = "provider-name",
+        MODULE = "module",
+        CLASS_NAME = "class-name",
+        CONFIGURATION = "configuration";
 
     @Drone
     protected WebDriver browser;
