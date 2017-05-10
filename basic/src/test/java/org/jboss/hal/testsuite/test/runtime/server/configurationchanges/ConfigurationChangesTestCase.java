@@ -55,9 +55,9 @@ public class ConfigurationChangesTestCase {
     private static final Administration administration = new Administration(client);
     private static final Address SERVICE_ADDRESS = client.options().isDomain ?
                                                     Address.host(client.options().defaultHost)
-                                                            .and("core-service", "management")
+                                                            .and("subsystem", "core-management")
                                                             .and("service", "configuration-changes") :
-                                                    Address.coreService("management")
+                                                    Address.subsystem("core-management")
                                                             .and("service", "configuration-changes");
     private static ConfigurationChangesResource changesResource = new ConfigurationChangesResource(client);
 

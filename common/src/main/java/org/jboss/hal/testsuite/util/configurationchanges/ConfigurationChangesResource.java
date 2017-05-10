@@ -42,9 +42,9 @@ public class ConfigurationChangesResource implements ConfigurationChangesProvide
     public ConfigurationChangesResource(OnlineManagementClient client) {
         this.operations = new Operations(client);
         this.serviceAddress = client.options().isDomain ?
-                Address.host(client.options().defaultHost).and("core-service", "management")
+                Address.host(client.options().defaultHost).and("subsystem", "core-management")
                         .and("service", "configuration-changes") :
-                Address.coreService("management")
+                Address.subsystem("core-management")
                         .and("service", "configuration-changes");
     }
 
