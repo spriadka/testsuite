@@ -37,10 +37,9 @@ import java.util.concurrent.TimeoutException;
 @Category(Shared.class)
 public class ConfigurationChangesTestCase {
 
-    //TODO remove https://issues.jboss.org/browse/HAL-1182 message when fixed
     private static final String LISTS_NOT_EQUAL_MESSAGE = "Some unexpected differences found! Either some changes are " +
-            "not displayed or some extra appeared. Some could fail due to the https://issues.jboss.org/browse/HAL-1182 " +
-            "because of composite operation having its name replaced by a operation step's operation name.";
+            "not displayed or some extra appeared. Some could fail because of https://issues.jboss.org/browse/HAL-1355" +
+            "because remote address is not set.";
 
     @Drone
     private WebDriver browser;
@@ -99,7 +98,8 @@ public class ConfigurationChangesTestCase {
 
     @Test
     public void allRelevantRecordsAreShown() throws IOException, ParseException {
-        assertListEquals(changesResource.getAllConfigurationChanges(),
+        assertListEquals("Probably fails because of https://issues.jboss.org/browse/HAL-1355.",
+                changesResource.getAllConfigurationChanges(),
                 page.getConfigurationChangesTable().getAllConfigurationChanges());
     }
 
