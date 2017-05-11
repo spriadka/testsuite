@@ -571,12 +571,12 @@ public class ElytronRoleMapperTestCase extends AbstractElytronTestCase {
     @Test
     public void editCustomRoleMapperAttributesTest() throws Exception {
         String
-        customRoleMapperName = randomAlphanumeric(5),
-        key1 = randomAlphanumeric(5),
-        value1 = randomAlphanumeric(5),
-        key2 = randomAlphanumeric(5),
-        value2 = randomAlphanumeric(5);
-    Address customRoleMapperAddress = elyOps.getElytronAddress(CUSTOM_ROLE_MAPPER, customRoleMapperName);
+            customRoleMapperName = randomAlphanumeric(5),
+            key1 = randomAlphanumeric(5),
+            value1 = randomAlphanumeric(5),
+            key2 = randomAlphanumeric(5),
+            value2 = randomAlphanumeric(5);
+        Address customRoleMapperAddress = elyOps.getElytronAddress(CUSTOM_ROLE_MAPPER, customRoleMapperName);
 
         try {
             ops.add(customRoleMapperAddress, Values.of(CLASS_NAME, LowercaseCustomRoleMapper.class.getName())
