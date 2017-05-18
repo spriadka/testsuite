@@ -5,6 +5,9 @@ import org.wildfly.security.authz.PermissionMapper;
 import org.wildfly.security.authz.Roles;
 import org.wildfly.security.permission.PermissionVerifier;
 
+/**
+ * Custom implementation of {@link PermissionMapper} for test purposes
+ */
 public class PesimisticCustomRoleMapper implements PermissionMapper {
 
     @Override
