@@ -4,6 +4,9 @@ import java.security.Principal;
 
 import org.wildfly.security.auth.server.PrincipalDecoder;
 
+/**
+ * Custom implementation of {@link PrincipalDecoder} for test purposes
+ */
 public class LowercaseCustomPrincipalDecoder implements PrincipalDecoder {
 
     @Override
