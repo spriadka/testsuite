@@ -7,6 +7,9 @@ import org.wildfly.security.authz.AuthorizationIdentity;
 import org.wildfly.security.authz.RoleDecoder;
 import org.wildfly.security.authz.Roles;
 
+/**
+ * Custom implementation of {@link RoleDecoder} for test purposes
+ */
 public class BugsBunnyCustomRoleDecoder implements RoleDecoder {
 
     private static final String BUGSBUNNY = "Bugs Bunny";
