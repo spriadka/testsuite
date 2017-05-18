@@ -418,6 +418,8 @@ public class ElytronPrincipalDecoderTestCase extends AbstractElytronTestCase {
             aggregatePrincipalDecoderVerifier.verifyDoesNotExist();
         } finally {
             ops.removeIfExists(aggregatePrincipalDecoderAddress);
+            ops.removeIfExists(constantPrincipalDecoder1address);
+            ops.removeIfExists(constantPrincipalDecoder2address);
             adminOps.reloadIfRequired();
         }
     }
@@ -565,6 +567,8 @@ public class ElytronPrincipalDecoderTestCase extends AbstractElytronTestCase {
             concatenatingPrincipalDecoderVerifier.verifyDoesNotExist();
         } finally {
             ops.removeIfExists(concatenatingPrincipalDecoderAddress);
+            ops.removeIfExists(constantPrincipalDecoder1address);
+            ops.removeIfExists(constantPrincipalDecoder2address);
             adminOps.reloadIfRequired();
         }
     }
