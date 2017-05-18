@@ -75,7 +75,7 @@ public class ElytronPermissionMapperTestCase extends AbstractElytronTestCase {
     public static void beforeClass() throws Exception {
         moduleUtils = new ModuleUtils(client);
         JavaArchive jar = ShrinkWrap.create(JavaArchive.class, ARCHIVE_NAME);
-        jar.addClasses(OptimisticCustomRoleMapper.class, PesimisticCustomRoleMapper.class);
+        jar.addClasses(OptimisticCustomPermissionMapper.class, PesimisticCustomPermissionMapper.class);
         customPermissionMapperModuleName = moduleUtils.createModule(CUSTOM_ROLE_MAPPER_PATH, jar,
                 "org.wildfly.extension.elytron", "org.wildfly.security.elytron-private");
     }
@@ -423,14 +423,14 @@ public class ElytronPermissionMapperTestCase extends AbstractElytronTestCase {
                 .getResourceManager()
                 .addResource(AddResourceWizard.class)
                 .name(customPermissionMapperName)
-                .text(CLASS_NAME, OptimisticCustomRoleMapper.class.getName())
+                .text(CLASS_NAME, OptimisticCustomPermissionMapper.class.getName())
                 .text(MODULE, customPermissionMapperModuleName)
                 .saveWithState().assertWindowClosed();
 
             assertTrue("Created resource should be present in the table!",
                     page.resourceIsPresentInMainTable(customPermissionMapperName));
             new ResourceVerifier(customPermissionMapperAddress, client).verifyExists()
-                    .verifyAttribute(CLASS_NAME, OptimisticCustomRoleMapper.class.getName())
+                    .verifyAttribute(CLASS_NAME, OptimisticCustomPermissionMapper.class.getName())
                     .verifyAttribute(MODULE, customPermissionMapperModuleName);
         } finally {
             ops.removeIfExists(customPermissionMapperAddress);
@@ -455,7 +455,7 @@ public class ElytronPermissionMapperTestCase extends AbstractElytronTestCase {
                 elyOps.getElytronAddress(CUSTOM_PERMISSION_MAPPER, customPermissionMapperName);
 
         try {
-            ops.add(customPermissionMapperAddress, Values.of(CLASS_NAME, OptimisticCustomRoleMapper.class.getName())
+            ops.add(customPermissionMapperAddress, Values.of(CLASS_NAME, OptimisticCustomPermissionMapper.class.getName())
                     .and(MODULE, customPermissionMapperModuleName)).assertSuccess();
 
             page.navigateToPermissionMapper().selectResource(CUSTOM_PERMISSION_MAPPER_LABEL).getResourceManager()
@@ -464,10 +464,10 @@ public class ElytronPermissionMapperTestCase extends AbstractElytronTestCase {
 
             new ConfigChecker.Builder(client, customPermissionMapperAddress)
                 .configFragment(page.getConfigFragment())
-                .edit(TEXT, CLASS_NAME, PesimisticCustomRoleMapper.class.getName())
+                .edit(TEXT, CLASS_NAME, PesimisticCustomPermissionMapper.class.getName())
                 .edit(TEXT, CONFIGURATION, key1 + "=" + value1 + "\n" + key2 + "=" + value2)
                 .andSave().verifyFormSaved()
-                .verifyAttribute(CLASS_NAME, PesimisticCustomRoleMapper.class.getName())
+                .verifyAttribute(CLASS_NAME, PesimisticCustomPermissionMapper.class.getName())
                 .verifyAttribute(CONFIGURATION, new ModelNodePropertiesBuilder()
                         .addProperty(key1, value1)
                         .addProperty(key2, value2)
@@ -492,7 +492,7 @@ public class ElytronPermissionMapperTestCase extends AbstractElytronTestCase {
         ResourceVerifier customPermissionMapperVerifier = new ResourceVerifier(customPermissionMapperAddress, client);
 
         try {
-            ops.add(customPermissionMapperAddress, Values.of(CLASS_NAME, OptimisticCustomRoleMapper.class.getName())
+            ops.add(customPermissionMapperAddress, Values.of(CLASS_NAME, OptimisticCustomPermissionMapper.class.getName())
                     .and(MODULE, customPermissionMapperModuleName)).assertSuccess();
             customPermissionMapperVerifier.verifyExists();
 

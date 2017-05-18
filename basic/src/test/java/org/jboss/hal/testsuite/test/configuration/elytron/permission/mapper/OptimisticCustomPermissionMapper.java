@@ -8,7 +8,7 @@ import org.wildfly.security.permission.PermissionVerifier;
 /**
  * Custom implementation of {@link PermissionMapper} for test purposes
  */
-public class OptimisticCustomRoleMapper implements PermissionMapper {
+public class OptimisticCustomPermissionMapper implements PermissionMapper {
 
     @Override
     public PermissionVerifier mapPermissions(PermissionMappable arg0, Roles arg1) {
