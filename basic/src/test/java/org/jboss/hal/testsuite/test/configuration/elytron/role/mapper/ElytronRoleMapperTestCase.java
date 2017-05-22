@@ -316,7 +316,7 @@ public class ElytronRoleMapperTestCase extends AbstractElytronTestCase {
                             .build());
         } finally {
             ops.removeIfExists(aggregateRoleMapperAddress);
-            ops.removeIfExists(addSuffixRoleMapperAddress);
+            ops.removeIfExists(addPrefixRoleMapperAddress);
             ops.removeIfExists(addSuffixRoleMapperAddress);
             adminOps.reloadIfRequired();
         }
