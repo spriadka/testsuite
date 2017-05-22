@@ -1,19 +1,19 @@
 package org.jboss.hal.testsuite.test.configuration.transactions;
 
 import org.apache.commons.lang.RandomStringUtils;
-import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
-import org.jboss.hal.testsuite.page.config.TransactionsPage;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
+import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.Batch;
 
 import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
 @RunWith(Arquillian.class)
 @Category(Shared.class)
@@ -26,9 +26,6 @@ public class StoreTestCase extends TransactionsTestCaseAbstract {
     private static final String JDBC_STATE_STORE_DROP_TABLE_ATTR = "jdbc-state-store-drop-table";
     private static final String JDBC_STATE_STORE_TABLE_PREFIX_ATTR = "jdbc-state-store-table-prefix";
     private static final String JDBC_STORE_DATASOURCE_ATTR = "jdbc-store-datasource";
-
-    @Page
-    public TransactionsPage page;
 
     @Before
     public void before() {
@@ -111,11 +108,14 @@ public class StoreTestCase extends TransactionsTestCaseAbstract {
     }
 
     @BeforeClass
-    public static void prepareForJDBCConfiguration() throws IOException {
+    public static void prepareForJDBCConfiguration() throws IOException, InterruptedException, TimeoutException {
         Batch batch = new Batch();
-        batch.writeAttribute(TRANSACTIONS_ADDRESS, USE_JOURNAL_STORE_ATTR, false)
-                .writeAttribute(TRANSACTIONS_ADDRESS, USE_JDBC_STORE_ATTR, true)
-                .writeAttribute(TRANSACTIONS_ADDRESS, JDBC_STORE_DATASOURCE_ATTR, "ExampleDS");
+        batch
+            .writeAttribute(Address.subsystem("datasources").and("data-source", "ExampleDS"), "jta", false)
+            .writeAttribute(TRANSACTIONS_ADDRESS, USE_JOURNAL_STORE_ATTR, false)
+            .writeAttribute(TRANSACTIONS_ADDRESS, USE_JDBC_STORE_ATTR, true)
+            .writeAttribute(TRANSACTIONS_ADDRESS, JDBC_STORE_DATASOURCE_ATTR, "java:jboss/datasources/ExampleDS");
         operations.batch(batch);
+        administration.reloadIfRequired();
     }
 }
