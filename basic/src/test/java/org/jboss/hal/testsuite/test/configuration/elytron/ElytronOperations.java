@@ -13,7 +13,7 @@ import java.io.IOException;
 public class ElytronOperations {
 
     private static final Address ELYTRON_SUBSYSTEM_ADDRESS = Address.subsystem("elytron");
-    static final String
+    public static final String
         PROVIDER_LOADER = "provider-loader";
 
     private final Operations ops;

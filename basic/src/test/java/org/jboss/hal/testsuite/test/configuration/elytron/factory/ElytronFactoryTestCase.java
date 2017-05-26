@@ -1,11 +1,15 @@
-package org.jboss.hal.testsuite.test.configuration.elytron;
+package org.jboss.hal.testsuite.test.configuration.elytron.factory;
 
 import static org.jboss.hal.testsuite.dmr.ModelNodeGenerator.ModelNodePropertiesBuilder;
+import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.jboss.hal.testsuite.dmr.ModelNodeGenerator.ModelNodeListBuilder;
 import static org.jboss.hal.testsuite.test.configuration.elytron.ElytronOperations.PROVIDER_LOADER;
+import static org.jboss.hal.testsuite.util.ConfigChecker.InputType.TEXT;
 import static org.junit.Assert.*;
 
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.lang3.RandomStringUtils;
@@ -14,14 +18,18 @@ import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
+import org.jboss.hal.testsuite.fragment.config.AddResourceWizard;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
 import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindowWithOptionalFields;
 import org.jboss.hal.testsuite.page.config.elytron.FactoryPage;
+import org.jboss.hal.testsuite.test.configuration.elytron.AbstractElytronTestCase;
 import org.jboss.hal.testsuite.util.ConfigChecker;
+import org.jboss.hal.testsuite.util.ModuleUtils;
 import org.jboss.hal.testsuite.util.ConfigChecker.InputType;
+import org.jboss.shrinkwrap.api.ShrinkWrap;
+import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -63,7 +71,17 @@ public class ElytronFactoryTestCase extends AbstractElytronTestCase {
             PRINCIPAL = "principal", REQUEST_LIFETIME = "request-lifetime", SERVER = "server", PROVIDERS = "providers",
             PROVIDER_LOADER_NAME_1 = RandomStringUtils.randomAlphanumeric(5),
             PROVIDER_LOADER_NAME_2 = RandomStringUtils.randomAlphanumeric(5),
-            PROVIDER_LOADER_NAME_ELYTRON = "elytron";
+            PROVIDER_LOADER_NAME_ELYTRON = "elytron",
+            ARCHIVE_NAME = "elytron.customer.credential.security.factory.jar",
+            CUSTOM_CREDENTIAL_SECURITY_FACTORY_LABEL = "Custom Credential Security",
+            CUSTOM_CREDENTIAL_SECURITY_FACTORY = "custom-credential-security-factory";
+
+    private static final Path CUSTOM_CREDENTIAL_SECURITY_FACTORY_PATH = Paths.get("test", "elytron",
+            "credential", "security", "factory_" + randomAlphanumeric(5));
+
+    private static String customCredentialSecurityFactoryModuleName;
+
+    private static ModuleUtils moduleUtils;
 
     @Page
     private FactoryPage page;
@@ -72,12 +90,18 @@ public class ElytronFactoryTestCase extends AbstractElytronTestCase {
     public static void beforeClass() throws IOException {
         elyOps.addProviderLoader(PROVIDER_LOADER_NAME_1);
         elyOps.addProviderLoader(PROVIDER_LOADER_NAME_2);
+        moduleUtils = new ModuleUtils(client);
+        JavaArchive jar = ShrinkWrap.create(JavaArchive.class, ARCHIVE_NAME);
+        jar.addClasses(BubuCustomCredentialFactory.class, ChachaCustomCredentialFactory.class);
+        customCredentialSecurityFactoryModuleName = moduleUtils.createModule(CUSTOM_CREDENTIAL_SECURITY_FACTORY_PATH,
+                jar, "org.wildfly.extension.elytron", "org.wildfly.security.elytron-private");
     }
 
     @AfterClass
     public static void afterClass() throws IOException, InterruptedException, TimeoutException {
         elyOps.removeProviderLoader(PROVIDER_LOADER_NAME_1);
         elyOps.removeProviderLoader(PROVIDER_LOADER_NAME_2);
+        moduleUtils.removeModule(CUSTOM_CREDENTIAL_SECURITY_FACTORY_PATH);
         adminOps.reloadIfRequired();
     }
 
@@ -1393,12 +1417,107 @@ public class ElytronFactoryTestCase extends AbstractElytronTestCase {
         }
     }
 
-    // TODO
+    /**
+     * @tpTestDetails Try to create Elytron Custom Credential Security Factory instance in Web Console's Elytron subsystem
+     * configuration.
+     * Validate created resource is visible in Custom Credential Security Factory table.
+     * Validate created resource is present in model.
+     * Validate value of created resource in model.
+     */
     @Test
-    public void addCustomCredentialSecurityFactory() throws Exception {
-        Assert.fail("Add test implementation as soon as "
-                + "https://github.com/wildfly-security/elytron-subsystem/issues/350 and "
-                + "https://issues.jboss.org/browse/HAL-1265 are fixed!");
+    public void addCustomCredentialSecurityFactoryTest() throws Exception {
+        String customCredentialSecurityFactoryName = randomAlphanumeric(5);
+        Address customCredentialSecurityFactoryAddress =
+                elyOps.getElytronAddress(CUSTOM_CREDENTIAL_SECURITY_FACTORY, customCredentialSecurityFactoryName);
+
+        try {
+            page.navigateToApplication()
+                .selectResource(CUSTOM_CREDENTIAL_SECURITY_FACTORY_LABEL)
+                .getResourceManager()
+                .addResource(AddResourceWizard.class)
+                .name(customCredentialSecurityFactoryName)
+                .text(CLASS_NAME, BubuCustomCredentialFactory.class.getName())
+                .text(MODULE, customCredentialSecurityFactoryModuleName)
+                .saveWithState().assertWindowClosed();
+
+            assertTrue("Created resource should be present in the table!",
+                    page.resourceIsPresentInMainTable(customCredentialSecurityFactoryName));
+            new ResourceVerifier(customCredentialSecurityFactoryAddress, client).verifyExists()
+                    .verifyAttribute(CLASS_NAME, BubuCustomCredentialFactory.class.getName())
+                    .verifyAttribute(MODULE, customCredentialSecurityFactoryModuleName);
+        } finally {
+            ops.removeIfExists(customCredentialSecurityFactoryAddress);
+            adminOps.reloadIfRequired();
+        }
+    }
+
+    /**
+     * @tpTestDetails Create Elytron Custom Credential Security Factory instance in model
+     * and try to edit it's value in Web Console's Elytron subsystem configuration.
+     * Validate edited attribute values in the model.
+     */
+    @Test
+    public void editCustomCredentialSecurityFactoryAttributesTest() throws Exception {
+        String
+            customCredentialSecurityFactoryName = randomAlphanumeric(5),
+            key1 = randomAlphanumeric(5),
+            value1 = randomAlphanumeric(5),
+            key2 = randomAlphanumeric(5),
+            value2 = randomAlphanumeric(5);
+        Address customCredentialSecurityFactoryAddress =
+                elyOps.getElytronAddress(CUSTOM_CREDENTIAL_SECURITY_FACTORY, customCredentialSecurityFactoryName);
+
+        try {
+            ops.add(customCredentialSecurityFactoryAddress, Values.of(CLASS_NAME, BubuCustomCredentialFactory.class.getName())
+                    .and(MODULE, customCredentialSecurityFactoryModuleName)).assertSuccess();
+
+            page.navigateToApplication().selectResource(CUSTOM_CREDENTIAL_SECURITY_FACTORY_LABEL).getResourceManager()
+                    .selectByName(customCredentialSecurityFactoryName);
+            page.switchToConfigAreaTab(ATTRIBUTES_LABEL);
+
+            new ConfigChecker.Builder(client, customCredentialSecurityFactoryAddress)
+                .configFragment(page.getConfigFragment())
+                .edit(TEXT, CLASS_NAME, ChachaCustomCredentialFactory.class.getName())
+                .edit(TEXT, CONFIGURATION, key1 + "=" + value1 + "\n" + key2 + "=" + value2)
+                .andSave().verifyFormSaved()
+                .verifyAttribute(CLASS_NAME, ChachaCustomCredentialFactory.class.getName())
+                .verifyAttribute(CONFIGURATION, new ModelNodePropertiesBuilder()
+                        .addProperty(key1, value1)
+                        .addProperty(key2, value2)
+                        .build());
+        } finally {
+            ops.removeIfExists(customCredentialSecurityFactoryAddress);
+            adminOps.reloadIfRequired();
+        }
+    }
+
+    /**
+     * @tpTestDetails Create Elytron Custom Credential Security Factory instance in model
+     * and try to remove it in Web Console's Elytron subsystem configuration.
+     * Validate the resource is not any more visible in Custom Credential Security Factory table.
+     * Validate created resource is not any more present in the model.
+     */
+    @Test
+    public void removeCustomCredentialSecurityFactoryTest() throws Exception {
+        String customCredentialSecurityFactoryName = randomAlphanumeric(5);
+        Address customCredentialSecurityFactoryAddress =
+                elyOps.getElytronAddress(CUSTOM_CREDENTIAL_SECURITY_FACTORY, customCredentialSecurityFactoryName);
+        ResourceVerifier customCredentialSecurityFactoryVerifier = new ResourceVerifier(customCredentialSecurityFactoryAddress, client);
+
+        try {
+            ops.add(customCredentialSecurityFactoryAddress, Values.of(CLASS_NAME, BubuCustomCredentialFactory.class.getName())
+                    .and(MODULE, customCredentialSecurityFactoryModuleName)).assertSuccess();
+            customCredentialSecurityFactoryVerifier.verifyExists();
+
+            page.navigateToApplication().selectResource(CUSTOM_CREDENTIAL_SECURITY_FACTORY_LABEL).getResourceManager()
+                    .removeResource(customCredentialSecurityFactoryName).confirmAndDismissReloadRequiredMessage().assertClosed();
+            assertFalse("Removed resource should not be present in the table any more!",
+                    page.resourceIsPresentInMainTable(customCredentialSecurityFactoryName));
+            customCredentialSecurityFactoryVerifier.verifyDoesNotExist();
+        } finally {
+            ops.removeIfExists(customCredentialSecurityFactoryAddress);
+            adminOps.reloadIfRequired();
+        }
     }
 
     @Test

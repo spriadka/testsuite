@@ -41,7 +41,7 @@
     </dependency>
     <dependency>
       <groupId>org.wildfly.core</groupId>
-      <artifactId>wildfly-elytron</artifactId>
+      <artifactId>wildfly-elytron-integration</artifactId>
     </dependency>
   </dependencies>
 
