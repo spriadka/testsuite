@@ -58,7 +58,8 @@ public class ElytronStoreTestCase extends AbstractElytronTestCase {
             NEW_ITEM_TEMPLATE_LABEL = "New Item Template",
             NEW_ITEM_PATH = "new-item-path",
             NEW_ITEM_RDN = "new-item-rdn",
-            NEW_ITEM_ATTRIBUTES = "new-item-attributes";
+            NEW_ITEM_ATTRIBUTES = "new-item-attributes",
+            MODIFIABLE = "modifiable";
 
     @Page
     private SSLPage page;
@@ -196,13 +197,16 @@ public class ElytronStoreTestCase extends AbstractElytronTestCase {
             Editor editor = wizard.getEditor();
             editor.text(NAME, credentialStoreName);
             editor.checkbox(CREATE, true);
+            editor.checkbox(MODIFIABLE, true);
             editor.text(CREDENTIAL_REFERENCE_CLEAR_TEXT_IDENTIFIER, password);
             boolean closed = wizard.finish();
 
             assertTrue("Dialog should be closed!", closed);
             assertTrue("Created resource should be present in the table!",
                     page.resourceIsPresentInMainTable(credentialStoreName));
-            new ResourceVerifier(credentialStoreAddress, client).verifyExists().verifyAttribute(CREATE, true)
+            new ResourceVerifier(credentialStoreAddress, client).verifyExists()
+                    .verifyAttribute(CREATE, true)
+                    .verifyAttribute(MODIFIABLE, true)
                     .verifyAttribute(CREDENTIAL_REFERENCE, expectedCredentialReferenceNode);
 
         } finally {
