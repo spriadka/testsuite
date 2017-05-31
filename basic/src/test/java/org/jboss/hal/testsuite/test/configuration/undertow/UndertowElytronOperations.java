@@ -30,7 +30,7 @@ public class UndertowElytronOperations {
             TLS_V12 = "TLSv1.2",
             PROTOCOLS = "protocols",
             ALGORITHM = "algorithm",
-            KEY_MANAGERS = "key-managers",
+            KEY_MANAGER = "key-manager",
             CLIENT_SSL_CONTEXT = "client-ssl-context",
             MODULE_NAME_1 = "org.jboss.as.cli";
 
@@ -87,7 +87,7 @@ public class UndertowElytronOperations {
 
     public Address createKeyManager(Address keyStoreAddress) throws IOException {
         final String algorithmValue = "PKIX";
-        final Address keyManagerAddress = elyOps.getElytronAddress(KEY_MANAGERS, RandomStringUtils.randomAlphanumeric(7));
+        final Address keyManagerAddress = elyOps.getElytronAddress(KEY_MANAGER, RandomStringUtils.randomAlphanumeric(7));
         operations.add(keyManagerAddress, Values.of(ALGORITHM, algorithmValue)
                 .and(KEY_STORE, keyStoreAddress.getLastPairValue())
                 .and(CREDENTIAL_REFERENCE, new ModelNodeGenerator.ModelNodePropertiesBuilder()
@@ -111,7 +111,7 @@ public class UndertowElytronOperations {
                 .addNode(new ModelNode(TLS_V12))
                 .build();
 
-        operations.add(clientSSLContextAddress, Values.of(KEY_MANAGERS, keyManagerAddress.getLastPairValue()).and(PROTOCOLS, protocolList))
+        operations.add(clientSSLContextAddress, Values.of(KEY_MANAGER, keyManagerAddress.getLastPairValue()).and(PROTOCOLS, protocolList))
                 .assertSuccess();
         return clientSSLContextAddress;
     }

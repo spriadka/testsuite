@@ -27,6 +27,8 @@ public class ElytronIntegrationChecker {
             CREDENTIAL_REFERENCE = "credential-reference",
             CREDENTIAL_STORE = "credential-store",
             CLEAR_TEXT = "clear-text",
+            SECRET_VALUE = "secret-value",
+            ADD_ALIAS = "add-alias",
             ALIAS = "alias",
             STORE = "store",
             TYPE = "type";
@@ -102,8 +104,9 @@ public class ElytronIntegrationChecker {
         //add credential store
         final Address credentialReferenceAddress = addCredentialStore(credentialStoreName);
         //add alias with value to credential store
-        operations.add(credentialReferenceAddress.and(ALIAS, credentialStoreAliasName),
-                Values.of("secret-value", credentialStoreAliasValue)).assertSuccess();
+        operations.invoke(ADD_ALIAS, credentialReferenceAddress, Values.empty()
+                .and(ALIAS, credentialStoreAliasValue)
+                .and(SECRET_VALUE, credentialStoreAliasValue)).assertSuccess();
         //edit form in web console and verify against model
         try {
             final ResourceVerifier verifier = new ConfigChecker.Builder(client, address)
