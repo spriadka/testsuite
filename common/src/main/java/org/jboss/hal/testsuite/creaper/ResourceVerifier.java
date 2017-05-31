@@ -25,6 +25,7 @@ package org.jboss.hal.testsuite.creaper;
 import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.cli.Library;
 import org.jboss.hal.testsuite.dmr.ModelNodeGenerator;
+import org.jboss.hal.testsuite.dmr.ModelNodeUtils;
 import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.junit.Assert;
 import org.slf4j.Logger;
@@ -238,9 +239,7 @@ public class ResourceVerifier {
 
     private boolean isModelNodePresentInListAttributeValue(String attributeName, ModelNode value) throws IOException {
         final ModelNodeResult modelNodeResult = ops.readAttribute(resourceAddress, attributeName);
-        return modelNodeResult.listValue().stream()
-                .peek(modelNode -> log.trace("Comparing '{}' with list member '{}'.", modelNode.toString(), value.toString()))
-                .anyMatch(modelNode -> modelNode.equals(value));
+        return ModelNodeUtils.isValuePresentInModelNodeList(modelNodeResult.value(), value);
     }
 
     /**
@@ -259,7 +258,8 @@ public class ResourceVerifier {
         final ModelNodeResult modelNodeResult = ops.readAttribute(resourceAddress, attributeName);
         modelNodeResult.assertSuccess();
 
-        Assert.assertTrue("Given value '" + value.toString() + "' is not present in list attribute '" + attributeName + "'!" +
+        Assert.assertTrue("Given value '" + value.toString() + "' is not present in list attribute '" + attributeName
+                        + "' with value '" + modelNodeResult.value() + "'!" +
                         (errorMessageSuffix == null || errorMessageSuffix.isEmpty() ? "" : " " + errorMessageSuffix),
                 isModelNodePresentInListAttributeValue(attributeName, value));
 

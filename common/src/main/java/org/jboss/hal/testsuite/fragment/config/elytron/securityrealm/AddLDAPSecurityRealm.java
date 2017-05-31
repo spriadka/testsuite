@@ -7,4 +7,9 @@ public class AddLDAPSecurityRealm extends AbstractAddSecurityRealmWizard<AddLDAP
         return this;
     }
 
+    public AddLDAPSecurityRealm identityMappingRdnIdentifier(String rdnIdentifier) {
+        getEditor().text("identity-mapping-rdn-identifier", rdnIdentifier);
+        return this;
+    }
+
 }
