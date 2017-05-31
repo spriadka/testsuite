@@ -145,6 +145,28 @@ public class ApplicationSecurityDomainSingleSignOnTestCase {
     }
 
     /**
+     * @tpTestDetails Try to disable Single Sign On for selected security domain with already enabled SSO by clicking on
+     * button present in Web Console configuration.
+     * Validate that SSO was disabled in model.
+     */
+    @Test
+    public void testDisableSSO() throws Exception {
+        try {
+            page.getResourceManager().selectByName(APP_SEC_DOMAIN_WITH_SSO_TBR_ADDRESS.getLastPairValue());
+            page.switchToSSOConfigTab();
+            page.disableSSO()
+                    .confirmAndDismissReloadRequiredMessage()
+                    .assertClosed();
+
+            new ResourceVerifier(APP_SEC_DOMAIN_WITH_SSO_TBR_ADDRESS.and(SETTING, SINGLE_SIGN_ON), client)
+                    .verifyDoesNotExist();
+        } finally {
+            operations.removeIfExists(APP_SEC_DOMAIN_WITH_SSO_TBR_ADDRESS.and(SETTING, SINGLE_SIGN_ON));
+            administration.reloadIfRequired();
+        }
+    }
+
+    /**
      * @tpTestDetails Try to edit credential reference of aalready created security domain in Web Console's Undertow
      * subsystem configuration.
      * Validate edited attribute values in the model.
@@ -152,7 +174,6 @@ public class ApplicationSecurityDomainSingleSignOnTestCase {
      * <li>store + alias</li>
      * <li>clear text</li>
      * <li>illegal combination of both</li></ul>
-
      */
     @Test
     public void testCredentialReferenceSetting() throws Exception {
