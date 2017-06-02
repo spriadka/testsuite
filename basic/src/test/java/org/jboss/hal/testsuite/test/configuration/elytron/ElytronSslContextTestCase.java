@@ -54,7 +54,6 @@ public class ElytronSslContextTestCase extends AbstractElytronTestCase {
         TLS_V12 = "TLSv1.2",
         PROTOCOLS = "protocols",
         NEED_CLIENT_AUTH = "need-client-auth",
-        SESSION_TIMEOUT = "session-timeout",
         CERTIFICATE_REVOCATION_LIST = "certificate-revocation-list",
         CERTIFICATE_REVOCATION_LIST_LABEL = "Certificate Revocation List",
         PATH = "path",
@@ -600,7 +599,6 @@ public class ElytronSslContextTestCase extends AbstractElytronTestCase {
     public void editClientSSLContextAttributesTest() throws Exception {
         String clientSSLContextName = randomAlphanumeric(5), keyManagerName = randomAlphanumeric(5),
                 password = randomAlphanumeric(5), trustManagerName = randomAlphanumeric(5);
-        Integer sessionTimeoutValue = 999;
         Address keyStoreAddress = createKeyStore(),
                 keyManagerAddress = elyOps.getElytronAddress(KEY_MANAGER, keyManagerName),
                 clientSSLContextAddress = elyOps.getElytronAddress(CLIENT_SSL_CONTEXT, clientSSLContextName),
@@ -626,11 +624,9 @@ public class ElytronSslContextTestCase extends AbstractElytronTestCase {
             new ConfigChecker.Builder(client, clientSSLContextAddress).configFragment(page.getConfigFragment())
                     .edit(TEXT, PROTOCOLS, TLS_V12)
                     .edit(TEXT, TRUST_MANAGER, trustManagerName)
-                    .edit(TEXT, SESSION_TIMEOUT, sessionTimeoutValue)
                     .andSave().verifyFormSaved()
                     .verifyAttribute(PROTOCOLS, newProtocolList)
-                    .verifyAttribute(TRUST_MANAGER, trustManagerName)
-                    .verifyAttribute(SESSION_TIMEOUT, sessionTimeoutValue);
+                    .verifyAttribute(TRUST_MANAGER, trustManagerName);
         } finally {
             ops.removeIfExists(clientSSLContextAddress);
             ops.removeIfExists(trustManagerAddress);
