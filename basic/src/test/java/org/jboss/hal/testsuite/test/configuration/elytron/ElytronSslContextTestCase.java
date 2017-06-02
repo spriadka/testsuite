@@ -491,7 +491,7 @@ public class ElytronSslContextTestCase extends AbstractElytronTestCase {
                     .and(KEY_STORE, keyStoreAddress.getLastPairValue())).assertSuccess();
 
             page.navigateToApplication().selectResource(SERVER_SSL_CONTEXT_LABEL).getResourceManager()
-                    .selectByName(trustManagerName);
+                    .selectByName(serverSSLContextName);
             page.switchToConfigAreaTab(ATTRIBUTES_LABEL);
 
             new ConfigChecker.Builder(client, serverSSLContextAddress).configFragment(page.getConfigFragment())
@@ -620,7 +620,7 @@ public class ElytronSslContextTestCase extends AbstractElytronTestCase {
                     .and(KEY_STORE, keyStoreAddress.getLastPairValue())).assertSuccess();
 
             page.navigateToApplication().selectResource(CLIENT_SSL_CONTEXT_LABEL).getResourceManager()
-                    .selectByName(trustManagerName);
+                    .selectByName(clientSSLContextName);
             page.switchToConfigAreaTab(ATTRIBUTES_LABEL);
 
             new ConfigChecker.Builder(client, clientSSLContextAddress).configFragment(page.getConfigFragment())
