@@ -367,7 +367,7 @@ public class ElytronTokenSecurityRealmTestCase extends AbstractElytronTestCase {
 
     public Address createKeyManager(Address keyStoreAddress) throws IOException {
         final String algorithmValue = "PKIX";
-        final Address keyManagerAddress = elyOps.getElytronAddress("key-managers", org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric(7));
+        final Address keyManagerAddress = elyOps.getElytronAddress("key-manager", org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric(7));
         ops.add(keyManagerAddress, Values.of("algorithm", algorithmValue)
                 .and(KEY_STORE, keyStoreAddress.getLastPairValue())
                 .and(CREDENTIAL_REFERENCE, new ModelNodeGenerator.ModelNodePropertiesBuilder()
@@ -383,7 +383,7 @@ public class ElytronTokenSecurityRealmTestCase extends AbstractElytronTestCase {
                 .addNode(new ModelNode("TLSv1.2"))
                 .build();
 
-        ops.add(clientSSLContextAddress, Values.of("key-managers", keyManagerAddress.getLastPairValue()).and("protocols", protocolList))
+        ops.add(clientSSLContextAddress, Values.of("key-manager", keyManagerAddress.getLastPairValue()).and("protocols", protocolList))
                 .assertSuccess();
         return clientSSLContextAddress;
     }

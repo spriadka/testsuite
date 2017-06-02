@@ -38,7 +38,7 @@ public class ElytronSslContextTestCase extends AbstractElytronTestCase {
         ALGORITH_VALUE_1 = "PKIX",
         ALGORITH_VALUE_2 = "SunX509",
         KEY_MANAGER_LABEL = "Key Manager",
-        KEY_MANAGERS = "key-managers",
+        KEY_MANAGER = "key-manager",
         TRUST_MANAGER_LABEL = "Trust Manager",
         TRUST_MANAGERS = "trust-managers",
         ALGORITHM = "algorithm",
@@ -75,7 +75,7 @@ public class ElytronSslContextTestCase extends AbstractElytronTestCase {
         Address keyStoreAddress = createKeyStore();
         String keyManagerName = randomAlphanumeric(5), password = randomAlphanumeric(5),
                 keyStoreName = keyStoreAddress.getLastPairValue();
-        Address keyManagerAddress = elyOps.getElytronAddress(KEY_MANAGERS, keyManagerName);
+        Address keyManagerAddress = elyOps.getElytronAddress(KEY_MANAGER, keyManagerName);
         ModelNode expectedCredentialReferenceNode = new ModelNodePropertiesBuilder().addProperty(CLEAR_TEXT, password)
                 .build();
 
@@ -116,7 +116,7 @@ public class ElytronSslContextTestCase extends AbstractElytronTestCase {
     public void removeKeyManagerTest() throws Exception {
         String keyManagerName = randomAlphanumeric(5), password = randomAlphanumeric(5);
         Address keyStoreAddress = createKeyStore(),
-                keyManagerAddress = elyOps.getElytronAddress(KEY_MANAGERS, keyManagerName);
+                keyManagerAddress = elyOps.getElytronAddress(KEY_MANAGER, keyManagerName);
         ModelNode credentialReferenceNode = new ModelNodePropertiesBuilder().addProperty(CLEAR_TEXT, password).build();
         ResourceVerifier keyManagerVerifier = new ResourceVerifier(keyManagerAddress, client);
 
@@ -149,7 +149,7 @@ public class ElytronSslContextTestCase extends AbstractElytronTestCase {
                 newProviders = randomAlphanumeric(5);
         Address originalKeyStoreAddress = createKeyStore(),
                 newKeyStoreAddress = createKeyStore(),
-                keyManagerAddress = elyOps.getElytronAddress(KEY_MANAGERS, keyManagerName);
+                keyManagerAddress = elyOps.getElytronAddress(KEY_MANAGER, keyManagerName);
         ModelNode credentialReferenceNode = new ModelNodePropertiesBuilder().addProperty(CLEAR_TEXT, password).build();
 
         try {
@@ -198,7 +198,7 @@ public class ElytronSslContextTestCase extends AbstractElytronTestCase {
     public void editKeyManagerCredentialReferenceTest() throws Exception {
         String keyManagerName = randomAlphanumeric(5), password = randomAlphanumeric(5);
         Address keyStoreAddress = createKeyStore(),
-                keyManagerAddress = elyOps.getElytronAddress(KEY_MANAGERS, keyManagerName);
+                keyManagerAddress = elyOps.getElytronAddress(KEY_MANAGER, keyManagerName);
         ModelNode originalCredentialReferenceNode = new ModelNodePropertiesBuilder().addProperty(CLEAR_TEXT, password)
                 .build();
 
@@ -398,7 +398,7 @@ public class ElytronSslContextTestCase extends AbstractElytronTestCase {
         String serverSSLContextName = randomAlphanumeric(5), keyManagerName = randomAlphanumeric(5),
                 password = randomAlphanumeric(5);
         Address keyStoreAddress = createKeyStore(),
-                keyManagerAddress = elyOps.getElytronAddress(KEY_MANAGERS, keyManagerName),
+                keyManagerAddress = elyOps.getElytronAddress(KEY_MANAGER, keyManagerName),
                 serverSSLContextAddress = elyOps.getElytronAddress(SERVER_SSL_CONTEXT, serverSSLContextName);
         ModelNode credentialReferenceNode = new ModelNodePropertiesBuilder().addProperty(CLEAR_TEXT, password).build();
 
@@ -411,13 +411,13 @@ public class ElytronSslContextTestCase extends AbstractElytronTestCase {
             wizard.maximizeWindow();
             Editor editor = wizard.getEditor();
             editor.text(NAME, serverSSLContextName);
-            editor.text(KEY_MANAGERS, keyManagerName);
+            editor.text(KEY_MANAGER, keyManagerName);
 
             assertTrue("Dialog should be closed!", wizard.finish());
             assertTrue("Created resource should be present in the table!",
                     page.resourceIsPresentInMainTable(serverSSLContextName));
             new ResourceVerifier(serverSSLContextAddress, client).verifyExists()
-                .verifyAttribute(KEY_MANAGERS, keyManagerName);
+                .verifyAttribute(KEY_MANAGER, keyManagerName);
         } finally {
             ops.removeIfExists(serverSSLContextAddress);
             ops.removeIfExists(keyManagerAddress);
@@ -437,7 +437,7 @@ public class ElytronSslContextTestCase extends AbstractElytronTestCase {
         String serverSSLContextName = randomAlphanumeric(5), keyManagerName = randomAlphanumeric(5),
                 password = randomAlphanumeric(5);
         Address keyStoreAddress = createKeyStore(),
-                keyManagerAddress = elyOps.getElytronAddress(KEY_MANAGERS, keyManagerName),
+                keyManagerAddress = elyOps.getElytronAddress(KEY_MANAGER, keyManagerName),
                 serverSSLContextAddress = elyOps.getElytronAddress(SERVER_SSL_CONTEXT, serverSSLContextName);
         ModelNode credentialReferenceNode = new ModelNodePropertiesBuilder().addProperty(CLEAR_TEXT, password).build(),
                 protocolList = new ModelNodeListBuilder(new ModelNode(TLS_V11)).addNode(new ModelNode(TLS_V12))
@@ -447,7 +447,7 @@ public class ElytronSslContextTestCase extends AbstractElytronTestCase {
         try {
             ops.add(keyManagerAddress, Values.of(ALGORITHM, ALGORITH_VALUE_1).and(KEY_STORE,
                     keyStoreAddress.getLastPairValue()).and(CREDENTIAL_REFERENCE, credentialReferenceNode));
-            ops.add(serverSSLContextAddress, Values.of(KEY_MANAGERS, keyManagerName).and(PROTOCOLS, protocolList));
+            ops.add(serverSSLContextAddress, Values.of(KEY_MANAGER, keyManagerName).and(PROTOCOLS, protocolList));
             serverSSLContextVerifier.verifyExists();
 
             page.navigateToApplication().selectResource(SERVER_SSL_CONTEXT_LABEL).getResourceManager()
@@ -473,7 +473,7 @@ public class ElytronSslContextTestCase extends AbstractElytronTestCase {
         String serverSSLContextName = randomAlphanumeric(5), keyManagerName = randomAlphanumeric(5),
                 password = randomAlphanumeric(5), trustManagerName = randomAlphanumeric(5);
         Address keyStoreAddress = createKeyStore(),
-                keyManagerAddress = elyOps.getElytronAddress(KEY_MANAGERS, keyManagerName),
+                keyManagerAddress = elyOps.getElytronAddress(KEY_MANAGER, keyManagerName),
                 serverSSLContextAddress = elyOps.getElytronAddress(SERVER_SSL_CONTEXT, serverSSLContextName),
                 trustManagerAddress = elyOps.getElytronAddress(TRUST_MANAGERS, trustManagerName);
         ModelNode credentialReferenceNode = new ModelNodePropertiesBuilder().addProperty(CLEAR_TEXT, password).build(),
@@ -485,7 +485,7 @@ public class ElytronSslContextTestCase extends AbstractElytronTestCase {
             ops.add(keyManagerAddress, Values.of(ALGORITHM, ALGORITH_VALUE_1).and(KEY_STORE,
                     keyStoreAddress.getLastPairValue()).and(CREDENTIAL_REFERENCE, credentialReferenceNode))
                     .assertSuccess();
-            ops.add(serverSSLContextAddress, Values.of(KEY_MANAGERS, keyManagerName).and(PROTOCOLS, protocolList))
+            ops.add(serverSSLContextAddress, Values.of(KEY_MANAGER, keyManagerName).and(PROTOCOLS, protocolList))
                     .assertSuccess();
             ops.add(trustManagerAddress, Values.of(ALGORITHM, ALGORITH_VALUE_1)
                     .and(KEY_STORE, keyStoreAddress.getLastPairValue())).assertSuccess();
@@ -522,7 +522,7 @@ public class ElytronSslContextTestCase extends AbstractElytronTestCase {
         String clientSSLContextName = randomAlphanumeric(5), keyManagerName = randomAlphanumeric(5),
                 password = randomAlphanumeric(5), protocolValues = TLS_V11 + "\n" + TLS_V12;
         Address keyStoreAddress = createKeyStore(),
-                keyManagerAddress = elyOps.getElytronAddress(KEY_MANAGERS, keyManagerName),
+                keyManagerAddress = elyOps.getElytronAddress(KEY_MANAGER, keyManagerName),
                 clientSSLContextAddress = elyOps.getElytronAddress(CLIENT_SSL_CONTEXT, clientSSLContextName);
         ModelNode credentialReferenceNode = new ModelNodePropertiesBuilder().addProperty(CLEAR_TEXT, password).build(),
                 expectedProtocolList = new ModelNodeListBuilder(new ModelNode(TLS_V11)).addNode(new ModelNode(TLS_V12))
@@ -537,14 +537,14 @@ public class ElytronSslContextTestCase extends AbstractElytronTestCase {
             wizard.maximizeWindow();
             Editor editor = wizard.getEditor();
             editor.text(NAME, clientSSLContextName);
-            editor.text(KEY_MANAGERS, keyManagerName);
+            editor.text(KEY_MANAGER, keyManagerName);
             editor.text(PROTOCOLS, protocolValues);
 
             assertTrue("Dialog should be closed!", wizard.finish());
             assertTrue("Created resource should be present in the table!",
                     page.resourceIsPresentInMainTable(clientSSLContextName));
             new ResourceVerifier(clientSSLContextAddress, client).verifyExists()
-                .verifyAttribute(KEY_MANAGERS, keyManagerName)
+                .verifyAttribute(KEY_MANAGER, keyManagerName)
                 .verifyAttribute(PROTOCOLS, expectedProtocolList);
         } finally {
             ops.removeIfExists(clientSSLContextAddress);
@@ -565,7 +565,7 @@ public class ElytronSslContextTestCase extends AbstractElytronTestCase {
         String clientSSLContextName = randomAlphanumeric(5), keyManagerName = randomAlphanumeric(5),
                 password = randomAlphanumeric(5);
         Address keyStoreAddress = createKeyStore(),
-                keyManagerAddress = elyOps.getElytronAddress(KEY_MANAGERS, keyManagerName),
+                keyManagerAddress = elyOps.getElytronAddress(KEY_MANAGER, keyManagerName),
                 clientSSLContextAddress = elyOps.getElytronAddress(CLIENT_SSL_CONTEXT, clientSSLContextName);
         ModelNode credentialReferenceNode = new ModelNodePropertiesBuilder().addProperty(CLEAR_TEXT, password).build(),
                 protocolList = new ModelNodeListBuilder(new ModelNode(TLS_V11)).addNode(new ModelNode(TLS_V12))
@@ -575,7 +575,7 @@ public class ElytronSslContextTestCase extends AbstractElytronTestCase {
         try {
             ops.add(keyManagerAddress, Values.of(ALGORITHM, ALGORITH_VALUE_1).and(KEY_STORE,
                     keyStoreAddress.getLastPairValue()).and(CREDENTIAL_REFERENCE, credentialReferenceNode));
-            ops.add(clientSSLContextAddress, Values.of(KEY_MANAGERS, keyManagerName).and(PROTOCOLS, protocolList));
+            ops.add(clientSSLContextAddress, Values.of(KEY_MANAGER, keyManagerName).and(PROTOCOLS, protocolList));
             clientSSLContextVerifier.verifyExists();
 
             page.navigateToApplication().selectResource(CLIENT_SSL_CONTEXT_LABEL).getResourceManager()
@@ -602,7 +602,7 @@ public class ElytronSslContextTestCase extends AbstractElytronTestCase {
                 password = randomAlphanumeric(5), trustManagerName = randomAlphanumeric(5);
         Integer sessionTimeoutValue = 999;
         Address keyStoreAddress = createKeyStore(),
-                keyManagerAddress = elyOps.getElytronAddress(KEY_MANAGERS, keyManagerName),
+                keyManagerAddress = elyOps.getElytronAddress(KEY_MANAGER, keyManagerName),
                 clientSSLContextAddress = elyOps.getElytronAddress(CLIENT_SSL_CONTEXT, clientSSLContextName),
                 trustManagerAddress = elyOps.getElytronAddress(TRUST_MANAGERS, trustManagerName);
         ModelNode credentialReferenceNode = new ModelNodePropertiesBuilder().addProperty(CLEAR_TEXT, password).build(),
@@ -614,7 +614,7 @@ public class ElytronSslContextTestCase extends AbstractElytronTestCase {
             ops.add(keyManagerAddress, Values.of(ALGORITHM, ALGORITH_VALUE_1).and(KEY_STORE,
                     keyStoreAddress.getLastPairValue()).and(CREDENTIAL_REFERENCE, credentialReferenceNode))
                     .assertSuccess();
-            ops.add(clientSSLContextAddress, Values.of(KEY_MANAGERS, keyManagerName).and(PROTOCOLS, protocolList))
+            ops.add(clientSSLContextAddress, Values.of(KEY_MANAGER, keyManagerName).and(PROTOCOLS, protocolList))
                     .assertSuccess();
             ops.add(trustManagerAddress, Values.of(ALGORITHM, ALGORITH_VALUE_1)
                     .and(KEY_STORE, keyStoreAddress.getLastPairValue())).assertSuccess();
