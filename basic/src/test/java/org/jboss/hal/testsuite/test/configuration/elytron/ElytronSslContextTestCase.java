@@ -40,7 +40,7 @@ public class ElytronSslContextTestCase extends AbstractElytronTestCase {
         KEY_MANAGER_LABEL = "Key Manager",
         KEY_MANAGER = "key-manager",
         TRUST_MANAGER_LABEL = "Trust Manager",
-        TRUST_MANAGERS = "trust-managers",
+        TRUST_MANAGER = "trust-manager",
         ALGORITHM = "algorithm",
         CREDENTIAL_REFERENCE_CLEAR_TEXT_IDENTIFIER = "credential-reference-clear-text",
         ALIAS_FILTER = "alias-filter",
@@ -233,7 +233,7 @@ public class ElytronSslContextTestCase extends AbstractElytronTestCase {
     public void addTrustManagerTest() throws Exception {
         Address keyStoreAddress = createKeyStore();
         String trustManagerName = randomAlphanumeric(5), keyStoreName = keyStoreAddress.getLastPairValue();
-        Address trustManagerAddress = elyOps.getElytronAddress(TRUST_MANAGERS, trustManagerName);
+        Address trustManagerAddress = elyOps.getElytronAddress(TRUST_MANAGER, trustManagerName);
 
         page.navigateToApplication().selectResource(TRUST_MANAGER_LABEL);
 
@@ -270,7 +270,7 @@ public class ElytronSslContextTestCase extends AbstractElytronTestCase {
     public void removeTrustManagerTest() throws Exception {
         String trustManagerName = randomAlphanumeric(5);
         Address keyStoreAddress = createKeyStore(),
-                trustManagerAddress = elyOps.getElytronAddress(TRUST_MANAGERS, trustManagerName);
+                trustManagerAddress = elyOps.getElytronAddress(TRUST_MANAGER, trustManagerName);
         ResourceVerifier trustManagerVerifier = new ResourceVerifier(trustManagerAddress, client);
 
         try {
@@ -301,7 +301,7 @@ public class ElytronSslContextTestCase extends AbstractElytronTestCase {
                 newProviderName = randomAlphanumeric(5), newProviders = randomAlphanumeric(5);
         Address originalKeyStoreAddress = createKeyStore(),
                 newKeyStoreAddress = createKeyStore(),
-                trustManagerAddress = elyOps.getElytronAddress(TRUST_MANAGERS, trustManagerName);
+                trustManagerAddress = elyOps.getElytronAddress(TRUST_MANAGER, trustManagerName);
 
         try {
             elyOps.addProviderLoader(newProviders);
@@ -350,7 +350,7 @@ public class ElytronSslContextTestCase extends AbstractElytronTestCase {
         long maximumCertPathValue = 123L;
         Address
             keyStoreAddress = createKeyStore(),
-            trustManagerAddress = elyOps.getElytronAddress(TRUST_MANAGERS, trustManagerName);
+            trustManagerAddress = elyOps.getElytronAddress(TRUST_MANAGER, trustManagerName);
         ModelNode
             expectedFirstCertificateRevocationListNode = new ModelNodePropertiesBuilder()
                 .addProperty(PATH, pathValue)
@@ -475,7 +475,7 @@ public class ElytronSslContextTestCase extends AbstractElytronTestCase {
         Address keyStoreAddress = createKeyStore(),
                 keyManagerAddress = elyOps.getElytronAddress(KEY_MANAGER, keyManagerName),
                 serverSSLContextAddress = elyOps.getElytronAddress(SERVER_SSL_CONTEXT, serverSSLContextName),
-                trustManagerAddress = elyOps.getElytronAddress(TRUST_MANAGERS, trustManagerName);
+                trustManagerAddress = elyOps.getElytronAddress(TRUST_MANAGER, trustManagerName);
         ModelNode credentialReferenceNode = new ModelNodePropertiesBuilder().addProperty(CLEAR_TEXT, password).build(),
                 protocolList = new ModelNodeListBuilder(new ModelNode(TLS_V11)).addNode(new ModelNode(TLS_V12))
                         .build(),
@@ -496,11 +496,11 @@ public class ElytronSslContextTestCase extends AbstractElytronTestCase {
 
             new ConfigChecker.Builder(client, serverSSLContextAddress).configFragment(page.getConfigFragment())
                     .edit(TEXT, PROTOCOLS, TLS_V12)
-                    .edit(TEXT, TRUST_MANAGERS, trustManagerName)
+                    .edit(TEXT, TRUST_MANAGER, trustManagerName)
                     .edit(CHECKBOX, NEED_CLIENT_AUTH, true)
                     .andSave().verifyFormSaved()
                     .verifyAttribute(PROTOCOLS, newProtocolList)
-                    .verifyAttribute(TRUST_MANAGERS, trustManagerName)
+                    .verifyAttribute(TRUST_MANAGER, trustManagerName)
                     .verifyAttribute(NEED_CLIENT_AUTH, true);
         } finally {
             ops.removeIfExists(serverSSLContextAddress);
@@ -604,7 +604,7 @@ public class ElytronSslContextTestCase extends AbstractElytronTestCase {
         Address keyStoreAddress = createKeyStore(),
                 keyManagerAddress = elyOps.getElytronAddress(KEY_MANAGER, keyManagerName),
                 clientSSLContextAddress = elyOps.getElytronAddress(CLIENT_SSL_CONTEXT, clientSSLContextName),
-                trustManagerAddress = elyOps.getElytronAddress(TRUST_MANAGERS, trustManagerName);
+                trustManagerAddress = elyOps.getElytronAddress(TRUST_MANAGER, trustManagerName);
         ModelNode credentialReferenceNode = new ModelNodePropertiesBuilder().addProperty(CLEAR_TEXT, password).build(),
                 protocolList = new ModelNodeListBuilder(new ModelNode(TLS_V11)).addNode(new ModelNode(TLS_V12))
                         .build(),
@@ -625,11 +625,11 @@ public class ElytronSslContextTestCase extends AbstractElytronTestCase {
 
             new ConfigChecker.Builder(client, clientSSLContextAddress).configFragment(page.getConfigFragment())
                     .edit(TEXT, PROTOCOLS, TLS_V12)
-                    .edit(TEXT, TRUST_MANAGERS, trustManagerName)
+                    .edit(TEXT, TRUST_MANAGER, trustManagerName)
                     .edit(TEXT, SESSION_TIMEOUT, sessionTimeoutValue)
                     .andSave().verifyFormSaved()
                     .verifyAttribute(PROTOCOLS, newProtocolList)
-                    .verifyAttribute(TRUST_MANAGERS, trustManagerName)
+                    .verifyAttribute(TRUST_MANAGER, trustManagerName)
                     .verifyAttribute(SESSION_TIMEOUT, sessionTimeoutValue);
         } finally {
             ops.removeIfExists(clientSSLContextAddress);
