@@ -3,6 +3,7 @@ package org.jboss.hal.testsuite.test.configuration.messaging.providerSettings;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Shared;
+import org.jboss.hal.testsuite.fragment.config.messaging.ProviderSettingsWindow;
 import org.jboss.hal.testsuite.page.config.MessagingPage;
 import org.jboss.hal.testsuite.test.configuration.messaging.AbstractMessagingTestCase;
 import org.jboss.hal.testsuite.util.ConfigChecker;
@@ -34,6 +35,8 @@ public class JournalTestCase extends AbstractMessagingTestCase {
 
     private static final Address SERVER_ADDRESS = MESSAGING_SUBSYSTEM.and("server", SERVER_NAME);
 
+    private ProviderSettingsWindow providerSettingsWindow;
+
     @BeforeClass
     public static void setUp() throws IOException {
         operations.add(SERVER_ADDRESS);
@@ -53,7 +56,7 @@ public class JournalTestCase extends AbstractMessagingTestCase {
     @Before
     public void before() {
         page.invokeProviderSettings(SERVER_NAME);
-        page.providerSettingsWindow().switchToJournalTab();
+        providerSettingsWindow = page.providerSettingsWindow().switchToJournalTab();
     }
 
     @After
@@ -93,13 +96,35 @@ public class JournalTestCase extends AbstractMessagingTestCase {
 
     @Test
     public void updateJournalBufferSize() throws Exception {
-        editTextAndVerify(SERVER_ADDRESS, "journal-buffer-size", 1024L);
-        undefineAndVerify(SERVER_ADDRESS, "journal-buffer-size");
+        final String journalBufferSize = "journal-buffer-size";
+        final long journalBufferSizeValue = 1024L;
+
+        new ConfigChecker.Builder(client, SERVER_ADDRESS)
+                .wizardWindow(providerSettingsWindow)
+                .configFragment(providerSettingsWindow.getConfigFragment())
+                .editAndSave(TEXT, journalBufferSize, String.valueOf(journalBufferSizeValue))
+                .verifyFormSaved()
+                .verifyAttribute(journalBufferSize, journalBufferSizeValue);
+
+        page.invokeProviderSettings(SERVER_NAME);
+        providerSettingsWindow = page.providerSettingsWindow().switchToJournalTab();
+
+        new ConfigChecker.Builder(client, SERVER_ADDRESS)
+                .wizardWindow(providerSettingsWindow)
+                .configFragment(providerSettingsWindow.getConfigFragment())
+                .editAndSave(TEXT, journalBufferSize, "")
+                .verifyFormSaved() // undefine
+                .verifyAttributeIsUndefined(journalBufferSize);
     }
 
     @Test
     public void updateJournalBufferTimeout() throws Exception {
-        editTextAndVerify(SERVER_ADDRESS, "journal-buffer-timeout", 1L);
+        new ConfigChecker.Builder(client, SERVER_ADDRESS)
+                .wizardWindow(providerSettingsWindow)
+                .configFragment(providerSettingsWindow.getConfigFragment())
+                .editAndSave(ConfigChecker.InputType.TEXT, "journal-buffer-timeout", String.valueOf(1L))
+                .verifyFormSaved()
+                .verifyAttribute("journal-buffer-timeout", 1L);
     }
 
     @Test
@@ -122,11 +147,21 @@ public class JournalTestCase extends AbstractMessagingTestCase {
         String journalDatasourceAttr = "journal-datasource",
                 journalDatasourceName = "journalDatasource_" + randomAlphanumeric(5);
         try {
-            new ConfigChecker.Builder(client, SERVER_ADDRESS).configFragment(page.getConfigFragment())
-                    .editAndSave(TEXT, journalDatasourceAttr, journalDatasourceName).verifyFormSaved()
+            new ConfigChecker.Builder(client, SERVER_ADDRESS)
+                    .wizardWindow(providerSettingsWindow)
+                    .configFragment(providerSettingsWindow.getConfigFragment())
+                    .editAndSave(TEXT, journalDatasourceAttr, journalDatasourceName)
+                    .verifyFormSaved()
                     .verifyAttribute(journalDatasourceAttr, journalDatasourceName);
-            new ConfigChecker.Builder(client, SERVER_ADDRESS).configFragment(page.getConfigFragment())
-                    .editAndSave(TEXT, journalDatasourceAttr, "").verifyFormSaved() // undefine
+
+            page.invokeProviderSettings(SERVER_NAME);
+            providerSettingsWindow = page.providerSettingsWindow().switchToJournalTab();
+
+            new ConfigChecker.Builder(client, SERVER_ADDRESS)
+                    .wizardWindow(providerSettingsWindow)
+                    .configFragment(providerSettingsWindow.getConfigFragment())
+                    .editAndSave(TEXT, journalDatasourceAttr, "")
+                    .verifyFormSaved() // undefine
                     .verifyAttributeIsUndefined(journalDatasourceAttr);
         } finally {
             // needed to be sure it will be possible to remove JMS server in #tearDown()
@@ -141,11 +176,21 @@ public class JournalTestCase extends AbstractMessagingTestCase {
     public void updateJournalDatabase() throws Exception {
         String journalDatabaseAttr = "journal-database",
                 journalDatabaseName = "journalDatabase_" + randomAlphanumeric(5);
-        new ConfigChecker.Builder(client, SERVER_ADDRESS).configFragment(page.getConfigFragment())
-                .editAndSave(TEXT, journalDatabaseAttr, journalDatabaseName).verifyFormSaved()
+        new ConfigChecker.Builder(client, SERVER_ADDRESS)
+                .wizardWindow(providerSettingsWindow)
+                .configFragment(providerSettingsWindow.getConfigFragment())
+                .editAndSave(TEXT, journalDatabaseAttr, journalDatabaseName)
+                .verifyFormSaved()
                 .verifyAttribute(journalDatabaseAttr, journalDatabaseName);
-        new ConfigChecker.Builder(client, SERVER_ADDRESS).configFragment(page.getConfigFragment())
-                .editAndSave(TEXT, journalDatabaseAttr, "").verifyFormSaved() // undefine
+
+        page.invokeProviderSettings(SERVER_NAME);
+        providerSettingsWindow = page.providerSettingsWindow().switchToJournalTab();
+
+        new ConfigChecker.Builder(client, SERVER_ADDRESS)
+                .wizardWindow(providerSettingsWindow)
+                .configFragment(providerSettingsWindow.getConfigFragment())
+                .editAndSave(TEXT, journalDatabaseAttr, "")
+                .verifyFormSaved() // undefine
                 .verifyAttributeIsUndefined(journalDatabaseAttr);
     }
 
@@ -153,11 +198,21 @@ public class JournalTestCase extends AbstractMessagingTestCase {
     public void updateJournalMessagesTable() throws Exception {
         String journalMessagesTableAttr = "journal-messages-table",
                 journalMessagesTableName = "journalMessagesTable_" + randomAlphanumeric(5);
-        new ConfigChecker.Builder(client, SERVER_ADDRESS).configFragment(page.getConfigFragment())
-                .editAndSave(TEXT, journalMessagesTableAttr, journalMessagesTableName).verifyFormSaved()
+        new ConfigChecker.Builder(client, SERVER_ADDRESS)
+                .wizardWindow(providerSettingsWindow)
+                .configFragment(providerSettingsWindow.getConfigFragment())
+                .editAndSave(TEXT, journalMessagesTableAttr, journalMessagesTableName)
+                .verifyFormSaved()
                 .verifyAttribute(journalMessagesTableAttr, journalMessagesTableName);
-        new ConfigChecker.Builder(client, SERVER_ADDRESS).configFragment(page.getConfigFragment())
-                .editAndSave(TEXT, journalMessagesTableAttr, "").verifyFormSaved() // undefine
+
+        page.invokeProviderSettings(SERVER_NAME);
+        providerSettingsWindow = page.providerSettingsWindow().switchToJournalTab();
+
+        new ConfigChecker.Builder(client, SERVER_ADDRESS)
+                .wizardWindow(providerSettingsWindow)
+                .configFragment(providerSettingsWindow.getConfigFragment())
+                .editAndSave(TEXT, journalMessagesTableAttr, "")
+                .verifyFormSaved() // undefine
                 .verifyAttribute(journalMessagesTableAttr, "MESSAGES"); // default name
     }
 
@@ -165,23 +220,43 @@ public class JournalTestCase extends AbstractMessagingTestCase {
     public void updateJournalLargeMessagesTable() throws Exception {
         String journalLargeMessagesTableAttr = "journal-large-messages-table",
                 journalLargeMessagesTableName = "journalLargeMessagesTable_" + randomAlphanumeric(5);
-        new ConfigChecker.Builder(client, SERVER_ADDRESS).configFragment(page.getConfigFragment())
-                .editAndSave(TEXT, journalLargeMessagesTableAttr, journalLargeMessagesTableName).verifyFormSaved()
+        new ConfigChecker.Builder(client, SERVER_ADDRESS)
+                .wizardWindow(providerSettingsWindow)
+                .configFragment(providerSettingsWindow.getConfigFragment())
+                .editAndSave(TEXT, journalLargeMessagesTableAttr, journalLargeMessagesTableName)
+                .verifyFormSaved()
                 .verifyAttribute(journalLargeMessagesTableAttr, journalLargeMessagesTableName);
-        new ConfigChecker.Builder(client, SERVER_ADDRESS).configFragment(page.getConfigFragment())
-                .editAndSave(TEXT, journalLargeMessagesTableAttr, "").verifyFormSaved() // undefine
-                .verifyAttribute(journalLargeMessagesTableAttr, "LARGE_MESSAGES"); // default name
+
+        page.invokeProviderSettings(SERVER_NAME);
+        providerSettingsWindow = page.providerSettingsWindow().switchToJournalTab();
+
+        new ConfigChecker.Builder(client, SERVER_ADDRESS)
+                .wizardWindow(providerSettingsWindow)
+                .configFragment(providerSettingsWindow.getConfigFragment())
+                .editAndSave(TEXT, journalLargeMessagesTableAttr, "")
+                .verifyFormSaved()
+                .verifyAttribute(journalLargeMessagesTableAttr, "LARGE_MESSAGES");
     }
 
     @Test
     public void updateJournalBindingsTable() throws Exception {
         String journalBindingsTableAttr = "journal-bindings-table",
                 journalBindingsTableName = "journalBindingsTable_" + randomAlphanumeric(5);
-        new ConfigChecker.Builder(client, SERVER_ADDRESS).configFragment(page.getConfigFragment())
-                .editAndSave(TEXT, journalBindingsTableAttr, journalBindingsTableName).verifyFormSaved()
+        new ConfigChecker.Builder(client, SERVER_ADDRESS)
+                .wizardWindow(providerSettingsWindow)
+                .configFragment(providerSettingsWindow.getConfigFragment())
+                .editAndSave(TEXT, journalBindingsTableAttr, journalBindingsTableName)
+                .verifyFormSaved()
                 .verifyAttribute(journalBindingsTableAttr, journalBindingsTableName);
-        new ConfigChecker.Builder(client, SERVER_ADDRESS).configFragment(page.getConfigFragment())
-                .editAndSave(TEXT, journalBindingsTableAttr, "").verifyFormSaved() // undefine
+
+        page.invokeProviderSettings(SERVER_NAME);
+        providerSettingsWindow = page.providerSettingsWindow().switchToJournalTab();
+
+        new ConfigChecker.Builder(client, SERVER_ADDRESS)
+                .wizardWindow(providerSettingsWindow)
+                .configFragment(providerSettingsWindow.getConfigFragment())
+                .editAndSave(TEXT, journalBindingsTableAttr, "")
+                .verifyFormSaved() // undefine
                 .verifyAttribute(journalBindingsTableAttr, "BINDINGS"); // default name
     }
 
@@ -190,8 +265,11 @@ public class JournalTestCase extends AbstractMessagingTestCase {
         String journalPageStoreTableAttr = "journal-page-store-table",
                 journalPageStoreTableName = "journalPageStoreTable_" + randomAlphanumeric(5);
         try {
-            new ConfigChecker.Builder(client, SERVER_ADDRESS).configFragment(page.getConfigFragment())
-                    .editAndSave(TEXT, journalPageStoreTableAttr, journalPageStoreTableName).verifyFormSaved()
+            new ConfigChecker.Builder(client, SERVER_ADDRESS)
+                    .wizardWindow(providerSettingsWindow)
+                    .configFragment(providerSettingsWindow.getConfigFragment())
+                    .editAndSave(TEXT, journalPageStoreTableAttr, journalPageStoreTableName)
+                    .verifyFormSaved()
                     .verifyAttribute(journalPageStoreTableAttr, journalPageStoreTableName);
         } catch (NoSuchElementException e) {
             if (e.getMessage().contains(journalPageStoreTableAttr)) {
@@ -200,8 +278,15 @@ public class JournalTestCase extends AbstractMessagingTestCase {
                 throw e;
             }
         }
-        new ConfigChecker.Builder(client, SERVER_ADDRESS).configFragment(page.getConfigFragment())
-                .editAndSave(TEXT, journalPageStoreTableAttr, "").verifyFormSaved() // undefine
+        page.invokeProviderSettings(SERVER_NAME);
+        providerSettingsWindow = page.providerSettingsWindow().switchToJournalTab();
+
+
+        new ConfigChecker.Builder(client, SERVER_ADDRESS)
+                .wizardWindow(providerSettingsWindow)
+                .configFragment(providerSettingsWindow.getConfigFragment())
+                .editAndSave(TEXT, journalPageStoreTableAttr, "")
+                .verifyFormSaved() // undefine
                 .verifyAttribute(journalPageStoreTableAttr, "PAGE_STORE"); // default name
     }
 }

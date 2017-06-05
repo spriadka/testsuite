@@ -3,20 +3,19 @@ package org.jboss.hal.testsuite.fragment.config.messaging;
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
-import org.jboss.hal.testsuite.fragment.WindowFragment;
+import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
-import java.util.concurrent.TimeUnit;
+public class ProviderSettingsWindow extends WizardWindow {
 
-public class ProviderSettingsWindow extends WindowFragment {
+    private static final By CONFIG_FRAGMENT_SELECTOR = ByJQuery.selector(".default-tabpanel");
 
     public void switchTo(String label) {
         By selector = ByJQuery.selector("div.gwt-Label:contains('" + label + "')");
-        Graphene.waitModel(browser)
-                .withTimeout(500, TimeUnit.MILLISECONDS)
-                .until().element(selector).is().visible();
+        Graphene.waitModel(browser).until().element(selector).is().visible();
         browser.findElement(selector).click();
+        Graphene.waitModel(browser).until().element(CONFIG_FRAGMENT_SELECTOR).is().visible();
     }
 
     public ProviderSettingsWindow switchToClusterCredentialReferenceTab() {
@@ -40,7 +39,9 @@ public class ProviderSettingsWindow extends WindowFragment {
     }
 
     public ConfigFragment getConfigFragment() {
-        final WebElement contentRoot = root.findElement(ByJQuery.selector(".gwt-TabPanelBottom > div:visible"));
-        return Graphene.createPageFragment(ConfigFragment.class, contentRoot);
+        final WebElement contentRoot = root.findElement(CONFIG_FRAGMENT_SELECTOR);
+        ConfigFragment configFragment = Graphene.createPageFragment(ConfigFragment.class, contentRoot);
+        maximize();
+        return configFragment;
     }
 }
