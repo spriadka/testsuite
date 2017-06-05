@@ -20,6 +20,7 @@ import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.OperationException;
 import org.wildfly.extras.creaper.core.online.operations.Operations;
+import org.wildfly.extras.creaper.core.online.operations.Values;
 import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
 
 import java.io.IOException;
@@ -296,5 +297,12 @@ public abstract class AbstractCacheTestCase {
      * Method to remove specific cache type in model - not a test
      */
     protected abstract void deleteCache() throws IOException, OperationException;
+
+    protected void addStoreToCache() throws IOException {
+        //service restart is needed, because default service 'none' is removed and to install new restart must take place
+        operations.add(STORE_ADDRESS, Values.empty()
+                .and("class", "org.infinispan.configuration.cache.SingleFileStoreConfigurationBuilder")
+                .and("allow-resource-service-restart", true));
+    }
 
 }

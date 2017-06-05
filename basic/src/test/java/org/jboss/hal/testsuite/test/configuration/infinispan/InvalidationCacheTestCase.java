@@ -32,7 +32,7 @@ public class InvalidationCacheTestCase extends AbstractCacheTestCase {
     protected void addCache() throws IOException {
         operations.add(CACHE_ADDRESS, Values.of("mode", "SYNC"));
         operations.add(TRANSACTION_ADDRESS);
-        operations.add(STORE_ADDRESS, Values.of("class", "org.infinispan.configuration.cache.SingleFileStoreConfigurationBuilder"));
+        addStoreToCache();
         operations.add(LOCKING_ADDRESS);
     }
 
