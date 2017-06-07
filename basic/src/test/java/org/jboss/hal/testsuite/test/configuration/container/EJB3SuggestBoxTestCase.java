@@ -36,6 +36,8 @@ public class EJB3SuggestBoxTestCase {
     private final String DEFAULT_ENTITY_INSTANCE_POOL = "default-entity-bean-instance-pool";
     private final String DEFAULT_SECURITY_DOMAIN = "default-security-domain";
 
+    private final String SECURITY_DOMAIN_FAIL_MESSAGE = "Probably failed because of https://issues.jboss.org/browse/HAL-1358.";
+
     private static final OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
 
     private final SuggestionResource securityDomainSuggestionResource = new SuggestionResource.Builder()
@@ -137,7 +139,7 @@ public class EJB3SuggestBoxTestCase {
         page.navigate();
         getSecurityDomainSuggestionChecker()
                 .filterSuggestions("jboss")
-                .verifyOnlyRelevantSuggestionWereSuggested();
+                .verifyOnlyRelevantSuggestionWereSuggested(SECURITY_DOMAIN_FAIL_MESSAGE);
     }
 
     @Test
@@ -145,7 +147,7 @@ public class EJB3SuggestBoxTestCase {
         page.navigate();
         getSecurityDomainSuggestionChecker()
                 .filterSuggestions("jboss")
-                .verifyOnlyRelevantSuggestionWereSuggested();
+                .verifyOnlyRelevantSuggestionWereSuggested(SECURITY_DOMAIN_FAIL_MESSAGE);
     }
 
     @Test
@@ -153,7 +155,7 @@ public class EJB3SuggestBoxTestCase {
         page.navigate();
         getSecurityDomainSuggestionChecker()
                 .filterSuggestions("other")
-                .verifyOnlyRelevantSuggestionWereSuggested();
+                .verifyOnlyRelevantSuggestionWereSuggested(SECURITY_DOMAIN_FAIL_MESSAGE);
     }
 
     @Test
@@ -161,7 +163,7 @@ public class EJB3SuggestBoxTestCase {
         page.navigate();
         getSecurityDomainSuggestionChecker()
                 .filterSuggestions("aspi")
-                .verifyOnlyRelevantSuggestionWereSuggested();
+                .verifyOnlyRelevantSuggestionWereSuggested(SECURITY_DOMAIN_FAIL_MESSAGE);
     }
 
     @Test
@@ -169,7 +171,7 @@ public class EJB3SuggestBoxTestCase {
         page.navigate();
         getSecurityDomainSuggestionChecker()
                 .filterSuggestions("s")
-                .verifyOnlyRelevantSuggestionWereSuggested();
+                .verifyOnlyRelevantSuggestionWereSuggested(SECURITY_DOMAIN_FAIL_MESSAGE);
     }
 
     @Test
