@@ -187,7 +187,6 @@ public class ElytronPermissionMapperTestCase extends AbstractElytronTestCase {
                                         .addProperty(ROLES, new ModelNodeListBuilder()
                                                 .addAll(role1name, role2name)
                                                 .build())
-                                        .addUndefinedProperty(PERMISSIONS)
                                         .build())
                                 .build());
         } finally {
@@ -656,6 +655,6 @@ public class ElytronPermissionMapperTestCase extends AbstractElytronTestCase {
         if (strings.length == 0) {
             return "";
         }
-        return "[\"" + String.join("\",\"", strings) + "\"]";
+        return String.join(",", strings);
     }
 }
