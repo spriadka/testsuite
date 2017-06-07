@@ -108,6 +108,15 @@ public class SuggestionChecker {
          * @throws IOException when there was an error during reading real values from model
          */
         public void verifyOnlyRelevantSuggestionWereSuggested() throws IOException {
+            verifyOnlyRelevantSuggestionWereSuggested(null);
+        }
+
+        /**
+         * Verifies that only relevant items were suggested
+         * @param message Error message to append
+         * @throws IOException when there was an error during reading real values from model
+         */
+        public void verifyOnlyRelevantSuggestionWereSuggested(String message) throws IOException {
             List<String> filteredSuggestionFromResource = suggestionResource.readSuggestions().stream()
                     .filter(suggestion -> suggestion.matches(".*(" + Pattern.quote(inputFieldValue) + ").*"))
                     .collect(Collectors.toList());
@@ -116,8 +125,8 @@ public class SuggestionChecker {
             Collections.sort(valuesLabels);
 
             Assert.assertEquals("Non relevant suggestions appeared or some of the are missing, input value: '" + inputFieldValue + "'. " +
-                    "Size expected: '" + filteredSuggestionFromResource.size() + "' vs. size actual: '" + valuesLabels.size() + "'. " +
-                    "If sizes are not equal it is probably because of https://issues.jboss.org/browse/HAL-1169.",
+                            "Size expected: '" + filteredSuggestionFromResource.size() + "' vs. size actual: '" + valuesLabels.size() + "'. " +
+                            (message == null ? "" : message),
                     filteredSuggestionFromResource,
                     valuesLabels);
         }
