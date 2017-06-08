@@ -1,6 +1,7 @@
 package org.jboss.hal.testsuite.test.configuration.elytron;
 
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
+import static org.jboss.hal.testsuite.util.ConfigChecker.InputType.CHECKBOX;
 import static org.jboss.hal.testsuite.util.ConfigChecker.InputType.TEXT;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -24,7 +25,6 @@ import org.jboss.hal.testsuite.util.ModuleUtils;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.junit.AfterClass;
-import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -53,7 +53,9 @@ public class TransformerTestCase extends AbstractElytronTestCase {
         REGEX_PRINCIPAL_TRANSFORMER = "regex-principal-transformer",
         REGEX_PRINCIPAL_TRANSFORMER_LABEL = "Regex",
         PATTERN = "pattern",
-        REPLACEMENT = "replacement";
+        MATCH = "match",
+        REPLACEMENT = "replacement",
+        REPLACE_ALL = "replace-all";
     private static String customTransformerModuleName;
     private static final Path CUSTOM_TRANSFORMER_MODULE_PATH = Paths.get("test", "elytron",
             "transformer" + randomAlphanumeric(5));
@@ -540,7 +542,30 @@ public class TransformerTestCase extends AbstractElytronTestCase {
      */
     @Test
     public void addRegexValidatingPrincipalTransformerTest() throws Exception {
-        Assert.fail("Add test implementation as soon as https://issues.jboss.org/browse/HAL-1341 is fixed.");
+        String
+            regexValidatingPrincipalTransformerName = randomAlphanumeric(5),
+            regexValidatingPrincipalTransformerPattern = randomAlphanumeric(5);
+        Address regexValidatingPrincipalTransformerAddress =
+                elyOps.getElytronAddress(REGEX_PRINCIPAL_TRANSFORMER,
+                        regexValidatingPrincipalTransformerName);
+
+        page.navigateToApplication().selectResource(REGEX_PRINCIPAL_TRANSFORMER_LABEL);
+
+        try {
+            WizardWindow wizard = page.getResourceManager().addResource();
+            Editor editor = wizard.getEditor();
+            editor.text(NAME, regexValidatingPrincipalTransformerName);
+            editor.text(PATTERN, regexValidatingPrincipalTransformerPattern);
+
+            assertTrue("Dialog should be closed!", wizard.finish());
+            assertTrue("Created resource should be present in the table!",
+                    page.resourceIsPresentInMainTable(regexValidatingPrincipalTransformerName));
+            new ResourceVerifier(regexValidatingPrincipalTransformerAddress, client).verifyExists()
+                    .verifyAttribute(PATTERN, regexValidatingPrincipalTransformerPattern);
+        } finally {
+            ops.removeIfExists(regexValidatingPrincipalTransformerAddress);
+            adminOps.reloadIfRequired();
+        }
     }
 
     /**
@@ -582,7 +607,32 @@ public class TransformerTestCase extends AbstractElytronTestCase {
      */
     @Test
     public void editRegexValidatingPrincipalTransformerAttributesTest() throws Exception {
-        Assert.fail("Add test implementation as soon as https://issues.jboss.org/browse/HAL-1341 is fixed.");
+        String regexValidatingPrincipalTransformerName = randomAlphanumeric(5),
+                regexValidatingPrincipalTransformerOriginalPattern = randomAlphanumeric(5),
+                regexValidatingPrincipalTransformerNewPattern = randomAlphanumeric(5);
+        Address regexValidatingPrincipalTransformerAddress =
+                elyOps.getElytronAddress(REGEX_VALIDATING_PRINCIPAL_TRANSFORMER,
+                        regexValidatingPrincipalTransformerName);
+
+        try {
+            ops.add(regexValidatingPrincipalTransformerAddress, Values.of(PATTERN,
+                    regexValidatingPrincipalTransformerOriginalPattern)).assertSuccess();
+
+            page.navigateToApplication().selectResource(REGEX_VALIDATING_PRINCIPAL_TRANSFORMER_LABEL)
+                    .getResourceManager().selectByName(regexValidatingPrincipalTransformerName);
+            page.switchToConfigAreaTab(ATTRIBUTES_LABEL);
+
+            new ConfigChecker.Builder(client, regexValidatingPrincipalTransformerAddress)
+                    .configFragment(page.getConfigFragment())
+                    .edit(TEXT, PATTERN, regexValidatingPrincipalTransformerNewPattern)
+                    .edit(CHECKBOX, MATCH, false)
+                    .andSave().verifyFormSaved()
+                    .verifyAttribute(PATTERN, regexValidatingPrincipalTransformerNewPattern)
+                    .verifyAttribute(MATCH, false);
+        } finally {
+            ops.removeIfExists(regexValidatingPrincipalTransformerAddress);
+            adminOps.reloadIfRequired();
+        }
     }
 
     /**
@@ -594,7 +644,31 @@ public class TransformerTestCase extends AbstractElytronTestCase {
      */
     @Test
     public void addRegexPrincipalTransformerTest() throws Exception {
-        Assert.fail("Add test implementation as soon as https://issues.jboss.org/browse/HAL-1342 is fixed.");
+        String regexPrincipalTransformerName = randomAlphanumeric(5),
+                regexPrincipalTransformerPattern = randomAlphanumeric(5),
+                regexPrincipalTransformerReplacement = randomAlphanumeric(5);
+        Address regexPrincipalTransformerAddress = elyOps
+                .getElytronAddress(REGEX_PRINCIPAL_TRANSFORMER, regexPrincipalTransformerName);
+
+        page.navigateToApplication().selectResourceWithExactLabelMatch(REGEX_PRINCIPAL_TRANSFORMER_LABEL);
+
+        try {
+            WizardWindow wizard = page.getResourceManager().addResource();
+            Editor editor = wizard.getEditor();
+            editor.text(NAME, regexPrincipalTransformerName);
+            editor.text(PATTERN, regexPrincipalTransformerPattern);
+            editor.text(REPLACEMENT, regexPrincipalTransformerReplacement);
+
+            assertTrue("Dialog should be closed!", wizard.finish());
+            assertTrue("Created resource should be present in the table!",
+                    page.resourceIsPresentInMainTable(regexPrincipalTransformerName));
+            new ResourceVerifier(regexPrincipalTransformerAddress, client).verifyExists()
+                    .verifyAttribute(PATTERN, regexPrincipalTransformerPattern)
+                    .verifyAttribute(REPLACEMENT, regexPrincipalTransformerReplacement);
+        } finally {
+            ops.removeIfExists(regexPrincipalTransformerAddress);
+            adminOps.reloadIfRequired();
+        }
     }
 
     /**
@@ -638,7 +712,37 @@ public class TransformerTestCase extends AbstractElytronTestCase {
      */
     @Test
     public void editRegexPrincipalTransformerAttributesTest() throws Exception {
-        Assert.fail("Add test implementation as soon as https://issues.jboss.org/browse/HAL-1342 is fixed.");
+        String regexPrincipalTransformerName = randomAlphanumeric(5),
+                regexPrincipalTransformerOriginalPattern = randomAlphanumeric(5),
+                regexPrincipalTransformerNewPattern = randomAlphanumeric(5),
+                regexPrincipalTransformerOriginalReplacement = randomAlphanumeric(5),
+                regexPrincipalTransformerNewReplacement = randomAlphanumeric(5);
+        Address regexPrincipalTransformerAddress =
+                elyOps.getElytronAddress(REGEX_PRINCIPAL_TRANSFORMER,
+                        regexPrincipalTransformerName);
+
+        try {
+            ops.add(regexPrincipalTransformerAddress,
+                    Values.of(PATTERN, regexPrincipalTransformerOriginalPattern)
+                    .and(REPLACEMENT, regexPrincipalTransformerOriginalReplacement)).assertSuccess();
+
+            page.navigateToApplication().selectResourceWithExactLabelMatch(REGEX_PRINCIPAL_TRANSFORMER_LABEL)
+                    .getResourceManager().selectByName(regexPrincipalTransformerName);
+            page.switchToConfigAreaTab(ATTRIBUTES_LABEL);
+
+            new ConfigChecker.Builder(client, regexPrincipalTransformerAddress)
+                    .configFragment(page.getConfigFragment())
+                    .edit(TEXT, PATTERN, regexPrincipalTransformerNewPattern)
+                    .edit(CHECKBOX, REPLACE_ALL, true)
+                    .edit(TEXT, REPLACEMENT, regexPrincipalTransformerNewReplacement)
+                    .andSave().verifyFormSaved()
+                    .verifyAttribute(PATTERN, regexPrincipalTransformerNewPattern)
+                    .verifyAttribute(REPLACE_ALL, true)
+                    .verifyAttribute(REPLACEMENT, regexPrincipalTransformerNewReplacement);
+        } finally {
+            ops.removeIfExists(regexPrincipalTransformerAddress);
+            adminOps.reloadIfRequired();
+        }
     }
 
     private Address createRandomConstantTransformer() throws IOException {
