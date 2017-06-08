@@ -24,9 +24,12 @@ package org.jboss.hal.testsuite.category;
 
 /**
  * <p>Intended to be used only as a JUnit Category designation parameter
- * in&nbsp;{@link org.junit.experimental.categories.Category} annotation</p>
+ * in&nbsp;{@link org.junit.experimental.categories.Category} annotation.
+ * It is not necessary to be used any more.
+ * Tests without @Standalone or @Domain annotation will be run in both modes.</p>
  * Created by pjelinek on Mar 31, 2015
  */
+@Deprecated
 public interface Shared {
 
 }

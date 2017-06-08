@@ -26,7 +26,7 @@ import java.io.IOException;
  * @author Jan Kasik
  *         Created on 8.9.15.
  */
-public class EETestCaseAbstract {
+public abstract class EETestCaseAbstract {
 
     @Drone
     protected WebDriver browser;
