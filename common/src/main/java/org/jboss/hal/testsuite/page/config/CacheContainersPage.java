@@ -76,7 +76,7 @@ public class CacheContainersPage extends ConfigurationPage implements Navigatabl
 
     public void navigateAndRemoveCacheContainer(String cacheContainer) {
         navigateAndInvokeActionOnCacheContainer(cacheContainer, "Remove");
-        Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirm();
+        Console.withBrowser(browser).openedWindow(ConfirmationWindow.class).confirmAndDismissReloadRequiredMessage();
     }
 
     public ConfigFragment getSettingsConfig() {

@@ -24,6 +24,7 @@ import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.OperationException;
 import org.wildfly.extras.creaper.core.online.operations.Operations;
+import org.wildfly.extras.creaper.core.online.operations.Values;
 import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
 
 import java.io.IOException;
@@ -74,7 +75,7 @@ public class CacheContainersTestCase {
     public static void beforeClass() throws IOException, TimeoutException, InterruptedException {
         ops.add(CACHE_CONTAINER_TBR_ADDRESS).assertSuccess();
         ops.add(CACHE_CONTAINER_ADDRESS).assertSuccess();
-        ops.add(TRANSPORT_ADDRESS).assertSuccess();
+        ops.headers(Values.of("allow-resource-service-restart", true)).add(TRANSPORT_ADDRESS).assertSuccess();
         ops.add(LOCAL_CACHE_ADDRESS).assertSuccess();
         adminOps.reloadIfRequired();
     }
@@ -106,7 +107,7 @@ public class CacheContainersTestCase {
 
     @Test
     public void removeCacheContainer() throws Exception {
-        page.navigateAndRemoveCacheContainer(CACHE_CONTAINER_TBR_NAME);
+        page.navigateAndRemoveCacheContainer(CACHE_CONTAINER_TBR_ADDRESS.getLastPairValue());
         new ResourceVerifier(CACHE_CONTAINER_TBR_ADDRESS, client).verifyDoesNotExist();
     }
 
