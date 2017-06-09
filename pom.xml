@@ -307,10 +307,9 @@
         <arquillian.launch>server</arquillian.launch>
         <suite.mode>standalone</suite.mode>
         <suite.server>wildfly</suite.server>
-        <test.category>
-          org.jboss.hal.testsuite.category.Shared,
-          org.jboss.hal.testsuite.category.Standalone
-        </test.category>
+        <test.excluded.category>
+          org.jboss.hal.testsuite.category.Domain
+        </test.excluded.category>
       </properties>
       <dependencies>
         <dependency>
@@ -328,10 +327,9 @@
         <suite.mode>domain</suite.mode>
         <suite.server>wildfly</suite.server>
         <arq.managementPort>9999</arq.managementPort>
-        <test.category>
-          org.jboss.hal.testsuite.category.Shared,
-          org.jboss.hal.testsuite.category.Domain
-        </test.category>
+        <test.excluded.category>
+          org.jboss.hal.testsuite.category.Standalone
+        </test.excluded.category>
       </properties>
       <dependencies>
         <dependency>
@@ -385,7 +383,7 @@
             <arq.managementPort>${arq.managementPort}</arq.managementPort>
           </systemPropertyVariables>
           <argLine>${argLine}</argLine>
-          <groups>${test.category}</groups>
+          <excludedGroups>${test.excluded.category}</excludedGroups>
         </configuration>
       </plugin>
 

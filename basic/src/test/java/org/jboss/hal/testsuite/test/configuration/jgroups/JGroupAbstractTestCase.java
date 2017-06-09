@@ -38,7 +38,7 @@ import java.util.concurrent.TimeoutException;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-public class JGroupAbstractTestCase {
+public abstract class JGroupAbstractTestCase {
 
     protected static Address BASE_ADDRESS;
     protected static Address PROTOCOL_ADDRESS;
