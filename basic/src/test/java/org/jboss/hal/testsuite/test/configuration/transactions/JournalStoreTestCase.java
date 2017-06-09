@@ -37,6 +37,28 @@ public class JournalStoreTestCase extends StoreTestCaseAbstract {
     }
 
     @Test
+    public void toggleUseJournalStore() throws Exception {
+        page.navigate();
+        page.switchToStore();
+
+        final ModelNodeResult originalModelNodeResult = operations.readAttribute(TRANSACTIONS_ADDRESS, USE_JOURNAL_STORE);
+        originalModelNodeResult.assertSuccess();
+        final boolean originalValue = originalModelNodeResult.booleanValue();
+
+        new ConfigChecker.Builder(client, TRANSACTIONS_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .editAndSave(ConfigChecker.InputType.CHECKBOX, USE_JOURNAL_STORE, !originalValue)
+                .verifyFormSaved()
+                .verifyAttribute(USE_JOURNAL_STORE, !originalValue);
+
+        new ConfigChecker.Builder(client, TRANSACTIONS_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .editAndSave(ConfigChecker.InputType.CHECKBOX, USE_JOURNAL_STORE, originalValue)
+                .verifyFormSaved()
+                .verifyAttribute(USE_JOURNAL_STORE, originalValue);
+    }
+
+    @Test
     public void testSettingBothStoresAtOnce() throws Exception {
         page.navigate();
         page.switchToStore();

@@ -8,7 +8,6 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.wildfly.extras.creaper.commands.datasources.AddDataSource;
-import org.wildfly.extras.creaper.commands.datasources.RemoveDataSource;
 import org.wildfly.extras.creaper.commands.foundation.online.SnapshotBackup;
 import org.wildfly.extras.creaper.core.CommandFailedException;
 import org.wildfly.extras.creaper.core.online.ModelNodeResult;
@@ -21,8 +20,6 @@ import java.util.concurrent.TimeoutException;
 public class JDBCStoreTestCase extends StoreTestCaseAbstract {
 
     private static final SnapshotBackup snapshotBackup = new SnapshotBackup();
-
-    private static String JDBC_STORE_DATASOURCE_NAME;
 
     private static final String
             USE_JDBC_STORE = "use-jdbc-store",
@@ -39,18 +36,38 @@ public class JDBCStoreTestCase extends StoreTestCaseAbstract {
     public static void beforeClass() throws IOException, CommandFailedException, TimeoutException, InterruptedException {
         client.apply(snapshotBackup.backup());
 
-        JDBC_STORE_DATASOURCE_NAME = createDatasource();
         operations.batch(new Batch()
-                .writeAttribute(TRANSACTIONS_ADDRESS, JDBC_STORE_DATASOURCE, JDBC_STORE_DATASOURCE_NAME)
+                .writeAttribute(TRANSACTIONS_ADDRESS, JDBC_STORE_DATASOURCE, createDatasource())
                 .writeAttribute(TRANSACTIONS_ADDRESS, USE_JDBC_STORE, true)
         ).assertSuccess();
     }
 
     @AfterClass
     public static void afterClass() throws InterruptedException, TimeoutException, IOException, CommandFailedException {
-        client.apply(new RemoveDataSource(JDBC_STORE_DATASOURCE_NAME));
         client.apply(snapshotBackup.restore());
         administration.restartIfRequired();
+    }
+
+    @Test
+    public void toggleUseJdbcStore() throws Exception {
+        page.navigate();
+        page.switchToStore();
+
+        final ModelNodeResult originalModelNodeResult = operations.readAttribute(TRANSACTIONS_ADDRESS, USE_JDBC_STORE);
+        originalModelNodeResult.assertSuccess();
+        final boolean originalValue = originalModelNodeResult.booleanValue();
+
+        new ConfigChecker.Builder(client, TRANSACTIONS_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .editAndSave(ConfigChecker.InputType.CHECKBOX, USE_JDBC_STORE, !originalValue)
+                .verifyFormSaved()
+                .verifyAttribute(USE_JDBC_STORE, !originalValue);
+
+        new ConfigChecker.Builder(client, TRANSACTIONS_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .editAndSave(ConfigChecker.InputType.CHECKBOX, USE_JDBC_STORE, originalValue)
+                .verifyFormSaved()
+                .verifyAttribute(USE_JDBC_STORE, originalValue);
     }
 
     @Test
@@ -168,15 +185,11 @@ public class JDBCStoreTestCase extends StoreTestCaseAbstract {
 
         final String datasource = createDatasource();
 
-        try {
-            new ConfigChecker.Builder(client, TRANSACTIONS_ADDRESS)
-                    .configFragment(page.getConfigFragment())
-                    .editAndSave(ConfigChecker.InputType.TEXT, JDBC_STATE_STORE_TABLE_PREFIX, datasource)
-                    .verifyFormSaved()
-                    .verifyAttribute(JDBC_STATE_STORE_TABLE_PREFIX, datasource);
-        } finally {
-            client.apply(new RemoveDataSource(datasource));
-        }
+        new ConfigChecker.Builder(client, TRANSACTIONS_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .editAndSave(ConfigChecker.InputType.TEXT, JDBC_STORE_DATASOURCE, datasource)
+                .verifyFormSaved()
+                .verifyAttribute(JDBC_STORE_DATASOURCE, datasource);
     }
 
     private static String createDatasource() throws CommandFailedException {
