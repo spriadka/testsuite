@@ -8,6 +8,7 @@ import org.jboss.hal.testsuite.fragment.ConfigAreaFragment;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.config.undertow.AddApplicationSecurityDomainWizard;
 import org.jboss.hal.testsuite.fragment.config.undertow.AddSSOWizard;
+import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
 import org.jboss.hal.testsuite.util.Console;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
@@ -41,6 +42,11 @@ public class ApplicationSecurityDomainPage extends ConfigurationPage {
     public AddSSOWizard enableSSO() {
         clickButton("Enable Single Sign On");
         return Console.withBrowser(browser).openedWizard(AddSSOWizard.class);
+    }
+
+    public ConfirmationWindow disableSSO() {
+        clickButton("Disable Single Sign On");
+        return Console.withBrowser(browser).openedWindow(ConfirmationWindow.class);
     }
 
     public ConfigFragment switchToSSOConfigTab() {
