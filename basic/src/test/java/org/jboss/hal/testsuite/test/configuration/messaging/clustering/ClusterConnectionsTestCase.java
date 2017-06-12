@@ -3,7 +3,6 @@ package org.jboss.hal.testsuite.test.configuration.messaging.clustering;
 import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.page.config.MessagingPage;
 import org.jboss.hal.testsuite.test.configuration.messaging.AbstractMessagingTestCase;
@@ -12,7 +11,6 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.OperationException;
@@ -21,11 +19,7 @@ import org.wildfly.extras.creaper.core.online.operations.Values;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
-/**
- * Created by pcyprian on 3.9.15.
- */
 @RunWith(Arquillian.class)
-@Category(Shared.class)
 public class ClusterConnectionsTestCase extends AbstractMessagingTestCase {
 
     private static final String CC_NAME = "test-cluster_" + RandomStringUtils.randomAlphanumeric(6);
@@ -36,17 +30,23 @@ public class ClusterConnectionsTestCase extends AbstractMessagingTestCase {
     private static final Address CC_TBA_ADDRESS = DEFAULT_MESSAGING_SERVER.and("cluster-connection", CC_TBA_NAME);
     private static final Address CC_TBR_ADDRESS = DEFAULT_MESSAGING_SERVER.and("cluster-connection", CC_TBR_NAME);
 
+    private static final String
+            CLUSTER_CONNECTION_ADDRESS = "cluster-connection-address",
+            DISCOVERY_GROUP = "discovery-group",
+            CONNECTOR_NAME = "connector-name",
+            JMS = "jms";
+
     @Page
     private MessagingPage page;
 
     @BeforeClass
     public static void setUp() throws Exception {
-        operations.add(CC_ADDRESS, Values.of("cluster-connection-address", "jms")
-                .and("connector-name", "http-connector"));
-        new ResourceVerifier(CC_ADDRESS, client).verifyExists();
-        operations.add(CC_TBR_ADDRESS, Values.of("cluster-connection-address", "jms")
-                .and("connector-name", "http-connector"));
-        new ResourceVerifier(CC_TBR_ADDRESS, client).verifyExists();
+        operations.add(CC_ADDRESS, Values.of(CLUSTER_CONNECTION_ADDRESS, JMS)
+                .and(DISCOVERY_GROUP, RandomStringUtils.randomAlphabetic(7))
+                .and(CONNECTOR_NAME, "http-connector")).assertSuccess();
+        operations.add(CC_TBR_ADDRESS, Values.of(CLUSTER_CONNECTION_ADDRESS, JMS)
+                .and(DISCOVERY_GROUP, RandomStringUtils.randomAlphabetic(7))
+                .and(CONNECTOR_NAME, "http-connector")).assertSuccess();
         administration.reloadIfRequired();
     }
 
@@ -69,12 +69,13 @@ public class ClusterConnectionsTestCase extends AbstractMessagingTestCase {
         operations.removeIfExists(CC_TBA_ADDRESS);
     }
 
-    @Test //https://issues.jboss.org/browse/HAL-827
+    @Test
     public void addClusterConnection() throws Exception {
         page.addClusterConnection()
-                .clusterConnectionAddress("jms")
+                .clusterConnectionAddress(JMS)
                 .name(CC_TBA_NAME)
                 .connectorName("http-connector")
+                .discoveryGroup(RandomStringUtils.randomAlphabetic(7))
                 .saveAndDismissReloadRequiredWindow();
         administration.reloadIfRequired();
         new ResourceVerifier(CC_TBA_ADDRESS, client).verifyExists();
