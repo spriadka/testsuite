@@ -67,7 +67,7 @@ public class ConfigurationChangesResource implements ConfigurationChangesProvide
             ConfigurationChange configurationChange = new ConfigurationChangeBuilder()
                     .setDatetime(parseDate(change.get("operation-date").asString()))
                     .setAccessMechanism(change.get("access-mechanism").asString())
-                    .setRemoteAddress(change.get("remote-address").asString())
+                    .setRemoteAddress(formRemoteAddress(change.get("remote-address").asString()))
                     .setResult(change.get("outcome").asString())
                     .setOperation(extractOperationName(change))
                     .setResourceAddress(StringUtils.abbreviate(extractResourceAddress(change), 66))
@@ -80,6 +80,18 @@ public class ConfigurationChangesResource implements ConfigurationChangesProvide
         }
 
         return changes;
+    }
+
+    //from HAL
+    private String formRemoteAddress(String originalRemoteAddress) {
+        if (originalRemoteAddress.contains("/")) {
+            String[] clientAddressArr = originalRemoteAddress.split("/");
+            originalRemoteAddress = clientAddressArr[0];
+            // there are situations where there is no value before the slash
+            if (originalRemoteAddress.length() == 0)
+                originalRemoteAddress = clientAddressArr[1];
+        }
+        return originalRemoteAddress;
     }
 
     //from HAL
