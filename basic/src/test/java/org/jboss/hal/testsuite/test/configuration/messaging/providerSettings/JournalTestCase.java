@@ -100,7 +100,6 @@ public class JournalTestCase extends AbstractMessagingTestCase {
         final long journalBufferSizeValue = 1024L;
 
         new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                .wizardWindow(providerSettingsWindow)
                 .configFragment(providerSettingsWindow.getConfigFragment())
                 .editAndSave(TEXT, journalBufferSize, String.valueOf(journalBufferSizeValue))
                 .verifyFormSaved()
@@ -110,7 +109,6 @@ public class JournalTestCase extends AbstractMessagingTestCase {
         providerSettingsWindow = page.providerSettingsWindow().switchToJournalTab();
 
         new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                .wizardWindow(providerSettingsWindow)
                 .configFragment(providerSettingsWindow.getConfigFragment())
                 .editAndSave(TEXT, journalBufferSize, "")
                 .verifyFormSaved() // undefine
@@ -120,7 +118,6 @@ public class JournalTestCase extends AbstractMessagingTestCase {
     @Test
     public void updateJournalBufferTimeout() throws Exception {
         new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                .wizardWindow(providerSettingsWindow)
                 .configFragment(providerSettingsWindow.getConfigFragment())
                 .editAndSave(ConfigChecker.InputType.TEXT, "journal-buffer-timeout", String.valueOf(1L))
                 .verifyFormSaved()
@@ -148,7 +145,6 @@ public class JournalTestCase extends AbstractMessagingTestCase {
                 journalDatasourceName = "journalDatasource_" + randomAlphanumeric(5);
         try {
             new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                    .wizardWindow(providerSettingsWindow)
                     .configFragment(providerSettingsWindow.getConfigFragment())
                     .editAndSave(TEXT, journalDatasourceAttr, journalDatasourceName)
                     .verifyFormSaved()
@@ -158,7 +154,6 @@ public class JournalTestCase extends AbstractMessagingTestCase {
             providerSettingsWindow = page.providerSettingsWindow().switchToJournalTab();
 
             new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                    .wizardWindow(providerSettingsWindow)
                     .configFragment(providerSettingsWindow.getConfigFragment())
                     .editAndSave(TEXT, journalDatasourceAttr, "")
                     .verifyFormSaved() // undefine
@@ -177,7 +172,6 @@ public class JournalTestCase extends AbstractMessagingTestCase {
         String journalDatabaseAttr = "journal-database",
                 journalDatabaseName = "journalDatabase_" + randomAlphanumeric(5);
         new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                .wizardWindow(providerSettingsWindow)
                 .configFragment(providerSettingsWindow.getConfigFragment())
                 .editAndSave(TEXT, journalDatabaseAttr, journalDatabaseName)
                 .verifyFormSaved()
@@ -187,7 +181,6 @@ public class JournalTestCase extends AbstractMessagingTestCase {
         providerSettingsWindow = page.providerSettingsWindow().switchToJournalTab();
 
         new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                .wizardWindow(providerSettingsWindow)
                 .configFragment(providerSettingsWindow.getConfigFragment())
                 .editAndSave(TEXT, journalDatabaseAttr, "")
                 .verifyFormSaved() // undefine
@@ -199,7 +192,6 @@ public class JournalTestCase extends AbstractMessagingTestCase {
         String journalMessagesTableAttr = "journal-messages-table",
                 journalMessagesTableName = "journalMessagesTable_" + randomAlphanumeric(5);
         new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                .wizardWindow(providerSettingsWindow)
                 .configFragment(providerSettingsWindow.getConfigFragment())
                 .editAndSave(TEXT, journalMessagesTableAttr, journalMessagesTableName)
                 .verifyFormSaved()
@@ -209,7 +201,6 @@ public class JournalTestCase extends AbstractMessagingTestCase {
         providerSettingsWindow = page.providerSettingsWindow().switchToJournalTab();
 
         new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                .wizardWindow(providerSettingsWindow)
                 .configFragment(providerSettingsWindow.getConfigFragment())
                 .editAndSave(TEXT, journalMessagesTableAttr, "")
                 .verifyFormSaved() // undefine
@@ -221,7 +212,6 @@ public class JournalTestCase extends AbstractMessagingTestCase {
         String journalLargeMessagesTableAttr = "journal-large-messages-table",
                 journalLargeMessagesTableName = "journalLargeMessagesTable_" + randomAlphanumeric(5);
         new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                .wizardWindow(providerSettingsWindow)
                 .configFragment(providerSettingsWindow.getConfigFragment())
                 .editAndSave(TEXT, journalLargeMessagesTableAttr, journalLargeMessagesTableName)
                 .verifyFormSaved()
@@ -231,7 +221,6 @@ public class JournalTestCase extends AbstractMessagingTestCase {
         providerSettingsWindow = page.providerSettingsWindow().switchToJournalTab();
 
         new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                .wizardWindow(providerSettingsWindow)
                 .configFragment(providerSettingsWindow.getConfigFragment())
                 .editAndSave(TEXT, journalLargeMessagesTableAttr, "")
                 .verifyFormSaved()
@@ -243,7 +232,6 @@ public class JournalTestCase extends AbstractMessagingTestCase {
         String journalBindingsTableAttr = "journal-bindings-table",
                 journalBindingsTableName = "journalBindingsTable_" + randomAlphanumeric(5);
         new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                .wizardWindow(providerSettingsWindow)
                 .configFragment(providerSettingsWindow.getConfigFragment())
                 .editAndSave(TEXT, journalBindingsTableAttr, journalBindingsTableName)
                 .verifyFormSaved()
@@ -253,7 +241,6 @@ public class JournalTestCase extends AbstractMessagingTestCase {
         providerSettingsWindow = page.providerSettingsWindow().switchToJournalTab();
 
         new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                .wizardWindow(providerSettingsWindow)
                 .configFragment(providerSettingsWindow.getConfigFragment())
                 .editAndSave(TEXT, journalBindingsTableAttr, "")
                 .verifyFormSaved() // undefine
@@ -266,7 +253,6 @@ public class JournalTestCase extends AbstractMessagingTestCase {
                 journalPageStoreTableName = "journalPageStoreTable_" + randomAlphanumeric(5);
         try {
             new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                    .wizardWindow(providerSettingsWindow)
                     .configFragment(providerSettingsWindow.getConfigFragment())
                     .editAndSave(TEXT, journalPageStoreTableAttr, journalPageStoreTableName)
                     .verifyFormSaved()
@@ -283,7 +269,6 @@ public class JournalTestCase extends AbstractMessagingTestCase {
 
 
         new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                .wizardWindow(providerSettingsWindow)
                 .configFragment(providerSettingsWindow.getConfigFragment())
                 .editAndSave(TEXT, journalPageStoreTableAttr, "")
                 .verifyFormSaved() // undefine

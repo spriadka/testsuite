@@ -25,7 +25,6 @@ package org.jboss.hal.testsuite.util;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
-import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
 import org.junit.Assert;
 import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
 import org.wildfly.extras.creaper.core.online.operations.Address;
@@ -42,7 +41,6 @@ public final class ConfigChecker {
 
     private final OnlineManagementClient client;
     private final Address resourceAddress;
-    private final WizardWindow wizardWindow;
     private boolean saved;
 
     /**
@@ -86,22 +84,13 @@ public final class ConfigChecker {
             throws IOException, InterruptedException, TimeoutException {
         this.client = builder.client;
         this.resourceAddress = builder.resourceAddress;
-        this.wizardWindow = builder.wizardWindow;
         Editor editor = builder.config.edit();
         for (Input input : builder.inputList) {
             enter(editor, input);
         }
-        if (wizardWindow == null) {
-            this.saved = builder.config.save();
-        } else {
-            this.saved = wizardWindow.saveAndDismissReloadRequiredWindow();
-        }
+        this.saved = builder.config.save();
         if (!this.saved) {
-            if (wizardWindow == null) {
-                builder.config.cancel(); // cleanup
-            } else {
-                wizardWindow.cancelAndDismissReloadRequiredWindow();
-            }
+            builder.config.cancel(); // cleanup
         }
     }
 
@@ -159,7 +148,6 @@ public final class ConfigChecker {
         private final Address resourceAddress;
         private ConfigFragment config;
         private List<Input> inputList;
-        private WizardWindow wizardWindow;
 
         public Builder(OnlineManagementClient client, Address resourceAddress) {
             this.client = client;
@@ -195,16 +183,6 @@ public final class ConfigChecker {
                 this.inputList = new ArrayList<>();
             }
             this.inputList.add(new Input(inputType, identifier, attrValue, inputMethod));
-            return this;
-        }
-
-        /**
-         * Set wizard window to config checker in case the configuration fragment is placed inside one. When setting it,
-         * different method will be used to determined whether the form was saved properly.
-         * @param wizardWindow containing configFragment
-         */
-        public Builder wizardWindow(WizardWindow wizardWindow) {
-            this.wizardWindow = wizardWindow;
             return this;
         }
 
