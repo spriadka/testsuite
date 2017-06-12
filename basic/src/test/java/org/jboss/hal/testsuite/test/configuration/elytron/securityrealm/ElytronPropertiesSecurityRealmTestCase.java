@@ -24,7 +24,6 @@ public class ElytronPropertiesSecurityRealmTestCase extends AbstractElytronTestC
 
     private static final String
             USERS_PROPERTIES = "users-properties",
-            USERS_PROPERTIES_PATH = "users-properties-path",
             GROUPS_PROPERTIES = "groups-properties",
             GROUPS_ATTRIBUTE = "groups-attribute",
             PROPERTIES_REALM = "properties-realm",
@@ -64,8 +63,8 @@ public class ElytronPropertiesSecurityRealmTestCase extends AbstractElytronTestC
                     page.getResourceManager().isResourcePresent(realmAddress.getLastPairValue()));
 
             new ResourceVerifier(realmAddress, client).verifyExists()
-                    .verifyAttribute(RELATIVE_TO, relativeToValue)
-                    .verifyAttribute(USERS_PROPERTIES_PATH, usersPropertiesPathValue);
+                    .verifyAttribute(USERS_PROPERTIES + "." + RELATIVE_TO, relativeToValue)
+                    .verifyAttribute(USERS_PROPERTIES + "." + PATH, usersPropertiesPathValue);
         } finally {
             ops.removeIfExists(realmAddress);
             adminOps.reloadIfRequired();
