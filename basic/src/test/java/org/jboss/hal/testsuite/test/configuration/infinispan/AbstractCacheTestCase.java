@@ -304,7 +304,7 @@ public abstract class AbstractCacheTestCase {
         //service restart is needed, because default service 'none' is removed and to install new restart must take place
         operations.headers(Values.of("allow-resource-service-restart", true))
                 .add(storeAddress)
-                .assertSuccess();
+                .assertSuccess("Probably fails because of https://issues.jboss.org/browse/WFLY-8921");
         administration.reloadIfRequired();
         return storeAddress;
     }

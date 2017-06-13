@@ -14,4 +14,9 @@ public class AddBroadcastGroupWizard extends WizardWindow {
         return this;
     }
 
+    public AddBroadcastGroupWizard connectors(String... connectors) {
+        getEditor().text("connectors", String.join("\n", connectors));
+        return this;
+    }
+
 }

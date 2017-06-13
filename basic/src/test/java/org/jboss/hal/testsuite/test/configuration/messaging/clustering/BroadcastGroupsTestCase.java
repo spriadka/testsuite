@@ -4,18 +4,16 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.dmr.ModelNode;
-import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
+import org.jboss.hal.testsuite.dmr.ModelNodeGenerator;
 import org.jboss.hal.testsuite.page.config.MessagingPage;
 import org.jboss.hal.testsuite.test.configuration.messaging.AbstractMessagingTestCase;
 import org.jboss.hal.testsuite.util.ConfigChecker;
 import org.junit.AfterClass;
-import org.junit.Assert;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
+import org.wildfly.extras.creaper.core.CommandFailedException;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.OperationException;
 import org.wildfly.extras.creaper.core.online.operations.Values;
@@ -23,102 +21,186 @@ import org.wildfly.extras.creaper.core.online.operations.Values;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
-/**
- * Created by pcyprian on 2.9.15.
- */
 @RunWith(Arquillian.class)
-@Category(Shared.class)
 public class BroadcastGroupsTestCase extends AbstractMessagingTestCase {
+
     private static final String
-            SERVER_NAME = "test-server_" + RandomStringUtils.randomAlphanumeric(6),
-            CONNECTOR_NAME = "connector_" + RandomStringUtils.randomAlphanumeric(6),
-            BG_NAME = "bg-group-test_" + RandomStringUtils.randomAlphanumeric(6),
-            BG_TBR_NAME = "bg-group-test-TBR_" + RandomStringUtils.randomAlphanumeric(6),
-            BG_TBA_NAME = "bg-group-test-TBA_" + RandomStringUtils.randomAlphanumeric(6),
-            BROADCAST_PERIOD = "broadcast-period",
-            CONNECTORS = "connectors",
             HAL1327_FAIL_MESSAGE = "Probably fails because of https://issues.jboss.org/browse/HAL-1327",
             HAL1328_FAIL_MESSAGE = "Probably fails because of https://issues.jboss.org/browse/HAL-1328",
             HAL1329_FAIL_MESSAGE = "Probably fails becasue of https://issues.jboss.org/browse/HAL-1329";
 
-    private static final Address NEW_SERVER = MESSAGING_SUBSYSTEM.and("server", SERVER_NAME);
-    private static final Address CONNECTOR_ADDRESS = NEW_SERVER.and("connector", CONNECTOR_NAME);
-    private static final Address BG_ADDRESS = NEW_SERVER.and("broadcast-group", BG_NAME);
-    private static final Address BG_TBA_ADDRESS = NEW_SERVER.and("broadcast-group", BG_TBA_NAME);
-    private static final Address BG_TBR_ADDRESS = NEW_SERVER.and("broadcast-group", BG_TBR_NAME);
+    private static final String
+            SERVER = "server",
+            BROADCAST_PERIOD = "broadcast-period",
+            CONNECTORS = "connectors",
+            CONNECTOR = "connector",
+            BROADCAST_GROUP = "broadcast-group",
+            FACTORY_CLASS = "factory-class",
+            SOCKET_BINDING = "socket-binding";
+
+    private static final Address NEW_SERVER = MESSAGING_SUBSYSTEM.and(SERVER, RandomStringUtils.randomAlphanumeric(6));
 
     @Page
     private MessagingPage page;
 
     @BeforeClass
     public static void setUp() throws Exception {
-        operations.add(NEW_SERVER);
-        new ResourceVerifier(NEW_SERVER, client).verifyExists();
-        operations.add(CONNECTOR_ADDRESS, Values.of("factory-class", "org.apache.activemq.artemis.core.remoting.impl.netty.NettyConnectorFactory"));
-        new ResourceVerifier(CONNECTOR_ADDRESS, client).verifyExists();
-        operations.add(BG_ADDRESS);
-        new ResourceVerifier(BG_ADDRESS, client).verifyExists();
-        operations.add(BG_TBR_ADDRESS);
-        new ResourceVerifier(BG_TBR_ADDRESS, client).verifyExists();
+        operations.add(NEW_SERVER).assertSuccess();
         administration.reloadIfRequired();
     }
 
-    @Before
-    public void before() {
-        page.viewClusteringSettings(SERVER_NAME);
-        page.selectInTable(BG_NAME, 0);
-    }
     @AfterClass
     public static void afterClass() throws IOException, InterruptedException, OperationException, TimeoutException {
-        operations.removeIfExists(BG_ADDRESS);
-        operations.removeIfExists(BG_TBA_ADDRESS);
-        operations.removeIfExists(BG_TBR_ADDRESS);
-        administration.reloadIfRequired();
         operations.removeIfExists(NEW_SERVER);
     }
 
     @Test
     public void addBroadcastGroup() throws Exception {
-        boolean isSaved = page.addBroadcastGroup()
-                .name(BG_TBA_NAME)
-                .socketBinding(createSocketBinding())
-                .saveAndDismissReloadRequiredWindow();
-        Assert.assertTrue("Form should be saved! " + HAL1327_FAIL_MESSAGE, isSaved);
-        new ResourceVerifier(BG_TBA_ADDRESS, client).verifyExists();
+        final Address connector = createConnector(NEW_SERVER),
+                broadcastGroupAddress = NEW_SERVER.and(BROADCAST_GROUP, RandomStringUtils.randomAlphabetic(7));
+        try {
+            page.viewClusteringSettings(NEW_SERVER.getLastPairValue());
+            page.selectInTable(broadcastGroupAddress.getLastPairValue(), 0);
+
+            page.addBroadcastGroup()
+                    .name(broadcastGroupAddress.getLastPairValue())
+                    .socketBinding(createSocketBinding())
+                    .connectors(connector.getLastPairValue())
+                    .saveAndDismissReloadRequiredWindowWithState()
+                    .assertWindowClosed(HAL1327_FAIL_MESSAGE);
+            new ResourceVerifier(broadcastGroupAddress, client).verifyExists();
+        } finally {
+            operations.removeIfExists(broadcastGroupAddress);
+            operations.removeIfExists(connector);
+        }
     }
 
     @Test
     public void updateBroadcastGroupPeriod() throws Exception {
         final long value = 1000;
 
-        new ConfigChecker.Builder(client, BG_ADDRESS)
-                .configFragment(page.getConfigFragment())
-                .editAndSave(ConfigChecker.InputType.TEXT, BROADCAST_PERIOD, String.valueOf(value))
-                .verifyFormSaved(HAL1328_FAIL_MESSAGE)
-                .verifyAttribute(BROADCAST_PERIOD, value);
+        Address connectorAddress = null,
+                broadcastGroupAddress = null;
+        try {
+            connectorAddress = createConnector(NEW_SERVER);
+            broadcastGroupAddress = createBroadcastGroup(NEW_SERVER, createSocketBinding(), connectorAddress);
+
+            page.viewClusteringSettings(NEW_SERVER.getLastPairValue());
+            page.selectInTable(broadcastGroupAddress.getLastPairValue(), 0);
+
+            new ConfigChecker.Builder(client, broadcastGroupAddress)
+                    .configFragment(page.getConfigFragment())
+                    .editAndSave(ConfigChecker.InputType.TEXT, BROADCAST_PERIOD, String.valueOf(value))
+                    .verifyFormSaved(HAL1328_FAIL_MESSAGE)
+                    .verifyAttribute(BROADCAST_PERIOD, value);
+        } finally {
+            if (broadcastGroupAddress != null) {
+                operations.removeIfExists(broadcastGroupAddress);
+            }
+            if (connectorAddress != null) {
+                operations.removeIfExists(connectorAddress);
+            }
+        }
     }
 
     @Test
     public void updateBroadcastGroupPeriodNegativeValue() throws Exception {
-        verifyIfErrorAppears("broadcast-period", "-1");
+        Address connectorAddress = null,
+                broadcastGroupAddress = null;
+        try {
+            connectorAddress = createConnector(NEW_SERVER);
+            broadcastGroupAddress = createBroadcastGroup(NEW_SERVER, createSocketBinding(), connectorAddress);
+
+            page.viewClusteringSettings(NEW_SERVER.getLastPairValue());
+            page.selectInTable(broadcastGroupAddress.getLastPairValue(), 0);
+
+            new ConfigChecker.Builder(client, broadcastGroupAddress)
+                    .configFragment(page.getConfigFragment())
+                    .editAndSave(ConfigChecker.InputType.TEXT, BROADCAST_PERIOD, "-1")
+                    .verifyFormNotSaved();
+        } finally {
+            if (broadcastGroupAddress != null) {
+                operations.removeIfExists(broadcastGroupAddress);
+            }
+            if (connectorAddress != null) {
+                operations.removeIfExists(connectorAddress);
+            }
+        }
     }
 
 
     @Test
     public void updateBroadcastGroupConnectors() throws Exception {
-        final ModelNode expected = new ModelNode().add(CONNECTOR_NAME);
+        Address connectorAddress = null,
+                newConnectorAddress = null,
+                broadcastGroupAddress = null;
+        try {
+            connectorAddress = createConnector(NEW_SERVER);
+            newConnectorAddress = createConnector(NEW_SERVER);
+            broadcastGroupAddress = createBroadcastGroup(NEW_SERVER, createSocketBinding(), connectorAddress);
 
-        new ConfigChecker.Builder(client, BG_ADDRESS)
-                .configFragment(page.getConfigFragment())
-                .editAndSave(ConfigChecker.InputType.TEXT, CONNECTORS, CONNECTOR_NAME)
-                .verifyFormSaved(HAL1329_FAIL_MESSAGE)
-                .verifyAttribute(CONNECTORS, expected);
+            page.viewClusteringSettings(NEW_SERVER.getLastPairValue());
+            page.selectInTable(broadcastGroupAddress.getLastPairValue(), 0);
+
+            new ConfigChecker.Builder(client, broadcastGroupAddress)
+                    .configFragment(page.getConfigFragment())
+                    .editAndSave(ConfigChecker.InputType.TEXT, CONNECTORS, newConnectorAddress.getLastPairValue())
+                    .verifyFormSaved(HAL1329_FAIL_MESSAGE)
+                    .verifyAttribute(CONNECTORS,
+                            new ModelNodeGenerator.ModelNodeListBuilder(new ModelNode(newConnectorAddress.getLastPairValue()))
+                                    .build());
+        } finally {
+            if (broadcastGroupAddress != null) {
+                operations.removeIfExists(broadcastGroupAddress);
+            }
+            if (connectorAddress != null) {
+                operations.removeIfExists(connectorAddress);
+            }
+            if (newConnectorAddress != null) {
+                operations.removeIfExists(newConnectorAddress);
+            }
+        }
     }
 
     @Test
     public void removeBroadcastGroup() throws Exception {
-        page.remove(BG_TBR_NAME);
+        Address connectorAddress = null,
+                broadcastGroupAddress = null;
+        try {
+            connectorAddress = createConnector(NEW_SERVER);
+            broadcastGroupAddress = createBroadcastGroup(NEW_SERVER, createSocketBinding(), connectorAddress);
 
-        new ResourceVerifier(BG_TBR_ADDRESS, client).verifyDoesNotExist();
+            page.viewClusteringSettings(NEW_SERVER.getLastPairValue());
+            page.selectInTable(broadcastGroupAddress.getLastPairValue(), 0);
+
+            page.remove(broadcastGroupAddress.getLastPairValue());
+
+        } finally {
+            if (broadcastGroupAddress != null) {
+                operations.removeIfExists(broadcastGroupAddress);
+            }
+            if (connectorAddress != null) {
+                operations.removeIfExists(connectorAddress);
+            }
+        }
+
+        new ResourceVerifier(broadcastGroupAddress, client).verifyDoesNotExist();
+    }
+
+    private Address createConnector(Address serverAddress) throws CommandFailedException, IOException, TimeoutException, InterruptedException {
+        final Address address = serverAddress.and(CONNECTOR, RandomStringUtils.randomAlphabetic(7));
+        operations.add(address,
+                Values.of(FACTORY_CLASS, "org.apache.activemq.artemis.core.remoting.impl.netty.NettyConnectorFactory"))
+                .assertSuccess();
+        administration.reloadIfRequired();
+        return address;
+    }
+
+    private Address createBroadcastGroup(Address serverAddress, String socketBinding, Address connectorAddress) throws IOException {
+        final Address address = serverAddress.and(BROADCAST_GROUP, RandomStringUtils.randomAlphabetic(7));
+        operations.add(address, Values.of(CONNECTORS,
+                new ModelNodeGenerator.ModelNodeListBuilder(new ModelNode(connectorAddress.getLastPairValue())).build())
+            .and(SOCKET_BINDING, socketBinding)).assertSuccess();
+        return address;
     }
 }
