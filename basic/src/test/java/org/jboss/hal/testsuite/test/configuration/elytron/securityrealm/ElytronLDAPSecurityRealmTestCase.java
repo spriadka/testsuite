@@ -318,7 +318,6 @@ public class ElytronLDAPSecurityRealmTestCase extends AbstractElytronTestCase {
                 .addUndefinedProperty(REFERENCE)
                 .addProperty(FILTER, RandomStringUtils.randomAlphabetic(7))
                 .addProperty(FILTER_BASE_DN, RandomStringUtils.randomAlphabetic(7))
-                .addProperty(SEARCH_RECURSIVE, new ModelNode(false))
                 .addProperty(ROLE_RECURSION, new ModelNode(roleRecursionValue))
                 .addProperty(ROLE_RECURSION_NAME, RandomStringUtils.randomAlphabetic(7))
                 .addProperty(EXTRACT_RDN, RandomStringUtils.randomAlphabetic(7))
