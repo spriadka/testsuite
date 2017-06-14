@@ -4,7 +4,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
-import org.jboss.arquillian.junit.InSequence;
 import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
@@ -186,8 +185,6 @@ public abstract class JGroupAbstractTestCase {
         assertFalse(jGroupsOperations.propertyExists(TRANSPORT_ADDRESS, TRANSPORT_PROPERTY_TBR, TRANSPORT_PROPERTY_TBR_VALUE));
     }
 
-
-    @InSequence(2)
     @Test
     public void createProtocolProperty() throws IOException {
         page.switchToProtocol(DEFAULT_PROTOCOL);
@@ -197,7 +194,6 @@ public abstract class JGroupAbstractTestCase {
         assertTrue(jGroupsOperations.propertyExists(PROTOCOL_ADDRESS, PROPERTY_NAME, PROPERTY_VALUE));
     }
 
-    @InSequence(1)
     @Test
     public void removeProtocolProperty() throws IOException {
         page.switchToProtocol(DEFAULT_PROTOCOL);
