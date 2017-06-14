@@ -6,16 +6,19 @@ import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.dmr.ModelNodeGenerator;
+import org.jboss.hal.testsuite.dmr.ModelNodeGenerator.ModelNodeListBuilder;
 import org.jboss.hal.testsuite.fragment.config.elytron.authentication.AddAuthenticationConfigurationWizard;
 import org.jboss.hal.testsuite.page.config.elytron.ElytronAuthenticationPage;
 import org.jboss.hal.testsuite.test.configuration.elytron.AbstractElytronTestCase;
 import org.jboss.hal.testsuite.test.configuration.undertow.UndertowElytronOperations;
 import org.jboss.hal.testsuite.util.ConfigChecker;
 import org.jboss.hal.testsuite.util.Console;
+import org.jboss.hal.testsuite.util.ElytronIntegrationChecker;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.Values;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -34,19 +37,20 @@ public class ElytronAuthenticationConfigurationTestCase extends AbstractElytronT
 
     private static final String
             AUTHENTICATION_CONFIGURATION = "authentication-configuration",
-            ALLOW_ALL_MECHANISMS = "allow-all-mechanisms",
-            ALLOW_SASL_MECHANISMS = "allow-sasl-mechanisms",
             ANONYMOUS = "anonymous",
             AUTHENTICATION_NAME = "authentication-name",
             AUTHORIZATION_NAME = "authorization-name",
             EXTENDS = "extends",
-            FORBID_SASL_MECHANISMS = "forbid-sasl-mechanisms",
             HOST = "host",
+            KERBEROS_SECURITY_FACTORY = "kerberos-security-factory",
             MECHANISM_PROPERTIES = "mechanism-properties",
             PORT = "port",
             PROTOCOL = "protocol",
             REALM = "realm",
-            SECURITY_DOMAIN = "security-domain";
+            SASL_MECHANISM_SELECTOR = "sasl-mechanism-selector",
+            SECURITY_DOMAIN = "security-domain",
+            CREDENTIAL_REFERENCE = "credential-reference",
+            CREDENTIAL_REFERENCE_LABEL = "Credential Reference";
 
     /**
      * @tpTestDetails Try to create Elytron Authentication configuration instance in Web Console's Elytron subsystem
@@ -104,83 +108,6 @@ public class ElytronAuthenticationConfigurationTestCase extends AbstractElytronT
             adminOps.reloadIfRequired();
         }
     }
-
-    /**
-     * @tpTestDetails Create Elytron Authentication configuration instance in model and try to edit its
-     * allow-all-mechanisms attribute value in Web Console's Elytron subsystem configuration.
-     * Validate edited attribute value in the model.
-     */
-    @Test
-    public void toggleAllowAllMechanisms() throws Exception {
-
-        final Address authenticationConfigurationAddress = createAuthenticationConfiguration();
-        final boolean initialValue = false;
-
-        try {
-            elytronAuthenticationOperations.performActionOnAttributeAndRevertItsValueToOriginal(
-                    authenticationConfigurationAddress,
-                    ALLOW_ALL_MECHANISMS,
-                    () -> {
-                        page.navigate();
-                        page.switchToAuthenticationConfiguration()
-                                .getResourceManager()
-                                .selectByName(authenticationConfigurationAddress.getLastPairValue());
-                        new ConfigChecker.Builder(client, authenticationConfigurationAddress)
-                                .configFragment(page.getConfigFragment())
-                                .editAndSave(ConfigChecker.InputType.CHECKBOX, ALLOW_ALL_MECHANISMS, !initialValue)
-                                .verifyFormSaved()
-                                .verifyAttribute(ALLOW_ALL_MECHANISMS, !initialValue);
-
-                        Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
-
-                        new ConfigChecker.Builder(client, authenticationConfigurationAddress)
-                                .configFragment(page.getConfigFragment())
-                                .editAndSave(ConfigChecker.InputType.CHECKBOX, ALLOW_ALL_MECHANISMS, initialValue)
-                                .verifyFormSaved()
-                                .verifyAttribute(ALLOW_ALL_MECHANISMS, initialValue);                  }
-            );
-        } finally {
-            ops.removeIfExists(authenticationConfigurationAddress);
-        }
-
-    }
-
-    /**
-     * @tpTestDetails Create Elytron Authentication configuration instance in model and try to edit its
-     * allow-sasl-mechanisms attribute value in Web Console's Elytron subsystem configuration.
-     * Validate edited attribute value in the model.
-     */
-    @Test
-    public void editAllowSASLMechanisms() throws Exception {
-        final Address authenticationConfigurationAddress = createAuthenticationConfiguration();
-
-        final String[] value = new String[]{
-                RandomStringUtils.randomAlphabetic(7),
-                RandomStringUtils.randomAlphabetic(7)
-        };
-
-        try {
-            elytronAuthenticationOperations.performActionOnAttributeAndRevertItsValueToOriginal(
-                    authenticationConfigurationAddress,
-                    ALLOW_SASL_MECHANISMS,
-                    () -> {
-                        page.navigate();
-                        page.switchToAuthenticationConfiguration()
-                                .getResourceManager()
-                                .selectByName(authenticationConfigurationAddress.getLastPairValue());
-                        new ConfigChecker.Builder(client, authenticationConfigurationAddress)
-                                .configFragment(page.getConfigFragment())
-                                .editAndSave(ConfigChecker.InputType.TEXT, ALLOW_SASL_MECHANISMS, String.join("\n", value))
-                                .verifyFormSaved()
-                                .verifyAttribute(ALLOW_SASL_MECHANISMS,
-                                        new ModelNodeGenerator.ModelNodeListBuilder().addAll(value).build());
-                    }
-            );
-        } finally {
-            ops.removeIfExists(authenticationConfigurationAddress);
-        }
-    }
-
 
     /**
      * @tpTestDetails Create Elytron Authentication configuration instance in model and try to edit its anonymous
@@ -329,42 +256,6 @@ public class ElytronAuthenticationConfigurationTestCase extends AbstractElytronT
     }
 
     /**
-     * @tpTestDetails Create Elytron Authentication configuration instance in model and try to edit its
-     * forbid-sasl-mechanisms attribute value in Web Console's Elytron subsystem configuration.
-     * Validate edited attribute value in the model.
-     */
-    @Test
-    public void editForbidSASLMechanisms() throws Exception {
-        final Address authenticationConfigurationAddress = createAuthenticationConfiguration();
-
-        final String[] value = new String[]{
-                RandomStringUtils.randomAlphabetic(7),
-                RandomStringUtils.randomAlphabetic(7)
-        };
-
-        try {
-            elytronAuthenticationOperations.performActionOnAttributeAndRevertItsValueToOriginal(
-                    authenticationConfigurationAddress,
-                    FORBID_SASL_MECHANISMS,
-                    () -> {
-                        page.navigate();
-                        page.switchToAuthenticationConfiguration()
-                                .getResourceManager()
-                                .selectByName(authenticationConfigurationAddress.getLastPairValue());
-                        new ConfigChecker.Builder(client, authenticationConfigurationAddress)
-                                .configFragment(page.getConfigFragment())
-                                .editAndSave(ConfigChecker.InputType.TEXT, FORBID_SASL_MECHANISMS, String.join("\n", value))
-                                .verifyFormSaved()
-                                .verifyAttribute(FORBID_SASL_MECHANISMS,
-                                        new ModelNodeGenerator.ModelNodeListBuilder().addAll(value).build());
-                    }
-            );
-        } finally {
-            ops.removeIfExists(authenticationConfigurationAddress);
-        }
-    }
-
-    /**
      * @tpTestDetails Create Elytron Authentication configuration instance in model and try to edit its host attribute
      * value in Web Console's Elytron subsystem configuration.
      * Validate edited attribute value in the model.
@@ -394,6 +285,42 @@ public class ElytronAuthenticationConfigurationTestCase extends AbstractElytronT
 
         } finally {
             ops.removeIfExists(authenticationConfigurationAddress);
+        }
+    }
+
+    /**
+     * @tpTestDetails Create Elytron Authentication configuration instance in model and try to edit its
+     * kerberos-security-factory attribute value in Web Console's Elytron subsystem configuration.
+     * Validate edited attribute value in the model.
+     */
+    @Test
+    public void editKerberosSecurityFactory() throws Exception {
+        final Address
+            authenticationConfigurationAddress = createAuthenticationConfiguration(),
+            kerberosFactory = createKerberosFactory();
+
+        final String kerberosFactoryName = kerberosFactory.getLastPairValue();
+
+        try {
+            elytronAuthenticationOperations.performActionOnAttributeAndRevertItsValueToOriginal(
+                    authenticationConfigurationAddress,
+                    KERBEROS_SECURITY_FACTORY,
+                    () -> {
+                        page.navigate();
+                        page.switchToAuthenticationConfiguration()
+                                .getResourceManager()
+                                .selectByName(authenticationConfigurationAddress.getLastPairValue());
+                        new ConfigChecker.Builder(client, authenticationConfigurationAddress)
+                                .configFragment(page.getConfigFragment())
+                                .editAndSave(ConfigChecker.InputType.TEXT, KERBEROS_SECURITY_FACTORY, kerberosFactoryName)
+                                .verifyFormSaved()
+                                .verifyAttribute(KERBEROS_SECURITY_FACTORY, kerberosFactoryName);
+                    }
+            );
+
+        } finally {
+            ops.removeIfExists(authenticationConfigurationAddress);
+            ops.removeIfExists(kerberosFactory);
         }
     }
 
@@ -536,6 +463,38 @@ public class ElytronAuthenticationConfigurationTestCase extends AbstractElytronT
     }
 
     /**
+     * @tpTestDetails Create Elytron Authentication configuration instance in model and try to edit its
+     * sasl-mechanism-selector attribute value in Web Console's Elytron subsystem configuration.
+     * Validate edited attribute value in the model.
+     */
+    @Test
+    public void editSaslMechanismSelector() throws Exception {
+        final Address authenticationConfigurationAddress = createAuthenticationConfiguration();
+
+        final String value = RandomStringUtils.randomAlphabetic(7);
+
+        try {
+            elytronAuthenticationOperations.performActionOnAttributeAndRevertItsValueToOriginal(
+                    authenticationConfigurationAddress,
+                    SASL_MECHANISM_SELECTOR,
+                    () -> {
+                        page.navigate();
+                        page.switchToAuthenticationConfiguration()
+                                .getResourceManager()
+                                .selectByName(authenticationConfigurationAddress.getLastPairValue());
+                        new ConfigChecker.Builder(client, authenticationConfigurationAddress)
+                                .configFragment(page.getConfigFragment())
+                                .editAndSave(ConfigChecker.InputType.TEXT, SASL_MECHANISM_SELECTOR, value)
+                                .verifyFormSaved()
+                                .verifyAttribute(SASL_MECHANISM_SELECTOR, value);
+                    }
+            );
+        } finally {
+            ops.removeIfExists(authenticationConfigurationAddress);
+        }
+    }
+
+    /**
      * @tpTestDetails Create Elytron Authentication configuration instance in model and try to edit its security-domain
      * attribute value in Web Console's Elytron subsystem configuration.
      * Validate edited attribute value in the model.
@@ -580,10 +539,57 @@ public class ElytronAuthenticationConfigurationTestCase extends AbstractElytronT
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron Authentication configuration instance in model and try to edit its
+     * credential-reference value in Web Console's Elytron subsystem configuration.
+     * Validate edited attribute value in the model.
+     */
+    @Test
+    public void editCredentialReference() throws Exception {
+        final Address authenticationConfigurationAddress = createAuthenticationConfiguration();
+
+        try {
+            elytronAuthenticationOperations.performActionOnAttributeAndRevertItsValueToOriginal(
+                    authenticationConfigurationAddress,
+                    CREDENTIAL_REFERENCE,
+                    () -> {
+                        page.navigate();
+                        page.switchToAuthenticationConfiguration()
+                                .getResourceManager()
+                                .selectByName(authenticationConfigurationAddress.getLastPairValue());
+                        page.getConfig().switchTo(CREDENTIAL_REFERENCE_LABEL);
+                        ElytronIntegrationChecker credentialReferenceChecker = new ElytronIntegrationChecker.Builder(client)
+                                .address(authenticationConfigurationAddress).configFragment(page.getConfigFragment()).build();
+                        credentialReferenceChecker.setCredentialStoreCredentialReferenceAndVerify();
+                        credentialReferenceChecker.testIllegalCombinationCredentialReferenceAttributes();
+                        credentialReferenceChecker.setClearTextCredentialReferenceAndVerify();
+                    }
+            );
+        } finally {
+            ops.removeIfExists(authenticationConfigurationAddress);
+        }
+    }
+
     private Address createAuthenticationConfiguration() throws IOException {
         final Address address = elyOps.getElytronAddress(AUTHENTICATION_CONFIGURATION, RandomStringUtils.randomAlphanumeric(7));
         ops.add(address).assertSuccess();
         return address;
+    }
+
+    private Address createKerberosFactory() throws IOException {
+        final String
+                factoryName = "factoryName_" + RandomStringUtils.randomAlphanumeric(5),
+                oid1 = "1.2.840.113554.1.2.2",
+                oid2 = "1.3.6.1.5.5.2",
+                pathValue = "path_" + RandomStringUtils.randomAlphanumeric(5),
+                principalValue = "principal_" + RandomStringUtils.randomAlphanumeric(5);
+        final Address factoryAddress = elyOps.getElytronAddress(KERBEROS_SECURITY_FACTORY, factoryName);
+        final ModelNode oidsNode = new ModelNodeListBuilder().addNode(new ModelNode(oid1))
+                .addNode(new ModelNode(oid2)).build();
+        ops.add(factoryAddress,
+                Values.of("mechanism-oids", oidsNode).and("path", pathValue).and("principal", principalValue))
+                .assertSuccess();
+        return factoryAddress;
     }
 
 }

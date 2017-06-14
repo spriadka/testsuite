@@ -96,4 +96,8 @@ public class ConfigUtils {
         return location.value();
     }
 
+    public static String getConfigDirPathName() {
+        return "jboss." + (isDomain() ? "domain" : "server") + ".config.dir";
+    }
+
 }

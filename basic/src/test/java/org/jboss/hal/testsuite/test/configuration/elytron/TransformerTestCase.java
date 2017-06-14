@@ -12,7 +12,6 @@ import java.nio.file.Paths;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.dmr.ModelNode;
-import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.dmr.ModelNodeGenerator.ModelNodeListBuilder;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
@@ -27,13 +26,11 @@ import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.Values;
 
 @RunWith(Arquillian.class)
-@Category(Shared.class)
 public class TransformerTestCase extends AbstractElytronTestCase {
 
     private static final String
@@ -546,10 +543,10 @@ public class TransformerTestCase extends AbstractElytronTestCase {
             regexValidatingPrincipalTransformerName = randomAlphanumeric(5),
             regexValidatingPrincipalTransformerPattern = randomAlphanumeric(5);
         Address regexValidatingPrincipalTransformerAddress =
-                elyOps.getElytronAddress(REGEX_PRINCIPAL_TRANSFORMER,
+                elyOps.getElytronAddress(REGEX_VALIDATING_PRINCIPAL_TRANSFORMER,
                         regexValidatingPrincipalTransformerName);
 
-        page.navigateToApplication().selectResource(REGEX_PRINCIPAL_TRANSFORMER_LABEL);
+        page.navigateToApplication().selectResource(REGEX_VALIDATING_PRINCIPAL_TRANSFORMER_LABEL);
 
         try {
             WizardWindow wizard = page.getResourceManager().addResource();

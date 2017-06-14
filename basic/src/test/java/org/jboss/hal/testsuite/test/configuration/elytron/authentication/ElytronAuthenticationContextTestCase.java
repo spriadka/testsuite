@@ -42,7 +42,6 @@ public class ElytronAuthenticationContextTestCase extends AbstractElytronTestCas
             MATCH_PATH = "match-path",
             MATCH_PORT = "match-port",
             MATCH_PROTOCOL = "match-protocol",
-            MATCH_PURPOSE = "match-purpose",
             MATCH_URN = "match-urn",
             MATCH_USER = "match-user";
 
@@ -191,7 +190,6 @@ public class ElytronAuthenticationContextTestCase extends AbstractElytronTestCas
                 matchLocalSecurityDomainValue = RandomStringUtils.randomAlphanumeric(7),
                 matchPathValue = RandomStringUtils.randomAlphanumeric(7),
                 matchProtocolValue = RandomStringUtils.randomAlphanumeric(7),
-                matchPurposeValue = RandomStringUtils.randomAlphanumeric(7),
                 matchUrnValue = RandomStringUtils.randomAlphanumeric(7),
                 matchUserValue = RandomStringUtils.randomAlphanumeric(7);
 
@@ -219,7 +217,6 @@ public class ElytronAuthenticationContextTestCase extends AbstractElytronTestCas
                     .matchPath(matchPathValue)
                     .matchPort(matchPortValue)
                     .matchProtocol(matchProtocolValue)
-                    .matchPurpose(matchPurposeValue)
                     .matchNoUser(matchNoUserValue)
                     .matchUrn(matchUrnValue)
                     .matchUser(matchUserValue)
@@ -243,7 +240,6 @@ public class ElytronAuthenticationContextTestCase extends AbstractElytronTestCas
                             .addProperty(MATCH_PATH, matchPathValue)
                             .addProperty(MATCH_PORT, new ModelNode(matchPortValue))
                             .addProperty(MATCH_PROTOCOL, matchProtocolValue)
-                            .addProperty(MATCH_PURPOSE, matchPurposeValue)
                             .addProperty(MATCH_URN, matchUrnValue)
                             .addProperty(MATCH_USER, matchUserValue)
                             .addProperty(AUTHENTICATION_CONFIGURATION, authenticationConfigurationAddress.getLastPairValue())

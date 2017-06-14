@@ -15,7 +15,6 @@ public class AddMatchRuleWizard extends WizardWindow {
             MATCH_PATH = "match-path",
             MATCH_PORT = "match-port",
             MATCH_PROTOCOL = "match-protocol",
-            MATCH_PURPOSE = "match-purpose",
             MATCH_URN = "match-urn",
             MATCH_USER = "match-user";
 
@@ -56,11 +55,6 @@ public class AddMatchRuleWizard extends WizardWindow {
 
     public AddMatchRuleWizard matchProtocol(String protocol) {
         getEditor().text(MATCH_PROTOCOL, protocol);
-        return this;
-    }
-
-    public AddMatchRuleWizard matchPurpose(String purpose) {
-        getEditor().text(MATCH_PURPOSE, purpose);
         return this;
     }
 
