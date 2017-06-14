@@ -11,6 +11,7 @@ import org.jboss.hal.testsuite.fragment.config.elytron.securityrealm.AddProperti
 import org.jboss.hal.testsuite.page.config.elytron.SecurityRealmPage;
 import org.jboss.hal.testsuite.test.configuration.elytron.AbstractElytronTestCase;
 import org.jboss.hal.testsuite.util.ConfigChecker;
+import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,7 +31,8 @@ public class ElytronPropertiesSecurityRealmTestCase extends AbstractElytronTestC
             DIGEST_REALM_NAME = "digest-realm-name",
             PATH = "path",
             PLAIN_TEXT = "plain-text",
-            RELATIVE_TO = "relative-to";
+            RELATIVE_TO = "relative-to",
+            CONFIG_DIR_PATH_NAME = ConfigUtils.getConfigDirPathName();
 
     @Page
     private SecurityRealmPage page;
@@ -46,8 +48,7 @@ public class ElytronPropertiesSecurityRealmTestCase extends AbstractElytronTestC
     public void testAddPropertiesSecurityRealm() throws Exception {
         final Address realmAddress = elyOps.getElytronAddress(PROPERTIES_REALM, RandomStringUtils.randomAlphabetic(7));
 
-        final String relativeToValue = "jboss.server.config.dir",
-                usersPropertiesPathValue = "mgmt-users.properties";
+        final String usersPropertiesPathValue = "mgmt-users.properties";
 
         page.navigate();
 
@@ -55,7 +56,7 @@ public class ElytronPropertiesSecurityRealmTestCase extends AbstractElytronTestC
             page.getResourceManager().addResource(AddPropertiesSecurityRealmWizard.class)
                     .name(realmAddress.getLastPairValue())
                     .usersPropertiesPath(usersPropertiesPathValue)
-                    .relativeTo(relativeToValue)
+                    .relativeTo(CONFIG_DIR_PATH_NAME)
                     .saveWithState()
                     .assertWindowClosed("Failed probably because of https://issues.jboss.org/browse/HAL-1347");
 
@@ -63,7 +64,7 @@ public class ElytronPropertiesSecurityRealmTestCase extends AbstractElytronTestC
                     page.getResourceManager().isResourcePresent(realmAddress.getLastPairValue()));
 
             new ResourceVerifier(realmAddress, client).verifyExists()
-                    .verifyAttribute(USERS_PROPERTIES + "." + RELATIVE_TO, relativeToValue)
+                    .verifyAttribute(USERS_PROPERTIES + "." + RELATIVE_TO, CONFIG_DIR_PATH_NAME)
                     .verifyAttribute(USERS_PROPERTIES + "." + PATH, usersPropertiesPathValue);
         } finally {
             ops.removeIfExists(realmAddress);
@@ -213,7 +214,7 @@ public class ElytronPropertiesSecurityRealmTestCase extends AbstractElytronTestC
 
         ops.add(securityRealmAddress, Values.of(USERS_PROPERTIES, new ModelNodeGenerator.ModelNodePropertiesBuilder()
                 .addProperty(PATH, "mgmt-users.properties")
-                .addProperty(RELATIVE_TO, "jboss.server.config.dir")
+                .addProperty(RELATIVE_TO, CONFIG_DIR_PATH_NAME)
                 .build()))
                 .assertSuccess();
 

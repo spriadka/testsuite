@@ -12,7 +12,6 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.dmr.ModelNode;
-import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
@@ -23,13 +22,11 @@ import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.Values;
 
 @RunWith(Arquillian.class)
-@Category(Shared.class)
 public class ElytronAuthenticationTestCase extends AbstractElytronTestCase {
 
     private static final String SERVICE_LOADER_HTTP_SERVER_MECHANISM_FACTORY = "service-loader-http-server-mechanism-factory",
@@ -65,10 +62,9 @@ public class ElytronAuthenticationTestCase extends AbstractElytronTestCase {
     }
 
     private static Address createSecurityRealm(String realmName) throws Exception {
-        String configDir = "jboss." + (ConfigUtils.isDomain() ? "domain" : "server") + ".config.dir";
         Address realmAddress = elyOps.getElytronAddress("properties-realm", realmName);
         ModelNode userPropertiesNode = new ModelNodePropertiesBuilder().addProperty("path", "mgmt-users.properties")
-                .addProperty("relative-to", configDir).build();
+                .addProperty("relative-to", ConfigUtils.getConfigDirPathName()).build();
         ops.add(realmAddress, Values.of("users-properties", userPropertiesNode)).assertSuccess();
         return realmAddress;
     }
