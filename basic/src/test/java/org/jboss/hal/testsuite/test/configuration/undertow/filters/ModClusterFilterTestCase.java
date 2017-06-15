@@ -12,17 +12,18 @@ import org.jboss.hal.testsuite.creaper.command.RemoveSocketBinding;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
 import org.jboss.hal.testsuite.page.config.UndertowFiltersPage;
+import org.jboss.hal.testsuite.test.configuration.undertow.UndertowElytronOperations;
 import org.jboss.hal.testsuite.test.configuration.undertow.UndertowOperations;
 import org.jboss.hal.testsuite.util.ConfigChecker;
 import org.jboss.hal.testsuite.util.Console;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
 import org.wildfly.extras.creaper.core.CommandFailedException;
+import org.wildfly.extras.creaper.core.online.ModelNodeResult;
 import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.OperationException;
@@ -98,31 +99,30 @@ public class ModClusterFilterTestCase {
     private static final UndertowOperations undertowOps = new UndertowOperations(client);
 
     @BeforeClass
-    public static void beforeClass() throws IOException, CommandFailedException {
+    public static void beforeClass() throws IOException, CommandFailedException, TimeoutException, InterruptedException {
         client.apply(new AddSocketBinding.Builder(SOCKET_BINDING_RESOURCE_1)
                 .multicastAddress("224.0.0.1")
+                .multicastPort(4567)
                 .build());
-        client.apply(new AddSocketBinding.Builder(SOCKET_BINDING_RESOURCE_2)
-                .multicastAddress("224.0.0.1")
-                .build());
+        client.apply(new AddSocketBinding.Builder(SOCKET_BINDING_RESOURCE_2).build());
         client.apply(new AddSocketBinding.Builder(SOCKET_BINDING_RESOURCE_3)
                 .multicastAddress("224.0.0.1")
+                .multicastPort(4567)
                 .build());
-        client.apply(new AddSocketBinding.Builder(SOCKET_BINDING_RESOURCE_4)
-                .multicastAddress("224.0.0.1")
-                .build());
+        client.apply(new AddSocketBinding.Builder(SOCKET_BINDING_RESOURCE_4).build());
         client.apply(new AddSocketBinding.Builder(SOCKET_BINDING_RESOURCE_5)
                 .multicastAddress("224.0.0.1")
+                .multicastPort(4567)
                 .build());
         client.apply(new AddSocketBinding.Builder(SOCKET_BINDING_RESOURCE_6)
                 .multicastAddress("224.0.0.1")
+                .multicastPort(4567)
                 .build());
         client.apply(new AddSocketBinding.Builder(SOCKET_BINDING_RESOURCE_7)
                 .multicastAddress("224.0.0.1")
+                .multicastPort(4567)
                 .build());
-        client.apply(new AddSocketBinding.Builder(SOCKET_BINDING_RESOURCE_8)
-                .multicastAddress("224.0.0.1")
-                .build());
+        client.apply(new AddSocketBinding.Builder(SOCKET_BINDING_RESOURCE_8).build());
 
         operations.add(FILTER_ADDRESS,
                 Values.of(ADVERTISE_SOCKET_BINDING, SOCKET_BINDING_RESOURCE_1)
@@ -133,6 +133,8 @@ public class ModClusterFilterTestCase {
                 Values.of(ADVERTISE_SOCKET_BINDING, SOCKET_BINDING_RESOURCE_3)
                         .and(MANAGEMENT_SOCKET_BINDING, SOCKET_BINDING_RESOURCE_4))
                 .assertSuccess();
+
+        administration.reloadIfRequired();
     }
 
     @Before
@@ -145,6 +147,10 @@ public class ModClusterFilterTestCase {
     @AfterClass
     public static void afterClass() throws IOException, OperationException, TimeoutException, InterruptedException, CommandFailedException {
         try {
+            operations.removeIfExists(FILTER_ADDRESS);
+            operations.removeIfExists(FILTER_TBA_ADDRESS);
+            operations.removeIfExists(FILTER_TBR_ADDRESS);
+
             client.apply(new RemoveSocketBinding(SOCKET_BINDING_RESOURCE_1));
             client.apply(new RemoveSocketBinding(SOCKET_BINDING_RESOURCE_2));
             client.apply(new RemoveSocketBinding(SOCKET_BINDING_RESOURCE_3));
@@ -153,11 +159,6 @@ public class ModClusterFilterTestCase {
             client.apply(new RemoveSocketBinding(SOCKET_BINDING_RESOURCE_6));
             client.apply(new RemoveSocketBinding(SOCKET_BINDING_RESOURCE_7));
             client.apply(new RemoveSocketBinding(SOCKET_BINDING_RESOURCE_8));
-
-
-            operations.removeIfExists(FILTER_ADDRESS);
-            operations.removeIfExists(FILTER_TBA_ADDRESS);
-            operations.removeIfExists(FILTER_TBR_ADDRESS);
 
             undertowOps.cleanupReferences();
             administration.reloadIfRequired();
@@ -517,18 +518,45 @@ public class ModClusterFilterTestCase {
                 .verifyAttribute(SECURITY_REALM, securityRealm);
     }
 
-    //TODO - make this part of elytron tests or wait till elytron tests are merged and use new API for this.
-    @Ignore("Need to use Elytron subsystem to define ssl context.")
     @Test
     public void editSSLContext() throws Exception {
         page.getResourceManager().selectByName(FILTER_NAME);
 
-        String value = "ssl-context" + RandomStringUtils.randomAlphanumeric(7);
-        new ConfigChecker.Builder(client, FILTER_ADDRESS)
-                .configFragment(page.getConfigFragment())
-                .editAndSave(ConfigChecker.InputType.TEXT, SSL_CONTEXT, value)
-                .verifyFormSaved()
-                .verifyAttribute(SSL_CONTEXT, value);
+        Address keyStoreAddress = null,
+            keyManagerAddress = null,
+            sslContextAddress = null;
+
+
+        final ModelNodeResult originalModelNodeResult = operations.readAttribute(FILTER_ADDRESS, SSL_CONTEXT);
+
+        originalModelNodeResult.assertSuccess();
+
+        try {
+            final UndertowElytronOperations undertowElyOps = new UndertowElytronOperations(client);
+
+            keyStoreAddress = undertowElyOps.createKeyStore();
+            keyManagerAddress = undertowElyOps.createKeyManager(keyStoreAddress);
+            sslContextAddress = undertowElyOps.createClientSSLContext(keyManagerAddress);
+
+            final String value = sslContextAddress.getLastPairValue();
+
+            new ConfigChecker.Builder(client, FILTER_ADDRESS)
+                    .configFragment(page.getConfigFragment())
+                    .editAndSave(ConfigChecker.InputType.TEXT, SSL_CONTEXT, value)
+                    .verifyFormSaved()
+                    .verifyAttribute(SSL_CONTEXT, value);
+        } finally {
+            operations.writeAttribute(FILTER_ADDRESS, SSL_CONTEXT, originalModelNodeResult.value()).assertSuccess();
+            if (sslContextAddress != null) {
+                operations.removeIfExists(sslContextAddress);
+            }
+            if (keyManagerAddress != null) {
+                operations.removeIfExists(keyManagerAddress);
+            }
+            if (keyStoreAddress != null) {
+                operations.removeIfExists(keyStoreAddress);
+            }
+        }
     }
 
     @Test
@@ -541,8 +569,7 @@ public class ModClusterFilterTestCase {
     @Test
     public void editWorker() throws Exception {
         page.getResourceManager().selectByName(FILTER_NAME);
-
-        String value = "my-worker" + RandomStringUtils.randomAlphanumeric(7);
+        String value = undertowOps.createWorker();
         new ConfigChecker.Builder(client, FILTER_ADDRESS)
                 .configFragment(page.getConfigFragment())
                 .editAndSave(ConfigChecker.InputType.TEXT, WORKER, value)
@@ -569,10 +596,7 @@ public class ModClusterFilterTestCase {
 
         administration.reloadIfRequired();
 
-        new ResourceVerifier(FILTER_ADDRESS, client).verifyAttribute(ENABLE_HTTP2, originalValue,
+        new ResourceVerifier(FILTER_ADDRESS, client).verifyAttribute(identifier, originalValue,
                 "Setting back to original value failed probably because of https://issues.jboss.org/browse/HAL-1235");
     }
-
-
-
 }
