@@ -25,10 +25,6 @@ import java.util.concurrent.TimeoutException;
 
 import static org.junit.Assert.assertTrue;
 
-/**
- * @author Jan Kasik <jkasik@redhat.com>
- *         Created on 7.12.15.
- */
 public abstract class LoggingAbstractTestCase {
 
     @Page
@@ -39,6 +35,11 @@ public abstract class LoggingAbstractTestCase {
     protected static OnlineManagementClient client;
     protected static Operations operations;
     protected static Administration administration;
+
+    protected static final String
+            FORMATTER = "formatter",
+            NAMED_FORMATTER = "named-formatter",
+            PERIODIC_SIZE_ROTATING_FILE_HANDLER = "periodic-size-rotating-file-handler";
 
     @BeforeClass
     public static void beforeClass_() {

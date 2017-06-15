@@ -4,14 +4,13 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.page.config.LoggingPage;
+import org.jboss.hal.testsuite.util.ConfigChecker;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
 import org.wildfly.extras.creaper.commands.logging.Logging;
@@ -25,11 +24,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeoutException;
 
-/**
- * Created by pcyprian on 27.8.15.
- */
 @RunWith(Arquillian.class)
-@Category(Shared.class)
 public class ConsoleHandlerTestCase extends LoggingAbstractTestCase {
 
     private static final String CONSOLE_HANDLER = "CONSOLE_HANDLER_" + RandomStringUtils.randomAlphanumeric(5);
@@ -84,7 +79,14 @@ public class ConsoleHandlerTestCase extends LoggingAbstractTestCase {
 
     @Test
     public void updateConsoleHandlerNamedFormatter() throws Exception {
-        editTextAndVerify(C_HANDLER_ADDRESS, "named-formatter", "PATTERN");
+        new ConfigChecker.Builder(client, C_HANDLER_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .edit(ConfigChecker.InputType.TEXT, FORMATTER, "")
+                .edit(ConfigChecker.InputType.TEXT, NAMED_FORMATTER, "COLOR-PATTERN")
+                .andSave()
+                .verifyFormSaved()
+                .verifyAttribute(NAMED_FORMATTER, "COLOR-PATTERN",
+                        "Probably fails because of https://issues.jboss.org/browse/WFCORE-2958");
     }
 
     @Test

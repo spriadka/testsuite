@@ -9,6 +9,7 @@ import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.jboss.hal.testsuite.page.config.LoggingPage;
+import org.jboss.hal.testsuite.util.ConfigChecker;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -70,7 +71,14 @@ public class FileHandlerTestCase extends LoggingAbstractTestCase {
 
     @Test
     public void updateFileHandlerNamedFormatter() throws Exception {
-        editTextAndVerify(FILE_HANDLER_ADDRESS, "named-formatter", "PATTERN");
+        new ConfigChecker.Builder(client, FILE_HANDLER_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .edit(ConfigChecker.InputType.TEXT, FORMATTER, "")
+                .edit(ConfigChecker.InputType.TEXT, NAMED_FORMATTER, "COLOR-PATTERN")
+                .andSave()
+                .verifyFormSaved()
+                .verifyAttribute(NAMED_FORMATTER, "COLOR-PATTERN",
+                        "Probably fails because of https://issues.jboss.org/browse/WFCORE-2958");
     }
 
     @Test
@@ -125,14 +133,14 @@ public class FileHandlerTestCase extends LoggingAbstractTestCase {
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
-        new ResourceVerifier(FILE_HANDLER_ADDRESS, client, 500).verifyAttributeIsUndefined("named-formatter");
-        new ResourceVerifier(FILE_HANDLER_ADDRESS, client, 500).verifyAttributeIsUndefined("encoding");
-        new ResourceVerifier(FILE_HANDLER_ADDRESS, client, 500).verifyAttributeIsUndefined("filter-spec");
-        new ResourceVerifier(FILE_HANDLER_ADDRESS, client, 500).verifyAttribute("formatter", "%d{HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n");
-        new ResourceVerifier(FILE_HANDLER_ADDRESS, client, 500).verifyAttribute("append", true);
-        new ResourceVerifier(FILE_HANDLER_ADDRESS, client, 500).verifyAttribute("autoflush", true);
-        new ResourceVerifier(FILE_HANDLER_ADDRESS, client, 500).verifyAttribute("enabled", true);
-        new ResourceVerifier(FILE_HANDLER_ADDRESS, client, 500).verifyAttribute("level", "ALL");
+        new ResourceVerifier(FILE_HANDLER_ADDRESS, client, 500).verifyAttributeIsUndefined("named-formatter")
+                .verifyAttributeIsUndefined("encoding")
+                .verifyAttributeIsUndefined("filter-spec")
+                .verifyAttribute("formatter", "%d{HH:mm:ss,SSS} %-5p [%c] (%t) %s%e%n")
+                .verifyAttribute("append", true)
+                .verifyAttribute("autoflush", true)
+                .verifyAttribute("enabled", true)
+                .verifyAttribute("level", "ALL");
     }
 
     @Test

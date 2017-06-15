@@ -4,14 +4,13 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.page.config.LoggingPage;
+import org.jboss.hal.testsuite.util.ConfigChecker;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
 import org.wildfly.extras.creaper.core.online.operations.Address;
@@ -20,11 +19,7 @@ import org.wildfly.extras.creaper.core.online.operations.Values;
 
 import java.io.IOException;
 
-/**
- * Created by pcyprian on 14.10.15.
- */
 @RunWith(Arquillian.class)
-@Category(Shared.class)
 public class PeriodicSizeTestCase extends LoggingAbstractTestCase {
 
     private static final String PERIODIC_SIZE_HANDLER = "PeriodicSizeHandler" + RandomStringUtils.randomAlphanumeric(5);
@@ -32,11 +27,11 @@ public class PeriodicSizeTestCase extends LoggingAbstractTestCase {
     private static final String PERIODIC_SIZE_HANDLER_TBA = "PeriodicSizeHandler-tba" + RandomStringUtils.randomAlphanumeric(5);
 
     private static final Address PERIODIC_SIZE_HANDLER_ADDRESS = LOGGING_SUBSYSTEM
-            .and("periodic-size-rotating-file-handler", PERIODIC_SIZE_HANDLER);
+            .and(PERIODIC_SIZE_ROTATING_FILE_HANDLER, PERIODIC_SIZE_HANDLER);
     private static final Address PERIODIC_SIZE_HANDLER_TBR_ADDRESS = LOGGING_SUBSYSTEM
-            .and("periodic-size-rotating-file-handler", PERIODIC_SIZE_HANDLER_TBR);
+            .and(PERIODIC_SIZE_ROTATING_FILE_HANDLER, PERIODIC_SIZE_HANDLER_TBR);
     private static final Address PERIODIC_SIZE_HANDLER_TBA_ADDRESS = LOGGING_SUBSYSTEM
-            .and("periodic-size-rotating-file-handler", PERIODIC_SIZE_HANDLER_TBA);
+            .and(PERIODIC_SIZE_ROTATING_FILE_HANDLER, PERIODIC_SIZE_HANDLER_TBA);
 
 
     @BeforeClass
@@ -76,7 +71,14 @@ public class PeriodicSizeTestCase extends LoggingAbstractTestCase {
 
     @Test
     public void updatePeriodicSizeHandlerNamedFormatter() throws Exception {
-        editTextAndVerify(PERIODIC_SIZE_HANDLER_ADDRESS, "named-formatter", "PATTERN");
+        new ConfigChecker.Builder(client, PERIODIC_SIZE_HANDLER_ADDRESS)
+                .configFragment(page.getConfigFragment())
+                .edit(ConfigChecker.InputType.TEXT, FORMATTER, "")
+                .edit(ConfigChecker.InputType.TEXT, NAMED_FORMATTER, "COLOR-PATTERN")
+                .andSave()
+                .verifyFormSaved()
+                .verifyAttribute(NAMED_FORMATTER, "COLOR-PATTERN",
+                        "Probably fails because of https://issues.jboss.org/browse/WFCORE-2958");
     }
 
     @Test

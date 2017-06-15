@@ -4,7 +4,6 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.creaper.command.BackupAndRestoreAttributes;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
@@ -14,7 +13,6 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
 import org.wildfly.extras.creaper.commands.logging.Logging;
@@ -26,7 +24,6 @@ import org.wildfly.extras.creaper.core.online.operations.ReadAttributeOption;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(Arquillian.class)
-@Category(Shared.class)
 public class RootLoggerTestCase extends LoggingAbstractTestCase {
 
     private static final Address ROOT_LOGGER_ADDRESS = LOGGING_SUBSYSTEM.and("root-logger", "ROOT");
