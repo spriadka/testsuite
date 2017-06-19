@@ -11,22 +11,20 @@ import java.io.IOException;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.dmr.ModelNode;
-import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.dmr.ModelNodeGenerator.ModelNodeListBuilder;
 import org.jboss.hal.testsuite.dmr.ModelNodeGenerator.ModelNodePropertiesBuilder;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindowWithOptionalFields;
 import org.jboss.hal.testsuite.page.config.elytron.SSLPage;
+import org.jboss.hal.testsuite.test.configuration.undertow.UndertowElytronOperations;
 import org.jboss.hal.testsuite.util.ConfigChecker;
 import org.junit.Test;
-import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.Values;
 
 @RunWith(Arquillian.class)
-@Category(Shared.class)
 public class ElytronSecurityDomainTestCase extends AbstractElytronTestCase {
 
     private static final String
@@ -38,7 +36,6 @@ public class ElytronSecurityDomainTestCase extends AbstractElytronTestCase {
         REALM_NAME = "realm-name",
         LOCAL_REALM_NAME = "local",
         APPLICATION_REALM_NAME = "ApplicationRealm",
-        MANAGEMENT_REALM_NAME = "ManagementRealm",
         APPLICATION_DOMAIN_NAME = "ApplicationDomain",
         PERMISSION_MAPPER = "permission-mapper",
         DEFAULT_PERMISSION_MAPPER_NAME = "default-permission-mapper",
@@ -167,8 +164,12 @@ public class ElytronSecurityDomainTestCase extends AbstractElytronTestCase {
      */
     @Test
     public void securityDomainAddRealmsTest() throws Exception {
-        Address securityDomainAddress = createSecurityDomain();
-        String securityDomainName = securityDomainAddress.getLastPairValue();
+        Address
+            securityDomainAddress = createSecurityDomain(),
+            newRealmAddress = new UndertowElytronOperations(client).createSecurityRealm();
+        String
+            securityDomainName = securityDomainAddress.getLastPairValue(),
+            newRealmName = newRealmAddress.getLastPairValue();
 
         try {
             page.navigateToApplication().selectResource(SECURITY_DOMAIN_LABEL).getResourceManager()
@@ -178,7 +179,7 @@ public class ElytronSecurityDomainTestCase extends AbstractElytronTestCase {
             WizardWindowWithOptionalFields wizard = page.getConfigAreaResourceManager()
                     .addResource(WizardWindowWithOptionalFields.class);
             Editor editor = wizard.getEditor();
-            editor.text(REALM, MANAGEMENT_REALM_NAME);
+            editor.text(REALM, newRealmName);
             wizard.openOptionalFieldsTab();
             wizard.maximizeWindow();
             editor.text(ROLE_DECODER, GROUPS_TO_ROLES_ROLE_DECODER_NAME);
@@ -186,7 +187,7 @@ public class ElytronSecurityDomainTestCase extends AbstractElytronTestCase {
 
             assertTrue("Dialog should be closed!", wizard.finishAndDismissReloadRequiredWindow());
             assertTrue("Created resource should be present in the table! See https://issues.jboss.org/browse/HAL-1326",
-                    page.resourceIsPresentInConfigAreaTable(MANAGEMENT_REALM_NAME));
+                    page.resourceIsPresentInConfigAreaTable(newRealmName));
             new ResourceVerifier(securityDomainAddress, client).verifyAttribute(REALMS, new ModelNodeListBuilder()
                     .addNode(new ModelNodePropertiesBuilder()
                             .addProperty(REALM, LOCAL_REALM_NAME)
@@ -195,13 +196,14 @@ public class ElytronSecurityDomainTestCase extends AbstractElytronTestCase {
                             .addProperty(REALM, APPLICATION_REALM_NAME)
                             .addProperty(ROLE_DECODER, GROUPS_TO_ROLES_ROLE_DECODER_NAME)
                     .build()).addNode(new ModelNodePropertiesBuilder()
-                            .addProperty(REALM, MANAGEMENT_REALM_NAME)
+                            .addProperty(REALM, newRealmName)
                             .addUndefinedProperty(PRINCIPAL_TRANSFORMER)
                             .addProperty(ROLE_DECODER, GROUPS_TO_ROLES_ROLE_DECODER_NAME)
                             .addProperty(ROLE_MAPPER, SUPER_USER_MAPPER_NAME)
                     .build()).build());
         } finally {
             ops.removeIfExists(securityDomainAddress);
+            ops.removeIfExists(newRealmAddress);
             adminOps.reloadIfRequired();
         }
     }
