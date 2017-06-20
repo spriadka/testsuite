@@ -3,7 +3,7 @@ package org.jboss.hal.testsuite.test.configuration.messaging.providerSettings;
 import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
+import org.jboss.hal.testsuite.fragment.config.messaging.ProviderSettingsWindow;
 import org.jboss.hal.testsuite.page.config.MessagingPage;
 import org.jboss.hal.testsuite.test.configuration.messaging.AbstractMessagingTestCase;
 import org.jboss.hal.testsuite.util.ConfigChecker;
@@ -39,7 +39,7 @@ public class AttributesTestCase extends AbstractMessagingTestCase {
 
     private static final Address SERVER_ADDRESS = MESSAGING_SUBSYSTEM.and("server", RandomStringUtils.randomAlphanumeric(5));
 
-    private WizardWindow wizardWindow;
+    private ProviderSettingsWindow wizardWindow;
 
     @Page
     private MessagingPage page;
@@ -51,7 +51,8 @@ public class AttributesTestCase extends AbstractMessagingTestCase {
 
     @Before
     public void before() {
-        wizardWindow = page.invokeProviderSettings(SERVER_ADDRESS.getLastPairValue());
+        page.invokeProviderSettings(SERVER_ADDRESS.getLastPairValue());
+        wizardWindow = page.providerSettingsWindow();
     }
 
     @After

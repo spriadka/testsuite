@@ -3,8 +3,8 @@ package org.jboss.hal.testsuite.test.configuration.messaging.providerSettings;
 import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
+import org.jboss.hal.testsuite.fragment.config.messaging.ProviderSettingsWindow;
 import org.jboss.hal.testsuite.page.config.MessagingPage;
 import org.jboss.hal.testsuite.test.configuration.messaging.AbstractMessagingTestCase;
 import org.jboss.hal.testsuite.util.ConfigChecker;
@@ -13,7 +13,6 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.wildfly.extras.creaper.core.online.ModelNodeResult;
 import org.wildfly.extras.creaper.core.online.operations.Address;
@@ -23,7 +22,6 @@ import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
 @RunWith(Arquillian.class)
-@Category(Shared.class)
 public class SecurityTestCase extends AbstractMessagingTestCase {
     private static final String
             SERVER_NAME  = "test-provider_" + RandomStringUtils.randomAlphanumeric(5),
@@ -51,10 +49,13 @@ public class SecurityTestCase extends AbstractMessagingTestCase {
     @Page
     private MessagingPage page;
 
+    private ProviderSettingsWindow wizardWindow;
+
     @Before
     public void before() {
         page.invokeProviderSettings(SERVER_NAME);
-        page.providerSettingsWindow().switchToSecurityTab().maximize();
+        wizardWindow = page.providerSettingsWindow();
+        wizardWindow.switchToSecurityTab().maximize();
     }
 
     @After
@@ -66,7 +67,8 @@ public class SecurityTestCase extends AbstractMessagingTestCase {
     public void updateClusterUser() throws Exception {
         final String value = "TESTER";
         new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                .configFragment(page.providerSettingsWindow().getConfigFragment())
+                .configFragment(page.getConfigFragment())
+                .wizardWindow(wizardWindow)
                 .editAndSave(ConfigChecker.InputType.TEXT, CLUSTER_USER, value)
                 .verifyFormSaved(NOT_SAVED_FAIL_MESSAGE)
                 .verifyAttribute(CLUSTER_USER, value);
@@ -77,6 +79,7 @@ public class SecurityTestCase extends AbstractMessagingTestCase {
         final String value = "TESTER.PASSWORD";
         new ConfigChecker.Builder(client, SERVER_ADDRESS)
                 .configFragment(page.getConfigFragment())
+                .wizardWindow(wizardWindow)
                 .editAndSave(ConfigChecker.InputType.TEXT, CLUSTER_PASSWORD, value)
                 .verifyFormSaved(NOT_SAVED_FAIL_MESSAGE)
                 .verifyAttribute(CLUSTER_PASSWORD, value);
@@ -90,12 +93,18 @@ public class SecurityTestCase extends AbstractMessagingTestCase {
         try {
             new ConfigChecker.Builder(client, SERVER_ADDRESS)
                     .configFragment(page.getConfigFragment())
+                    .wizardWindow(wizardWindow)
                     .editAndSave(ConfigChecker.InputType.CHECKBOX, SECURITY_ENABLED, !originalValue)
                     .verifyFormSaved(NOT_SAVED_FAIL_MESSAGE)
                     .verifyAttribute(SECURITY_ENABLED, !originalValue);
 
+            page.invokeProviderSettings(SERVER_NAME);
+            wizardWindow = page.providerSettingsWindow();
+            wizardWindow.switchToSecurityTab().maximize();
+
             new ConfigChecker.Builder(client, SERVER_ADDRESS)
                     .configFragment(page.getConfigFragment())
+                    .wizardWindow(wizardWindow)
                     .editAndSave(ConfigChecker.InputType.CHECKBOX, SECURITY_ENABLED, originalValue)
                     .verifyFormSaved(NOT_SAVED_FAIL_MESSAGE)
                     .verifyAttribute(SECURITY_ENABLED, originalValue);
@@ -109,6 +118,7 @@ public class SecurityTestCase extends AbstractMessagingTestCase {
         final long value = 10L;
         new ConfigChecker.Builder(client, SERVER_ADDRESS)
                 .configFragment(page.getConfigFragment())
+                .wizardWindow(wizardWindow)
                 .editAndSave(ConfigChecker.InputType.TEXT, SECURITY_INVALIDATION_INTERVAL, String.valueOf(value))
                 .verifyFormSaved(NOT_SAVED_FAIL_MESSAGE)
                 .verifyAttribute(SECURITY_INVALIDATION_INTERVAL, value);
@@ -119,6 +129,7 @@ public class SecurityTestCase extends AbstractMessagingTestCase {
         final String value = "jboss-web-policy";
         new ConfigChecker.Builder(client, SERVER_ADDRESS)
                 .configFragment(page.getConfigFragment())
+                .wizardWindow(wizardWindow)
                 .editAndSave(ConfigChecker.InputType.TEXT, SECURITY_DOMAIN, value)
                 .verifyFormSaved(NOT_SAVED_FAIL_MESSAGE)
                 .verifyAttribute(SECURITY_DOMAIN, value);
