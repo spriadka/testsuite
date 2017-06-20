@@ -5,7 +5,6 @@ import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.page.config.IOSubsystemPage;
@@ -15,7 +14,6 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.NotFoundException;
@@ -32,7 +30,6 @@ import java.util.concurrent.TimeoutException;
 
 @RunWith(Arquillian.class)
 @RunAsClient
-@Category(Shared.class)
 public class WorkerTestCase {
 
     @Drone
@@ -136,7 +133,7 @@ public class WorkerTestCase {
 
     @Test
     public void editStackSize() throws Exception {
-        final int value = 1024;
+        final long value = 1024;
         ModelNodeResult originalNodeResult = operations.readAttribute(WORKER_ADDRESS, STACK_SIZE);
         originalNodeResult.assertSuccess();
         try {
