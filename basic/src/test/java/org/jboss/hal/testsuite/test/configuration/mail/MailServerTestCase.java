@@ -258,7 +258,7 @@ public class MailServerTestCase {
                     .configFragment(page.getConfigFragment())
                     .editAndSave(ConfigChecker.InputType.TEXT, attributeName, value)
                     .verifyFormSaved()
-                    .verifyAttribute(attributeName, value,"Probably fails because of https://issues.jboss.org/browse/HAL-1349");
+                    .verifyAttribute(attributeName, value, "Probably fails because of https://issues.jboss.org/browse/HAL-1349");
         } finally {
             client.apply(new RemoveSocketBinding(value));
         }
