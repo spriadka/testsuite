@@ -14,6 +14,7 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openqa.selenium.WebDriver;
 import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
@@ -179,6 +180,7 @@ public abstract class AbstractCacheTestCase {
         editCheckboxAndVerify(STORE_ADDRESS, "purge", false);
     }
 
+    @Ignore("Deprecated. Consider using a shared store instead, where writes are only performed by primary owners.")
     @Test
     public void editSingleton() throws Exception {
         page.getConfig().switchTo(STORE_LABEL);
