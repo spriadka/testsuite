@@ -14,7 +14,6 @@ import org.jboss.hal.testsuite.util.ConfigChecker;
 import org.jboss.hal.testsuite.util.Console;
 import org.jboss.hal.testsuite.util.ElytronIntegrationChecker;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -87,11 +86,9 @@ public class MailServerTestCase {
         operations.add(SERVER_TBR_ADDRESS, Values.of("outbound-socket-binding-ref", SOCKET_BINDING_1)).assertSuccess();
     }
 
-    @Before
-    public void before() {
+    private void navigate() {
         page.viewMailSession(MAIL_SESSION_NAME);
         page.getResourceManager().selectByName(SMTP.toUpperCase());
-        page.getSesionsServers().selectServer(SMTP);
     }
 
     @AfterClass
@@ -110,6 +107,7 @@ public class MailServerTestCase {
 
     @Test
     public void createMailServer() throws Exception {
+        navigate();
         Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
         MailServerWizard wizard = page.getResourceManager().addResource(MailServerWizard.class);
 
@@ -130,6 +128,7 @@ public class MailServerTestCase {
 
     @Test
     public void removeMailServer() throws Exception {
+        navigate();
         page.getResourceManager().removeResource(IMAP.toUpperCase()).confirmAndDismissReloadRequiredMessage();
 
         new ResourceVerifier(SERVER_TBR_ADDRESS, client).verifyDoesNotExist();
@@ -138,6 +137,9 @@ public class MailServerTestCase {
     @Test
     public void setCredentialReferenceToClearText() throws Exception {
         operations.undefineAttribute(SERVER_ADDRESS, "password");
+
+        navigate();
+
         page.switchToCredentialReferenceTab();
         new ElytronIntegrationChecker.Builder(client)
                 .configFragment(page.getConfigFragment())
@@ -149,6 +151,9 @@ public class MailServerTestCase {
     @Test
     public void setCredentialReferenceToCredentialStore() throws Exception {
         operations.undefineAttribute(SERVER_ADDRESS, "password");
+
+        navigate();
+
         page.switchToCredentialReferenceTab();
         new ElytronIntegrationChecker.Builder(client)
                 .configFragment(page.getConfigFragment())
@@ -159,6 +164,10 @@ public class MailServerTestCase {
 
     @Test
     public void setInvalidCombinationToCredentialStore() throws Exception {
+        operations.undefineAttribute(SERVER_ADDRESS, "password");
+
+        navigate();
+
         page.switchToCredentialReferenceTab();
         new ElytronIntegrationChecker.Builder(client)
                 .configFragment(page.getConfigFragment())
@@ -169,6 +178,7 @@ public class MailServerTestCase {
 
     @Test
     public void editUsername() throws Exception {
+        navigate();
         final String value = "FooUsername_" + RandomStringUtils.randomAlphanumeric(5),
                 attributeName = "username";
         new ConfigChecker.Builder(client, SERVER_ADDRESS)
@@ -180,6 +190,7 @@ public class MailServerTestCase {
 
     @Test
     public void editPassword() throws Exception {
+        navigate();
         final String value = "FooPassword_" + RandomStringUtils.randomAlphanumeric(5),
                 attributeName = "password";
         new ConfigChecker.Builder(client, SERVER_ADDRESS)
@@ -191,6 +202,7 @@ public class MailServerTestCase {
 
     @Test
     public void toggleUseSSL() throws Exception {
+        navigate();
         final String attributeName = "ssl";
         final ModelNodeResult nodeResult = operations.readAttribute(SERVER_ADDRESS, attributeName);
         nodeResult.assertSuccess();
@@ -214,6 +226,7 @@ public class MailServerTestCase {
 
     @Test
     public void toggleUseTLS() throws Exception {
+        navigate();
         final String attributeName = "tls";
         final ModelNodeResult nodeResult = operations.readAttribute(SERVER_ADDRESS, attributeName);
         nodeResult.assertSuccess();
@@ -237,6 +250,7 @@ public class MailServerTestCase {
 
     @Test
     public void editSocketBinding() throws Exception {
+        navigate();
         final String value = mailOperations.createSocketBinding(),
                 attributeName = "outbound-socket-binding-ref";
         try {
@@ -244,8 +258,7 @@ public class MailServerTestCase {
                     .configFragment(page.getConfigFragment())
                     .editAndSave(ConfigChecker.InputType.TEXT, attributeName, value)
                     .verifyFormSaved()
-                    .verifyAttribute("Probably fails because of https://issues.jboss.org/browse/HAL-1349",
-                            attributeName, value);
+                    .verifyAttribute(attributeName, value,"Probably fails because of https://issues.jboss.org/browse/HAL-1349");
         } finally {
             client.apply(new RemoveSocketBinding(value));
         }
