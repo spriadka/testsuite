@@ -25,6 +25,7 @@ package org.jboss.hal.testsuite.util;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
+import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
 import org.junit.Assert;
 import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
 import org.wildfly.extras.creaper.core.online.operations.Address;
@@ -84,12 +85,17 @@ public final class ConfigChecker {
             throws IOException, InterruptedException, TimeoutException {
         this.client = builder.client;
         this.resourceAddress = builder.resourceAddress;
+        WizardWindow wizardWindow = builder.wizardWindow;
         Editor editor = builder.config.edit();
         for (Input input : builder.inputList) {
             enter(editor, input);
         }
-        this.saved = builder.config.save();
-        if (!this.saved) {
+        if (wizardWindow != null) {
+            this.saved = wizardWindow.saveAndDismissReloadRequiredWindow();
+        } else {
+            this.saved = builder.config.save();
+        }
+        if (!this.saved && wizardWindow == null) {
             builder.config.cancel(); // cleanup
         }
     }
@@ -147,6 +153,7 @@ public final class ConfigChecker {
         private final OnlineManagementClient client;
         private final Address resourceAddress;
         private ConfigFragment config;
+        private WizardWindow wizardWindow;
         private List<Input> inputList;
 
         public Builder(OnlineManagementClient client, Address resourceAddress) {
@@ -159,6 +166,16 @@ public final class ConfigChecker {
          */
         public Builder configFragment(ConfigFragment config) {
             this.config = config;
+            return this;
+        }
+
+        /**
+         * Wizard window for use cases when config fragment is inside wizard window which is closed upon clicking on
+         * save button. If wizard window remains open, do not use this setter.
+         * @param wizardWindow wizard window containing config fragment
+         */
+        public Builder wizardWindow(WizardWindow wizardWindow) {
+            this.wizardWindow = wizardWindow;
             return this;
         }
 

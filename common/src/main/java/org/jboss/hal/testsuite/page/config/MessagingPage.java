@@ -18,6 +18,7 @@ import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConfigProperties
 import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConfigPropertyWizard;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
+import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
 import org.jboss.hal.testsuite.fragment.shared.util.ResourceManager;
 import org.jboss.hal.testsuite.page.ConfigPage;
 import org.jboss.hal.testsuite.page.Navigatable;
@@ -90,8 +91,9 @@ public class MessagingPage extends ConfigPage implements Navigatable {
     }
 
 
-    public void invokeProviderSettings(String providerName) {
+    public WizardWindow invokeProviderSettings(String providerName) {
         invokeActionOnMessagingProviderRow("Provider Settings", providerName);
+        return Console.withBrowser(browser).openedWizard();
     }
 
     private void switchToTabInConfig(String label) {
