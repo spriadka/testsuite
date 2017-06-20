@@ -67,6 +67,7 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
             TCP_BACKLOG = "tcp-backlog",
             TCP_KEEP_ALIVE = "tcp-keep-alive",
             URL_CHARSET = "url-charset",
+            VERIFY_CLIENT = "verify-client",
             WORKER = "worker",
             WRITE_TIMEOUT = "write-timeout";
 
@@ -378,22 +379,26 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
                 serverSSLContextAddress = undertowElytronOperations.createServerSSLContext(keyManagerAddress);
 
         final ModelNodeResult sslContextModelNodeResult = operations.readAttribute(HTTPS_LISTENER_ADDRESS, SSL_CONTEXT),
-                securityRealmModelNodeResult = operations.readAttribute(HTTPS_LISTENER_ADDRESS, SECURITY_REALM);
+                securityRealmModelNodeResult = operations.readAttribute(HTTPS_LISTENER_ADDRESS, SECURITY_REALM),
+                verifyClientModelNodeResult = operations.readAttribute(HTTPS_LISTENER_ADDRESS, VERIFY_CLIENT);
         sslContextModelNodeResult.assertSuccess();
         securityRealmModelNodeResult.assertSuccess();
+        verifyClientModelNodeResult.assertSuccess();
 
         try {
             new ConfigChecker.Builder(client, HTTPS_LISTENER_ADDRESS)
                     .configFragment(page.getConfigFragment())
                     .edit(ConfigChecker.InputType.TEXT, SSL_CONTEXT, serverSSLContextAddress.getLastPairValue())
                     .edit(ConfigChecker.InputType.TEXT, SECURITY_REALM, "")
+                    .edit(ConfigChecker.InputType.SELECT, VERIFY_CLIENT, "")
                     .andSave()
                     .verifyFormSaved()
                     .verifyAttribute(SSL_CONTEXT, serverSSLContextAddress.getLastPairValue());
         } finally {
             operations.batch(new Batch()
                     .writeAttribute(HTTPS_LISTENER_ADDRESS, SSL_CONTEXT, sslContextModelNodeResult.value())
-                    .writeAttribute(HTTPS_LISTENER_ADDRESS, SECURITY_REALM, securityRealmModelNodeResult.value()))
+                    .writeAttribute(HTTPS_LISTENER_ADDRESS, SECURITY_REALM, securityRealmModelNodeResult.value())
+                    .writeAttribute(HTTPS_LISTENER_ADDRESS, VERIFY_CLIENT, verifyClientModelNodeResult.value()))
                     .assertSuccess();
             operations.removeIfExists(serverSSLContextAddress);
             operations.removeIfExists(keyManagerAddress);
