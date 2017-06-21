@@ -6,6 +6,7 @@ import org.jboss.dmr.Property;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.dmr.ModelNodeGenerator;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
+import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.wildfly.extras.creaper.core.online.ModelNodeResult;
@@ -36,6 +37,7 @@ public class ElytronIntegrationChecker {
     private final OnlineManagementClient client;
     private final Operations operations;
     private ConfigFragment configFragment;
+    private WizardWindow wizardWindow;
     private Address address;
     private String credentialReferenceAttributeName;
 
@@ -44,6 +46,7 @@ public class ElytronIntegrationChecker {
         this.operations = new Operations(client);
         this.address = builder.address;
         this.configFragment = builder.configFragment;
+        this.wizardWindow = builder.wizardWindow;
         this.credentialReferenceAttributeName = builder.credentialReferenceAttributeName;
     }
 
@@ -59,6 +62,7 @@ public class ElytronIntegrationChecker {
         try {
             final ResourceVerifier verifier = new ConfigChecker.Builder(client, address)
                     .configFragment(configFragment)
+                    .wizardWindow(wizardWindow)
                     .edit(ConfigChecker.InputType.TEXT, ALIAS, "")
                     .edit(ConfigChecker.InputType.TEXT, CLEAR_TEXT, clearTextValue)
                     .edit(ConfigChecker.InputType.TEXT, STORE, "")
@@ -111,6 +115,7 @@ public class ElytronIntegrationChecker {
         try {
             final ResourceVerifier verifier = new ConfigChecker.Builder(client, address)
                     .configFragment(configFragment)
+                    .wizardWindow(wizardWindow)
                     .edit(ConfigChecker.InputType.TEXT, ALIAS, credentialStoreAliasName, ConfigChecker.InputMethod.HUMAN)
                     .edit(ConfigChecker.InputType.TEXT, CLEAR_TEXT, "")
                     .edit(ConfigChecker.InputType.TEXT, STORE, credentialStoreName)
@@ -155,6 +160,7 @@ public class ElytronIntegrationChecker {
         try {
             new ConfigChecker.Builder(client, address)
                     .configFragment(configFragment)
+                    .wizardWindow(wizardWindow)
                     .edit(ConfigChecker.InputType.TEXT, ALIAS, "")
                     .edit(ConfigChecker.InputType.TEXT, CLEAR_TEXT, RandomStringUtils.randomAlphanumeric(6))
                     .edit(ConfigChecker.InputType.TEXT, STORE, credentialStoreName)
@@ -249,6 +255,7 @@ public class ElytronIntegrationChecker {
         private String credentialReferenceAttributeName;
         private Address address;
         private ConfigFragment configFragment;
+        private WizardWindow wizardWindow;
 
         public Builder(OnlineManagementClient client) {
             this.client = client;
@@ -277,6 +284,17 @@ public class ElytronIntegrationChecker {
             this.configFragment = configFragment;
             return this;
         }
+
+        /**
+         * Wizard window for use cases when config fragment is inside wizard window which is closed upon clicking on
+         * save button. If wizard window remains open, do not use this setter.
+         * @param wizardWindow wizard window containing config fragment
+         */
+        public Builder wizardWindow(WizardWindow wizardWindow) {
+            this.wizardWindow = wizardWindow;
+            return this;
+        }
+
 
         private void validate() {
             if (client == null) {
