@@ -23,7 +23,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(Arquillian.class)
-public class ElytronAggregateSecurityEventListener extends AbstractElytronTestCase {
+public class ElytronAggregateSecurityEventListenerTestCase extends AbstractElytronTestCase {
 
     private static final String
             AGGREGATE_SECURITY_EVENT_LISTENER = "aggregate-security-event-listener",
