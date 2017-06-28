@@ -37,6 +37,13 @@ public class ElytronFilePeriodicRotatingAuditLogTestCase extends AbstractElytron
     @Page
     private ElytronLogsPage page;
 
+    /**
+     * @tpTestDetails Try to create File Periodic Rotating Audit Log instance in Web Console's Elytron subsystem
+     * configuration.
+     * Validate created resource is visible in File Periodic Rotating Audit Log.
+     * Validate created resource is present in model.
+     * Validate attributes of created resource in model.
+     */
     @Test
     public void testAddFilePeriodicRotatingAuditLog() throws Exception {
         final Address auditLogAddress = elyOps.getElytronAddress(FILE_PERIODIC_ROTATING_AUDIT_LOG,
@@ -67,6 +74,12 @@ public class ElytronFilePeriodicRotatingAuditLogTestCase extends AbstractElytron
         }
     }
 
+    /**
+     * @tpTestDetails Create File Periodic Rotating Audit Log instance in model and try to remove it in Web Console's
+     * Elytron subsystem configuration.
+     * Validate the resource is not any more visible in File Periodic Rotating Audit Log table.
+     * Validate removed resource is not any more present in the model.
+     */
     @Test
     public void testRemoveFilePeriodicRotatingAuditLog() throws Exception {
         final Address auditLogAddress = elyOps.getElytronAddress(FILE_PERIODIC_ROTATING_AUDIT_LOG,
@@ -91,6 +104,11 @@ public class ElytronFilePeriodicRotatingAuditLogTestCase extends AbstractElytron
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron File Periodic Rotating Audit Log instance in model and try to edit its format
+     * attribute value in Web Console's Elytron subsystem configuration.
+     * Validate edited attribute value in the model.
+     */
     @Test
     public void selectFormat() throws Exception {
         final Address auditLogAddress = elyOps.getElytronAddress(FILE_PERIODIC_ROTATING_AUDIT_LOG, randomAlphabetic(7));
@@ -114,6 +132,11 @@ public class ElytronFilePeriodicRotatingAuditLogTestCase extends AbstractElytron
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron File Periodic Rotating Audit Log instance in model and try to edit its suffix
+     * attribute value in Web Console's Elytron subsystem configuration.
+     * Validate edited attribute value in the model.
+     */
     @Test
     public void editSuffix() throws Exception {
         final Address auditLogAddress = elyOps.getElytronAddress(FILE_PERIODIC_ROTATING_AUDIT_LOG,
@@ -140,6 +163,11 @@ public class ElytronFilePeriodicRotatingAuditLogTestCase extends AbstractElytron
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron File Periodic Rotating Audit Log instance in model and try to edit its path
+     * attribute value in Web Console's Elytron subsystem configuration.
+     * Validate edited attribute value in the model.
+     */
     @Test
     public void editPath() throws Exception {
         final Address auditLogAddress = elyOps.getElytronAddress(FILE_PERIODIC_ROTATING_AUDIT_LOG,
@@ -166,6 +194,11 @@ public class ElytronFilePeriodicRotatingAuditLogTestCase extends AbstractElytron
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron File Periodic Rotating Audit Log instance in model and try to edit its relative-to
+     * attribute value in Web Console's Elytron subsystem configuration.
+     * Validate edited attribute value in the model.
+     */
     @Test
     public void editRelativeTo() throws Exception {
         final Address auditLogAddress = elyOps.getElytronAddress(FILE_PERIODIC_ROTATING_AUDIT_LOG, randomAlphabetic(7));
@@ -189,6 +222,11 @@ public class ElytronFilePeriodicRotatingAuditLogTestCase extends AbstractElytron
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron File Periodic Rotating Audit Log instance in model and try to edit its synchronized
+     * attribute value in Web Console's Elytron subsystem configuration.
+     * Validate edited attribute value in the model.
+     */
     @Test
     public void toggleSynchronized() throws Exception {
         final Address auditLogAddress = elyOps.getElytronAddress(FILE_PERIODIC_ROTATING_AUDIT_LOG, randomAlphabetic(7));

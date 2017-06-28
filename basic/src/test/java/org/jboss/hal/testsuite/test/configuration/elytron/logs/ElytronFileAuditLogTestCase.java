@@ -36,6 +36,12 @@ public class ElytronFileAuditLogTestCase extends AbstractElytronTestCase {
     @Page
     private ElytronLogsPage page;
 
+    /**
+     * @tpTestDetails Try to create File Audit Log instance in Web Console's Elytron subsystem configuration.
+     * Validate created resource is visible in File Audit Log table.
+     * Validate created resource is present in model.
+     * Validate attributes of created resource in model.
+     */
     @Test
     public void testAddFileAuditLog() throws Exception {
         final Address fileAuditAddress = elyOps.getElytronAddress(FILE_AUDIT_LOG, randomAlphabetic(7));
@@ -60,6 +66,12 @@ public class ElytronFileAuditLogTestCase extends AbstractElytronTestCase {
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron File Audit Log instance in model and try to remove it in Web Console's Elytron
+     * subsystem configuration.
+     * Validate the resource is not any more visible in File Audit Log table.
+     * Validate removed resource is not any more present in the model.
+     */
     @Test
     public void testRemoveFileAuditLog() throws Exception {
         final Address fileAuditAddress = elyOps.getElytronAddress(FILE_AUDIT_LOG, randomAlphabetic(7));
@@ -82,6 +94,11 @@ public class ElytronFileAuditLogTestCase extends AbstractElytronTestCase {
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron File Audit Log instance in model and try to edit its format attribute value in
+     * Web Console's Elytron subsystem configuration.
+     * Validate edited attribute value in the model.
+     */
     @Test
     public void editFormat() throws Exception {
         final Address fileAuditAddress = elyOps.getElytronAddress(FILE_AUDIT_LOG, randomAlphabetic(7));
@@ -105,6 +122,11 @@ public class ElytronFileAuditLogTestCase extends AbstractElytronTestCase {
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron File Audit Log instance in model and try to edit its path attribute value in Web
+     * Console's Elytron subsystem configuration.
+     * Validate edited attribute value in the model.
+     */
     @Test
     public void editPath() throws Exception {
         final Address fileAuditAddress = elyOps.getElytronAddress(FILE_AUDIT_LOG, randomAlphabetic(7));
@@ -128,6 +150,11 @@ public class ElytronFileAuditLogTestCase extends AbstractElytronTestCase {
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron File Audit Log instance in model and try to edit its relative-to attribute value in
+     * Web Console's Elytron subsystem configuration.
+     * Validate edited attribute value in the model.
+     */
     @Test
     public void editRelativeTo() throws Exception {
         final Address fileAuditAddress = elyOps.getElytronAddress(FILE_AUDIT_LOG, randomAlphabetic(7));
@@ -151,6 +178,11 @@ public class ElytronFileAuditLogTestCase extends AbstractElytronTestCase {
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron File Audit Log instance in model and try to edit its synchronized attribute value
+     * in Web Console's Elytron subsystem configuration.
+     * Validate edited attribute value in the model.
+     */
     @Test
     public void toggleSynchronized() throws Exception {
         final Address fileAuditAddress = elyOps.getElytronAddress(FILE_AUDIT_LOG, randomAlphabetic(7));

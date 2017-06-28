@@ -39,6 +39,12 @@ public class ElytronSyslogAuditLogTestCase extends AbstractElytronTestCase {
     @Page
     private ElytronLogsPage page;
 
+    /**
+     * @tpTestDetails Try to create Syslog Audit Log instance in Web Console's Elytron subsystem configuration.
+     * Validate created resource is visible in Syslog Audit Log table.
+     * Validate created resource is present in model.
+     * Validate attributes of created resource in model.
+     */
     @Test
     public void testAddSyslogAuditLog() throws Exception {
         final Address syslogAuditLogAddress = elyOps.getElytronAddress(SYSLOG_AUDIT_LOG, randomAlphabetic(7));
@@ -68,6 +74,12 @@ public class ElytronSyslogAuditLogTestCase extends AbstractElytronTestCase {
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron Syslog Audit Log instance in model and try to remove it in Web Console's Elytron
+     * subsystem configuration.
+     * Validate the resource is not any more visible in Syslog Audit Log table.
+     * Validate removed resource is not any more present in the model.
+     */
     @Test
     public void testRemoveSyslogAuditLog() throws Exception {
         final Address syslogAuditLogAddress = elyOps.getElytronAddress(SYSLOG_AUDIT_LOG, randomAlphabetic(7));
@@ -94,6 +106,11 @@ public class ElytronSyslogAuditLogTestCase extends AbstractElytronTestCase {
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron Syslog Audit Log instance in model and try to edit its format attribute value in
+     * Web Console's Elytron subsystem configuration.
+     * Validate edited attribute value in the model.
+     */
     @Test
     public void selectFormat() throws Exception {
         final Address syslogAuditLogAddress = elyOps.getElytronAddress(SYSLOG_AUDIT_LOG, randomAlphabetic(7));
@@ -118,6 +135,11 @@ public class ElytronSyslogAuditLogTestCase extends AbstractElytronTestCase {
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron Syslog Audit Log instance in model and try to edit its host-name attribute value in
+     * Web Console's Elytron subsystem configuration.
+     * Validate edited attribute value in the model.
+     */
     @Test
     public void editHostname() throws Exception {
         final Address syslogAuditLogAddress = elyOps.getElytronAddress(SYSLOG_AUDIT_LOG, randomAlphabetic(7));
@@ -142,6 +164,11 @@ public class ElytronSyslogAuditLogTestCase extends AbstractElytronTestCase {
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron Syslog Audit Log instance in model and try to edit its port attribute value in Web
+     * Console's Elytron subsystem configuration.
+     * Validate edited attribute value in the model.
+     */
     @Test
     public void editPort() throws Exception {
         final Address syslogAuditLogAddress = elyOps.getElytronAddress(SYSLOG_AUDIT_LOG, randomAlphabetic(7));
@@ -166,6 +193,11 @@ public class ElytronSyslogAuditLogTestCase extends AbstractElytronTestCase {
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron Syslog Audit Log instance in model and try to edit its server-address attribute
+     * value in Web Console's Elytron subsystem configuration.
+     * Validate edited attribute value in the model.
+     */
     @Test
     public void editServerAddress() throws Exception {
         final Address syslogAuditLogAddress = elyOps.getElytronAddress(SYSLOG_AUDIT_LOG, randomAlphabetic(7));
@@ -190,6 +222,11 @@ public class ElytronSyslogAuditLogTestCase extends AbstractElytronTestCase {
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron Syslog Audit Log instance in model and try to edit its ssl-context attribute value
+     * in Web Console's Elytron subsystem configuration.
+     * Validate edited attribute value in the model.
+     */
     @Test
     public void editSSLContext() throws Exception {
         final Address syslogAuditLogAddress = elyOps.getElytronAddress(SYSLOG_AUDIT_LOG, randomAlphabetic(7)),
@@ -223,6 +260,11 @@ public class ElytronSyslogAuditLogTestCase extends AbstractElytronTestCase {
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron Syslog Audit Log instance in model and try to edit its transport attribute value in
+     * Web Console's Elytron subsystem configuration.
+     * Validate edited attribute value in the model.
+     */
     @Test
     public void selectTransport() throws Exception {
         final Address syslogAuditLogAddress = elyOps.getElytronAddress(SYSLOG_AUDIT_LOG, randomAlphabetic(7));

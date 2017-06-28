@@ -35,6 +35,13 @@ public class ElytronAggregateSecurityEventListenerTestCase extends AbstractElytr
     @Page
     private ElytronOtherOtherPage page;
 
+    /**
+     * @tpTestDetails Try to create Aggregate Security Event Listener instance in Web Console's Elytron subsystem
+     * configuration.
+     * Validate created resource is visible in Aggregate Security Event Listener table.
+     * Validate created resource is present in model.
+     * Validate attributes of created resource in model.
+     */
     @Test
     public void testAddAggregateSecurityEventListener() throws Exception {
         final Address eventListener1 = elyOps.getElytronAddress(FILE_AUDIT_LOG, randomAlphabetic(7)),
@@ -72,6 +79,12 @@ public class ElytronAggregateSecurityEventListenerTestCase extends AbstractElytr
         }
     }
 
+    /**
+     * @tpTestDetails Create Aggregate Security Event Listener instance in model and try to remove it in Web Console's
+     * Elytron subsystem configuration.
+     * Validate the resource is not any more visible in Aggregate Security Event Listener table.
+     * Validate removed resource is not any more present in the model.
+     */
     @Test
     public void testRemoveAggregateSecurityEventListener() throws Exception {
         final Address eventListener1 = elyOps.getElytronAddress(FILE_AUDIT_LOG, randomAlphabetic(7)),
@@ -102,6 +115,11 @@ public class ElytronAggregateSecurityEventListenerTestCase extends AbstractElytr
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron Aggregate Security Event Listener instance in model and try to edit its
+     * security-event-listeners attribute value in Web Console's Elytron subsystem configuration.
+     * Validate edited attribute value in the model.
+     */
     @Test
     public void editSecurityEventListeners() throws Exception {
         final Address eventListener1 = elyOps.getElytronAddress(FILE_AUDIT_LOG, randomAlphabetic(7)),

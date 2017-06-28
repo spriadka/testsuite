@@ -40,12 +40,18 @@ public class ElytronFileSizeRotatingAuditLogTestCase extends AbstractElytronTest
     @Page
     private ElytronLogsPage page;
 
+    /**
+     * @tpTestDetails Try to create File Size Rotating Audit Log instance in Web Console's Elytron subsystem
+     * configuration.
+     * Validate created resource is visible in File Size Rotating Audit Log table.
+     * Validate created resource is present in model.
+     * Validate attributes of created resource in model.
+     */
     @Test
     public void testAddFilePeriodicRotatingAuditLog() throws Exception {
         final Address auditLogAddress = elyOps.getElytronAddress(FILE_SIZE_ROTATING_AUDIT_LOG,
                 randomAlphabetic(7));
-        final String pathValue = randomAlphabetic(7),
-                suffixValue = "%H%m";
+        final String pathValue = randomAlphabetic(7);
         try {
             page.navigateToApplication()
                     .switchSubTab(FILE_SIZE_ROTATING_AUDIT_LOG_LABEL);
@@ -68,6 +74,12 @@ public class ElytronFileSizeRotatingAuditLogTestCase extends AbstractElytronTest
         }
     }
 
+    /**
+     * @tpTestDetails Create File Size Rotating Audit Log instance in model and try to remove it in Web Console's
+     * Elytron subsystem configuration.
+     * Validate the resource is not any more visible in File Size Rotating Audit Log table.
+     * Validate removed resource is not any more present in the model.
+     */
     @Test
     public void testRemoveFilePeriodicRotatingAuditLog() throws Exception {
         final Address auditLogAddress = elyOps.getElytronAddress(FILE_SIZE_ROTATING_AUDIT_LOG,
@@ -92,6 +104,11 @@ public class ElytronFileSizeRotatingAuditLogTestCase extends AbstractElytronTest
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron File Size Rotating Audit Log instance in model and try to edit its format attribute
+     * value in Web Console's Elytron subsystem configuration.
+     * Validate edited attribute value in the model.
+     */
     @Test
     public void selectFormat() throws Exception {
         final Address auditLogAddress = elyOps.getElytronAddress(FILE_SIZE_ROTATING_AUDIT_LOG, randomAlphabetic(7));
@@ -114,7 +131,12 @@ public class ElytronFileSizeRotatingAuditLogTestCase extends AbstractElytronTest
             adminOps.reloadIfRequired();
         }
     }
-    
+
+    /**
+     * @tpTestDetails Create Elytron File Size Rotating Audit Log instance in model and try to edit its max-backup-index
+     * attribute value in Web Console's Elytron subsystem configuration.
+     * Validate edited attribute value in the model.
+     */
     @Test
     public void editMaxBackupIndex() throws Exception {
         final Address auditLogAddress = elyOps.getElytronAddress(FILE_SIZE_ROTATING_AUDIT_LOG, randomAlphabetic(7));
@@ -138,6 +160,11 @@ public class ElytronFileSizeRotatingAuditLogTestCase extends AbstractElytronTest
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron File Size Rotating Audit Log instance in model and try to edit its max-backup-index
+     * attribute value in Web Console's Elytron subsystem configuration with invalid value.
+     * Validate that the form wasn't saved.
+     */
     @Test
     public void editMaxBackupIndexInvalid() throws Exception {
         final Address auditLogAddress = elyOps.getElytronAddress(FILE_SIZE_ROTATING_AUDIT_LOG, randomAlphabetic(7));
@@ -160,6 +187,11 @@ public class ElytronFileSizeRotatingAuditLogTestCase extends AbstractElytronTest
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron File Size Rotating Audit Log instance in model and try to edit its suffix attribute
+     * value in Web Console's Elytron subsystem configuration.
+     * Validate edited attribute value in the model.
+     */
     @Test
     public void editSuffix() throws Exception {
         final Address auditLogAddress = elyOps.getElytronAddress(FILE_SIZE_ROTATING_AUDIT_LOG,
@@ -186,6 +218,11 @@ public class ElytronFileSizeRotatingAuditLogTestCase extends AbstractElytronTest
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron File Size Rotating Audit Log instance in model and try to edit its path attribute
+     * value in Web Console's Elytron subsystem configuration.
+     * Validate edited attribute value in the model.
+     */
     @Test
     public void editPath() throws Exception {
         final Address auditLogAddress = elyOps.getElytronAddress(FILE_SIZE_ROTATING_AUDIT_LOG,
@@ -212,6 +249,11 @@ public class ElytronFileSizeRotatingAuditLogTestCase extends AbstractElytronTest
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron File Size Rotating Audit Log instance in model and try to edit its relative-to
+     * attribute value in Web Console's Elytron subsystem configuration.
+     * Validate edited attribute value in the model.
+     */
     @Test
     public void editRelativeTo() throws Exception {
         final Address auditLogAddress = elyOps.getElytronAddress(FILE_SIZE_ROTATING_AUDIT_LOG, randomAlphabetic(7));
@@ -235,6 +277,11 @@ public class ElytronFileSizeRotatingAuditLogTestCase extends AbstractElytronTest
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron File Size Rotating Audit Log instance in model and try to edit its rotate-on-boot
+     * attribute value in Web Console's Elytron subsystem configuration.
+     * Validate edited attribute value in the model.
+     */
     @Test
     public void toggleRotateOnBoot() throws Exception {
         final Address auditLogAddress = elyOps.getElytronAddress(FILE_SIZE_ROTATING_AUDIT_LOG, randomAlphabetic(7));
@@ -267,6 +314,11 @@ public class ElytronFileSizeRotatingAuditLogTestCase extends AbstractElytronTest
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron File Size Rotating Audit Log instance in model and try to edit its rotate-size
+     * attribute value in Web Console's Elytron subsystem configuration.
+     * Validate edited attribute value in the model.
+     */
     @Test
     public void editRotateSize() throws Exception {
         final Address auditLogAddress = elyOps.getElytronAddress(FILE_SIZE_ROTATING_AUDIT_LOG, randomAlphabetic(7));
@@ -290,6 +342,11 @@ public class ElytronFileSizeRotatingAuditLogTestCase extends AbstractElytronTest
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron File Size Rotating Audit Log instance in model and try to edit its synchronized
+     * attribute value in Web Console's Elytron subsystem configuration.
+     * Validate edited attribute value in the model.
+     */
     @Test
     public void toggleSynchronized() throws Exception {
         final Address auditLogAddress = elyOps.getElytronAddress(FILE_SIZE_ROTATING_AUDIT_LOG, randomAlphabetic(7));
