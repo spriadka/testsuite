@@ -6,6 +6,7 @@ import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.fragment.config.messaging.ProviderSettingsWindow;
 import org.jboss.hal.testsuite.page.config.MessagingPage;
 import org.jboss.hal.testsuite.test.configuration.messaging.AbstractMessagingTestCase;
+import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.jboss.hal.testsuite.util.ElytronIntegrationChecker;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -51,10 +52,7 @@ public class CredentialReferenceTestCase extends AbstractMessagingTestCase {
 
     @Test
     public void editCredentialReferenceClearText() throws Exception {
-        new ElytronIntegrationChecker.Builder(client)
-                .address(SERVER_ADDRESS)
-                .configFragment(page.getConfigFragment())
-                .wizardWindow(providerSettingsWindow)
+        integrationNCheckerBasedOnServerMode()
                 .credetialReferenceAttributeName(CLUSTER_CREDENTIAL_REFERENCE)
                 .build()
                 .setClearTextCredentialReferenceAndVerify();
@@ -62,10 +60,7 @@ public class CredentialReferenceTestCase extends AbstractMessagingTestCase {
 
     @Test
     public void editCredentialReferenceStoreReference() throws Exception {
-        new ElytronIntegrationChecker.Builder(client)
-                .address(SERVER_ADDRESS)
-                .configFragment(page.getConfigFragment())
-                .wizardWindow(providerSettingsWindow)
+        integrationNCheckerBasedOnServerMode()
                 .credetialReferenceAttributeName(CLUSTER_CREDENTIAL_REFERENCE)
                 .build()
                 .setCredentialStoreCredentialReferenceAndVerify();
@@ -73,12 +68,19 @@ public class CredentialReferenceTestCase extends AbstractMessagingTestCase {
 
     @Test
     public void editCredentialReferenceIllegalCombination() throws Exception {
-        new ElytronIntegrationChecker.Builder(client)
-                .address(SERVER_ADDRESS)
-                .configFragment(page.getConfigFragment())
-                .wizardWindow(providerSettingsWindow)
+        integrationNCheckerBasedOnServerMode()
                 .credetialReferenceAttributeName(CLUSTER_CREDENTIAL_REFERENCE)
                 .build()
                 .testIllegalCombinationCredentialReferenceAttributes();
+    }
+
+    private ElytronIntegrationChecker.Builder integrationNCheckerBasedOnServerMode() {
+        ElytronIntegrationChecker.Builder builder = new ElytronIntegrationChecker.Builder(client)
+                .address(SERVER_ADDRESS)
+                .configFragment(page.getConfigFragment());
+        if (ConfigUtils.isDomain()) {
+            builder.wizardWindow(providerSettingsWindow);
+        }
+        return builder;
     }
 }

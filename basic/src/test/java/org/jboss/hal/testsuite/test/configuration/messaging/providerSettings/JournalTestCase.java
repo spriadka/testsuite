@@ -72,9 +72,7 @@ public class JournalTestCase extends AbstractMessagingTestCase {
     public void updateJournalType() throws Exception {
         final String value = "NIO";
 
-        new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                .configFragment(page.getConfigFragment())
-                .wizardWindow(providerSettingsWindow)
+        createConfigCheckerBuilderBasedOnServerMode(client, SERVER_ADDRESS, providerSettingsWindow)
                 .editAndSave(SELECT, JOURNAL_TYPE, value)
                 .verifyFormSaved()
                 .verifyAttribute(JOURNAL_TYPE, value);
@@ -82,9 +80,7 @@ public class JournalTestCase extends AbstractMessagingTestCase {
 
     @Test
     public void updateCreateJournalDir() throws Exception {
-        new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                .configFragment(page.getConfigFragment())
-                .wizardWindow(providerSettingsWindow)
+        createConfigCheckerBuilderBasedOnServerMode(client, SERVER_ADDRESS, providerSettingsWindow)
                 .editAndSave(CHECKBOX, CREATE_JOURNAL_DIR, false)
                 .verifyFormSaved()
                 .verifyAttribute(CREATE_JOURNAL_DIR, false);
@@ -92,9 +88,7 @@ public class JournalTestCase extends AbstractMessagingTestCase {
 
     @Test
     public void updateJournalSyncNonTransactional() throws Exception {
-        new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                .configFragment(page.getConfigFragment())
-                .wizardWindow(providerSettingsWindow)
+        createConfigCheckerBuilderBasedOnServerMode(client, SERVER_ADDRESS, providerSettingsWindow)
                 .editAndSave(CHECKBOX, JOURNAL_SYNC_NON_TRANSACTIONAL, false)
                 .verifyFormSaved()
                 .verifyAttribute(JOURNAL_SYNC_NON_TRANSACTIONAL, false);
@@ -102,9 +96,7 @@ public class JournalTestCase extends AbstractMessagingTestCase {
 
     @Test
     public void updateJournalSyncTransactional() throws Exception {
-        new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                .configFragment(page.getConfigFragment())
-                .wizardWindow(providerSettingsWindow)
+        createConfigCheckerBuilderBasedOnServerMode(client, SERVER_ADDRESS, providerSettingsWindow)
                 .editAndSave(CHECKBOX, JOURNAL_SYNC_TRANSACTIONAL, false)
                 .verifyFormSaved()
                 .verifyAttribute(JOURNAL_SYNC_TRANSACTIONAL, false);
@@ -112,18 +104,14 @@ public class JournalTestCase extends AbstractMessagingTestCase {
 
     @Test
     public void updateJournalMinFilesInvalid() throws Exception {
-        new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                .configFragment(page.getConfigFragment())
-                .wizardWindow(providerSettingsWindow)
+        createConfigCheckerBuilderBasedOnServerMode(client, SERVER_ADDRESS, providerSettingsWindow)
                 .editAndSave(TEXT, JOURNAL_MIN_FILES, "0")
                 .verifyFormNotSaved();
     }
 
     @Test
     public void updateJournalMaxFilesWrongValue() throws Exception {
-        new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                .configFragment(page.getConfigFragment())
-                .wizardWindow(providerSettingsWindow)
+        createConfigCheckerBuilderBasedOnServerMode(client, SERVER_ADDRESS, providerSettingsWindow)
                 .editAndSave(TEXT, JOURNAL_MAX_IO, "-1")
                 .verifyFormNotSaved();
     }
@@ -133,9 +121,7 @@ public class JournalTestCase extends AbstractMessagingTestCase {
         final String journalBufferSize = JOURNAL_BUFFER_SIZE;
         final long journalBufferSizeValue = 1024L;
 
-        new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                .configFragment(providerSettingsWindow.getConfigFragment())
-                .wizardWindow(providerSettingsWindow)
+        createConfigCheckerBuilderBasedOnServerMode(client, SERVER_ADDRESS, providerSettingsWindow)
                 .editAndSave(TEXT, journalBufferSize, String.valueOf(journalBufferSizeValue))
                 .verifyFormSaved()
                 .verifyAttribute(journalBufferSize, journalBufferSizeValue);
@@ -143,9 +129,7 @@ public class JournalTestCase extends AbstractMessagingTestCase {
         page.invokeProviderSettings(SERVER_ADDRESS.getLastPairValue());
         providerSettingsWindow = page.providerSettingsWindow().switchToJournalTab();
 
-        new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                .configFragment(providerSettingsWindow.getConfigFragment())
-                .wizardWindow(providerSettingsWindow)
+        createConfigCheckerBuilderBasedOnServerMode(client, SERVER_ADDRESS, providerSettingsWindow)
                 .editAndSave(TEXT, journalBufferSize, "")
                 .verifyFormSaved() // undefine
                 .verifyAttributeIsUndefined(journalBufferSize);
@@ -153,9 +137,7 @@ public class JournalTestCase extends AbstractMessagingTestCase {
 
     @Test
     public void updateJournalBufferTimeout() throws Exception {
-        new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                .configFragment(providerSettingsWindow.getConfigFragment())
-                .wizardWindow(providerSettingsWindow)
+        createConfigCheckerBuilderBasedOnServerMode(client, SERVER_ADDRESS, providerSettingsWindow)
                 .editAndSave(ConfigChecker.InputType.TEXT, JOURNAL_BUFFER_TIMEOUT, String.valueOf(1L))
                 .verifyFormSaved()
                 .verifyAttribute(JOURNAL_BUFFER_TIMEOUT, 1L);
@@ -165,9 +147,7 @@ public class JournalTestCase extends AbstractMessagingTestCase {
     public void updateJournalCompactMinFiles() throws Exception {
         final int value = 1;
 
-        new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                .configFragment(providerSettingsWindow.getConfigFragment())
-                .wizardWindow(providerSettingsWindow)
+        createConfigCheckerBuilderBasedOnServerMode(client, SERVER_ADDRESS, providerSettingsWindow)
                 .editAndSave(TEXT, JOURNAL_COMPACT_MIN_FILES, String.valueOf(value))
                 .verifyFormSaved()
                 .verifyAttribute(JOURNAL_COMPACT_MIN_FILES, value);
@@ -177,9 +157,7 @@ public class JournalTestCase extends AbstractMessagingTestCase {
     public void updateJournalCompactPercentage() throws Exception {
         final int value = 99;
 
-        new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                .configFragment(providerSettingsWindow.getConfigFragment())
-                .wizardWindow(providerSettingsWindow)
+        createConfigCheckerBuilderBasedOnServerMode(client, SERVER_ADDRESS, providerSettingsWindow)
                 .editAndSave(TEXT, JOURNAL_COMPACT_PERCENTAGE, String.valueOf(value))
                 .verifyFormSaved()
                 .verifyAttribute(JOURNAL_COMPACT_PERCENTAGE, value);
@@ -189,9 +167,7 @@ public class JournalTestCase extends AbstractMessagingTestCase {
     public void updateJournalFileSize() throws Exception {
         final long value = 4096;
 
-        new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                .configFragment(providerSettingsWindow.getConfigFragment())
-                .wizardWindow(providerSettingsWindow)
+        createConfigCheckerBuilderBasedOnServerMode(client, SERVER_ADDRESS, providerSettingsWindow)
                 .editAndSave(TEXT, JOURNAL_FILE_SIZE, String.valueOf(value))
                 .verifyFormSaved()
                 .verifyAttribute(JOURNAL_FILE_SIZE, value);
@@ -202,9 +178,7 @@ public class JournalTestCase extends AbstractMessagingTestCase {
         String journalDatasourceAttr = "journal-datasource",
                 journalDatasourceName = "journalDatasource_" + randomAlphanumeric(5);
         try {
-            new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                    .configFragment(providerSettingsWindow.getConfigFragment())
-                    .wizardWindow(providerSettingsWindow)
+            createConfigCheckerBuilderBasedOnServerMode(client, SERVER_ADDRESS, providerSettingsWindow)
                     .editAndSave(TEXT, journalDatasourceAttr, journalDatasourceName)
                     .verifyFormSaved()
                     .verifyAttribute(journalDatasourceAttr, journalDatasourceName);
@@ -212,9 +186,7 @@ public class JournalTestCase extends AbstractMessagingTestCase {
             page.invokeProviderSettings(SERVER_ADDRESS.getLastPairValue());
             providerSettingsWindow = page.providerSettingsWindow().switchToJournalTab();
 
-            new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                    .configFragment(providerSettingsWindow.getConfigFragment())
-                    .wizardWindow(providerSettingsWindow)
+            createConfigCheckerBuilderBasedOnServerMode(client, SERVER_ADDRESS, providerSettingsWindow)
                     .editAndSave(TEXT, journalDatasourceAttr, "")
                     .verifyFormSaved() // undefine
                     .verifyAttributeIsUndefined(journalDatasourceAttr);
@@ -231,9 +203,7 @@ public class JournalTestCase extends AbstractMessagingTestCase {
     public void updateJournalDatabase() throws Exception {
         String journalDatabaseAttr = "journal-database",
                 journalDatabaseName = "journalDatabase_" + randomAlphanumeric(5);
-        new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                .configFragment(providerSettingsWindow.getConfigFragment())
-                .wizardWindow(providerSettingsWindow)
+        createConfigCheckerBuilderBasedOnServerMode(client, SERVER_ADDRESS, providerSettingsWindow)
                 .editAndSave(TEXT, journalDatabaseAttr, journalDatabaseName)
                 .verifyFormSaved()
                 .verifyAttribute(journalDatabaseAttr, journalDatabaseName);
@@ -241,9 +211,7 @@ public class JournalTestCase extends AbstractMessagingTestCase {
         page.invokeProviderSettings(SERVER_ADDRESS.getLastPairValue());
         providerSettingsWindow = page.providerSettingsWindow().switchToJournalTab();
 
-        new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                .configFragment(providerSettingsWindow.getConfigFragment())
-                .wizardWindow(providerSettingsWindow)
+        createConfigCheckerBuilderBasedOnServerMode(client, SERVER_ADDRESS, providerSettingsWindow)
                 .editAndSave(TEXT, journalDatabaseAttr, "")
                 .verifyFormSaved() // undefine
                 .verifyAttributeIsUndefined(journalDatabaseAttr);
@@ -253,9 +221,7 @@ public class JournalTestCase extends AbstractMessagingTestCase {
     public void updateJournalMessagesTable() throws Exception {
         String journalMessagesTableAttr = "journal-messages-table",
                 journalMessagesTableName = "journalMessagesTable_" + randomAlphanumeric(5);
-        new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                .configFragment(providerSettingsWindow.getConfigFragment())
-                .wizardWindow(providerSettingsWindow)
+        createConfigCheckerBuilderBasedOnServerMode(client, SERVER_ADDRESS, providerSettingsWindow)
                 .editAndSave(TEXT, journalMessagesTableAttr, journalMessagesTableName)
                 .verifyFormSaved()
                 .verifyAttribute(journalMessagesTableAttr, journalMessagesTableName);
@@ -263,9 +229,7 @@ public class JournalTestCase extends AbstractMessagingTestCase {
         page.invokeProviderSettings(SERVER_ADDRESS.getLastPairValue());
         providerSettingsWindow = page.providerSettingsWindow().switchToJournalTab();
 
-        new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                .configFragment(providerSettingsWindow.getConfigFragment())
-                .wizardWindow(providerSettingsWindow)
+        createConfigCheckerBuilderBasedOnServerMode(client, SERVER_ADDRESS, providerSettingsWindow)
                 .editAndSave(TEXT, journalMessagesTableAttr, "")
                 .verifyFormSaved() // undefine
                 .verifyAttribute(journalMessagesTableAttr, "MESSAGES"); // default name
@@ -275,9 +239,7 @@ public class JournalTestCase extends AbstractMessagingTestCase {
     public void updateJournalLargeMessagesTable() throws Exception {
         String journalLargeMessagesTableAttr = "journal-large-messages-table",
                 journalLargeMessagesTableName = "journalLargeMessagesTable_" + randomAlphanumeric(5);
-        new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                .configFragment(providerSettingsWindow.getConfigFragment())
-                .wizardWindow(providerSettingsWindow)
+        createConfigCheckerBuilderBasedOnServerMode(client, SERVER_ADDRESS, providerSettingsWindow)
                 .editAndSave(TEXT, journalLargeMessagesTableAttr, journalLargeMessagesTableName)
                 .verifyFormSaved()
                 .verifyAttribute(journalLargeMessagesTableAttr, journalLargeMessagesTableName);
@@ -285,9 +247,7 @@ public class JournalTestCase extends AbstractMessagingTestCase {
         page.invokeProviderSettings(SERVER_ADDRESS.getLastPairValue());
         providerSettingsWindow = page.providerSettingsWindow().switchToJournalTab();
 
-        new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                .configFragment(providerSettingsWindow.getConfigFragment())
-                .wizardWindow(providerSettingsWindow)
+        createConfigCheckerBuilderBasedOnServerMode(client, SERVER_ADDRESS, providerSettingsWindow)
                 .editAndSave(TEXT, journalLargeMessagesTableAttr, "")
                 .verifyFormSaved()
                 .verifyAttribute(journalLargeMessagesTableAttr, "LARGE_MESSAGES");
@@ -297,9 +257,7 @@ public class JournalTestCase extends AbstractMessagingTestCase {
     public void updateJournalBindingsTable() throws Exception {
         String journalBindingsTableAttr = "journal-bindings-table",
                 journalBindingsTableName = "journalBindingsTable_" + randomAlphanumeric(5);
-        new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                .configFragment(providerSettingsWindow.getConfigFragment())
-                .wizardWindow(providerSettingsWindow)
+        createConfigCheckerBuilderBasedOnServerMode(client, SERVER_ADDRESS, providerSettingsWindow)
                 .editAndSave(TEXT, journalBindingsTableAttr, journalBindingsTableName)
                 .verifyFormSaved()
                 .verifyAttribute(journalBindingsTableAttr, journalBindingsTableName);
@@ -307,9 +265,7 @@ public class JournalTestCase extends AbstractMessagingTestCase {
         page.invokeProviderSettings(SERVER_ADDRESS.getLastPairValue());
         providerSettingsWindow = page.providerSettingsWindow().switchToJournalTab();
 
-        new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                .configFragment(providerSettingsWindow.getConfigFragment())
-                .wizardWindow(providerSettingsWindow)
+        createConfigCheckerBuilderBasedOnServerMode(client, SERVER_ADDRESS, providerSettingsWindow)
                 .editAndSave(TEXT, journalBindingsTableAttr, "")
                 .verifyFormSaved() // undefine
                 .verifyAttribute(journalBindingsTableAttr, "BINDINGS"); // default name
@@ -320,9 +276,7 @@ public class JournalTestCase extends AbstractMessagingTestCase {
         String journalPageStoreTableAttr = "journal-page-store-table",
                 journalPageStoreTableName = "journalPageStoreTable_" + randomAlphanumeric(5);
         try {
-            new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                    .configFragment(providerSettingsWindow.getConfigFragment())
-                    .wizardWindow(providerSettingsWindow)
+            createConfigCheckerBuilderBasedOnServerMode(client, SERVER_ADDRESS, providerSettingsWindow)
                     .editAndSave(TEXT, journalPageStoreTableAttr, journalPageStoreTableName)
                     .verifyFormSaved()
                     .verifyAttribute(journalPageStoreTableAttr, journalPageStoreTableName);
@@ -337,9 +291,7 @@ public class JournalTestCase extends AbstractMessagingTestCase {
         providerSettingsWindow = page.providerSettingsWindow().switchToJournalTab();
 
 
-        new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                .configFragment(providerSettingsWindow.getConfigFragment())
-                .wizardWindow(providerSettingsWindow)
+        createConfigCheckerBuilderBasedOnServerMode(client, SERVER_ADDRESS, providerSettingsWindow)
                 .editAndSave(TEXT, journalPageStoreTableAttr, "")
                 .verifyFormSaved() // undefine
                 .verifyAttribute(journalPageStoreTableAttr, "PAGE_STORE"); // default name

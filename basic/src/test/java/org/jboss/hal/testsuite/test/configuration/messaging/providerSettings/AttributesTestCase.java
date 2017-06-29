@@ -6,7 +6,6 @@ import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.fragment.config.messaging.ProviderSettingsWindow;
 import org.jboss.hal.testsuite.page.config.MessagingPage;
 import org.jboss.hal.testsuite.test.configuration.messaging.AbstractMessagingTestCase;
-import org.jboss.hal.testsuite.util.ConfigChecker;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -69,9 +68,7 @@ public class AttributesTestCase extends AbstractMessagingTestCase {
     public void updateManagementAddress() throws Exception {
         final String value = "management";
 
-        new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                .configFragment(page.getConfigFragment())
-                .wizardWindow(wizardWindow)
+        createConfigCheckerBuilderBasedOnServerMode(client, SERVER_ADDRESS, wizardWindow)
                 .editAndSave(TEXT, MANAGEMENT_ADDRESS, value)
                 .verifyFormSaved()
                 .verifyAttribute(MANAGEMENT_ADDRESS, value);
@@ -81,9 +78,7 @@ public class AttributesTestCase extends AbstractMessagingTestCase {
     public void updateNotificationAddress() throws Exception {
         final String value = "jms.topic.randomTopic";
 
-        new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                .configFragment(page.getConfigFragment())
-                .wizardWindow(wizardWindow)
+        createConfigCheckerBuilderBasedOnServerMode(client, SERVER_ADDRESS, wizardWindow)
                 .editAndSave(TEXT, MANAGEMENT_NOTIFICATION_ADDRESS, value)
                 .verifyFormSaved()
                 .verifyAttribute(MANAGEMENT_NOTIFICATION_ADDRESS, value);
@@ -93,9 +88,7 @@ public class AttributesTestCase extends AbstractMessagingTestCase {
     public void updateThreadPollMaxSize() throws Exception {
         final int value = -1;
 
-        new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                .configFragment(page.getConfigFragment())
-                .wizardWindow(wizardWindow)
+        createConfigCheckerBuilderBasedOnServerMode(client, SERVER_ADDRESS, wizardWindow)
                 .editAndSave(TEXT, THREAD_POOL_MAX_SIZE, value)
                 .verifyFormSaved()
                 .verifyAttribute(THREAD_POOL_MAX_SIZE, value);
@@ -105,9 +98,7 @@ public class AttributesTestCase extends AbstractMessagingTestCase {
     public void updateScheduledThreadPollMaxSize() throws Exception {
         final int value = 10;
 
-        new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                .configFragment(page.getConfigFragment())
-                .wizardWindow(wizardWindow)
+        createConfigCheckerBuilderBasedOnServerMode(client, SERVER_ADDRESS, wizardWindow)
                 .editAndSave(TEXT, SCHEDULED_THREAD_POOL_MAX_SIZE, value)
                 .verifyFormSaved()
                 .verifyAttribute(SCHEDULED_THREAD_POOL_MAX_SIZE, value);
@@ -117,9 +108,7 @@ public class AttributesTestCase extends AbstractMessagingTestCase {
     public void updateTransactionTimeout() throws Exception {
         final long value = 1;
 
-        new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                .configFragment(page.getConfigFragment())
-                .wizardWindow(wizardWindow)
+        createConfigCheckerBuilderBasedOnServerMode(client, SERVER_ADDRESS, wizardWindow)
                 .editAndSave(TEXT, TRANSACTION_TIMEOUT, String.valueOf(value))
                 .verifyFormSaved()
                 .verifyAttribute(TRANSACTION_TIMEOUT, value);
@@ -129,9 +118,7 @@ public class AttributesTestCase extends AbstractMessagingTestCase {
     public void updateTransactionTimeoutWrongValue() throws Exception {
         final long value = -2;
 
-        new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                .configFragment(page.getConfigFragment())
-                .wizardWindow(wizardWindow)
+        createConfigCheckerBuilderBasedOnServerMode(client, SERVER_ADDRESS, wizardWindow)
                 .editAndSave(TEXT, TRANSACTION_TIMEOUT, String.valueOf(value))
                 .verifyFormNotSaved();
     }
@@ -140,9 +127,7 @@ public class AttributesTestCase extends AbstractMessagingTestCase {
     public void updateTransactionTimeoutScanPeriod() throws Exception {
         final long value = 100000;
 
-        new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                .configFragment(page.getConfigFragment())
-                .wizardWindow(wizardWindow)
+        createConfigCheckerBuilderBasedOnServerMode(client, SERVER_ADDRESS, wizardWindow)
                 .editAndSave(TEXT, TRANSACTION_TIMEOUT_SCAN_PERIOD, String.valueOf(value))
                 .verifyFormSaved()
                 .verifyAttribute(TRANSACTION_TIMEOUT_SCAN_PERIOD, value);
@@ -150,9 +135,7 @@ public class AttributesTestCase extends AbstractMessagingTestCase {
 
     @Test
     public void updateStatisticsEnabled() throws Exception {
-        new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                .configFragment(page.getConfigFragment())
-                .wizardWindow(wizardWindow)
+        createConfigCheckerBuilderBasedOnServerMode(client, SERVER_ADDRESS, wizardWindow)
                 .editAndSave(CHECKBOX, STATISTICS_ENABLED, true)
                 .verifyFormSaved()
                 .verifyAttribute(STATISTICS_ENABLED, true);
@@ -160,9 +143,7 @@ public class AttributesTestCase extends AbstractMessagingTestCase {
 
     @Test
     public void updateWildCardRoutingEnabled() throws Exception {
-        new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                .configFragment(page.getConfigFragment())
-                .wizardWindow(wizardWindow)
+        createConfigCheckerBuilderBasedOnServerMode(client, SERVER_ADDRESS, wizardWindow)
                 .editAndSave(CHECKBOX, WILD_CARD_ROUTING_ENABLED, false)
                 .verifyFormSaved()
                 .verifyAttribute(WILD_CARD_ROUTING_ENABLED, false);
@@ -170,9 +151,7 @@ public class AttributesTestCase extends AbstractMessagingTestCase {
 
     @Test
     public void updatePersistenceEnabled() throws Exception {
-        new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                .configFragment(page.getConfigFragment())
-                .wizardWindow(wizardWindow)
+        createConfigCheckerBuilderBasedOnServerMode(client, SERVER_ADDRESS, wizardWindow)
                 .editAndSave(CHECKBOX, PERSISTENCE_ENABLED, false)
                 .verifyFormSaved()
                 .verifyAttribute(PERSISTENCE_ENABLED, false);
@@ -180,9 +159,7 @@ public class AttributesTestCase extends AbstractMessagingTestCase {
 
     @Test
     public void updatePersistIdCache() throws Exception {
-        new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                .configFragment(page.getConfigFragment())
-                .wizardWindow(wizardWindow)
+        createConfigCheckerBuilderBasedOnServerMode(client, SERVER_ADDRESS, wizardWindow)
                 .editAndSave(CHECKBOX, PERSIST_ID_CACHE, false)
                 .verifyFormSaved()
                 .verifyAttribute(PERSIST_ID_CACHE, false);
