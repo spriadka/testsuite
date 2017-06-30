@@ -66,9 +66,7 @@ public class SecurityTestCase extends AbstractMessagingTestCase {
     @Test
     public void updateClusterUser() throws Exception {
         final String value = "TESTER";
-        new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                .configFragment(page.getConfigFragment())
-                .wizardWindow(wizardWindow)
+        createConfigCheckerBuilderBasedOnServerMode(client, SERVER_ADDRESS, wizardWindow)
                 .editAndSave(ConfigChecker.InputType.TEXT, CLUSTER_USER, value)
                 .verifyFormSaved(NOT_SAVED_FAIL_MESSAGE)
                 .verifyAttribute(CLUSTER_USER, value);
@@ -77,9 +75,7 @@ public class SecurityTestCase extends AbstractMessagingTestCase {
     @Test
     public void updateClusterPassword() throws Exception {
         final String value = "TESTER.PASSWORD";
-        new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                .configFragment(page.getConfigFragment())
-                .wizardWindow(wizardWindow)
+        createConfigCheckerBuilderBasedOnServerMode(client, SERVER_ADDRESS, wizardWindow)
                 .editAndSave(ConfigChecker.InputType.TEXT, CLUSTER_PASSWORD, value)
                 .verifyFormSaved(NOT_SAVED_FAIL_MESSAGE)
                 .verifyAttribute(CLUSTER_PASSWORD, value);
@@ -91,9 +87,7 @@ public class SecurityTestCase extends AbstractMessagingTestCase {
         originalModelNodeResult.assertSuccess();
         final boolean originalValue = originalModelNodeResult.booleanValue();
         try {
-            new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                    .configFragment(page.getConfigFragment())
-                    .wizardWindow(wizardWindow)
+            createConfigCheckerBuilderBasedOnServerMode(client, SERVER_ADDRESS, wizardWindow)
                     .editAndSave(ConfigChecker.InputType.CHECKBOX, SECURITY_ENABLED, !originalValue)
                     .verifyFormSaved(NOT_SAVED_FAIL_MESSAGE)
                     .verifyAttribute(SECURITY_ENABLED, !originalValue);
@@ -102,9 +96,7 @@ public class SecurityTestCase extends AbstractMessagingTestCase {
             wizardWindow = page.providerSettingsWindow();
             wizardWindow.switchToSecurityTab().maximize();
 
-            new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                    .configFragment(page.getConfigFragment())
-                    .wizardWindow(wizardWindow)
+            createConfigCheckerBuilderBasedOnServerMode(client, SERVER_ADDRESS, wizardWindow)
                     .editAndSave(ConfigChecker.InputType.CHECKBOX, SECURITY_ENABLED, originalValue)
                     .verifyFormSaved(NOT_SAVED_FAIL_MESSAGE)
                     .verifyAttribute(SECURITY_ENABLED, originalValue);
@@ -116,9 +108,7 @@ public class SecurityTestCase extends AbstractMessagingTestCase {
     @Test
     public void updateSecurityInvalidationInterval() throws Exception {
         final long value = 10L;
-        new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                .configFragment(page.getConfigFragment())
-                .wizardWindow(wizardWindow)
+        createConfigCheckerBuilderBasedOnServerMode(client, SERVER_ADDRESS, wizardWindow)
                 .editAndSave(ConfigChecker.InputType.TEXT, SECURITY_INVALIDATION_INTERVAL, String.valueOf(value))
                 .verifyFormSaved(NOT_SAVED_FAIL_MESSAGE)
                 .verifyAttribute(SECURITY_INVALIDATION_INTERVAL, value);
@@ -127,9 +117,7 @@ public class SecurityTestCase extends AbstractMessagingTestCase {
     @Test
     public void updateSecurityDomain() throws Exception {
         final String value = "jboss-web-policy";
-        new ConfigChecker.Builder(client, SERVER_ADDRESS)
-                .configFragment(page.getConfigFragment())
-                .wizardWindow(wizardWindow)
+        createConfigCheckerBuilderBasedOnServerMode(client, SERVER_ADDRESS, wizardWindow)
                 .editAndSave(ConfigChecker.InputType.TEXT, SECURITY_DOMAIN, value)
                 .verifyFormSaved(NOT_SAVED_FAIL_MESSAGE)
                 .verifyAttribute(SECURITY_DOMAIN, value);

@@ -8,8 +8,11 @@ import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.creaper.command.AddSocketBinding;
 import org.jboss.hal.testsuite.creaper.command.RemoveSocketBinding;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
+import org.jboss.hal.testsuite.fragment.config.messaging.ProviderSettingsWindow;
 import org.jboss.hal.testsuite.page.config.MessagingPage;
 import org.jboss.hal.testsuite.util.AvailablePortFinder;
+import org.jboss.hal.testsuite.util.ConfigChecker;
+import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -153,6 +156,21 @@ public abstract class AbstractMessagingTestCase {
         socketBindings.clear();
     }
 
-
+    /**
+     * Only for usage with tests from org.jboss.hal.testsuite.test.configuration.messaging.providerSettings package.
+     * Since there is different behaviour in tests, when in domain, the wizard window closes itself upon clicking on
+     * Save button and in standalone, the window remains open.
+     * @param wizardWindow provider settings pop up window
+     */
+    protected ConfigChecker.Builder createConfigCheckerBuilderBasedOnServerMode(OnlineManagementClient client,
+                                                                                Address address,
+                                                                                ProviderSettingsWindow wizardWindow) {
+        ConfigChecker.Builder builder = new ConfigChecker.Builder(client, address)
+                .configFragment(wizardWindow.getConfigFragment());
+        if (ConfigUtils.isDomain()) {
+            builder.wizardWindow(wizardWindow);
+        }
+        return builder;
+    }
 
 }
