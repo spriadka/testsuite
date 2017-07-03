@@ -34,13 +34,28 @@ public class Console {
 
     private static final Logger log = LoggerFactory.getLogger(Console.class);
 
+    public static final long DEFAULT_PAGE_LOAD_TIMEOUT = 30;
+
     private WebDriver browser;
+
+    private long pageLoadTimeout = DEFAULT_PAGE_LOAD_TIMEOUT;
 
     public static Console withBrowser(WebDriver browser) {
         Console console = new Console();
         console.browser = browser;
 
         return console;
+    }
+
+    /**
+     * Sets the timeout in seconds for the application to be loaded.
+     * Use carefully in exceptional situations where default timeout of 30 seconds is not sufficient,
+     * e.g. for large domain performance tests.
+     * @param pageLoadTimeout - timeout in seconds
+     */
+    public Console withPageLoadTimeout(long pageLoadTimeout) {
+        this.pageLoadTimeout = pageLoadTimeout;
+        return this;
     }
 
     // Prevent constructor instantiation
@@ -52,7 +67,7 @@ public class Console {
      */
     public Console waitUntilLoaded() {
         // TODO: this should rather wait until the loading box is not present
-        Graphene.waitModel().withTimeout(30, TimeUnit.SECONDS).until().element(By.className("hal-ProgressElement")).is().not().visible();
+        Graphene.waitModel().withTimeout(pageLoadTimeout, TimeUnit.SECONDS).until().element(By.className("hal-ProgressElement")).is().not().visible();
         return this;
     }
 

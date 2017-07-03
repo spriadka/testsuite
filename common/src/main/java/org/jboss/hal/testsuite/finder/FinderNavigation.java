@@ -21,6 +21,8 @@
  */
 package org.jboss.hal.testsuite.finder;
 
+import static org.jboss.hal.testsuite.util.Console.DEFAULT_PAGE_LOAD_TIMEOUT;
+
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.hal.testsuite.page.BasePage;
 import org.jboss.hal.testsuite.util.ConfigUtils;
@@ -69,6 +71,7 @@ public class FinderNavigation {
     private final Hook hook;
     private boolean refresh;
     private int naviRetriesNo = 0;
+    private long pageLoadTimeout = DEFAULT_PAGE_LOAD_TIMEOUT;
 
     /**
      * This constructor should not be used regularly! <br />
@@ -103,6 +106,17 @@ public class FinderNavigation {
     public FinderNavigation(final WebDriver browser, final Class<? extends BasePage> page) {
         this(browser, page, () -> {
         });
+    }
+
+    /**
+     * Sets the timeout in seconds for the application to be loaded in the beginning of the navigation after refresh.
+     * Use carefully in exceptional situations where default timeout of 30 seconds is not sufficient,
+     * e.g. for large domain performance tests.
+     * @param pageLoadTimeout - timeout in seconds
+     */
+    public FinderNavigation withPageLoadTimeout(long pageLoadTimeout) {
+        this.pageLoadTimeout = pageLoadTimeout;
+        return this;
     }
 
     /**
@@ -174,7 +188,7 @@ public class FinderNavigation {
         WebElement[] columnRow = new WebElement[2];
         if (refresh) {
            // Console.withBrowser(browser).refreshAndNavigate(page);
-            Console.withBrowser(browser).waitForFirstNavigationPanel(page);
+            Console.withBrowser(browser).withPageLoadTimeout(pageLoadTimeout).waitForFirstNavigationPanel(page);
         }
         for (int i = 0; i < address.size(); i++) {
             AddressTuple tuple = address.get(i);
