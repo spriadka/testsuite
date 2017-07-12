@@ -1,11 +1,5 @@
 package org.jboss.hal.testsuite.page.config.elytron;
 
-import static org.jboss.hal.testsuite.finder.FinderNames.SETTINGS;
-import static org.jboss.hal.testsuite.page.config.elytron.ElytronPageConstants.ELYTRON_SUBSYTEM_LABEL;
-import static org.jboss.hal.testsuite.page.config.elytron.ElytronPageConstants.OTHER;
-
-import java.util.List;
-
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.ByJQuery;
 import org.jboss.hal.testsuite.util.Console;
@@ -13,11 +7,17 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
 
+import java.util.List;
+
+import static org.jboss.hal.testsuite.finder.FinderNames.SETTINGS;
+import static org.jboss.hal.testsuite.page.config.elytron.ElytronPageConstants.ELYTRON_SUBSYTEM_LABEL;
+import static org.jboss.hal.testsuite.page.config.elytron.ElytronPageConstants.FACTORY_TRANSFORMER;
+
 public class TransformerPage extends AbstractElytronConfigPage<TransformerPage> {
 
     @Override
     public TransformerPage navigateToApplication() {
-        getSubsystemNavigation(ELYTRON_SUBSYTEM_LABEL).step(SETTINGS, OTHER).openApplication(30);
+        getSubsystemNavigation(ELYTRON_SUBSYTEM_LABEL).step(SETTINGS, FACTORY_TRANSFORMER).openApplication(30);
         switchTab("Transformer");
         return this;
     }
