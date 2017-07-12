@@ -13,11 +13,15 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
+import org.wildfly.extras.creaper.core.online.ModelNodeResult;
 import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.Batch;
 import org.wildfly.extras.creaper.core.online.operations.OperationException;
 import org.wildfly.extras.creaper.core.online.operations.Values;
 
 import java.io.IOException;
+
+import static org.jboss.hal.testsuite.util.ConfigChecker.InputType.TEXT;
 
 @RunWith(Arquillian.class)
 public class PeriodicSizeTestCase extends LoggingAbstractTestCase {
@@ -71,14 +75,31 @@ public class PeriodicSizeTestCase extends LoggingAbstractTestCase {
 
     @Test
     public void updatePeriodicSizeHandlerNamedFormatter() throws Exception {
-        new ConfigChecker.Builder(client, PERIODIC_SIZE_HANDLER_ADDRESS)
-                .configFragment(page.getConfigFragment())
-                .edit(ConfigChecker.InputType.TEXT, FORMATTER, "")
-                .edit(ConfigChecker.InputType.TEXT, NAMED_FORMATTER, "COLOR-PATTERN")
-                .andSave()
-                .verifyFormSaved()
-                .verifyAttribute(NAMED_FORMATTER, "COLOR-PATTERN",
-                        "Probably fails because of https://issues.jboss.org/browse/WFCORE-2958");
+        final String value = "COLOR-PATTERN";
+
+        final ModelNodeResult
+                formatterModelNodeResult = operations.readAttribute(PERIODIC_SIZE_HANDLER_ADDRESS, FORMATTER),
+                namedFormatterModelNodeResult = operations.readAttribute(PERIODIC_SIZE_HANDLER_ADDRESS, NAMED_FORMATTER);
+
+        formatterModelNodeResult.assertSuccess();
+        namedFormatterModelNodeResult.assertSuccess();
+
+        try {
+            new ConfigChecker.Builder(client, PERIODIC_SIZE_HANDLER_ADDRESS)
+                    .configFragment(page.getConfigFragment())
+                    .edit(TEXT, FORMATTER, "")
+                    .edit(TEXT, NAMED_FORMATTER, value)
+                    .andSave()
+                    .verifyFormSaved()
+                    .verifyAttribute(NAMED_FORMATTER, value,
+                            "Probably fails because of https://issues.jboss.org/browse/WFCORE-2958");
+        } finally {
+            operations.batch(new Batch()
+                    .writeAttribute(PERIODIC_SIZE_HANDLER_ADDRESS, FORMATTER, formatterModelNodeResult.value())
+                    .writeAttribute(PERIODIC_SIZE_HANDLER_ADDRESS, NAMED_FORMATTER, namedFormatterModelNodeResult.value()))
+                    .assertSuccess();
+            administration.reloadIfRequired();
+        }
     }
 
     @Test
