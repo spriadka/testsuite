@@ -1,16 +1,11 @@
 package org.jboss.hal.testsuite.test.configuration.elytron;
 
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
-import static org.apache.commons.lang3.RandomStringUtils.randomNumeric;
-import static org.jboss.hal.testsuite.util.ConfigChecker.InputType.CHECKBOX;
-import static org.jboss.hal.testsuite.util.ConfigChecker.InputType.TEXT;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
+import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
+import org.jboss.hal.testsuite.dmr.ModelNodeGenerator;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindowWithOptionalFields;
 import org.jboss.hal.testsuite.page.config.elytron.DirContextPage;
@@ -21,6 +16,13 @@ import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.Values;
+
+import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
+import static org.apache.commons.lang3.RandomStringUtils.randomNumeric;
+import static org.jboss.hal.testsuite.util.ConfigChecker.InputType.CHECKBOX;
+import static org.jboss.hal.testsuite.util.ConfigChecker.InputType.TEXT;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(Arquillian.class)
 @Category(Shared.class)
@@ -34,6 +36,9 @@ public class DirContextTestCase extends AbstractElytronTestCase {
         CONNECTION_TIMEOUT = "connection-timeout",
         ENABLE_CONNECTION_POOLING = "enable-connection-pooling",
         CREDENTIAL_REFERENCE_LABEL = "Credential Reference",
+        CREDENTIAL_REFERENCE = "credential-reference",
+        CLEAR_TEXT = "clear-text",
+        CREDENTIAL_REFERENCE_CLEAR_TEXT = "credential-reference-clear-text",
         LDAP_URL_BEGINNING = "ldap://127.0.0.1:3",
         PRINCIPAL_BEGINNING = "uid=admin,ou=";
 
@@ -52,7 +57,8 @@ public class DirContextTestCase extends AbstractElytronTestCase {
         String
             dirContextName = randomAlphanumeric(5),
             urlValue = LDAP_URL_BEGINNING + randomNumeric(3),
-            principalValue = PRINCIPAL_BEGINNING + randomAlphanumeric(5);
+            principalValue = PRINCIPAL_BEGINNING + randomAlphanumeric(5),
+            credentitialStoreClearTextValue = RandomStringUtils.randomAlphanumeric(7);
         Address dirContextAddress = elyOps.getElytronAddress(DIR_CONTEXT, dirContextName);
 
         page.navigateToApplication().selectResource(DIR_CONTEXT_LABEL);
@@ -64,14 +70,18 @@ public class DirContextTestCase extends AbstractElytronTestCase {
             editor.text(NAME, dirContextName);
             editor.text(URL, urlValue);
             wizard.openOptionalFieldsTab();
+            editor.text(CREDENTIAL_REFERENCE_CLEAR_TEXT, credentitialStoreClearTextValue);
             editor.text(PRINCIPAL, principalValue);
 
-            assertTrue("Dialog should be closed!", wizard.save());
+            wizard.saveWithState().assertWindowClosed();
             assertTrue("Created resource should be present in the table!",
                     page.resourceIsPresentInMainTable(dirContextName));
             new ResourceVerifier(dirContextAddress, client).verifyExists()
                     .verifyAttribute(URL, urlValue)
-                    .verifyAttribute(PRINCIPAL, principalValue);
+                    .verifyAttribute(PRINCIPAL, principalValue)
+                    .verifyAttribute(CREDENTIAL_REFERENCE, new ModelNodeGenerator.ModelNodePropertiesBuilder()
+                        .addProperty(CLEAR_TEXT, credentitialStoreClearTextValue)
+                        .build());
         } finally {
             ops.removeIfExists(dirContextAddress);
             adminOps.reloadIfRequired();
