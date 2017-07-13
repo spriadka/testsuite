@@ -8,4 +8,9 @@ public class AddAuthenticationConfigurationWizard extends WizardWindow {
         getEditor().text("name", name);
         return this;
     }
+
+    public AddAuthenticationConfigurationWizard clearTextCredentialStoreReference(String value) {
+        getEditor().text("credential-reference-clear-text", value);
+        return this;
+    }
 }

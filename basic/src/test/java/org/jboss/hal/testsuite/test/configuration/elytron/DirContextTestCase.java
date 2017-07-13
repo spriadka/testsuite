@@ -58,7 +58,7 @@ public class DirContextTestCase extends AbstractElytronTestCase {
             dirContextName = randomAlphanumeric(5),
             urlValue = LDAP_URL_BEGINNING + randomNumeric(3),
             principalValue = PRINCIPAL_BEGINNING + randomAlphanumeric(5),
-            credentitialStoreClearTextValue = RandomStringUtils.randomAlphanumeric(7);
+            credentialStoreClearTextValue = RandomStringUtils.randomAlphanumeric(7);
         Address dirContextAddress = elyOps.getElytronAddress(DIR_CONTEXT, dirContextName);
 
         page.navigateToApplication().selectResource(DIR_CONTEXT_LABEL);
@@ -70,7 +70,7 @@ public class DirContextTestCase extends AbstractElytronTestCase {
             editor.text(NAME, dirContextName);
             editor.text(URL, urlValue);
             wizard.openOptionalFieldsTab();
-            editor.text(CREDENTIAL_REFERENCE_CLEAR_TEXT, credentitialStoreClearTextValue);
+            editor.text(CREDENTIAL_REFERENCE_CLEAR_TEXT, credentialStoreClearTextValue);
             editor.text(PRINCIPAL, principalValue);
 
             wizard.saveWithState().assertWindowClosed();
@@ -80,7 +80,7 @@ public class DirContextTestCase extends AbstractElytronTestCase {
                     .verifyAttribute(URL, urlValue)
                     .verifyAttribute(PRINCIPAL, principalValue)
                     .verifyAttribute(CREDENTIAL_REFERENCE, new ModelNodeGenerator.ModelNodePropertiesBuilder()
-                        .addProperty(CLEAR_TEXT, credentitialStoreClearTextValue)
+                        .addProperty(CLEAR_TEXT, credentialStoreClearTextValue)
                         .build());
         } finally {
             ops.removeIfExists(dirContextAddress);

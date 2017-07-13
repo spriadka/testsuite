@@ -40,6 +40,7 @@ public class ElytronAuthenticationConfigurationTestCase extends AbstractElytronT
             ANONYMOUS = "anonymous",
             AUTHENTICATION_NAME = "authentication-name",
             AUTHORIZATION_NAME = "authorization-name",
+            CLEAR_TEXT = "clear-text",
             EXTENDS = "extends",
             HOST = "host",
             KERBEROS_SECURITY_FACTORY = "kerberos-security-factory",
@@ -60,6 +61,8 @@ public class ElytronAuthenticationConfigurationTestCase extends AbstractElytronT
      */
     @Test
     public void testAddAuthenticationConfigurationTestCase() throws Exception {
+        final String credentialStoreClearTextValue = RandomStringUtils.randomAlphabetic(7);
+
         final Address authenticationConfigurationAddress = elyOps.getElytronAddress(AUTHENTICATION_CONFIGURATION, RandomStringUtils.randomAlphanumeric(7));
 
         page.navigate();
@@ -69,12 +72,16 @@ public class ElytronAuthenticationConfigurationTestCase extends AbstractElytronT
                     .getResourceManager()
                     .addResource(AddAuthenticationConfigurationWizard.class)
                     .name(authenticationConfigurationAddress.getLastPairValue())
+                    .clearTextCredentialStoreReference(credentialStoreClearTextValue)
                     .saveAndDismissReloadRequiredWindowWithState()
                     .assertWindowClosed();
 
             Assert.assertTrue(page.getResourceManager().isResourcePresent(authenticationConfigurationAddress.getLastPairValue()));
 
-            new ResourceVerifier(authenticationConfigurationAddress, client).verifyExists();
+            new ResourceVerifier(authenticationConfigurationAddress, client).verifyExists()
+                    .verifyAttribute(CREDENTIAL_REFERENCE, new ModelNodeGenerator.ModelNodePropertiesBuilder()
+                            .addProperty(CLEAR_TEXT, credentialStoreClearTextValue)
+                            .build());
         } finally {
             ops.removeIfExists(authenticationConfigurationAddress);
             adminOps.reloadIfRequired();
