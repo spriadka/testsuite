@@ -1,14 +1,5 @@
 package org.jboss.hal.testsuite.test.configuration.elytron.permission.mapper;
 
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
-import static org.jboss.hal.testsuite.util.ConfigChecker.InputType.SELECT;
-import static org.jboss.hal.testsuite.util.ConfigChecker.InputType.TEXT;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.dmr.ModelNode;
@@ -30,6 +21,15 @@ import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.Values;
+
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
+import static org.jboss.hal.testsuite.util.ConfigChecker.InputType.SELECT;
+import static org.jboss.hal.testsuite.util.ConfigChecker.InputType.TEXT;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(Arquillian.class)
 @Category(Shared.class)
@@ -222,8 +222,9 @@ public class ElytronPermissionMapperTestCase extends AbstractElytronTestCase {
                 .selectByName(simplePermissionMapperName);
             page.switchToConfigAreaTab(PERMISSION_MAPPINGS_LABEL);
 
-            page.getConfigAreaResourceManager().removeResource(principalsListValue)
-                .confirmAndDismissReloadRequiredMessage().assertClosed();
+            page.getConfigAreaResourceManager()
+                    .removeResource(principalsListValue)
+                    .confirmAndDismissReloadRequiredMessage().assertClosed();
             assertFalse("Deleted resource should not be present in the table any more!",
                 page.resourceIsPresentInConfigAreaTable(principalsListValue));
             new ResourceVerifier(simplePermissionMapperAddress, client).verifyAttribute(PERMISSION_MAPPINGS,
@@ -655,6 +656,6 @@ public class ElytronPermissionMapperTestCase extends AbstractElytronTestCase {
         if (strings.length == 0) {
             return "";
         }
-        return String.join(",", strings);
+        return "[\"" + String.join("\",\"", strings) + "\"]";
     }
 }
