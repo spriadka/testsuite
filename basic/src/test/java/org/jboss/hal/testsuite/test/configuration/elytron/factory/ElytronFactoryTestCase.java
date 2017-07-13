@@ -1,22 +1,9 @@
 package org.jboss.hal.testsuite.test.configuration.elytron.factory;
 
-import static org.jboss.hal.testsuite.dmr.ModelNodeGenerator.ModelNodePropertiesBuilder;
-import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
-import static org.jboss.hal.testsuite.dmr.ModelNodeGenerator.ModelNodeListBuilder;
-import static org.jboss.hal.testsuite.test.configuration.elytron.ElytronOperations.PROVIDER_LOADER;
-import static org.jboss.hal.testsuite.util.ConfigChecker.InputType.TEXT;
-import static org.junit.Assert.*;
-
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.concurrent.TimeoutException;
-
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.dmr.ModelNode;
-import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.fragment.config.AddResourceWizard;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
@@ -25,20 +12,31 @@ import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindowWithOptionalFie
 import org.jboss.hal.testsuite.page.config.elytron.FactoryPage;
 import org.jboss.hal.testsuite.test.configuration.elytron.AbstractElytronTestCase;
 import org.jboss.hal.testsuite.util.ConfigChecker;
-import org.jboss.hal.testsuite.util.ModuleUtils;
 import org.jboss.hal.testsuite.util.ConfigChecker.InputType;
+import org.jboss.hal.testsuite.util.ModuleUtils;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
 import org.jboss.shrinkwrap.api.spec.JavaArchive;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.Values;
 
+import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.concurrent.TimeoutException;
+
+import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
+import static org.jboss.hal.testsuite.dmr.ModelNodeGenerator.ModelNodeListBuilder;
+import static org.jboss.hal.testsuite.dmr.ModelNodeGenerator.ModelNodePropertiesBuilder;
+import static org.jboss.hal.testsuite.test.configuration.elytron.ElytronOperations.PROVIDER_LOADER;
+import static org.jboss.hal.testsuite.util.ConfigChecker.InputType.TEXT;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
 @RunWith(Arquillian.class)
-@Category(Shared.class)
 public class ElytronFactoryTestCase extends AbstractElytronTestCase {
 
     private static final String SERVICE_LOADER_HTTP_SERVER_LABEL = "Service Loader HTTP Server",
@@ -845,10 +843,12 @@ public class ElytronFactoryTestCase extends AbstractElytronTestCase {
                     .selectByName(configurableFactoryName);
             page.switchToConfigAreaTab(FILTERS_LABEL);
 
-            WizardWindow wizard = page.getConfigAreaResourceManager().addResource();
+            WizardWindowWithOptionalFields wizard = page.getConfigAreaResourceManager()
+                    .addResource(WizardWindowWithOptionalFields.class);
             Editor editor = wizard.getEditor();
             editor.select(PREDEFINED_FILTER, predefinedFilterValue);
             editor.text(PATTERN_FILTER, patternFilterValue);
+            wizard.openOptionalFieldsTab();
             editor.checkbox(ENABLING, true);
             boolean closed = wizard.finishAndDismissReloadRequiredWindow();
             assertFalse("Dialog should not be closed since it should not be possible to set both " + PREDEFINED_FILTER
@@ -866,9 +866,11 @@ public class ElytronFactoryTestCase extends AbstractElytronTestCase {
                     .build();
             factoryVerifier.verifyExists().verifyAttribute(FILTERS_ATTR, expectedFiltersNode);
 
-            wizard = page.getConfigAreaResourceManager().addResource();
+            wizard = page.getConfigAreaResourceManager()
+                    .addResource(WizardWindowWithOptionalFields.class);
             editor = wizard.getEditor();
             editor.text(PATTERN_FILTER, patternFilterValue);
+            wizard.openOptionalFieldsTab();
             editor.checkbox(ENABLING, false);
             closed = wizard.finishAndDismissReloadRequiredWindow();
             assertTrue("Dialog should be closed!", closed);
