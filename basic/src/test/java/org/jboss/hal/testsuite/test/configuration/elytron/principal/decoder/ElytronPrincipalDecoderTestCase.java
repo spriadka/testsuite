@@ -52,7 +52,6 @@ public class ElytronPrincipalDecoderTestCase extends AbstractElytronTestCase {
         ATTRIBUTE_NAME = "attribute-name",
         MAXIMUM_SEGMENTS = "maximum-segments",
         OID = "oid",
-        REQUIRED_OIDS = "required-oids",
         REVERSE = "reverse";
 
     private static final Path CUSTOM_PRINCIPAL_DECODER_PATH = Paths.get("test", "elytron",
@@ -585,9 +584,7 @@ public class ElytronPrincipalDecoderTestCase extends AbstractElytronTestCase {
         String
             x500AttributePrincipalDecoderName = randomAlphanumeric(5),
             attributeNameValue = randomAlphanumeric(5),
-            oidValue = randomAlphanumeric(5),
-            requiredAttr1value = randomAlphanumeric(5),
-            requiredAttr2value = randomAlphanumeric(5);
+            oidValue = randomAlphanumeric(5);
         Address x500AttributePrincipalDecoderAddress =
                 elyOps.getElytronAddress(X500_ATTRIBUTE_PRINCIPAL_DECODER, x500AttributePrincipalDecoderName);
 
@@ -600,17 +597,12 @@ public class ElytronPrincipalDecoderTestCase extends AbstractElytronTestCase {
                 .text(ATTRIBUTE_NAME, attributeNameValue)
                 .text(OID, oidValue);
                 wizard.saveWithState().assertWindowOpen(); // ATTRIBUTE_NAME and OID cannot be set at the same time
-                wizard.text(ATTRIBUTE_NAME, "")
-                .text(REQUIRED_OIDS, requiredAttr1value + "\n" + requiredAttr2value)
-                .saveWithState().assertWindowClosed();
+                wizard.text(ATTRIBUTE_NAME, "").saveWithState().assertWindowClosed();
 
             assertTrue("Created resource should be present in the table!",
                     page.resourceIsPresentInMainTable(x500AttributePrincipalDecoderName));
             new ResourceVerifier(x500AttributePrincipalDecoderAddress, client).verifyExists()
-                    .verifyAttribute(OID, oidValue)
-                    .verifyAttribute(REQUIRED_OIDS, new ModelNodeListBuilder()
-                            .addAll(requiredAttr1value, requiredAttr2value)
-                            .build());
+                    .verifyAttribute(OID, oidValue);
         } finally {
             ops.removeIfExists(x500AttributePrincipalDecoderAddress);
             adminOps.reloadIfRequired();
