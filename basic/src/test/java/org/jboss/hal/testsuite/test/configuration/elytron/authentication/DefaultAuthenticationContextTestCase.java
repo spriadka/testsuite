@@ -1,8 +1,11 @@
 package org.jboss.hal.testsuite.test.configuration.elytron.authentication;
 
+import static org.jboss.hal.testsuite.dmr.ModelNodeGenerator.ModelNodePropertiesBuilder;
+
 import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.page.config.elytron.ElytronAuthenticationPage;
 import org.jboss.hal.testsuite.test.configuration.elytron.AbstractElytronTestCase;
 import org.jboss.hal.testsuite.test.configuration.elytron.ElytronOperations;
@@ -25,7 +28,8 @@ public class DefaultAuthenticationContextTestCase extends AbstractElytronTestCas
         AUTHENTICATION_CONTEXT = "authentication-context",
         DEFAULT_AUTHENTICATION_CONTEXT = "default-authentication-context",
         FINAL_PROVIDERS = "final-providers",
-        INITIAL_PROVIDERS = "initial-providers";
+        INITIAL_PROVIDERS = "initial-providers",
+        SECURITY_PROPERTIES = "security-properties";
 
     /**
      * @tpTestDetails Try to edit default-authentication-context attribute value in Web Console's Elytron subsystem
@@ -106,6 +110,33 @@ public class DefaultAuthenticationContextTestCase extends AbstractElytronTestCas
         } finally {
             elyOps.removeProviderLoader(providerLoader);
         }
+    }
+
+    /**
+     * @tpTestDetails Try to edit security-properties attribute value in Web Console's Elytron subsystem configuration.
+     * Validate edited attribute value in the model.
+     */
+    @Test
+    public void editSecurityProperties() throws Exception {
+        final String
+            key1 = RandomStringUtils.randomAlphanumeric(7),
+            key2 = RandomStringUtils.randomAlphanumeric(7),
+            value1 = RandomStringUtils.randomAlphanumeric(7),
+            value2 = RandomStringUtils.randomAlphanumeric(7),
+            securityPropertiesString = key1 + "=" + value1 + "\n" + key2 + "=" + value2;
+        final ModelNode expectedSecurityPropertiesNode = new ModelNodePropertiesBuilder()
+                .addProperty(key1, value1)
+                .addProperty(key2, value2)
+                .build();
+
+        elytronAuthenticationOperations.performActionOnAttributeAndRevertItsValueToOriginal(
+                ElytronOperations.getElytronSubsystemAddress(), SECURITY_PROPERTIES, () -> {
+                    page.navigate();
+                    new ConfigChecker.Builder(client, ElytronOperations.getElytronSubsystemAddress())
+                            .configFragment(page.getConfigFragment())
+                            .editAndSave(ConfigChecker.InputType.TEXT, SECURITY_PROPERTIES, securityPropertiesString)
+                            .verifyFormSaved().verifyAttribute(SECURITY_PROPERTIES, expectedSecurityPropertiesNode);
+                });
     }
 
     private Address createAuthenticationContext() throws IOException {
