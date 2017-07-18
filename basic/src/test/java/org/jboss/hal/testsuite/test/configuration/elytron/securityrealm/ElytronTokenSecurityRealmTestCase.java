@@ -14,7 +14,6 @@ import org.jboss.hal.testsuite.util.ConfigChecker;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.wildfly.extras.creaper.core.online.ModelNodeResult;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.Values;
 
@@ -91,45 +90,6 @@ public class ElytronTokenSecurityRealmTestCase extends AbstractElytronTestCase {
             Assert.assertFalse(page.getResourceManager().isResourcePresent(realmAddress.getLastPairValue()));
 
             new ResourceVerifier(realmAddress, client).verifyDoesNotExist();
-        } finally {
-            ops.removeIfExists(realmAddress);
-            adminOps.reloadIfRequired();
-        }
-    }
-
-    /**
-     * @tpTestDetails Create Elytron Token security realm instance in model and try to edit its case-sensitive attribute
-     * value in Web Console's Elytron subsystem configuration.
-     * Validate edited attribute value in the model.
-     */
-    @Test
-    public void toggleCaseSensitive() throws Exception {
-        final Address realmAddress = createTokenRealm();
-
-        final String caseSensitive = "case-sensitive";
-
-        try {
-
-            final ModelNodeResult originalModelNodeResult = ops.readAttribute(realmAddress, caseSensitive);
-            originalModelNodeResult.assertSuccess();
-            final boolean originalBoolValue = originalModelNodeResult.booleanValue();
-
-            page.navigate();
-            page.switchToTokenRealms()
-                    .getResourceManager()
-                    .selectByName(realmAddress.getLastPairValue());
-
-            new ConfigChecker.Builder(client, realmAddress)
-                    .configFragment(page.getConfigFragment())
-                    .editAndSave(ConfigChecker.InputType.CHECKBOX, caseSensitive, !originalBoolValue)
-                    .verifyFormSaved()
-                    .verifyAttribute(caseSensitive, !originalBoolValue);
-
-            new ConfigChecker.Builder(client, realmAddress)
-                    .configFragment(page.getConfigFragment())
-                    .editAndSave(ConfigChecker.InputType.CHECKBOX, caseSensitive, originalBoolValue)
-                    .verifyFormSaved()
-                    .verifyAttribute(caseSensitive, originalBoolValue);
         } finally {
             ops.removeIfExists(realmAddress);
             adminOps.reloadIfRequired();
