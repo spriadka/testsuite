@@ -1,5 +1,6 @@
 package org.jboss.hal.testsuite.test.configuration.elytron.authentication;
 
+import static org.jboss.hal.testsuite.dmr.ModelNodeGenerator.ModelNodeListBuilder;
 import static org.jboss.hal.testsuite.dmr.ModelNodeGenerator.ModelNodePropertiesBuilder;
 
 import org.apache.commons.lang.RandomStringUtils;
@@ -29,6 +30,7 @@ public class DefaultAuthenticationContextTestCase extends AbstractElytronTestCas
         DEFAULT_AUTHENTICATION_CONTEXT = "default-authentication-context",
         FINAL_PROVIDERS = "final-providers",
         INITIAL_PROVIDERS = "initial-providers",
+        DISALLOWED_PROVIDERS = "disallowed-providers",
         SECURITY_PROPERTIES = "security-properties";
 
     /**
@@ -109,6 +111,39 @@ public class DefaultAuthenticationContextTestCase extends AbstractElytronTestCas
             );
         } finally {
             elyOps.removeProviderLoader(providerLoader);
+        }
+    }
+
+    /**
+     * @tpTestDetails Try to edit disallowed-providers attribute value in Web Console's Elytron subsystem configuration.
+     * Validate edited attribute value in the model.
+     */
+    @Test
+    public void editDisallowedProviders() throws Exception {
+        final String
+            providerLoader1 = RandomStringUtils.randomAlphanumeric(7),
+            providerLoader2 = RandomStringUtils.randomAlphanumeric(7),
+            providersString = providerLoader1 + "\n" + providerLoader2;
+        final ModelNode providersNode = new ModelNodeListBuilder().addAll(providerLoader1, providerLoader2).build();
+
+        try {
+            elytronAuthenticationOperations.performActionOnAttributeAndRevertItsValueToOriginal(
+                    ElytronOperations.getElytronSubsystemAddress(),
+                    DISALLOWED_PROVIDERS,
+                    () -> {
+                        elyOps.addProviderLoader(providerLoader1);
+                        elyOps.addProviderLoader(providerLoader2);
+                        page.navigate();
+                        new ConfigChecker.Builder(client, ElytronOperations.getElytronSubsystemAddress())
+                                .configFragment(page.getConfigFragment())
+                                .editAndSave(ConfigChecker.InputType.TEXT, DISALLOWED_PROVIDERS, providersString)
+                                .verifyFormSaved()
+                                .verifyAttribute(DISALLOWED_PROVIDERS, providersNode);
+                    }
+            );
+        } finally {
+            elyOps.removeProviderLoader(providerLoader1);
+            elyOps.removeProviderLoader(providerLoader2);
         }
     }
 
