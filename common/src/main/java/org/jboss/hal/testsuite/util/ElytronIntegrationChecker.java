@@ -1,5 +1,7 @@
 package org.jboss.hal.testsuite.util;
 
+import static org.wildfly.extras.creaper.core.online.Constants.SUBSYSTEM;
+
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.dmr.ModelNode;
 import org.jboss.dmr.Property;
@@ -9,11 +11,13 @@ import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wildfly.extras.creaper.core.online.Constants;
 import org.wildfly.extras.creaper.core.online.ModelNodeResult;
 import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.Operations;
 import org.wildfly.extras.creaper.core.online.operations.Values;
+import org.wildfly.extras.creaper.core.online.operations.admin.DomainAdministration;
 
 import java.io.IOException;
 
@@ -32,7 +36,8 @@ public class ElytronIntegrationChecker {
             ADD_ALIAS = "add-alias",
             ALIAS = "alias",
             STORE = "store",
-            TYPE = "type";
+            TYPE = "type",
+            ELYTRON = "elytron";
 
     private final OnlineManagementClient client;
     private final Operations operations;
@@ -108,9 +113,7 @@ public class ElytronIntegrationChecker {
         //add credential store
         final Address credentialReferenceAddress = addCredentialStore(credentialStoreName);
         //add alias with value to credential store
-        operations.invoke(ADD_ALIAS, credentialReferenceAddress, Values.empty()
-                .and(ALIAS, credentialStoreAliasValue)
-                .and(SECRET_VALUE, credentialStoreAliasValue)).assertSuccess();
+        addAlias(credentialStoreAliasValue, credentialReferenceAddress);
         //edit form in web console and verify against model
         try {
             final ResourceVerifier verifier = new ConfigChecker.Builder(client, address)
@@ -181,13 +184,34 @@ public class ElytronIntegrationChecker {
     }
 
     private Address addCredentialStore(String credentialStoreName) throws IOException {
-        final Address credentialReferenceAddress = Address.subsystem("elytron").and(CREDENTIAL_STORE, credentialStoreName);
+        final Address credentialReferenceAddress = Address.subsystem(ELYTRON).and(CREDENTIAL_STORE, credentialStoreName);
         operations.add(credentialReferenceAddress, Values
                 .of("create", true)
                 .and(CREDENTIAL_REFERENCE, new ModelNode().set(new Property(CLEAR_TEXT, new ModelNode("foobar")))
                         .asObject()))
                 .assertSuccess();
         return credentialReferenceAddress;
+    }
+
+    private void addAlias(final String credentialStoreAliasValue, final Address credentialReferenceAddress)
+            throws IOException {
+        if (ConfigUtils.isDomain()) {
+            for (String server : new DomainAdministration(client).allRunningServers()) {
+                Address serverCredentialReferenceAddress = Address.host(ConfigUtils.getDefaultHost())
+                        .and(Constants.SERVER, server).and(SUBSYSTEM, ELYTRON)
+                        .and(CREDENTIAL_STORE, credentialReferenceAddress.getLastPairValue());
+                invokeAddAlias(credentialStoreAliasValue, serverCredentialReferenceAddress);
+            }
+        } else {
+            invokeAddAlias(credentialStoreAliasValue, credentialReferenceAddress);
+        }
+    }
+
+    private void invokeAddAlias(final String credentialStoreAliasValue, final Address credentialReferenceAddress)
+            throws IOException {
+        operations.invoke(ADD_ALIAS, credentialReferenceAddress, Values.empty()
+                .and(ALIAS, credentialStoreAliasValue)
+                .and(SECRET_VALUE, credentialStoreAliasValue)).assertSuccess();
     }
 
     private static final class CredentialStoreModelNodeBuilder {
