@@ -9,7 +9,9 @@ import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
 import org.jboss.hal.testsuite.page.config.UndertowHTTPPage;
+import org.jboss.hal.testsuite.test.configuration.elytron.ElytronOperations;
 import org.jboss.hal.testsuite.util.ConfigChecker;
+import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
@@ -22,15 +24,18 @@ import org.wildfly.extras.creaper.commands.undertow.SslVerifyClient;
 import org.wildfly.extras.creaper.core.CommandFailedException;
 import org.wildfly.extras.creaper.core.online.ModelNodeResult;
 import org.wildfly.extras.creaper.core.online.operations.Address;
+import org.wildfly.extras.creaper.core.online.operations.Values;
 import org.wildfly.extras.creaper.core.online.operations.Batch;
 import org.wildfly.extras.creaper.core.online.operations.OperationException;
 import org.wildfly.extras.creaper.core.online.operations.ReadAttributeOption;
+
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeoutException;
 
+import static org.jboss.hal.testsuite.util.ConfigChecker.InputType.CHECKBOX;
 import static org.jboss.hal.testsuite.util.ConfigChecker.InputType.SELECT;
 import static org.jboss.hal.testsuite.util.ConfigChecker.InputType.TEXT;
 
@@ -82,7 +87,7 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
     private static final String HTTP_SERVER = "undertow-http-server-https-listener_" + RandomStringUtils.randomAlphanumeric(5);
 
     private static final String HTTPS_LISTENER = "https-listener_" + RandomStringUtils.randomAlphanumeric(5);
-    private static final String HTTPS_LISTENER_TBR = "https-listener-btr_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String HTTPS_LISTENER_TBR = "https-listener-tbr_" + RandomStringUtils.randomAlphanumeric(5);
     private static final String HTTPS_LISTENER_TBA = "https-listener-tba_" + RandomStringUtils.randomAlphanumeric(5);
 
     private static final Address HTTP_SERVER_ADDRESS = UNDERTOW_ADDRESS.and("server", HTTP_SERVER);
@@ -91,24 +96,36 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
     private static final Address HTTPS_LISTENER_TBR_ADDRESS = HTTP_SERVER_ADDRESS.and("https-listener", HTTPS_LISTENER_TBR);
     private static final Address HTTPS_LISTENER_TBA_ADDRESS = HTTP_SERVER_ADDRESS.and("https-listener", HTTPS_LISTENER_TBA);
 
+    private static final String CLIENT_SSL_CONTEXT_NAME = "my_client_ssl_context_" + RandomStringUtils.randomAlphanumeric(7);
+    private static final Address CLIENT_SSL_CONTEXT_ADDRESS = ElytronOperations.getElytronSubsystemAddress()
+            .and(ElytronOperations.CLIENT_SSL_CONTEXT, CLIENT_SSL_CONTEXT_NAME);
+    private static final String HAL_1372_WORKAROUND_PROPERTY = "hal1372workaround";
+
     @BeforeClass
     public static void setUp() throws IOException, CommandFailedException, TimeoutException, InterruptedException, OperationException {
         operations.add(HTTP_SERVER_ADDRESS);
         administration.reloadIfRequired();
-        client.apply(new AddUndertowListener.HttpsBuilder(HTTPS_LISTENER, HTTP_SERVER,
-                        undertowOps.createSocketBinding())
-                .securityRealm(undertowOps.createSecurityRealm())
-                .verifyClient(SslVerifyClient.NOT_REQUESTED)
-                .enabled(true)
-                .build());
-        client.apply(new AddUndertowListener.HttpsBuilder(HTTPS_LISTENER_TBR, HTTP_SERVER,
-                        undertowOps.createSocketBinding())
-                .securityRealm(undertowOps.createSecurityRealm())
-                .verifyClient(SslVerifyClient.NOT_REQUESTED)
-                .enabled(true)
-                .build());
+        if (ConfigUtils.get(HAL_1372_WORKAROUND_PROPERTY) != null) {
+            operations.add(CLIENT_SSL_CONTEXT_ADDRESS);
+            operations.add(HTTPS_LISTENER_ADDRESS, Values.of(SOCKET_BINDING, undertowOps.createSocketBinding()).and(SSL_CONTEXT, CLIENT_SSL_CONTEXT_NAME));
+            operations.add(HTTPS_LISTENER_TBR_ADDRESS, Values.of(SOCKET_BINDING, undertowOps.createSocketBinding()).and(SSL_CONTEXT, CLIENT_SSL_CONTEXT_NAME));
+        } else {
+            client.apply(new AddUndertowListener.HttpsBuilder(HTTPS_LISTENER, HTTP_SERVER,
+                    undertowOps.createSocketBinding())
+                    .securityRealm(undertowOps.createSecurityRealm())
+                    .verifyClient(SslVerifyClient.NOT_REQUESTED)
+                    .enabled(true)
+                    .build());
+            client.apply(new AddUndertowListener.HttpsBuilder(HTTPS_LISTENER_TBR, HTTP_SERVER,
+                    undertowOps.createSocketBinding())
+                    .securityRealm(undertowOps.createSecurityRealm())
+                    .verifyClient(SslVerifyClient.NOT_REQUESTED)
+                    .enabled(true)
+                    .build());
+        }
         administration.reloadIfRequired();
     }
+
 
     @Before
     public void before() {
@@ -124,6 +141,7 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
         operations.removeIfExists(HTTPS_LISTENER_TBA_ADDRESS);
         operations.removeIfExists(HTTPS_LISTENER_TBR_ADDRESS);
         operations.removeIfExists(HTTP_SERVER_ADDRESS);
+        operations.removeIfExists(CLIENT_SSL_CONTEXT_ADDRESS);
         administration.reloadIfRequired();
     }
 
@@ -338,11 +356,7 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
         ModelNode originalSocketBindingValue = operations.readAttribute(HTTPS_LISTENER_ADDRESS, SOCKET_BINDING,
                 ReadAttributeOption.NOT_INCLUDE_DEFAULTS).value();
         try {
-            new ConfigChecker.Builder(client, HTTPS_LISTENER_ADDRESS)
-                    .configFragment(page.getConfigFragment())
-                    .editAndSave(TEXT, SOCKET_BINDING, socketBinding)
-                    .verifyFormSaved()
-                    .verifyAttribute(SOCKET_BINDING, socketBinding);
+            editTextAndVerify(HTTPS_LISTENER_ADDRESS, SOCKET_BINDING, socketBinding);
         } finally {
             operations.writeAttribute(HTTPS_LISTENER_ADDRESS, SOCKET_BINDING, originalSocketBindingValue);
         }
@@ -499,13 +513,14 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
         Editor editor = wizard.getEditor();
         editor.text("name", HTTPS_LISTENER_TBA);
         editor.text(SOCKET_BINDING, socketBinding);
-        boolean result = wizard.finish();
-
-        Assert.assertTrue("Window should be closed", result);
+        if (ConfigUtils.get(HAL_1372_WORKAROUND_PROPERTY) != null) {
+            editor.text(SSL_CONTEXT, CLIENT_SSL_CONTEXT_NAME);
+        }
+        wizard.saveAndDismissReloadRequiredWindowWithState().assertWindowClosed();
         Assert.assertTrue("HTTPS listener should be present in table", page.getResourceManager().isResourcePresent(HTTPS_LISTENER_TBA));
-        ResourceVerifier verifier = new ResourceVerifier(HTTPS_LISTENER_TBA_ADDRESS, client);
-        verifier.verifyAttribute(SOCKET_BINDING, socketBinding);
-}
+        new ResourceVerifier(HTTPS_LISTENER_TBA_ADDRESS, client)
+                .verifyAttribute(SOCKET_BINDING, socketBinding);
+    }
 
     @Test
     public void removeHTTPSListenerInGUI() throws Exception {
@@ -517,4 +532,49 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
         new ResourceVerifier(HTTPS_LISTENER_TBR_ADDRESS, client).verifyDoesNotExist(); //HTTP server host should not be present on the server
     }
 
+    @Override
+    public void editTextAndVerify(Address address, String identifier, String value) throws Exception {
+        ConfigChecker.Builder builder = new ConfigChecker.Builder(client, address).configFragment(page.getConfigFragment());
+        if (ConfigUtils.get(HAL_1372_WORKAROUND_PROPERTY) != null) {
+            builder.edit(SELECT, VERIFY_CLIENT, "");
+        }
+        builder.editAndSave(TEXT, identifier, value).verifyFormSaved().verifyAttribute(identifier, value);
+    }
+
+    @Override
+    public void editTextAndVerify(Address address, String identifier, int value) throws Exception {
+        ConfigChecker.Builder builder = new ConfigChecker.Builder(client, address).configFragment(page.getConfigFragment());
+        if (ConfigUtils.get(HAL_1372_WORKAROUND_PROPERTY) != null) {
+            builder.edit(SELECT, VERIFY_CLIENT, "");
+        }
+        builder.editAndSave(TEXT, identifier, value).verifyFormSaved().verifyAttribute(identifier, value);
+    }
+
+    @Override
+    public void editTextAndVerify(Address address, String identifier, long value) throws Exception {
+        ConfigChecker.Builder builder = new ConfigChecker.Builder(client, address).configFragment(page.getConfigFragment());
+        if (ConfigUtils.get(HAL_1372_WORKAROUND_PROPERTY) != null) {
+            builder.edit(SELECT, VERIFY_CLIENT, "");
+        }
+        builder.editAndSave(TEXT, identifier, value).verifyFormSaved().verifyAttribute(identifier, value);
+    }
+
+    @Override
+    public void editCheckboxAndVerify(Address address, String attributeName, Boolean value) throws Exception {
+        ConfigChecker.Builder builder = new ConfigChecker.Builder(client, address).configFragment(page.getConfigFragment());
+        if (ConfigUtils.get(HAL_1372_WORKAROUND_PROPERTY) != null) {
+            builder.edit(SELECT, VERIFY_CLIENT, "");
+        }
+        builder.editAndSave(CHECKBOX, attributeName, value).verifyFormSaved().verifyAttribute(attributeName, value);
+    }
+
+    @Override
+    public void editCheckboxAndVerify(Address address, String identifier, String attributeName, Boolean value) throws Exception {
+        ConfigChecker.Builder builder = new ConfigChecker.Builder(client, address).configFragment(page.getConfigFragment());
+        if (ConfigUtils.get(HAL_1372_WORKAROUND_PROPERTY) != null) {
+            builder.edit(SELECT, VERIFY_CLIENT, "");
+        }
+        builder.editAndSave(CHECKBOX, identifier, value).verifyFormSaved().verifyAttribute(attributeName, value);
+    }
 }
+
