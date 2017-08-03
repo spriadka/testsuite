@@ -37,7 +37,9 @@ public class ElytronOperations {
             HTTP_SERVER_MECHANISM_FACTORY = "http-server-mechanism-factory",
             SECURITY_DOMAIN = "security-domain",
             KEY_MANAGER = "key-manager",
-            CLIENT_SSL_CONTEXT = "client-ssl-context";
+            CLIENT_SSL_CONTEXT = "client-ssl-context",
+            CREDENTIAL_STORE = "credential-store",
+            CREATE = "create";
 
     private final Operations ops;
 
@@ -201,6 +203,43 @@ public class ElytronOperations {
         ops.add(sslContextAddress, Values.of(KEY_MANAGER, keyManagerAddress.getLastPairValue()).and(PROTOCOLS, protocolList))
                 .assertSuccess();
         return sslContextAddress;
+    }
+
+    /**
+     * Create new credential store with given name and given clear text value of credential reference associated with created credential store
+     * @param credentialStoreName name of the credential store to be created
+     * @param clearTextValue clear text value of credential reference associated with created credential store
+     * @return address of created credential store
+     */
+    public Address createCredentialStoreWithCredentialReferenceClearText(String credentialStoreName, String clearTextValue) throws IOException {
+        final ModelNode credentialReference = new ModelNodeGenerator.ModelNodePropertiesBuilder().addProperty(CLEAR_TEXT, clearTextValue).build();
+        final Address credentialStoreAddress = ELYTRON_SUBSYSTEM_ADDRESS.and(CREDENTIAL_STORE, credentialStoreName);
+        ops.add(credentialStoreAddress, Values.of(CREDENTIAL_REFERENCE, credentialReference).and(CREATE, true));
+        return credentialStoreAddress;
+    }
+
+    /**
+     * Create new credential store with given name and random clear text value of credential reference associated with created credential store
+     * @param credentialStoreName name of the credential store to be created
+     * @return address of created credential store
+     */
+    public Address createCredentialStoreWithCredentialReferenceClearText(String credentialStoreName) throws IOException {
+        final ModelNode credentialReference = new ModelNodeGenerator.ModelNodePropertiesBuilder().addProperty(CLEAR_TEXT, RandomStringUtils.randomAlphanumeric(7)).build();
+        final Address credentialStoreAddress = ELYTRON_SUBSYSTEM_ADDRESS.and(CREDENTIAL_STORE, credentialStoreName);
+        ops.add(credentialStoreAddress, Values.of(CREDENTIAL_REFERENCE, credentialReference).and(CREATE, true));
+        return credentialStoreAddress;
+    }
+
+    /**
+     * Create new credential store at target address with random clear text value of credential reference associated with created credential store
+     * @param credentialStoreAddress address of created credential store
+     * @return passed address of credential store
+     * @throws IOException
+     */
+    public Address createCredentialStoreWithCredentialReferenceClearText(Address credentialStoreAddress) throws IOException {
+        final ModelNode credentialReference = new ModelNodeGenerator.ModelNodePropertiesBuilder().addProperty(CLEAR_TEXT, RandomStringUtils.randomAlphanumeric(7)).build();
+        ops.add(credentialStoreAddress, Values.of(CREDENTIAL_REFERENCE, credentialReference).and(CREATE, true));
+        return credentialStoreAddress;
     }
 
     private enum SSLContext {
