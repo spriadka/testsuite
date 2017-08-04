@@ -8,6 +8,7 @@ import org.jboss.dmr.ModelNode;
 import org.jboss.dmr.Property;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.creaper.command.BackupAndRestoreAttributes;
+import org.jboss.hal.testsuite.dmr.ModelNodeGenerator;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.page.config.LoggingPage;
 import org.jboss.hal.testsuite.util.Console;
@@ -113,7 +114,9 @@ public class CustomFormatterTestCase extends LoggingAbstractTestCase {
         Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
         administration.reloadIfRequired();
         config.editTextAndSave(PROPERTIES, PATTERN + "=" + PATTERN_VALUE);
-        ModelNode expected = new ModelNode().add(new Property(PATTERN, new ModelNode(PATTERN_VALUE)));
+        ModelNode expected = new ModelNodeGenerator.ModelNodePropertiesBuilder()
+                .addProperty(PATTERN,PATTERN_VALUE)
+                .build();
         new ResourceVerifier(CUSTOM_FORMATTER_ADDRESS, client)
                 .verifyAttribute(PROPERTIES, expected, "Failed probably due https://issues.jboss.org/browse/HAL-1174");
     }
