@@ -1,5 +1,10 @@
 package org.jboss.hal.testsuite.page.config.elytron;
 
+import org.jboss.arquillian.graphene.Graphene;
+import org.jboss.hal.testsuite.fragment.config.elytron.permissionmapper.PermissionsTableFragment;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebElement;
+
 import static org.jboss.hal.testsuite.finder.FinderNames.SETTINGS;
 import static org.jboss.hal.testsuite.page.config.elytron.ElytronPageConstants.ELYTRON_SUBSYTEM_LABEL;
 
@@ -32,6 +37,11 @@ public class MapperDecoderPage extends AbstractElytronConfigPage<MapperDecoderPa
         getSubsystemNavigation(ELYTRON_SUBSYTEM_LABEL).step(SETTINGS, MAPPER_DECODER).openApplication(30);
         switchTab(tabIdentifier);
         return this;
+    }
+
+    public PermissionsTableFragment getPermissionsTable() {
+        WebElement windowPanel = browser.findElement(By.className("default-window-content"));
+        return Graphene.createPageFragment(PermissionsTableFragment.class, windowPanel);
     }
 
 }
