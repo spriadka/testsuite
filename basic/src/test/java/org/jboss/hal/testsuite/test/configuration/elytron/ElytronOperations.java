@@ -39,7 +39,9 @@ public class ElytronOperations {
             KEY_MANAGER = "key-manager",
             CLIENT_SSL_CONTEXT = "client-ssl-context",
             CREDENTIAL_STORE = "credential-store",
-            CREATE = "create";
+            CREATE = "create",
+            MODIFIABLE = "modifiable",
+            STORE = "store";
 
     private final Operations ops;
 
@@ -206,28 +208,12 @@ public class ElytronOperations {
     }
 
     /**
-     * Create new credential store with given name and given clear text value of credential reference associated with created credential store
-     * @param credentialStoreName name of the credential store to be created
-     * @param clearTextValue clear text value of credential reference associated with created credential store
-     * @return address of created credential store
-     */
-    public Address createCredentialStoreWithCredentialReferenceClearText(String credentialStoreName, String clearTextValue) throws IOException {
-        final ModelNode credentialReference = new ModelNodeGenerator.ModelNodePropertiesBuilder().addProperty(CLEAR_TEXT, clearTextValue).build();
-        final Address credentialStoreAddress = ELYTRON_SUBSYSTEM_ADDRESS.and(CREDENTIAL_STORE, credentialStoreName);
-        ops.add(credentialStoreAddress, Values.of(CREDENTIAL_REFERENCE, credentialReference).and(CREATE, true));
-        return credentialStoreAddress;
-    }
-
-    /**
      * Create new credential store with given name and random clear text value of credential reference associated with created credential store
      * @param credentialStoreName name of the credential store to be created
      * @return address of created credential store
      */
     public Address createCredentialStoreWithCredentialReferenceClearText(String credentialStoreName) throws IOException {
-        final ModelNode credentialReference = new ModelNodeGenerator.ModelNodePropertiesBuilder().addProperty(CLEAR_TEXT, RandomStringUtils.randomAlphanumeric(7)).build();
-        final Address credentialStoreAddress = ELYTRON_SUBSYSTEM_ADDRESS.and(CREDENTIAL_STORE, credentialStoreName);
-        ops.add(credentialStoreAddress, Values.of(CREDENTIAL_REFERENCE, credentialReference).and(CREATE, true));
-        return credentialStoreAddress;
+        return createCredentialStoreWithCredentialReferenceClearText(credentialStoreName, RandomStringUtils.randomAlphanumeric(7));
     }
 
     /**
@@ -237,8 +223,15 @@ public class ElytronOperations {
      * @throws IOException
      */
     public Address createCredentialStoreWithCredentialReferenceClearText(Address credentialStoreAddress) throws IOException {
-        final ModelNode credentialReference = new ModelNodeGenerator.ModelNodePropertiesBuilder().addProperty(CLEAR_TEXT, RandomStringUtils.randomAlphanumeric(7)).build();
-        ops.add(credentialStoreAddress, Values.of(CREDENTIAL_REFERENCE, credentialReference).and(CREATE, true));
+        return createCredentialStoreWithCredentialReferenceClearText(credentialStoreAddress.getLastPairValue(), RandomStringUtils.randomAlphanumeric(7));
+    }
+
+    private Address createCredentialStoreWithCredentialReferenceClearText(String credentialStoreName, String clearTextValue) throws IOException {
+        final ModelNode credentialReference = new ModelNodeGenerator.ModelNodePropertiesBuilder().addProperty(CLEAR_TEXT, clearTextValue).build();
+        final Address credentialStoreAddress = ELYTRON_SUBSYSTEM_ADDRESS.and(CREDENTIAL_STORE, credentialStoreName);
+        ops.add(credentialStoreAddress, Values.of(CREDENTIAL_REFERENCE, credentialReference)
+                .and(CREATE, true)
+                .and(MODIFIABLE, true));
         return credentialStoreAddress;
     }
 
