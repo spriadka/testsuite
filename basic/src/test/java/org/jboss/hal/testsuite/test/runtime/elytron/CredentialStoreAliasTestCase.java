@@ -4,6 +4,8 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.hal.testsuite.creaper.ResourceVerifier;
+import org.jboss.hal.testsuite.dmr.ModelNodeGenerator;
 import org.jboss.hal.testsuite.fragment.config.AddResourceWizard;
 import org.jboss.hal.testsuite.fragment.shared.util.ResourceManager;
 import org.jboss.hal.testsuite.page.runtime.ElytronRuntimePage;
@@ -37,6 +39,12 @@ public class CredentialStoreAliasTestCase extends AbstractElytronTestCase {
     private static final String ADD_ALIAS_OPERATION = "add-alias";
     private static final String READ_ALIASES_OPERATION = "read-aliases";
     private static final String REMOVE_ALIAS_OPERATION = "remove-alias";
+
+    private static final String STATE = "state";
+    private static final String START_FAILED_STATE = "START_FAILED";
+    private static final String UP_STATE = "UP";
+
+    private static final String SET_SECRET_LABEL = "Set secret";
 
     @BeforeClass
     public static void setUp() throws IOException, TimeoutException, InterruptedException {
@@ -128,7 +136,8 @@ public class CredentialStoreAliasTestCase extends AbstractElytronTestCase {
     @Test
     public void testRefreshCredentialStores() throws IOException, TimeoutException, InterruptedException, OperationException {
         final String credentialStoreName = "created_credential_store_" + RandomStringUtils.randomAlphanumeric(7);
-        final Address credentialStoreAddress = ElytronOperations.getElytronSubsystemAddress().and(ElytronOperations.CREDENTIAL_STORE, credentialStoreName);
+        final Address credentialStoreAddress = ElytronOperations.getElytronSubsystemAddress()
+                .and(ElytronOperations.CREDENTIAL_STORE, credentialStoreName);
         try {
             page.navigate();
             ResourceManager credentialStoresManager = page.getResourceManager();
@@ -141,6 +150,55 @@ public class CredentialStoreAliasTestCase extends AbstractElytronTestCase {
         } finally {
             ops.removeIfExists(credentialStoreAddress);
             adminOps.reloadIfRequired();
+        }
+    }
+
+    @Test
+    public void testSetSecret() throws Exception {
+        final String credentialStoreName = "owning_credential_store_" + RandomStringUtils.randomAlphanumeric(7);
+        final Address credentialStoreAddress = ElytronOperations.getElytronSubsystemAddress()
+                .and(ElytronOperations.CREDENTIAL_STORE, credentialStoreName);
+        final String dependingCredentialStoreName = "depending_credential_store_" + RandomStringUtils.randomAlphanumeric(7);
+        final Address dependingCredentialStoreAddress = ElytronOperations.getElytronSubsystemAddress()
+                .and(ElytronOperations.CREDENTIAL_STORE, dependingCredentialStoreName);
+        final String aliasName = "alias_" + RandomStringUtils.randomNumeric(7);
+        final String aliasSecret = RandomStringUtils.randomAlphanumeric(7);
+        try {
+            elyOps.createCredentialStoreWithCredentialReferenceClearText(credentialStoreAddress);
+            ops.invoke(ADD_ALIAS_OPERATION, credentialStoreAddress, Values.of(ALIAS, aliasName).and(SECRET_VALUE, aliasSecret))
+                    .assertSuccess();
+            ops.add(dependingCredentialStoreAddress, Values.of(ElytronOperations.CREATE, true)
+                    .and(ElytronOperations.CREDENTIAL_REFERENCE, new ModelNodeGenerator.ModelNodePropertiesBuilder()
+                            .addProperty(ALIAS, aliasName)
+                            .addProperty(ElytronOperations.STORE, credentialStoreName).build())).assertSuccess();
+            page.navigate();
+            page.getResourceManager().selectByName(credentialStoreName);
+            ResourceManager aliasManager = page.getConfig().switchTo(ALIASES_TAB_LABEL).getResourceManager();
+            aliasManager.selectByName(aliasName);
+            AddResourceWizard wizard = aliasManager.addResource(AddResourceWizard.class, SET_SECRET_LABEL);
+            wizard.openOptionalFieldsTab();
+            wizard.text(SECRET_VALUE, RandomStringUtils.randomAlphanumeric(10));
+            wizard.saveAndDismissReloadRequiredWindowWithState().assertWindowClosed();
+            adminOps.reload();
+            page.refreshCredentialStores();
+            Assert.assertEquals("Depending credential store should have \"" + START_FAILED_STATE + "\" state in the UI after alias secret change"
+                    , START_FAILED_STATE, page.getResourceManager().selectByName(dependingCredentialStoreName).getCellValue(1));
+            new ResourceVerifier(dependingCredentialStoreAddress, client).verifyAttribute(STATE, START_FAILED_STATE);
+            page.getResourceManager().selectByName(credentialStoreName);
+            page.getConfig().switchTo(ALIASES_TAB_LABEL).getResourceManager().selectByName(aliasName);
+            wizard = aliasManager.addResource(AddResourceWizard.class, SET_SECRET_LABEL);
+            wizard.openOptionalFieldsTab();
+            wizard.text(SECRET_VALUE, aliasSecret);
+            wizard.saveAndDismissReloadRequiredWindowWithState().assertWindowClosed();
+            adminOps.reload();
+            page.refreshCredentialStores();
+            Assert.assertEquals("Depending credential store should have \"" + UP_STATE + "\" state in the UI after reverting alias secret change"
+                    , UP_STATE, page.getResourceManager().selectByName(dependingCredentialStoreName).getCellValue(1));
+            new ResourceVerifier(dependingCredentialStoreAddress, client).verifyAttribute(STATE, UP_STATE);
+
+        } finally {
+            ops.removeIfExists(dependingCredentialStoreAddress);
+            ops.removeIfExists(credentialStoreAddress);
         }
     }
 

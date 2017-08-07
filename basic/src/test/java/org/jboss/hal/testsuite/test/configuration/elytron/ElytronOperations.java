@@ -39,7 +39,8 @@ public class ElytronOperations {
             KEY_MANAGER = "key-manager",
             CLIENT_SSL_CONTEXT = "client-ssl-context",
             CREDENTIAL_STORE = "credential-store",
-            CREATE = "create";
+            CREATE = "create",
+            STORE = "store";
 
     private final Operations ops;
 
