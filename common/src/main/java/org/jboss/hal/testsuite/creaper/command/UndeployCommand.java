@@ -48,7 +48,7 @@ public class UndeployCommand implements OnlineCommand {
             if (fromAllGroups) {
                 cmd.append(" --all-relevant-server-groups");
             } else {
-                cmd.append("--server-groups").append(particularGroup);
+                cmd.append(" --server-groups=").append(particularGroup);
             }
         }
         ctx.client.executeCli(cmd.toString());

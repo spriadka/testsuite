@@ -155,7 +155,7 @@ public class WebMetricsTestCase {
 
         // do some load
         generateBytesSentBySending(amountOfDataToSend);
-        generageBytesReceivedBySending(amountOfDataToReceive);
+        generateBytesReceivedBySending(amountOfDataToReceive);
 
         // refresh results
         undertowMetricsPage.refreshStats();
@@ -198,7 +198,7 @@ public class WebMetricsTestCase {
         }
     }
 
-    private void generageBytesReceivedBySending(long numberOfBytes) throws IOException {
+    private void generateBytesReceivedBySending(long numberOfBytes) throws IOException {
         URL uploadUrl = new URL(deploymentBaseUrl() + UploadServlet.URL_PATTERN);
         sendNumOfMegaBytesToAsMultipart(uploadUrl, (numberOfBytes / (1024 * 1024)));
     }
