@@ -8,6 +8,7 @@ import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.dmr.ModelNodeGenerator.ModelNodeListBuilder;
 import org.jboss.hal.testsuite.dmr.ModelNodeGenerator.ModelNodePropertiesBuilder;
 import org.jboss.hal.testsuite.fragment.config.AddResourceWizard;
+import org.jboss.hal.testsuite.fragment.config.elytron.permissionmapper.PermissionsTableRowFragment;
 import org.jboss.hal.testsuite.page.config.elytron.MapperDecoderPage;
 import org.jboss.hal.testsuite.test.configuration.elytron.AbstractElytronTestCase;
 import org.jboss.hal.testsuite.util.ConfigChecker;
@@ -28,6 +29,7 @@ import java.nio.file.Paths;
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.jboss.hal.testsuite.util.ConfigChecker.InputType.SELECT;
 import static org.jboss.hal.testsuite.util.ConfigChecker.InputType.TEXT;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -56,10 +58,15 @@ public class ElytronPermissionMapperTestCase extends AbstractElytronTestCase {
         CUSTOM_PERMISSION_MAPPER_LABEL = "Custom Permission Mapper",
         CONSTANT_PERMISSION_MAPPER = "constant-permission-mapper",
         CONSTANT_PERMISSION_MAPPER_LABEL = "Constant Permission Mapper",
+        PERMISSIONS = "permissions",
+        PERMISSIONS_LABEL = "Permissions",
+        CLASS_NAME = "class-name",
+        MODULE = "module",
         TARGET_NAME = "target-name",
         ACTION = "action",
-        PERMISSIONS = "permissions",
-        PERMISSIONS_LABEL = "Permissions";
+        VALUE = "value";
+
+    private static final String LIST_ADD_OPERATION = "list-add";
 
     private static final Path CUSTOM_ROLE_MAPPER_PATH = Paths.get("test", "elytron",
             "permission", "mapper" + randomAlphanumeric(5));
@@ -189,6 +196,61 @@ public class ElytronPermissionMapperTestCase extends AbstractElytronTestCase {
                                                 .build())
                                         .build())
                                 .build());
+        } finally {
+            ops.removeIfExists(simplePermissionMapperAddress);
+            adminOps.reloadIfRequired();
+        }
+    }
+
+    /**
+     * @tpTestDetails Create Elytron Simple Mapper instance and associated permission mappings in model
+     * and try to view attributes of these permission mappings in Web Console.
+     * Validate attributes of permission mapping in Web Console
+     */
+    @Test
+    public void viewPermissionMappingItemOfSimplePermissionMapperTest() throws Exception {
+        final String
+                simplePermissionMapperName = randomAlphanumeric(5),
+                principal1name = randomAlphanumeric(5),
+                principal2name = randomAlphanumeric(5),
+                principal3name = randomAlphanumeric(5),
+                role1name = randomAlphanumeric(5),
+                role2name = randomAlphanumeric(5);
+        final String arrayStringOfPrincipals = getArrayString(principal1name, principal2name, principal3name);
+        final String permissionClassName = "ClassName_" + randomAlphanumeric(7),
+                permissionTargetName = "TargetName_" + randomAlphanumeric(7),
+                permissionModule = "Module_" + randomAlphanumeric(7),
+                permissionAction = "Action_" + randomAlphanumeric(7);
+        final Address simplePermissionMapperAddress =
+                elyOps.getElytronAddress(SIMPLE_PERMISSION_MAPPER, simplePermissionMapperName);
+        final ModelNode permissionMappingsPermissions = new ModelNodeListBuilder()
+                .addNode(new ModelNodePropertiesBuilder()
+                        .addProperty(CLASS_NAME, permissionClassName)
+                        .addProperty(TARGET_NAME, permissionTargetName)
+                        .addProperty(MODULE, permissionModule)
+                        .addProperty(ACTION, permissionAction).build()).build();
+        final ModelNode permissionMappings = new ModelNodePropertiesBuilder()
+                .addProperty(PRINCIPALS, new ModelNodeListBuilder().addAll(principal1name, principal2name, principal3name).build())
+                .addProperty(ROLES, new ModelNodeListBuilder().addAll(role1name, role2name).build())
+                .addProperty(PERMISSIONS, permissionMappingsPermissions)
+                .build();
+
+        try {
+            ops.add(simplePermissionMapperAddress).assertSuccess();
+            ops.invoke(LIST_ADD_OPERATION, simplePermissionMapperAddress, Values.of(NAME, PERMISSION_MAPPINGS).and(VALUE, permissionMappings)).assertSuccess();
+            adminOps.reloadIfRequired();
+            page.navigateToPermissionMapper().selectResource(SIMPLE_PERMISSION_MAPPER_LABEL).getResourceManager()
+                    .selectByName(simplePermissionMapperName);
+            page.switchToConfigAreaTab(PERMISSION_MAPPINGS_LABEL);
+            assertTrue("Created permission mappings should be present in the table!",
+                    page.resourceIsPresentInConfigAreaTable(arrayStringOfPrincipals));
+            page.getConfigAreaResourceManager().selectByName(arrayStringOfPrincipals).view();
+            PermissionsTableRowFragment permissionTableRow = page.getPermissionsTable().getRow(0);
+            assertEquals("Permission class name should be same in Web Console as in model", permissionClassName, permissionTableRow.getClassNameValue());
+            assertEquals("Permission module should be same in Web Console as in model", permissionModule, permissionTableRow.getModuleValue());
+            assertEquals("Permission target name should be same in Web Console as in model", permissionTargetName, permissionTableRow.getTargetNameValue());
+            assertEquals("Permission action should be same in Web Console as in model", permissionAction, permissionTableRow.getActionValue());
+
         } finally {
             ops.removeIfExists(simplePermissionMapperAddress);
             adminOps.reloadIfRequired();
