@@ -9,11 +9,13 @@ import org.jboss.hal.testsuite.fragment.shared.util.ResourceManager;
 import org.jboss.hal.testsuite.page.runtime.ElytronRuntimePage;
 import org.jboss.hal.testsuite.test.configuration.elytron.AbstractElytronTestCase;
 import org.jboss.hal.testsuite.test.configuration.elytron.ElytronOperations;
+import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.wildfly.extras.creaper.core.online.Constants;
 import org.wildfly.extras.creaper.core.online.ModelNodeResult;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.OperationException;
@@ -28,6 +30,8 @@ public class CredentialStoreAliasTestCase extends AbstractElytronTestCase {
 
     private static final String CREDENTIAL_STORE_NAME = "credential_store_" + RandomStringUtils.randomAlphanumeric(7);
     private static Address credentialStoreAddress;
+
+    private static final String MONITORED_SERVER = "server-one";
 
     private static final String ALIAS = "alias";
     private static final String SECRET_VALUE = "secret-value";
@@ -67,7 +71,7 @@ public class CredentialStoreAliasTestCase extends AbstractElytronTestCase {
                     .text(ALIAS, aliasName)
                     .saveAndDismissReloadRequiredWindowWithState().assertWindowClosed();
             Assert.assertTrue("Created alias should be present in table", aliasManager.isResourcePresent(aliasName));
-            ModelNodeResult aliases = ops.invoke(READ_ALIASES_OPERATION, credentialStoreAddress);
+            ModelNodeResult aliases = readAliases(credentialStoreAddress);
             aliases.assertSuccess();
             Assert.assertTrue("Created alias should be present in model", aliases.stringListValue().contains(aliasName));
         } finally {
@@ -92,7 +96,7 @@ public class CredentialStoreAliasTestCase extends AbstractElytronTestCase {
             wizard.text(SECRET_VALUE, aliasSecretValue)
                     .saveAndDismissReloadRequiredWindowWithState().assertWindowClosed();
             Assert.assertTrue("Created alias should be present in table", aliasManager.isResourcePresent(aliasName));
-            ModelNodeResult aliases = ops.invoke(READ_ALIASES_OPERATION, credentialStoreAddress);
+            ModelNodeResult aliases = readAliases(credentialStoreAddress);
             aliases.assertSuccess();
             Assert.assertTrue("Created alias should be present in model", aliases.stringListValue().contains(aliasName));
         } finally {
@@ -105,7 +109,7 @@ public class CredentialStoreAliasTestCase extends AbstractElytronTestCase {
     public void testRemoveAlias() throws IOException, TimeoutException, InterruptedException {
         final String aliasName = "my_alias_" + RandomStringUtils.randomNumeric(7);
         try {
-            ops.invoke(ADD_ALIAS_OPERATION, credentialStoreAddress, Values.of(ALIAS, aliasName)).assertSuccess();
+            addAlias(aliasName).assertSuccess();
             page.navigate();
             page.getResourceManager().selectByName(CREDENTIAL_STORE_NAME);
             ResourceManager aliasManager = page.getConfig()
@@ -116,7 +120,7 @@ public class CredentialStoreAliasTestCase extends AbstractElytronTestCase {
                     .confirmAndDismissReloadRequiredMessage()
                     .assertClosed();
             Assert.assertFalse("Removed alias should not be present in table anymore", aliasManager.isResourcePresent(aliasName));
-            ModelNodeResult aliases = ops.invoke(READ_ALIASES_OPERATION, credentialStoreAddress);
+            ModelNodeResult aliases = readAliases(credentialStoreAddress);
             aliases.assertSuccess();
             Assert.assertFalse("Removed alias should not be present in model anymore", aliases.stringListValue().contains(aliasName));
         } finally {
@@ -142,6 +146,25 @@ public class CredentialStoreAliasTestCase extends AbstractElytronTestCase {
             ops.removeIfExists(credentialStoreAddress);
             adminOps.reloadIfRequired();
         }
+    }
+
+    private ModelNodeResult readAliases(Address credentialStoreAddress) throws IOException {
+        if (ConfigUtils.isDomain()) {
+            return ops.invoke(READ_ALIASES_OPERATION, credentialStoreAddress)
+                    .forServer(ConfigUtils.getDefaultHost(), MONITORED_SERVER);
+        }
+        return ops.invoke(READ_ALIASES_OPERATION, credentialStoreAddress);
+    }
+
+    private ModelNodeResult addAlias(String aliasName) throws IOException {
+        if (ConfigUtils.isDomain()) {
+            final Address monitoredServerCredentialStoreAddress = Address.host(ConfigUtils.getDefaultHost())
+                    .and(Constants.SERVER, MONITORED_SERVER)
+                    .and(Constants.SUBSYSTEM, "elytron")
+                    .and(ElytronOperations.CREDENTIAL_STORE, CREDENTIAL_STORE_NAME);
+            return ops.invoke(ADD_ALIAS_OPERATION, monitoredServerCredentialStoreAddress, Values.of(ALIAS, aliasName));
+        }
+        return ops.invoke(ADD_ALIAS_OPERATION, credentialStoreAddress, Values.of(ALIAS, aliasName));
     }
 
 }
