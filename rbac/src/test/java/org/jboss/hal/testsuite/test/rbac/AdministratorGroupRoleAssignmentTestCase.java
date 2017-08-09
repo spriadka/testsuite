@@ -1,27 +1,24 @@
 package org.jboss.hal.testsuite.test.rbac;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Standalone;
-import org.jboss.hal.testsuite.cli.CliClient;
-import org.jboss.hal.testsuite.cli.CliClientFactory;
-import org.jboss.hal.testsuite.cli.Library;
-import org.jboss.hal.testsuite.dmr.Dispatcher;
-import org.jboss.hal.testsuite.dmr.ResourceAddress;
-import org.jboss.hal.testsuite.dmr.ResourceVerifier;
+import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
+import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.page.admin.RoleAssignmentPage;
 import org.jboss.hal.testsuite.util.Authentication;
 import org.jboss.hal.testsuite.util.RbacRole;
 import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
+import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
+import org.wildfly.extras.creaper.core.online.operations.Address;
 
 
 /**
@@ -31,18 +28,11 @@ import org.openqa.selenium.WebDriver;
 @Category(Standalone.class)
 public class AdministratorGroupRoleAssignmentTestCase {
 
-    private static final String TYPE = "GROUP";
+    private static final OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
+    private final RBACOperations rbacOps = new RBACOperations(client);
 
-    private ResourceAddress address1;
-    private ResourceAddress address2;
-    static Dispatcher dispatcher;
-    static ResourceVerifier verifier;
-    CliClient cliClient = CliClientFactory.getClient();
-
-    private String role;
-    private String NAME;
-    private String REALM;
-    private String command = "/core-service=management/access=authorization/role-mapping=";
+    private String groupName;
+    private String realmName;
 
     @Drone
     private WebDriver browser;
@@ -50,217 +40,192 @@ public class AdministratorGroupRoleAssignmentTestCase {
     @Page
     private RoleAssignmentPage page;
 
-    @BeforeClass
-    public static void beforeClass() {
-        dispatcher = new Dispatcher();
-        verifier  = new ResourceVerifier(dispatcher);
-    }
-
     @AfterClass
     public static void afterClass() {
-        dispatcher.close();
+        IOUtils.closeQuietly(client);
     }
 
     @Before
     public void setUp() {
-        NAME = RandomStringUtils.randomAlphanumeric(5);
-        REALM = RandomStringUtils.randomAlphanumeric(5);
-        Library.letsSleep(1000);
+        groupName = RandomStringUtils.randomAlphanumeric(5);
+        realmName = RandomStringUtils.randomAlphanumeric(5);
         Authentication.with(browser).authenticate(RbacRole.ADMINISTRATOR);
     }
 
     @Test
-    public void createRoleAssignmentMonitorRole() {
-        role = "Monitor";
-        address1 = new ResourceAddress(new ModelNode(page.preparePathGroup(NAME, REALM, role, true)));
+    public void createRoleAssignmentMonitorRole() throws Exception {
 
-        page.createGroup(NAME, REALM, role);
-        verifier.verifyAttribute(address1, "type", "GROUP", 100);
-        verifier.verifyResource(address1, true, 100);
+        String monitorRole = "Monitor";
+        Address groupInMonitorRoleAddress = rbacOps.getGroupIncludedInRole(groupName, realmName, monitorRole);
+        ResourceVerifier groupInMonitorRoleVerifier = new ResourceVerifier(groupInMonitorRoleAddress, client);
 
+        page.createGroup(groupName, realmName, monitorRole);
+        groupInMonitorRoleVerifier.verifyAttribute("type", "GROUP");
+        groupInMonitorRoleVerifier.verifyExists();
 
-        page.removeGroup(NAME, REALM);
-        verifier.verifyResource(address1, false);
+        page.removeGroup(groupName, realmName);
+        groupInMonitorRoleVerifier.verifyDoesNotExist();
     }
 
     @Test //should not create
-    public void createRoleAssignmentAuditorRole() {
-        role = "Auditor";
-        address1 = new ResourceAddress(new ModelNode(page.preparePathGroup(NAME, REALM, role, true)));
+    public void createRoleAssignmentAuditorRole() throws Exception {
 
-        page.createGroup(NAME, REALM, role);
-        verifier.verifyResource(address1, false);
+        String auditorRole = "Auditor";
+        Address groupInAuditorRoleAddress = rbacOps.getGroupIncludedInRole(groupName, realmName, auditorRole);
+
+        page.createGroup(groupName, realmName, auditorRole);
+        new ResourceVerifier(groupInAuditorRoleAddress, client).verifyDoesNotExist();
     }
 
     @Test//should not create
-    public void createRoleAssignmentSuperUserRole() {
-        role = "SuperUser";
-        address1 = new ResourceAddress(new ModelNode(page.preparePathGroup(NAME, REALM, role, true)));
+    public void createRoleAssignmentSuperUserRole() throws Exception {
 
-        page.createGroup(NAME, REALM, role);
+        String superUserRole = "SuperUser";
+        Address groupInSuperUserRoleAddress = rbacOps.getGroupIncludedInRole(groupName, realmName, superUserRole);
 
-        verifier.verifyResource(address1, false);
+        page.createGroup(groupName, realmName, superUserRole);
+        new ResourceVerifier(groupInSuperUserRoleAddress, client).verifyDoesNotExist();
     }
 
 
     @Test //should not remove
-    public void removeGroupWithMonitorAndSuperUserRole() {
-        role = "Monitor";
-        cliClient.executeCommand(command + role + page.prepareAdd(NAME, TYPE, REALM));
+    public void removeGroupWithMonitorAndSuperUserRole() throws Exception {
 
-        address1 = new ResourceAddress(new ModelNode(page.preparePathGroup(NAME, REALM, role, false)));
+        String monitorRole = "Monitor";
+        Address groupInMonitorRoleAddress = rbacOps.addGroupIncludedInRole(groupName, realmName, monitorRole);
+        ResourceVerifier groupInMonitorRoleVerifier = new ResourceVerifier(groupInMonitorRoleAddress, client)
+                .verifyExists();
 
-        verifier.verifyResource(address1, true);
+        String superUserRole = "SuperUser";
+        Address groupInSuperUserRoleAddress = rbacOps.addGroupIncludedInRole(groupName, realmName, superUserRole);
+        ResourceVerifier groupInSuperUserRoleVerifier = new ResourceVerifier(groupInSuperUserRoleAddress, client)
+                .verifyExists();
 
-        role = "SuperUser";
-        cliClient.executeCommand(command + role + page.prepareAdd(NAME, TYPE, REALM));
+        page.removeGroup(groupName, realmName);
+        groupInMonitorRoleVerifier.verifyExists();
+        groupInSuperUserRoleVerifier.verifyExists();
 
-        address2 = new ResourceAddress(new ModelNode(page.preparePathGroup(NAME, REALM, role, false)));
-
-        verifier.verifyResource(address2, true, 100);
-
-        page.removeGroup(NAME, REALM);
-
-        verifier.verifyResource(address1, true);
-        verifier.verifyResource(address2, true, 100);
-
-        cliClient.executeCommand(command + role + "/include=" + NAME + ":remove");
-        cliClient.executeCommand(command + "Monitor" + "/include=" + NAME + ":remove");
-        verifier.verifyResource(address1, false);
-        verifier.verifyResource(address2, false);
+        rbacOps.removePrincipalFromRole(groupName, superUserRole);
+        rbacOps.removePrincipalFromRole(groupName, monitorRole);
+        groupInMonitorRoleVerifier.verifyDoesNotExist();
+        groupInSuperUserRoleVerifier.verifyDoesNotExist();
     }
 
     @Test
-    public void removeGroupWithMonitorAndOperatorRole() {
-        role = "Monitor";
-        cliClient.executeCommand(command + role + page.prepareAdd(NAME, TYPE, REALM));
+    public void removeGroupWithMonitorAndOperatorRole() throws Exception {
 
-        address1 = new ResourceAddress(new ModelNode(page.preparePathGroup(NAME, REALM, role, false)));
+        Address groupInMonitorRoleAddress = rbacOps.addGroupIncludedInRole(groupName, realmName, "Monitor");
+        ResourceVerifier groupInMonitorRoleVerifier = new ResourceVerifier(groupInMonitorRoleAddress, client)
+                .verifyExists();
 
-        verifier.verifyResource(address1, true);
+        Address groupInOperatorRoleAddress = rbacOps.addGroupIncludedInRole(groupName, realmName, "Operator");
+        ResourceVerifier groupInOperatorRoleVerifier = new ResourceVerifier(groupInOperatorRoleAddress, client)
+                .verifyExists();
 
-        role = "Operator";
-        cliClient.executeCommand(command + role + page.prepareAdd(NAME, TYPE, REALM));
-
-        address2 = new ResourceAddress(new ModelNode(page.preparePathGroup(NAME, REALM, role, false)));
-
-        verifier.verifyResource(address2, true, 100);
-
-        page.removeGroup(NAME, REALM);
-
-        verifier.verifyResource(address1, false);
-        verifier.verifyResource(address2, false);
+        page.removeGroup(groupName, realmName);
+        groupInMonitorRoleVerifier.verifyDoesNotExist();
+        groupInOperatorRoleVerifier.verifyDoesNotExist();
     }
 
     @Test //should not remove
-    public void removeGroupWithMonitorAndAuditorRole() {
-        role = "Monitor";
-        cliClient.executeCommand(command + role + page.prepareAdd(NAME, TYPE, REALM));
+    public void removeGroupWithMonitorAndAuditorRole() throws Exception {
 
-        address1 = new ResourceAddress(new ModelNode(page.preparePathGroup(NAME, REALM, role, false)));
+        String monitorRole = "Monitor";
+        Address groupInMonitorRoleAddress = rbacOps.addGroupIncludedInRole(groupName, realmName, monitorRole);
+        ResourceVerifier groupInMonitorRoleVerifier = new ResourceVerifier(groupInMonitorRoleAddress, client)
+                .verifyExists();
 
-        verifier.verifyResource(address1, true);
+        String auditorRole = "Auditor";
+        Address groupInAuditorRoleAddress = rbacOps.addGroupIncludedInRole(groupName, realmName, auditorRole);
+        ResourceVerifier groupInAuditorRoleVerifier = new ResourceVerifier(groupInAuditorRoleAddress, client)
+                .verifyExists();
 
-        role = "Auditor";
-        cliClient.executeCommand(command + role + page.prepareAdd(NAME, TYPE, REALM));
+        page.removeGroup(groupName, realmName);
+        groupInMonitorRoleVerifier.verifyExists();
+        groupInAuditorRoleVerifier.verifyExists();
 
-        address2 = new ResourceAddress(new ModelNode(page.preparePathGroup(NAME, REALM, role, false)));
-
-        verifier.verifyResource(address2, true);
-
-        page.removeGroup(NAME, REALM);
-
-        verifier.verifyResource(address1, true);
-        verifier.verifyResource(address2, true);
-
-        cliClient.executeCommand(command + role + "/include=" + NAME + ":remove");
-        cliClient.executeCommand(command + "Monitor" + "/include=" + NAME + ":remove");
-        verifier.verifyResource(address1, false);
-        verifier.verifyResource(address2, false);
+        rbacOps.removePrincipalFromRole(groupName, auditorRole);
+        rbacOps.removePrincipalFromRole(groupName, monitorRole);
+        groupInMonitorRoleVerifier.verifyDoesNotExist();
+        groupInAuditorRoleVerifier.verifyDoesNotExist();
     }
 
     @Test
-    public void addIncludeOpperator() {
-        role = "Monitor";
-        cliClient.executeCommand(command + role + page.prepareAdd(NAME, TYPE, REALM));
+    public void addIncludeOpperator() throws Exception {
 
-        address1 = new ResourceAddress(new ModelNode(page.preparePathGroup(NAME, REALM, role, false)));
+        String monitorRole = "Monitor";
+        Address groupInMonitorRoleAddress = rbacOps.addGroupIncludedInRole(groupName, realmName, monitorRole);
+        ResourceVerifier groupInMonitorRoleVerifier = new ResourceVerifier(groupInMonitorRoleAddress, client)
+                .verifyExists();
 
-        verifier.verifyResource(address1, true, 100);
+        String operatorRole = "Operator";
+        page.addInclude(groupName, realmName, operatorRole);
+        Address groupInOperatorRoleAddress = rbacOps.getPrincipalIncludedInRole(groupName, operatorRole);
+        ResourceVerifier groupInOperatorRoleVerifier = new ResourceVerifier(groupInOperatorRoleAddress, client)
+                .verifyExists();
 
-        role = "Operator";
-        page.addInclude(NAME, REALM, role);
-
-        address2 = new ResourceAddress(new ModelNode(page.preparePathGroup(NAME, REALM, role, false)));
-
-        verifier.verifyResource(address2, true , 200);
-
-        cliClient.executeCommand(command + role + "/include=" + NAME + ":remove");
-        cliClient.executeCommand(command + "Monitor" + "/include=" + NAME + ":remove");
-        verifier.verifyResource(address1, false);
-        verifier.verifyResource(address2, false);
+        rbacOps.removePrincipalFromRole(groupName, operatorRole);
+        rbacOps.removePrincipalFromRole(groupName, monitorRole);
+        groupInMonitorRoleVerifier.verifyDoesNotExist();
+        groupInOperatorRoleVerifier.verifyDoesNotExist();
     }
 
     @Test
-    public void addIncludeAuditor() {
-        role = "Monitor";
-        cliClient.executeCommand(command + role + page.prepareAdd(NAME, TYPE, REALM));
+    public void addIncludeAuditor() throws Exception {
 
-        address1 = new ResourceAddress(new ModelNode(page.preparePathGroup(NAME, REALM, role, false)));
+        String monitorRole = "Monitor";
+        Address groupInMonitorRoleAddress = rbacOps.addGroupIncludedInRole(groupName, realmName, monitorRole);
+        ResourceVerifier groupInMonitorRoleVerifier = new ResourceVerifier(groupInMonitorRoleAddress, client)
+                .verifyExists();
 
-        verifier.verifyResource(address1, true);
-        role = "Auditor";
-        page.addInclude(NAME, REALM, role);
+        String auditorRole = "Auditor";
+        page.addInclude(groupName, realmName, auditorRole);
+        Address groupInAuditorRoleAddress = rbacOps.getPrincipalIncludedInRole(groupName, auditorRole);
+        ResourceVerifier groupInAuditorRoleVerifier = new ResourceVerifier(groupInAuditorRoleAddress, client)
+                .verifyDoesNotExist();
 
-        address2 = new ResourceAddress(new ModelNode(page.preparePathGroup(NAME, REALM, role, false)));
-
-        verifier.verifyResource(address2, false);
-
-        cliClient.executeCommand(command + "Monitor" + "/include=" + NAME + ":remove");
-        verifier.verifyResource(address1, false);
-        verifier.verifyResource(address2, false);
+        rbacOps.removePrincipalFromRole(groupName, monitorRole);
+        groupInMonitorRoleVerifier.verifyDoesNotExist();
+        groupInAuditorRoleVerifier.verifyDoesNotExist();
     }
 
     @Test
-    public void addIncludeSuperUser() {
-        role = "Monitor";
-        cliClient.executeCommand(command + role + page.prepareAdd(NAME, TYPE, REALM));
+    public void addIncludeSuperUser() throws Exception {
 
-        address1 = new ResourceAddress(new ModelNode(page.preparePathGroup(NAME, REALM, role, false)));
+        String monitorRole = "Monitor";
+        Address groupInMonitorRoleAddress = rbacOps.addGroupIncludedInRole(groupName, realmName, monitorRole);
+        ResourceVerifier groupInMonitorRoleVerifier = new ResourceVerifier(groupInMonitorRoleAddress, client)
+                .verifyExists();
 
-        verifier.verifyResource(address1, true);
-        role = "SuperUser";
-        page.addInclude(NAME, REALM, role);
+        String superUserRole = "SuperUser";
+        page.addInclude(groupName, realmName, superUserRole);
+        Address groupInSuperUserRoleAddress = rbacOps.getPrincipalIncludedInRole(groupName, superUserRole);
+        ResourceVerifier groupInSuperUserRoleVerifier = new ResourceVerifier(groupInSuperUserRoleAddress, client)
+                .verifyDoesNotExist();
 
-        address2 = new ResourceAddress(new ModelNode(page.preparePathGroup(NAME, REALM, role, false)));
-
-        verifier.verifyResource(address2, false);
-
-        cliClient.executeCommand(command + "Monitor" + "/include=" + NAME + ":remove");
-        verifier.verifyResource(address1, false);
-        verifier.verifyResource(address2, false);
+        rbacOps.removePrincipalFromRole(groupName, monitorRole);
+        groupInMonitorRoleVerifier.verifyDoesNotExist();
+        groupInSuperUserRoleVerifier.verifyDoesNotExist();
     }
 
     @Test
-    public void removeIncludeOperator() {
-        role = "Monitor";
-        cliClient.executeCommand(command + role + page.prepareAdd(NAME, TYPE, REALM));
+    public void removeIncludeOperator() throws Exception {
 
-        address1 = new ResourceAddress(new ModelNode(page.preparePathGroup(NAME, REALM, role, false)));
+        String monitorRole = "Monitor";
+        Address groupInMonitorRoleAddress = rbacOps.addGroupIncludedInRole(groupName, realmName, monitorRole);
+        ResourceVerifier groupInMonitorRoleVerifier = new ResourceVerifier(groupInMonitorRoleAddress, client)
+                .verifyExists();
 
-        verifier.verifyResource(address1, true, 100);
+        String operatorRole = "Operator";
+        Address groupInOperatorRoleAddress = rbacOps.addGroupIncludedInRole(groupName, realmName, operatorRole);
+        ResourceVerifier groupInOperatorRoleVerifier = new ResourceVerifier(groupInOperatorRoleAddress, client)
+                .verifyExists();
 
-        role = "Operator";
-        cliClient.executeCommand(command + role + page.prepareAdd(NAME, TYPE, REALM));
-        address2 = new ResourceAddress(new ModelNode(page.preparePathGroup(NAME, REALM, role, false)));
-        verifier.verifyResource(address2, true, 100);
+        page.removeInclude(groupName, realmName, operatorRole);
+        groupInOperatorRoleVerifier.verifyDoesNotExist();
 
-        page.removeInclude(NAME, REALM, role);
-
-        verifier.verifyResource(address2, false);
-
-        cliClient.executeCommand(command + "Monitor" + "/include=" + NAME + ":remove");
-        verifier.verifyResource(address1, false);
+        rbacOps.removePrincipalFromRole(groupName, monitorRole);
+        groupInMonitorRoleVerifier.verifyDoesNotExist();
 
     }
 }

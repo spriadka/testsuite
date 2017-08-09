@@ -19,27 +19,9 @@ import org.openqa.selenium.WebElement;
 @Location("#rbac")
 public class RoleAssignmentPage extends BasePage {
     private FinderNavigation navigation;
-    private String roleMapping = "/core-service=management/access=authorization/role-mapping=";
-    private String include = "/include=";
 
     public String prepareAdd(String name, String type, String realm) {
         return "/include=" + name + ":add(name=" + name + ",type=" + type + ",realm=" + realm + ")";
-    }
-
-    public String preparePathGroup(String name, String realm, String role, boolean group) {
-        if (group) {
-            return roleMapping + role + include + "group-" + name + "@" + realm;
-        } else {
-            return roleMapping + role + include + name;
-        }
-    }
-
-    public String preparePathUser(String name, String realm, String role, boolean user) {
-        if (user) {
-            return roleMapping + role + include + "user-" + name + "@" + realm;
-        } else {
-            return roleMapping + role + include + name;
-        }
     }
 
     public void createGroup(String name, String realm, String role) {
