@@ -20,10 +20,6 @@ import org.openqa.selenium.WebElement;
 public class RoleAssignmentPage extends BasePage {
     private FinderNavigation navigation;
 
-    public String prepareAdd(String name, String type, String realm) {
-        return "/include=" + name + ":add(name=" + name + ",type=" + type + ",realm=" + realm + ")";
-    }
-
     public void createGroup(String name, String realm, String role) {
         navigation = new FinderNavigation(browser, RoleAssignmentPage.class)
                 .step(FinderNames.BROWSE_BY, "Groups")
