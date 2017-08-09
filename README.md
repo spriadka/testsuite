@@ -14,10 +14,20 @@ You can download it here:
 <http://wildfly.org/downloads/> or <http://www.jboss.org/products/eap/download/>
 
 Currently it's necessary to unsecure the management http-interface to be able to run testsuite.
-E.g. for standalone Wildfly 10 using CLI:
+### How to unsecure management http-interface using CLI
+
+#### Standalone
+
 ```
 /core-service=management/management-interface=http-interface:undefine-attribute(name=security-realm)
 :reload
+```
+
+#### Domain
+
+```
+/host=master/core-service=management/management-interface=http-interface:undefine-attribute(name=security-realm)
+/host=master:reload
 ```
 
 ## How to run tests
