@@ -56,17 +56,26 @@ public abstract class MetricsPage extends BasePage {
     }
 
     /**
-     * Navigate in Runtime menu to the subsystem identified by provided label. For domain navigate to the subsystem
+     * Navigate in Runtime menu to the subsystem identified by provided label. For domain navigateToServer to the subsystem
      * in {@link #MONITORED_SERVER}.
      * @param subsystemLabel
      */
     protected void navigate2runtimeSubsystem(String subsystemLabel) {
+        navigate2runtimeSubsystem(subsystemLabel, MONITORED_SERVER);
+    }
+
+    /**
+     * Navigate in Runtime menu to the subsystem identified by provided label. For domain mode, navigate to specified server
+     * @param subsystemLabel subsystem to be navigated
+     * @param serverName server to be navigated
+     */
+    protected void navigate2runtimeSubsystem(String subsystemLabel, String serverName) {
         FinderNavigation navigation;
         if (ConfigUtils.isDomain()) {
             navigation = new FinderNavigation(browser, DomainRuntimeEntryPoint.class)
                     .step(FinderNames.BROWSE_DOMAIN_BY, FinderNames.HOSTS)
                     .step(FinderNames.HOST, ConfigUtils.getDefaultHost())
-                    .step(FinderNames.SERVER, MONITORED_SERVER);
+                    .step(FinderNames.SERVER, serverName);
         } else {
             navigation = new FinderNavigation(browser, StandaloneRuntimeEntryPoint.class)
                     .step(FinderNames.SERVER, FinderNames.STANDALONE_SERVER);
