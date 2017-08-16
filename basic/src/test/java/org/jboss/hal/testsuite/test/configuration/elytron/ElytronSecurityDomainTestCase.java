@@ -11,6 +11,7 @@ import java.io.IOException;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.dmr.ModelNode;
+import org.jboss.hal.testsuite.category.Elytron;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.dmr.ModelNodeGenerator.ModelNodeListBuilder;
 import org.jboss.hal.testsuite.dmr.ModelNodeGenerator.ModelNodePropertiesBuilder;
@@ -20,10 +21,12 @@ import org.jboss.hal.testsuite.page.config.elytron.SSLPage;
 import org.jboss.hal.testsuite.test.configuration.undertow.UndertowElytronOperations;
 import org.jboss.hal.testsuite.util.ConfigChecker;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.Values;
 
+@Category(Elytron.class)
 @RunWith(Arquillian.class)
 public class ElytronSecurityDomainTestCase extends AbstractElytronTestCase {
 

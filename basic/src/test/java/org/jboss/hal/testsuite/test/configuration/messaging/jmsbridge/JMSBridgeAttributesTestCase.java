@@ -5,7 +5,7 @@ import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.dmr.ModelNode;
-import org.jboss.hal.testsuite.category.Shared;
+import org.jboss.hal.testsuite.category.Elytron;
 import org.jboss.hal.testsuite.creaper.AddJMSBridge;
 import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.page.config.JMSBridgePage;
@@ -60,7 +60,6 @@ import static org.jboss.hal.testsuite.test.configuration.messaging.jmsbridge.JMS
  *         Created on 9/19/16.
  */
 @RunWith(Arquillian.class)
-@Category(Shared.class)
 public class JMSBridgeAttributesTestCase {
 
     private static final OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
@@ -494,6 +493,7 @@ public class JMSBridgeAttributesTestCase {
         }
     }
 
+    @Category(Elytron.class)
     @Test
     public void editSourceCredentialReferenceClearText() throws Exception {
         page.switchToSourceCredentialReference();
@@ -505,6 +505,7 @@ public class JMSBridgeAttributesTestCase {
                 .setClearTextCredentialReferenceAndVerify();
     }
 
+    @Category(Elytron.class)
     @Test
     public void editSourceCredentialReferenceStoreReference() throws Exception {
         page.switchToSourceCredentialReference();
@@ -516,6 +517,7 @@ public class JMSBridgeAttributesTestCase {
                 .setCredentialStoreCredentialReferenceAndVerify();
     }
 
+    @Category(Elytron.class)
     @Test
     public void editSourceCredentialReferenceIllegalCombination() throws Exception {
         page.switchToSourceCredentialReference();
@@ -527,6 +529,7 @@ public class JMSBridgeAttributesTestCase {
                 .testIllegalCombinationCredentialReferenceAttributes();
     }
 
+    @Category(Elytron.class)
     @Test
     public void editTargetCredentialReferenceClearText() throws Exception {
         page.switchToTargetCredentialReference();
@@ -537,7 +540,7 @@ public class JMSBridgeAttributesTestCase {
                 .build()
                 .setClearTextCredentialReferenceAndVerify();
     }
-
+    @Category(Elytron.class)
     @Test
     public void editTargetCredentialReferenceStoreReference() throws Exception {
         page.switchToTargetCredentialReference();
@@ -549,6 +552,7 @@ public class JMSBridgeAttributesTestCase {
                 .setCredentialStoreCredentialReferenceAndVerify();
     }
 
+    @Category(Elytron.class)
     @Test
     public void editTargetCredentialReferenceIllegalCombination() throws Exception {
         page.switchToTargetCredentialReference();

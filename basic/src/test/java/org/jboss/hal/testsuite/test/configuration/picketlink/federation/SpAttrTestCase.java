@@ -27,7 +27,7 @@ import static org.jboss.hal.testsuite.test.configuration.picketlink.federation.U
 import java.io.IOException;
 
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.hal.testsuite.category.Shared;
+import org.jboss.hal.testsuite.category.PicketLink;
 import org.jboss.hal.testsuite.test.configuration.picketlink.federation.UtilFedInputChecker.InputType;
 import org.junit.After;
 import org.junit.Before;
@@ -41,7 +41,7 @@ import org.wildfly.extras.creaper.core.online.operations.OperationException;
  * Created by pjelinek on Nov 29, 2015
  */
 @RunWith(Arquillian.class)
-@Category(Shared.class)
+@Category(PicketLink.class)
 public class SpAttrTestCase extends AbstractFederationTestCase {
 
     private String

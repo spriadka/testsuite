@@ -3,6 +3,7 @@ package org.jboss.hal.testsuite.test.configuration.elytron.securityrealm;
 import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.hal.testsuite.category.Elytron;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.dmr.ModelNodeGenerator;
 import org.jboss.hal.testsuite.fragment.config.elytron.securityrealm.AddCustomSecurityRealmWizard;
@@ -17,6 +18,7 @@ import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.Values;
@@ -27,6 +29,7 @@ import java.nio.file.Paths;
 
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 
+@Category(Elytron.class)
 @RunWith(Arquillian.class)
 public class ElytronCustomModifiableSecurityRealmTestCase extends AbstractElytronTestCase {
 

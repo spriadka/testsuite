@@ -3,6 +3,7 @@ package org.jboss.hal.testsuite.test.configuration.container;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.hal.testsuite.category.PicketBox;
 import org.jboss.hal.testsuite.category.Standalone;
 import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.page.config.EJB3Page;
@@ -134,6 +135,7 @@ public class EJB3SuggestBoxTestCase {
                 .verifyNoneSuggestionWereSuggested();
     }
 
+    @Category(PicketBox.class)
     @Test
     public void defaultSecurityDomainFilter_jboss() throws IOException {
         page.navigate();
@@ -142,6 +144,7 @@ public class EJB3SuggestBoxTestCase {
                 .verifyOnlyRelevantSuggestionWereSuggested(SECURITY_DOMAIN_FAIL_MESSAGE);
     }
 
+    @Category(PicketBox.class)
     @Test
     public void defaultSecurityDomainFilter_EMPTY() throws IOException {
         page.navigate();
@@ -150,6 +153,7 @@ public class EJB3SuggestBoxTestCase {
                 .verifyOnlyRelevantSuggestionWereSuggested(SECURITY_DOMAIN_FAIL_MESSAGE);
     }
 
+    @Category(PicketBox.class)
     @Test
     public void defaultSecurityDomainFilter_other() throws IOException {
         page.navigate();
@@ -158,6 +162,7 @@ public class EJB3SuggestBoxTestCase {
                 .verifyOnlyRelevantSuggestionWereSuggested(SECURITY_DOMAIN_FAIL_MESSAGE);
     }
 
+    @Category(PicketBox.class)
     @Test
     public void defaultSecurityDomainFilter_aspi() throws IOException {
         page.navigate();
@@ -166,6 +171,7 @@ public class EJB3SuggestBoxTestCase {
                 .verifyOnlyRelevantSuggestionWereSuggested(SECURITY_DOMAIN_FAIL_MESSAGE);
     }
 
+    @Category(PicketBox.class)
     @Test
     public void defaultSecurityDomainFilterCommonForAllPossibleValues() throws IOException {
         page.navigate();

@@ -3,7 +3,7 @@ package org.jboss.hal.testsuite.test.configuration.elytron;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.hal.testsuite.category.Shared;
+import org.jboss.hal.testsuite.category.Elytron;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.dmr.ModelNodeGenerator;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
@@ -25,7 +25,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 @RunWith(Arquillian.class)
-@Category(Shared.class)
+@Category(Elytron.class)
 public class DirContextTestCase extends AbstractElytronTestCase {
 
     private static final String

@@ -23,7 +23,7 @@
 package org.jboss.hal.testsuite.test.configuration.picketlink.federation;
 
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.hal.testsuite.category.Shared;
+import org.jboss.hal.testsuite.category.PicketLink;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
@@ -46,7 +46,7 @@ import static org.jboss.hal.testsuite.test.configuration.picketlink.federation.U
  * Created by pjelinek on Nov 29, 2015
  */
 @RunWith(Arquillian.class)
-@Category(Shared.class)
+@Category(PicketLink.class)
 public class SpSAMLHandlerTestCase extends AbstractFederationTestCase {
 
     private String

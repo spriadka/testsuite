@@ -3,6 +3,7 @@ package org.jboss.hal.testsuite.test.configuration.messaging.providerSettings;
 import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.hal.testsuite.category.Elytron;
 import org.jboss.hal.testsuite.fragment.config.messaging.ProviderSettingsWindow;
 import org.jboss.hal.testsuite.page.config.MessagingPage;
 import org.jboss.hal.testsuite.test.configuration.messaging.AbstractMessagingTestCase;
@@ -12,6 +13,7 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.OperationException;
@@ -19,6 +21,7 @@ import org.wildfly.extras.creaper.core.online.operations.OperationException;
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
+@Category(Elytron.class)
 @RunWith(Arquillian.class)
 public class CredentialReferenceTestCase extends AbstractMessagingTestCase {
 

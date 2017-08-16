@@ -2,7 +2,7 @@ package org.jboss.hal.testsuite.test.configuration.security;
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.hal.testsuite.category.Shared;
+import org.jboss.hal.testsuite.category.PicketBox;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.junit.AfterClass;
 import org.junit.Assert;
@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
 @RunWith(Arquillian.class)
-@Category(Shared.class)
+@Category(PicketBox.class)
 public class IdentityTrustTestCase extends SecurityTestCaseAbstract {
 
     private static final String TRUST_MODULE_NAME = "tm_" + RandomStringUtils.randomAlphanumeric(6);

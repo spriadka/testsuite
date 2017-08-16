@@ -27,7 +27,7 @@ import static org.jboss.hal.testsuite.test.configuration.picketlink.federation.U
 import java.io.IOException;
 
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.hal.testsuite.category.Shared;
+import org.jboss.hal.testsuite.category.PicketLink;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
@@ -46,7 +46,7 @@ import org.wildfly.extras.creaper.core.online.operations.Values;
  * Created by pjelinek on Nov 25, 2015
  */
 @RunWith(Arquillian.class)
-@Category(Shared.class)
+@Category(PicketLink.class)
 public class KeyStoreTestCase extends AbstractFederationTestCase {
 
     private final String

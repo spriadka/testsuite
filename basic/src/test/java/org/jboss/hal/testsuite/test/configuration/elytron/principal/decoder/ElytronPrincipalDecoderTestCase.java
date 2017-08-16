@@ -11,7 +11,7 @@ import java.nio.file.Paths;
 
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.hal.testsuite.category.Shared;
+import org.jboss.hal.testsuite.category.Elytron;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.dmr.ModelNodeGenerator.ModelNodePropertiesBuilder;
 import org.jboss.hal.testsuite.dmr.ModelNodeGenerator.ModelNodeListBuilder;
@@ -31,7 +31,7 @@ import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.Values;
 
 @RunWith(Arquillian.class)
-@Category(Shared.class)
+@Category(Elytron.class)
 public class ElytronPrincipalDecoderTestCase extends AbstractElytronTestCase {
 
     private static final String

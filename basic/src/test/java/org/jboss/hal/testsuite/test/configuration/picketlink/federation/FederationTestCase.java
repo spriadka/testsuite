@@ -27,7 +27,7 @@ import static org.jboss.hal.testsuite.test.configuration.picketlink.federation.U
 import java.io.IOException;
 
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.hal.testsuite.category.Shared;
+import org.jboss.hal.testsuite.category.PicketLink;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.fragment.WindowFragment;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
@@ -42,7 +42,7 @@ import org.wildfly.extras.creaper.core.online.operations.OperationException;
  * Created by pjelinek on Nov 16, 2015
  */
 @RunWith(Arquillian.class)
-@Category(Shared.class)
+@Category(PicketLink.class)
 public class FederationTestCase extends AbstractFederationTestCase {
 
     private String

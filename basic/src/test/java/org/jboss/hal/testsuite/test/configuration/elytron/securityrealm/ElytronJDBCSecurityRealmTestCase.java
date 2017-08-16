@@ -4,6 +4,7 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.dmr.ModelNode;
+import org.jboss.hal.testsuite.category.Elytron;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.dmr.ModelNodeGenerator;
 import org.jboss.hal.testsuite.fragment.config.elytron.securityrealm.AddJDBCSecurityRealmWizard;
@@ -12,6 +13,7 @@ import org.jboss.hal.testsuite.page.config.elytron.SecurityRealmPage;
 import org.jboss.hal.testsuite.test.configuration.elytron.AbstractElytronTestCase;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.wildfly.extras.creaper.commands.datasources.AddDataSource;
 import org.wildfly.extras.creaper.commands.datasources.RemoveDataSource;
@@ -21,6 +23,7 @@ import org.wildfly.extras.creaper.core.online.operations.Values;
 
 import java.io.IOException;
 
+@Category(Elytron.class)
 @RunWith(Arquillian.class)
 public class ElytronJDBCSecurityRealmTestCase extends AbstractElytronTestCase {
 

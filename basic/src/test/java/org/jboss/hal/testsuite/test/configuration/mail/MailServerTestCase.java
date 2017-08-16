@@ -4,6 +4,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.hal.testsuite.category.Elytron;
 import org.jboss.hal.testsuite.category.Standalone;
 import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
@@ -134,6 +135,7 @@ public class MailServerTestCase {
         new ResourceVerifier(SERVER_TBR_ADDRESS, client).verifyDoesNotExist();
     }
 
+    @Category(Elytron.class)
     @Test
     public void setCredentialReferenceToClearText() throws Exception {
         operations.undefineAttribute(SERVER_ADDRESS, "password");
@@ -148,6 +150,7 @@ public class MailServerTestCase {
                 .setClearTextCredentialReferenceAndVerify();
     }
 
+    @Category(Elytron.class)
     @Test
     public void setCredentialReferenceToCredentialStore() throws Exception {
         operations.undefineAttribute(SERVER_ADDRESS, "password");
@@ -162,6 +165,7 @@ public class MailServerTestCase {
                 .setCredentialStoreCredentialReferenceAndVerify();
     }
 
+    @Category(Elytron.class)
     @Test
     public void setInvalidCombinationToCredentialStore() throws Exception {
         operations.undefineAttribute(SERVER_ADDRESS, "password");

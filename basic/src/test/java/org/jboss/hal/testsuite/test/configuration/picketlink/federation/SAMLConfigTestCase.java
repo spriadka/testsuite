@@ -28,7 +28,7 @@ import java.io.IOException;
 
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.dmr.ModelNode;
-import org.jboss.hal.testsuite.category.Shared;
+import org.jboss.hal.testsuite.category.PicketLink;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,7 +41,7 @@ import org.wildfly.extras.creaper.core.online.operations.OperationException;
  * Created by pjelinek on Nov 18, 2015
  */
 @RunWith(Arquillian.class)
-@Category(Shared.class)
+@Category(PicketLink.class)
 public class SAMLConfigTestCase extends AbstractFederationTestCase {
 
     private Address samlAddress = federationOps.getSAMLConfigAddress(name.getFederation());

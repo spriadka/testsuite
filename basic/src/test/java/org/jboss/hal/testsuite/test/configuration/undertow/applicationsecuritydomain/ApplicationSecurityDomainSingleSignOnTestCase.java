@@ -5,7 +5,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.hal.testsuite.category.Shared;
+import org.jboss.hal.testsuite.category.Elytron;
 import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.dmr.ModelNodeGenerator;
@@ -34,7 +34,7 @@ import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
 @RunWith(Arquillian.class)
-@Category(Shared.class)
+@Category(Elytron.class)
 public class ApplicationSecurityDomainSingleSignOnTestCase {
 
     @Drone

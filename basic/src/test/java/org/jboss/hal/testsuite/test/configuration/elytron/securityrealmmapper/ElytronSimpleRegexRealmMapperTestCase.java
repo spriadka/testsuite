@@ -3,6 +3,7 @@ package org.jboss.hal.testsuite.test.configuration.elytron.securityrealmmapper;
 import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.hal.testsuite.category.Elytron;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.fragment.config.elytron.securityrealmmapper.AddMappedRegexRealmMapperWizard;
 import org.jboss.hal.testsuite.page.config.elytron.SecurityRealmMapperPage;
@@ -10,12 +11,14 @@ import org.jboss.hal.testsuite.test.configuration.elytron.AbstractElytronTestCas
 import org.jboss.hal.testsuite.util.ConfigChecker;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.Values;
 
 import java.io.IOException;
 
+@Category(Elytron.class)
 @RunWith(Arquillian.class)
 public class ElytronSimpleRegexRealmMapperTestCase extends AbstractElytronTestCase {
 

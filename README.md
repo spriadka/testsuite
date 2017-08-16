@@ -85,6 +85,15 @@ Until https://issues.jboss.org/browse/JBEAP-2168 is fixed you can use this optio
  to re-navigate up to 2 times again if navigation seems to be frozen.
 E.g. `-Djbeap2168workaround`
 
+### Optional elytronSecurity
+Run only Elytron related tests.
+
+### Optional picketSecurity
+Run only PicketBox and PicketLink related tests.
+
+### Optional noSecurity
+Run tests except of Elytron, PicketBox and Picketlink related ones.
+
 ## Modules
 
 ### common

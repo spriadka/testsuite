@@ -2,12 +2,14 @@ package org.jboss.hal.testsuite.test.configuration.elytron.logs;
 
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.hal.testsuite.category.Elytron;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.fragment.config.AddResourceWizard;
 import org.jboss.hal.testsuite.page.config.elytron.ElytronLogsPage;
 import org.jboss.hal.testsuite.test.configuration.elytron.AbstractElytronTestCase;
 import org.jboss.hal.testsuite.util.ConfigChecker;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.wildfly.extras.creaper.core.online.ModelNodeResult;
 import org.wildfly.extras.creaper.core.online.operations.Address;
@@ -22,6 +24,7 @@ import static org.jboss.hal.testsuite.util.ConfigChecker.InputType.TEXT;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+@Category(Elytron.class)
 @RunWith(Arquillian.class)
 public class ElytronFileSizeRotatingAuditLogTestCase extends AbstractElytronTestCase {
 

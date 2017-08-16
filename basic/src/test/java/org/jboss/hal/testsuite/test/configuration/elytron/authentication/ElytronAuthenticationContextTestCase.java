@@ -4,6 +4,7 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.dmr.ModelNode;
+import org.jboss.hal.testsuite.category.Elytron;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.dmr.ModelNodeGenerator;
 import org.jboss.hal.testsuite.fragment.config.elytron.authentication.AddAuthenticationContextWizard;
@@ -16,11 +17,13 @@ import org.jboss.hal.testsuite.util.ConfigChecker;
 import org.jboss.hal.testsuite.util.Console;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 
 import java.io.IOException;
 
+@Category(Elytron.class)
 @RunWith(Arquillian.class)
 public class ElytronAuthenticationContextTestCase extends AbstractElytronTestCase {
 

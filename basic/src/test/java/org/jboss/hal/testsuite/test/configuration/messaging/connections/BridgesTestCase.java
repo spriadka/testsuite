@@ -3,7 +3,7 @@ package org.jboss.hal.testsuite.test.configuration.messaging.connections;
 import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.hal.testsuite.category.Shared;
+import org.jboss.hal.testsuite.category.Elytron;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.page.config.MessagingPage;
 import org.jboss.hal.testsuite.test.configuration.messaging.AbstractMessagingTestCase;
@@ -32,7 +32,6 @@ import java.util.List;
 import java.util.concurrent.TimeoutException;
 
 @RunWith(Arquillian.class)
-@Category(Shared.class)
 public class BridgesTestCase extends AbstractMessagingTestCase {
 
     private static final Logger log = LoggerFactory.getLogger(BridgesTestCase.class);
@@ -219,6 +218,7 @@ public class BridgesTestCase extends AbstractMessagingTestCase {
                 .verifyAttribute("reconnect-attempts", -1);
     }
 
+    @Category(Elytron.class)
     @Test
     public void setCredentialReferenceToClearText() throws Exception {
         page.switchToCredentialReference();
@@ -229,6 +229,7 @@ public class BridgesTestCase extends AbstractMessagingTestCase {
                 .setClearTextCredentialReferenceAndVerify(HAL1318_FAIL_MESSAGE);
     }
 
+    @Category(Elytron.class)
     @Test
     public void setCredentialReferenceToCredentialStore() throws Exception {
         page.switchToCredentialReference();
@@ -239,6 +240,7 @@ public class BridgesTestCase extends AbstractMessagingTestCase {
                 .setCredentialStoreCredentialReferenceAndVerify(HAL1318_FAIL_MESSAGE);
     }
 
+    @Category(Elytron.class)
     @Test
     public void testIllegalCombinationsForCredentialReference() throws Exception {
         page.switchToCredentialReference();

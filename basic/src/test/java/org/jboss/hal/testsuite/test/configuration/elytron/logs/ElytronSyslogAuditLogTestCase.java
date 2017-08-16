@@ -2,6 +2,7 @@ package org.jboss.hal.testsuite.test.configuration.elytron.logs;
 
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.hal.testsuite.category.Elytron;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.fragment.config.AddResourceWizard;
 import org.jboss.hal.testsuite.page.config.elytron.ElytronLogsPage;
@@ -10,6 +11,7 @@ import org.jboss.hal.testsuite.util.AvailablePortFinder;
 import org.jboss.hal.testsuite.util.ConfigChecker;
 import org.junit.Assert;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.Values;
@@ -23,6 +25,7 @@ import static org.jboss.hal.testsuite.test.configuration.elytron.ElytronOperatio
 import static org.jboss.hal.testsuite.util.ConfigChecker.InputType.SELECT;
 import static org.jboss.hal.testsuite.util.ConfigChecker.InputType.TEXT;
 
+@Category(Elytron.class)
 @RunWith(Arquillian.class)
 public class ElytronSyslogAuditLogTestCase extends AbstractElytronTestCase {
 

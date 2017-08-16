@@ -39,6 +39,8 @@
     <version.org.jgrapht>0.9.1</version.org.jgrapht>
     <version.org.apache.maven.plugins.maven-checkstyle-plugin>2.17</version.org.apache.maven.plugins.maven-checkstyle-plugin>
     <version.com.puppycrawl.tools.checkstyle>RELEASE</version.com.puppycrawl.tools.checkstyle>
+    <test.included.category></test.included.category>
+    <test.excluded.category></test.excluded.category>
   </properties>
 
 
@@ -307,9 +309,9 @@
         <arquillian.launch>server</arquillian.launch>
         <suite.mode>standalone</suite.mode>
         <suite.server>wildfly</suite.server>
-        <test.excluded.category>
+        <mode.excluded.category>
           org.jboss.hal.testsuite.category.Domain
-        </test.excluded.category>
+        </mode.excluded.category>
       </properties>
       <dependencies>
         <dependency>
@@ -327,9 +329,9 @@
         <suite.mode>domain</suite.mode>
         <suite.server>wildfly</suite.server>
         <arq.managementPort>9999</arq.managementPort>
-        <test.excluded.category>
+        <mode.excluded.category>
           org.jboss.hal.testsuite.category.Standalone
-        </test.excluded.category>
+        </mode.excluded.category>
       </properties>
       <dependencies>
         <dependency>
@@ -338,6 +340,36 @@
           <version>${version.arquillian.container.wildfly}</version>
         </dependency>
       </dependencies>
+    </profile>
+
+    <profile>
+      <id>elytronSecurity</id>
+      <properties>
+        <test.included.category>
+          org.jboss.hal.testsuite.category.Elytron
+        </test.included.category>
+      </properties>
+    </profile>
+
+    <profile>
+      <id>picketSecurity</id>
+      <properties>
+        <test.included.category>
+          org.jboss.hal.testsuite.category.PicketBox,
+          org.jboss.hal.testsuite.category.PicketLink
+        </test.included.category>
+      </properties>
+    </profile>
+
+    <profile>
+      <id>noSecurity</id>
+      <properties>
+        <test.excluded.category>
+          org.jboss.hal.testsuite.category.Elytron,
+          org.jboss.hal.testsuite.category.PicketBox,
+          org.jboss.hal.testsuite.category.PicketLink
+        </test.excluded.category>
+      </properties>
     </profile>
 
   </profiles>
@@ -383,7 +415,8 @@
             <arq.managementPort>${arq.managementPort}</arq.managementPort>
           </systemPropertyVariables>
           <argLine>${argLine}</argLine>
-          <excludedGroups>${test.excluded.category}</excludedGroups>
+          <groups>${test.included.category}</groups>
+          <excludedGroups>${mode.excluded.category},${test.excluded.category}</excludedGroups>
         </configuration>
       </plugin>
 

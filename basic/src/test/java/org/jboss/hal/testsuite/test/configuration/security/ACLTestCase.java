@@ -2,7 +2,7 @@ package org.jboss.hal.testsuite.test.configuration.security;
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.hal.testsuite.category.Shared;
+import org.jboss.hal.testsuite.category.PicketBox;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
 @RunWith(Arquillian.class)
-@Category(Shared.class)
+@Category(PicketBox.class)
 public class ACLTestCase extends SecurityTestCaseAbstract {
 
     private static final Address ACL_ADDRESS = JBOSS_WEB_ADDRESS.and("acl", "classic");

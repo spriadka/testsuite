@@ -7,16 +7,19 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.dmr.ModelNode;
+import org.jboss.hal.testsuite.category.Elytron;
 import org.jboss.hal.testsuite.page.config.elytron.ElytronAuthenticationPage;
 import org.jboss.hal.testsuite.test.configuration.elytron.AbstractElytronTestCase;
 import org.jboss.hal.testsuite.test.configuration.elytron.ElytronOperations;
 import org.jboss.hal.testsuite.util.ConfigChecker;
 import org.junit.Test;
+import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 
 import java.io.IOException;
 
+@Category(Elytron.class)
 @RunWith(Arquillian.class)
 public class DefaultAuthenticationContextTestCase extends AbstractElytronTestCase {
 
