@@ -12,7 +12,6 @@ import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
 import org.jboss.hal.testsuite.page.config.MailSessionsPage;
 import org.jboss.hal.testsuite.util.Console;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -75,10 +74,6 @@ public class MailSessionTestCase {
         new ResourceVerifier(MAIL_SESSION_PRE_ADDRESS, client).verifyExists();
         operations.add(MAIL_SESSION_TBR_ADDRESS, Values.of("jndi-name", "java:/" + TBR_NAME));
         new ResourceVerifier(MAIL_SESSION_TBR_ADDRESS, client).verifyExists();
-    }
-
-    @Before
-    public void before() {
     }
 
     @AfterClass
