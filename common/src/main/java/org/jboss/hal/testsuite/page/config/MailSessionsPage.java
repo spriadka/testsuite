@@ -9,6 +9,7 @@ import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.finder.Row;
 import org.jboss.hal.testsuite.fragment.ConfigAreaFragment;
+import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.config.mail.MailServerFragment;
 import org.jboss.hal.testsuite.fragment.config.mail.MailSessionWizard;
 import org.jboss.hal.testsuite.fragment.config.mail.MailSessionsFragment;
@@ -81,8 +82,8 @@ public class MailSessionsPage extends ConfigurationPage {
         MailSessionWizard wizard = Console.withBrowser(browser).openedWizard(MailSessionWizard.class);
 
         return wizard.jndiName(sessionName)
-                        .name(mailName)
-                        .finish();
+                .name(mailName)
+                .finish();
     }
 
     private void invokeOperationOnMailSession(String operationName, String sessionName) {
@@ -108,12 +109,17 @@ public class MailSessionsPage extends ConfigurationPage {
         getConfig().clickTabByLabel("Credential Reference");
     }
 
+    public ConfigFragment getWindowFragment() {
+        WebElement windowElement = browser.findElement(By.className("default-window-content"));
+        return Graphene.createPageFragment(ConfigFragment.class, windowElement);
+    }
+
     private void backIfAvailable() {
         try {
-        WebElement back = getContentRoot().findElement(BACK_ANCHOR);
-        if (back.isDisplayed()) {
-            back.click();
-        }
+            WebElement back = getContentRoot().findElement(BACK_ANCHOR);
+            if (back.isDisplayed()) {
+                back.click();
+            }
         } catch (NoSuchElementException e) {
             log.debug("No back anchor found");
         }
