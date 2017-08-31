@@ -54,8 +54,14 @@ public class ElytronPolicyTestCase extends AbstractElytronTestCase {
     private ElytronOtherOtherPage page;
 
     @BeforeClass
-    public static void setUp() throws CommandFailedException {
+    public static void setUp() throws CommandFailedException, InterruptedException, TimeoutException, IOException {
         client.apply(snapshotBackup.backup());
+        disableJACCInLegacySecurity();
+        adminOps.reloadIfRequired();
+    }
+
+    private static void disableJACCInLegacySecurity() throws IOException {
+        ops.writeAttribute(Address.subsystem("security"), "initialize-jacc", false);
     }
 
     @AfterClass
@@ -481,8 +487,8 @@ public class ElytronPolicyTestCase extends AbstractElytronTestCase {
         }
     }
 
-    private void createPolicy(Address address) throws IOException, TimeoutException, InterruptedException {
-        ops.add(address, Values.of(JACC_POLICY, new ModelNodeGenerator.ModelNodeListBuilder(
+    private void createPolicy(Address policyAddress) throws IOException, TimeoutException, InterruptedException {
+        ops.add(policyAddress, Values.of(JACC_POLICY, new ModelNodeGenerator.ModelNodeListBuilder(
                 new ModelNodeGenerator.ModelNodePropertiesBuilder()
                         .addProperty(NAME, JACC)
                         .build()
