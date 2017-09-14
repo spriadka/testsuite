@@ -5,16 +5,13 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.arquillian.junit.InSequence;
 import org.jboss.hal.testsuite.category.Standalone;
 import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.fragment.config.resourceadapters.AdminObjectWizard;
 import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConfigPropertyWizard;
 import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConnectionDefinitionWizard;
-import org.jboss.hal.testsuite.fragment.config.resourceadapters.ResourceAdapterWizard;
 import org.jboss.hal.testsuite.page.config.ResourceAdaptersPage;
-import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -24,12 +21,11 @@ import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.OperationException;
 import org.wildfly.extras.creaper.core.online.operations.Operations;
+import org.wildfly.extras.creaper.core.online.operations.Values;
 import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
 
 import java.io.IOException;
 import java.util.concurrent.TimeoutException;
-
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author mkrajcov <mkrajcov@redhat.com>
@@ -46,23 +42,24 @@ public class ResourceAdaptersTestCase {
     private static final String LOCAL_TRANSACTION = "LocalTransaction";
     private static final String XA_TRANSACTION = "XATransaction";
     private static final String PROPERTY_VALUE = "prop_" + RandomStringUtils.randomAlphanumeric(5);
-    private static final String PROPERTY_KEY = "val_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String PROPERTY_NAME = "val_" + RandomStringUtils.randomAlphanumeric(5);
     private static final String CONNECTION_DEFINITION_NAME = "cdn_" + RandomStringUtils.randomAlphanumeric(5);
-    private static final String CONNECTION_DEFINITION_JNDI_NAME = "java:/cdjn_" + RandomStringUtils.randomAlphanumeric(5);
     private static final String CONNECTION_DEFINITION_CLASS = "cdc_" + RandomStringUtils.randomAlphanumeric(5);
     private static final String ADMIN_OBJECT_NAME = "aon_" + RandomStringUtils.randomAlphanumeric(5);
-    private static final String ADMIN_OBJECT_JNDI_NAME = "java:/aojn_" + RandomStringUtils.randomAlphanumeric(5);
     private static final String ADMIN_OBJECT_CLASS = "aoc_" + RandomStringUtils.randomAlphanumeric(5);
+
     private static final String RESOURCE_ADAPTER = "resource-adapter";
+    private static final String ARCHIVE_ATTRIBUTE = "archive";
+    private static final String TRANSACTION_ATTRIBUTE = "transaction";
+    private static final String CONFIG_PROPERTIES_ATTRIBUTE = "config-properties";
+    private static final String ADMIN_OBJECTS_ATTRIBUTE = "admin-objects";
+    private static final String CONNECTION_DEFINITIONS_ATTRIBUTE = "connection-definitions";
 
     private static final Address
-        subsystemAddress = Address.subsystem("resource-adapters"),
-        adapterNoTransAddress = subsystemAddress.and(RESOURCE_ADAPTER, NAME_NO_TRANSACTION),
-        adapterLocalTransAddress = subsystemAddress.and(RESOURCE_ADAPTER, NAME_LOCAL_TRANSACTION),
-        adapterXaTransAddress = subsystemAddress.and(RESOURCE_ADAPTER, NAME_XA_TRANSACTION),
-        propertyAdress = adapterNoTransAddress.and("config-properties", PROPERTY_KEY),
-        adminObjectAdress = adapterNoTransAddress.and("admin-objects", ADMIN_OBJECT_NAME),
-        connectionDefinitionAdress = adapterNoTransAddress.and("connection-definitions", CONNECTION_DEFINITION_NAME);
+            subsystemAddress = Address.subsystem("resource-adapters"),
+            NO_TRANSACTION_ADAPTER_ADDRESS = subsystemAddress.and(RESOURCE_ADAPTER, NAME_NO_TRANSACTION),
+            LOCAL_TRANSACTION_ADAPTER_ADDRESS = subsystemAddress.and(RESOURCE_ADAPTER, NAME_LOCAL_TRANSACTION),
+            XA_TRANSACTION_ADAPTER_ADDRESS = subsystemAddress.and(RESOURCE_ADAPTER, NAME_XA_TRANSACTION);
 
     private static final OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
     private static final Operations ops = new Operations(client);
@@ -74,143 +71,155 @@ public class ResourceAdaptersTestCase {
     @Page
     public ResourceAdaptersPage page;
 
-    @After
-    public void after() throws IOException, InterruptedException, TimeoutException {
-        adminOps.reloadIfRequired();
-    }
-
     @AfterClass
     public static void cleanUp() throws IOException, OperationException {
         try {
-            ops.removeIfExists(adapterNoTransAddress);
-            ops.removeIfExists(adapterXaTransAddress);
-            ops.removeIfExists(adapterLocalTransAddress);
+            ops.removeIfExists(NO_TRANSACTION_ADAPTER_ADDRESS);
+            ops.removeIfExists(XA_TRANSACTION_ADAPTER_ADDRESS);
+            ops.removeIfExists(LOCAL_TRANSACTION_ADAPTER_ADDRESS);
         } finally {
             IOUtils.closeQuietly(client);
         }
     }
 
     @Test
-    @InSequence(0)
     public void createNoTransaction() throws Exception {
-        ResourceAdapterWizard wizard = page.addResourceAdapter();
-
-        boolean result =
-                wizard.name(NAME_NO_TRANSACTION)
-                .archive(ARCHIVE)
-                .tx(NO_TRANSACTION)
-                .finish();
-
-        assertTrue("Window should be closed", result);
-        new ResourceVerifier(adapterNoTransAddress, client).verifyExists();
+        try {
+            page.addResourceAdapter()
+                    .name(NAME_NO_TRANSACTION)
+                    .archive(ARCHIVE)
+                    .tx(NO_TRANSACTION)
+                    .saveAndDismissReloadRequiredWindowWithState()
+                    .assertWindowClosed();
+            new ResourceVerifier(NO_TRANSACTION_ADAPTER_ADDRESS, client).verifyExists();
+        } finally {
+            ops.removeIfExists(NO_TRANSACTION_ADAPTER_ADDRESS);
+            adminOps.reloadIfRequired();
+        }
 
     }
 
     @Test
-    @InSequence(1)
     public void createProperties() throws Exception {
-        ResourceVerifier propertyVerifier = new ResourceVerifier(propertyAdress, client);
-
-        page.navigate2ra(NAME_NO_TRANSACTION).switchSubTab("Configuration");
-        page.switchConfigAreaTabTo("Properties");
-
-        ConfigPropertyWizard wizard = page.getResourceManager().addResource(ConfigPropertyWizard.class);
-        wizard.getEditor().text("name", PROPERTY_KEY);
-        boolean result = wizard
+        final Address configPropertyAddress = NO_TRANSACTION_ADAPTER_ADDRESS.and(CONFIG_PROPERTIES_ATTRIBUTE, PROPERTY_NAME);
+        try {
+            createResourceAdapterInModel(NO_TRANSACTION_ADAPTER_ADDRESS);
+            ResourceVerifier propertyVerifier = new ResourceVerifier(configPropertyAddress, client);
+            page.navigateToResourceAdapter(NAME_NO_TRANSACTION).switchSubTab("Configuration");
+            page.switchConfigAreaTabTo("Properties");
+            page.getResourceManager()
+                .addResource(ConfigPropertyWizard.class)
+                .name(PROPERTY_NAME)
                 .value(PROPERTY_VALUE)
-                .finish();
-
-        assertTrue("Window should be closed", result);
-        propertyVerifier.verifyExists();
-
-        page.getResourceManager().removeResource(PROPERTY_KEY).confirmAndDismissReloadRequiredMessage();
-        propertyVerifier.verifyDoesNotExist();
+                .saveAndDismissReloadRequiredWindowWithState()
+                .assertWindowClosed();
+            propertyVerifier.verifyExists();
+            page.getResourceManager().removeResource(PROPERTY_NAME).confirmAndDismissReloadRequiredMessage();
+            propertyVerifier.verifyDoesNotExist();
+        } finally {
+            ops.removeIfExists(NO_TRANSACTION_ADAPTER_ADDRESS);
+            adminOps.reloadIfRequired();
+        }
     }
 
     @Test
-    @InSequence(2)
     public void addManagedConnectionDefinition() throws Exception {
-        ResourceVerifier connectionDefinitionVerifier = new ResourceVerifier(connectionDefinitionAdress, client);
+        final Address connectionDefinitionAddress = NO_TRANSACTION_ADAPTER_ADDRESS
+                .and(CONNECTION_DEFINITIONS_ATTRIBUTE, CONNECTION_DEFINITION_NAME);
+        try {
+            createResourceAdapterInModel(NO_TRANSACTION_ADAPTER_ADDRESS);
+            ResourceVerifier connectionDefinitionVerifier = new ResourceVerifier(connectionDefinitionAddress, client);
 
-        page.navigate2ra(NAME_NO_TRANSACTION).switchSubTab("Connection Definitions");
-
-        ConnectionDefinitionWizard wizard = page.getResourceManager().addResource(ConnectionDefinitionWizard.class);
-
-        boolean result = wizard
-                .name(CONNECTION_DEFINITION_NAME)
-                .connectionClass(CONNECTION_DEFINITION_CLASS)
-                .finish();
-
-        assertTrue("Window should be closed", result);
-        connectionDefinitionVerifier.verifyExists();
-
-        page.getResourceManager().removeResource(CONNECTION_DEFINITION_NAME).confirmAndDismissReloadRequiredMessage();
-        connectionDefinitionVerifier.verifyDoesNotExist();
+            page.navigateToResourceAdapter(NAME_NO_TRANSACTION).switchSubTab("Connection Definitions");
+            page.getResourceManager()
+                    .addResource(ConnectionDefinitionWizard.class)
+                    .name(CONNECTION_DEFINITION_NAME)
+                    .connectionClass(CONNECTION_DEFINITION_CLASS)
+                    .saveAndDismissReloadRequiredWindowWithState()
+                    .assertWindowClosed();
+            connectionDefinitionVerifier.verifyExists();
+            page.getResourceManager().removeResource(CONNECTION_DEFINITION_NAME).confirmAndDismissReloadRequiredMessage();
+            connectionDefinitionVerifier.verifyDoesNotExist();
+        } finally {
+            ops.removeIfExists(NO_TRANSACTION_ADAPTER_ADDRESS);
+            adminOps.reloadIfRequired();
+        }
     }
 
     @Test
-    @InSequence(3)
     public void addAdminObject() throws Exception {
-        ResourceVerifier adminObjectVerifier = new ResourceVerifier(adminObjectAdress, client);
-
-        page.navigate2ra(NAME_NO_TRANSACTION).switchSubTab("Admin Objects");
-
-        AdminObjectWizard wizard = page.getResourceManager().addResource(AdminObjectWizard.class);
-        boolean result = wizard
-                .name(ADMIN_OBJECT_NAME)
-                .className(ADMIN_OBJECT_CLASS)
-                .finish();
-
-        assertTrue("Window should be closed", result);
-        adminObjectVerifier.verifyExists();
-
-        page.getResourceManager().removeResource(ADMIN_OBJECT_NAME).confirmAndDismissReloadRequiredMessage();
-        adminObjectVerifier.verifyDoesNotExist();
+        final Address adminObjectAddress = NO_TRANSACTION_ADAPTER_ADDRESS.and(ADMIN_OBJECTS_ATTRIBUTE, ADMIN_OBJECT_NAME);
+        try {
+            createResourceAdapterInModel(NO_TRANSACTION_ADAPTER_ADDRESS);
+            ResourceVerifier adminObjectVerifier = new ResourceVerifier(adminObjectAddress, client);
+            page.navigateToResourceAdapter(NAME_NO_TRANSACTION).switchSubTab("Admin Objects");
+            page.getResourceManager().addResource(AdminObjectWizard.class)
+                    .name(ADMIN_OBJECT_NAME)
+                    .className(ADMIN_OBJECT_CLASS)
+                    .saveAndDismissReloadRequiredWindowWithState()
+                    .assertWindowClosed();
+            adminObjectVerifier.verifyExists();
+            page.getResourceManager().removeResource(ADMIN_OBJECT_NAME).confirmAndDismissReloadRequiredMessage();
+            adminObjectVerifier.verifyDoesNotExist();
+        } finally {
+            ops.removeIfExists(NO_TRANSACTION_ADAPTER_ADDRESS);
+            adminOps.reloadIfRequired();
+        }
     }
 
 
     @Test
-    @InSequence(4)
     public void removeResourceAdapter() throws Exception {
-        page.removeRa(NAME_NO_TRANSACTION).assertClosed();
-        new ResourceVerifier(adapterNoTransAddress, client).verifyDoesNotExist();
+        try {
+            createResourceAdapterInModel(NO_TRANSACTION_ADAPTER_ADDRESS);
+            page.removeResourceAdapter(NAME_NO_TRANSACTION).assertClosed();
+            new ResourceVerifier(NO_TRANSACTION_ADAPTER_ADDRESS, client).verifyDoesNotExist();
+        } finally {
+            ops.removeIfExists(NO_TRANSACTION_ADAPTER_ADDRESS);
+            adminOps.reloadIfRequired();
+        }
     }
 
     @Test
     public void createLocalTransaction() throws Exception {
-        ResourceVerifier resourceVerifier = new ResourceVerifier(adapterLocalTransAddress, client);
-
-        ResourceAdapterWizard wizard = page.addResourceAdapter();
-
-        boolean result =
-                wizard.name(NAME_LOCAL_TRANSACTION)
-                        .archive(ARCHIVE)
-                        .tx(LOCAL_TRANSACTION)
-                        .finish();
-
-        assertTrue("Window should be closed", result);
-        resourceVerifier.verifyExists();
-
-        page.removeRa(NAME_LOCAL_TRANSACTION).assertClosed();
-        resourceVerifier.verifyDoesNotExist();
+        try {
+            ResourceVerifier resourceVerifier = new ResourceVerifier(LOCAL_TRANSACTION_ADAPTER_ADDRESS, client);
+            page.addResourceAdapter()
+                    .name(NAME_LOCAL_TRANSACTION)
+                    .archive(ARCHIVE)
+                    .tx(LOCAL_TRANSACTION)
+                    .saveAndDismissReloadRequiredWindowWithState()
+                    .assertWindowClosed();
+            resourceVerifier.verifyExists();
+            page.removeResourceAdapter(NAME_LOCAL_TRANSACTION).assertClosed();
+            resourceVerifier.verifyDoesNotExist();
+        } finally {
+            ops.removeIfExists(LOCAL_TRANSACTION_ADAPTER_ADDRESS);
+            adminOps.reloadIfRequired();
+        }
     }
 
     @Test
     public void createXATransaction() throws Exception {
-        ResourceVerifier resourceVerifier = new ResourceVerifier(adapterXaTransAddress, client);
+        try {
+            ResourceVerifier resourceVerifier = new ResourceVerifier(XA_TRANSACTION_ADAPTER_ADDRESS, client);
+            page.addResourceAdapter()
+                    .name(NAME_XA_TRANSACTION)
+                    .archive(ARCHIVE)
+                    .tx(XA_TRANSACTION)
+                    .saveAndDismissReloadRequiredWindowWithState()
+                    .assertWindowClosed();
+            resourceVerifier.verifyExists();
+            page.removeResourceAdapter(NAME_XA_TRANSACTION).assertClosed();
+            resourceVerifier.verifyDoesNotExist();
+        } finally {
+            ops.removeIfExists(XA_TRANSACTION_ADAPTER_ADDRESS);
+            adminOps.reloadIfRequired();
+        }
+    }
 
-        ResourceAdapterWizard wizard = page.addResourceAdapter();
-
-        boolean result = wizard
-                .name(NAME_XA_TRANSACTION)
-                .archive(ARCHIVE)
-                .tx(XA_TRANSACTION)
-                .finish();
-
-        assertTrue("Window should be closed", result);
-        resourceVerifier.verifyExists();
-
-        page.removeRa(NAME_XA_TRANSACTION).assertClosed();
-        resourceVerifier.verifyDoesNotExist();
+    private void createResourceAdapterInModel(Address address) throws IOException, TimeoutException, InterruptedException {
+        ops.add(address, Values.of(ARCHIVE_ATTRIBUTE, ARCHIVE).and(TRANSACTION_ATTRIBUTE, NO_TRANSACTION));
+        adminOps.reloadIfRequired();
     }
 }

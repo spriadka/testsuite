@@ -4,17 +4,14 @@ import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.io.IOUtils;
+import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.drone.api.annotation.Drone;
-import org.jboss.arquillian.graphene.Graphene;
+import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.arquillian.junit.InSequence;
-import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.page.home.HomePage;
-import org.jboss.hal.testsuite.util.Console;
 import org.junit.AfterClass;
 import org.junit.Test;
-import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
 import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
@@ -26,7 +23,7 @@ import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
  * @author mkrajcov <mkrajcov@redhat.com>
  */
 @RunWith(Arquillian.class)
-@Category(Shared.class)
+@RunAsClient
 public class WebAccessTestCase {
 
     private static final OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
@@ -34,7 +31,10 @@ public class WebAccessTestCase {
     private static final Administration adminOps = new Administration(client);
 
     @Drone
-    public WebDriver browser;
+    private WebDriver browser;
+
+    @Page
+    private HomePage homePage;
 
     @AfterClass
     public static void afterClass() throws IOException, InterruptedException, TimeoutException {
@@ -46,21 +46,15 @@ public class WebAccessTestCase {
     }
 
     @Test(expected = org.openqa.selenium.TimeoutException.class)
-    @InSequence(0)
-    public void disabledAccess() throws IOException, InterruptedException, TimeoutException {
+    public void testNavigateToHomeWithDisabledAccess() throws IOException, InterruptedException, TimeoutException {
         toggleWebConsole(false);
-        Graphene.goTo(HomePage.class);
-        browser.navigate().refresh();
-        Console.withBrowser(browser).waitUntilLoaded();
+        homePage.navigate();
     }
 
     @Test
-    @InSequence(1)
-    public void enabledAccess() throws IOException, InterruptedException, TimeoutException {
+    public void testNavigateToHomeWithEnabledAccess() throws IOException, InterruptedException, TimeoutException {
         toggleWebConsole(true);
-        Graphene.goTo(HomePage.class);
-        browser.navigate().refresh();
-        Console.withBrowser(browser).waitUntilLoaded();
+        homePage.navigate();
     }
 
     private static void toggleWebConsole(boolean enabled) throws IOException, InterruptedException, TimeoutException {
