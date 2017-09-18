@@ -14,6 +14,12 @@ import org.jboss.hal.testsuite.util.Console;
 
 public class DatasourcesPage extends ConfigurationPage implements Navigatable {
 
+    private static final String CAPACITY_DECREMENTER_CLASS_IDENTIFIER = "capacityDecrementerClass";
+    private static final String CAPACITY_DECREMENTER_PROPERTIES_IDENTIFIER = "capacityDecrementerProperties";
+
+    private static final String CAPACITY_INCREMENTER_CLASS_IDENTIFIER = "capacityIncrementerClass";
+    private static final String CAPACITY_INCREMENTER_PROPERTIES_IDENTIFIER = "capacityIncrementerProperties";
+
     @Override
     public DatasourceConfigArea getConfig() {
         return getConfig(DatasourceConfigArea.class);
@@ -173,5 +179,43 @@ public class DatasourcesPage extends ConfigurationPage implements Navigatable {
     public void invokeViewXADatasource(String name) {
         invokeActionOnDatasourceRow(Action.VIEW, DatasourceType.XA, name);
         Application.waitUntilVisible();
+    }
+
+    public void setDecrementerClass(String value) {
+        getConfigFragment()
+                .getEditor()
+                .select(CAPACITY_DECREMENTER_CLASS_IDENTIFIER, value);
+    }
+
+    public void unsetDecrementerClass() {
+        setDecrementerClass("");
+    }
+
+    public void setDecrementerProperty(String key, String value) {
+        String propertyValue = String.format("%s=%s", key, value);
+        getConfigFragment().getEditor().text(CAPACITY_DECREMENTER_PROPERTIES_IDENTIFIER, propertyValue);
+    }
+
+    public void unsetDecrementerProperty() {
+        getConfigFragment().getEditor().text(CAPACITY_DECREMENTER_PROPERTIES_IDENTIFIER, "");
+    }
+
+    public void setIncrementerClass(String value) {
+        getConfigFragment()
+                .getEditor()
+                .select(CAPACITY_INCREMENTER_CLASS_IDENTIFIER, value);
+    }
+
+    public void unsetIncrementerClass() {
+        setIncrementerClass("");
+    }
+
+    public void setIncrementerProperty(String key, String value) {
+        String propertyValue = String.format("%s=%s", key, value);
+        getConfigFragment().getEditor().text(CAPACITY_INCREMENTER_PROPERTIES_IDENTIFIER, propertyValue);
+    }
+
+    public void unsetIncrementerProperty() {
+        getConfigFragment().getEditor().text(CAPACITY_INCREMENTER_PROPERTIES_IDENTIFIER, "");
     }
 }

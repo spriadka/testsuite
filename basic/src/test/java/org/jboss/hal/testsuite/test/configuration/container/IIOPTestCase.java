@@ -23,10 +23,10 @@ package org.jboss.hal.testsuite.test.configuration.container;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.arquillian.junit.InSequence;
 import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Standalone;
 import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
@@ -36,24 +36,27 @@ import org.jboss.hal.testsuite.finder.Application;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
+import org.jboss.hal.testsuite.fragment.config.iiop.IIOPPropertyWizard;
 import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConfigPropertiesFragment;
-import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConfigPropertyWizard;
 import org.jboss.hal.testsuite.fragment.shared.table.ResourceTableRowFragment;
 import org.jboss.hal.testsuite.page.config.IIOPPage;
 import org.jboss.hal.testsuite.page.config.StandaloneConfigurationPage;
 import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.wildfly.extras.creaper.commands.foundation.online.SnapshotBackup;
+import org.wildfly.extras.creaper.core.CommandFailedException;
 import org.wildfly.extras.creaper.core.online.ModelNodeResult;
 import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.Operations;
+import org.wildfly.extras.creaper.core.online.operations.Values;
 import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
 
 import java.io.IOException;
@@ -68,15 +71,14 @@ import static org.junit.Assert.assertTrue;
  * @author Harald Pehl
  */
 @RunWith(Arquillian.class)
+@RunAsClient
 @Category(Standalone.class)
 public class IIOPTestCase {
 
     private static final Logger log = LoggerFactory.getLogger(IIOPTestCase.class);
-    private static final String KEY_VALUE = "IIOPKey_" +  RandomStringUtils.randomAlphanumeric(5);
+    private static final String KEY_VALUE = "IIOPKey_" + RandomStringUtils.randomAlphanumeric(5);
     private static final String VALUE = "IIOPValue_" + RandomStringUtils.randomAlphanumeric(5);
 
-    @Drone
-    public WebDriver browser;
     private FinderNavigation navigation;
     private FinderNavigation transactionNavigation;
     private Address iiopSubsystemAddress = Address.subsystem("iiop-openjdk");
@@ -85,26 +87,27 @@ public class IIOPTestCase {
     private static final Operations operations = new Operations(client);
     private static final Administration adminOps = new Administration(client);
 
-    @AfterClass
-    public static void tearDown() {
-        IOUtils.closeQuietly(client);
-    }
+    private static final SnapshotBackup backup = new SnapshotBackup();
 
     @Page
     IIOPPage page;
 
-    @Before
-    public void before() {
-        transactionNavigation = new FinderNavigation(browser, StandaloneConfigurationPage.class)
-                .step(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
-                .step(FinderNames.SUBSYSTEM, "Transactions");
+    @Drone
+    private WebDriver browser;
 
-        navigation = new FinderNavigation(browser, StandaloneConfigurationPage.class)
-                    .step(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
-                    .step(FinderNames.SUBSYSTEM, "IIOP");
+    @BeforeClass
+    public static void init() throws CommandFailedException {
+        client.apply(backup.backup());
+    }
 
-        navigation.selectRow().invoke(FinderNames.VIEW);
-        Application.waitUntilVisible();
+    @AfterClass
+    public static void tearDown() throws CommandFailedException, InterruptedException, TimeoutException, IOException {
+        try {
+            client.apply(backup.restore());
+            adminOps.reloadIfRequired();
+        } finally {
+            IOUtils.closeQuietly(client);
+        }
     }
 
     @After
@@ -113,9 +116,22 @@ public class IIOPTestCase {
         adminOps.reloadIfRequired();
     }
 
+    private void navigateToIIOPSubsystemPage() {
+        transactionNavigation = new FinderNavigation(browser, StandaloneConfigurationPage.class)
+                .step(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
+                .step(FinderNames.SUBSYSTEM, "Transactions");
+
+        navigation = new FinderNavigation(browser, StandaloneConfigurationPage.class)
+                .step(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS)
+                .step(FinderNames.SUBSYSTEM, "IIOP");
+
+        navigation.selectRow().invoke(FinderNames.VIEW);
+        Application.waitUntilVisible();
+    }
+
     @Test
-    @InSequence(0)
     public void expectErrorForInvalidNumberToReclaimValue() throws Exception {
+        navigateToIIOPSubsystemPage();
         page.switchToEditMode();
         ConfigFragment editPanelFragment = page.getConfigFragment();
 
@@ -127,8 +143,8 @@ public class IIOPTestCase {
     }
 
     @Test
-    @InSequence(1)
     public void numberToReclaimValueTest() throws Exception {
+        navigateToIIOPSubsystemPage();
         page.switchToEditMode();
         ConfigFragment editPanelFragment = page.getConfigFragment();
         editPanelFragment.getEditor().text("number-to-reclaim", "5");
@@ -147,8 +163,8 @@ public class IIOPTestCase {
     }
 
     @Test
-    @InSequence(2)
     public void expectErrorForInvalidHighWaterMarkValue() throws Exception {
+        navigateToIIOPSubsystemPage();
         page.switchToEditMode();
         ConfigFragment editPanelFragment = page.getConfigFragment();
 
@@ -160,14 +176,14 @@ public class IIOPTestCase {
     }
 
     @Test
-    @InSequence(3)
     public void highWaterMarkValueTest() throws Exception {
+        navigateToIIOPSubsystemPage();
         page.switchToEditMode();
         ConfigFragment editPanelFragment = page.getConfigFragment();
         editPanelFragment.getEditor().text("high-water-mark", "7");
         boolean finished = editPanelFragment.save();
 
-        assertTrue("onfig should be saved and closed.", finished);
+        assertTrue("Config should be saved and closed.", finished);
         new ResourceVerifier(iiopSubsystemAddress, client).verifyAttribute("high-water-mark", 7);
 
         page.switchToEditMode();
@@ -175,13 +191,13 @@ public class IIOPTestCase {
         editPanelFragment.getEditor().text("high-water-mark", "");
         finished = editPanelFragment.save();
 
-        assertTrue("onfig should be saved and closed.", finished);
+        assertTrue("Config should be saved and closed.", finished);
         new ResourceVerifier(iiopSubsystemAddress, client).verifyAttributeIsUndefined("high-water-mark"); //https://issues.jboss.org/browse/HAL-790
     }
 
     @Test
-    @InSequence(4)
     public void setAuthMethodValues() throws Exception {
+        navigateToIIOPSubsystemPage();
         final String attributeName = "auth-method";
 
         final ModelNodeResult originalModelNodeResult = operations.readAttribute(iiopSubsystemAddress, attributeName);
@@ -215,27 +231,37 @@ public class IIOPTestCase {
     }
 
     @Test
-    @InSequence(5)
     public void addProperty() throws Exception {
+        navigateToIIOPSubsystemPage();
         ConfigPropertiesFragment properties = page.getConfig().propertiesConfig();
         page.waitUntilPropertiesAreVisible();
-        ConfigPropertyWizard wizard = properties.addProperty();
+        try {
+            properties.getResourceManager()
+                    .addResource(IIOPPropertyWizard.class)
+                    .key(KEY_VALUE)
+                    .value(VALUE)
+                    .saveAndDismissReloadRequiredWindowWithState()
+                    .assertWindowClosed();
+            List<ResourceTableRowFragment> actual = page.getResourceManager().getResourceTable().getAllRows();
 
-        boolean result = wizard.name(KEY_VALUE).value(VALUE).saveAndDismissReloadRequiredWindow();
+            assertEquals("Table should have one row.", 1, actual.size());
 
-        assertTrue("Property should be added and wizard closed.", result);
-
-        List<ResourceTableRowFragment> actual = page.getResourceManager().getResourceTable().getAllRows();
-
-        assertEquals("Table should have one row.", 1, actual.size());
-
-        ModelNode expectedPropertiesNode = new ModelNodeGenerator().createObjectNodeWithPropertyChild(KEY_VALUE, VALUE);
-        new ResourceVerifier(iiopSubsystemAddress, client).verifyAttribute("properties", expectedPropertiesNode);
+            ModelNode expectedPropertiesNode = new ModelNodeGenerator().createObjectNodeWithPropertyChild(KEY_VALUE, VALUE);
+            new ResourceVerifier(iiopSubsystemAddress, client).verifyAttribute("properties", expectedPropertiesNode);
+        } finally {
+            operations.invoke("map-remove", iiopSubsystemAddress, Values.of("name", "properties")
+                    .and("key", KEY_VALUE));
+            adminOps.reloadIfRequired();
+        }
     }
 
     @Test
-    @InSequence(6)
     public void removeProperty() throws Exception {
+        operations.invoke("map-put", iiopSubsystemAddress,
+                Values.of("name", "properties").and("key", KEY_VALUE)
+                        .and("value", VALUE));
+        adminOps.reloadIfRequired();
+        navigateToIIOPSubsystemPage();
         ConfigPropertiesFragment properties = page.getConfig().propertiesConfig();
         page.waitUntilPropertiesAreVisible();
         properties.removePropertyAndDismissReloadRequiredButton(KEY_VALUE);
@@ -247,8 +273,8 @@ public class IIOPTestCase {
     }
 
     @Test
-    @InSequence(7)
     public void setRealmValues() throws Exception {
+        navigateToIIOPSubsystemPage();
         page.switchToEditMode();
         ConfigFragment editPanelFragment = page.getConfigFragment();
         editPanelFragment.getEditor().text("realm", VALUE);
@@ -267,8 +293,8 @@ public class IIOPTestCase {
     }
 
     @Test
-    @InSequence(8)
     public void setSecurityDomainValues() throws Exception {
+        navigateToIIOPSubsystemPage();
         page.switchToEditMode();
         ConfigFragment editPanelFragment = page.getConfigFragment();
         editPanelFragment.getEditor().text("security-domain", VALUE);
@@ -287,8 +313,8 @@ public class IIOPTestCase {
     }
 
     @Test
-    @InSequence(9)
     public void setTransactionsToNoneWithEnablingJTS() throws Exception {
+        navigateToIIOPSubsystemPage();
         page.switchToEditMode();
         ConfigFragment editPanelFragment = page.getConfigFragment();
         editPanelFragment.getEditor().select("transactions", "none");
@@ -310,8 +336,8 @@ public class IIOPTestCase {
     }
 
     @Test
-    @InSequence(10)
     public void setTransactionsToSpecWithDisablingJTS() throws Exception {
+        navigateToIIOPSubsystemPage();
         page.switchToEditMode();
         ConfigFragment editPanelFragment = page.getConfigFragment();
         editPanelFragment.getEditor().select("transactions", "spec");
