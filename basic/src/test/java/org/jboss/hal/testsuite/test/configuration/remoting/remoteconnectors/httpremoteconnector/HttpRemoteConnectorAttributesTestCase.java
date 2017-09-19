@@ -28,8 +28,9 @@ public class HttpRemoteConnectorAttributesTestCase extends HttpRemotingConnector
     private static final String APPLICATION_SASL_AUTHENTICATION = "application-sasl-authentication";
 
     @BeforeClass
-    public static void setUp() throws IOException {
+    public static void setUp() throws IOException, TimeoutException, InterruptedException {
         createHttpRemotingConnector(HTTP_CONNECTOR_ADDRESS);
+        administration.reloadIfRequired();
     }
 
     @AfterClass

@@ -27,8 +27,9 @@ public class HttpRemoteConnectorPropertiesTestCase extends HttpRemotingConnector
     private static final String PROPERTIES_TAB_LABEL = "Properties";
 
     @BeforeClass
-    public static void setUp() throws IOException {
+    public static void setUp() throws IOException, TimeoutException, InterruptedException {
         createHttpRemotingConnector(HTTP_CONNECTOR_ADDRESS);
+        administration.reloadIfRequired();
     }
 
     @AfterClass
