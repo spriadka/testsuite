@@ -56,4 +56,9 @@ public class RemotingSubsystemPage extends ConfigPage {
         return getResourceManager().addResource(OutboundConnectionWizard.class);
     }
 
+    public void switchToRemotingAttributes() {
+        switchToRemoteConnectorsTab();
+        switchSubTab("Attributes");
+    }
+
 }
