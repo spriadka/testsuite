@@ -1,6 +1,6 @@
 package org.jboss.hal.testsuite.fragment.config.jgroups;
 
-import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConfigPropertyWizard;
+import org.jboss.hal.testsuite.fragment.config.ConfigPropertyWizard;
 
 /**
  * @author Jan Kasik <jkasik@redhat.com>

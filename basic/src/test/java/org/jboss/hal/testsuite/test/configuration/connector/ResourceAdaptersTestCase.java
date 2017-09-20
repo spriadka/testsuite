@@ -9,7 +9,7 @@ import org.jboss.hal.testsuite.category.Standalone;
 import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.fragment.config.resourceadapters.AdminObjectWizard;
-import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConfigPropertyWizard;
+import org.jboss.hal.testsuite.fragment.config.resourceadapters.ResourceAdapterPropertyWizard;
 import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConnectionDefinitionWizard;
 import org.jboss.hal.testsuite.page.config.ResourceAdaptersPage;
 import org.junit.AfterClass;
@@ -108,7 +108,7 @@ public class ResourceAdaptersTestCase {
             page.navigateToResourceAdapter(NAME_NO_TRANSACTION).switchSubTab("Configuration");
             page.switchConfigAreaTabTo("Properties");
             page.getResourceManager()
-                .addResource(ConfigPropertyWizard.class)
+                .addResource(ResourceAdapterPropertyWizard.class)
                 .name(PROPERTY_NAME)
                 .value(PROPERTY_VALUE)
                 .saveAndDismissReloadRequiredWindowWithState()

@@ -19,7 +19,7 @@ public class AddBridgeWizard extends WizardWindow {
         return this;
     }
 
-    public AddBridgeWizard forwardAddress(String forwardAddress) {
+    public AddBridgeWizard forwardingAddress(String forwardAddress) {
         getEditor().text("forwardingAddress", forwardAddress);
         return this;
     }
