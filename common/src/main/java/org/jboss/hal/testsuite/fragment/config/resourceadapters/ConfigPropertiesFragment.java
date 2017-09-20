@@ -1,6 +1,7 @@
 package org.jboss.hal.testsuite.fragment.config.resourceadapters;
 
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
+import org.jboss.hal.testsuite.fragment.config.ConfigPropertyWizard;
 
 /**
  * @author mkrajcov <mkrajcov@redhat.com>

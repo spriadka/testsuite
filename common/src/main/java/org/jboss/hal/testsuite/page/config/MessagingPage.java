@@ -8,15 +8,15 @@ import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.WindowFragment;
+import org.jboss.hal.testsuite.fragment.config.messaging.AddClusterConnectionWizard;
+import org.jboss.hal.testsuite.fragment.config.messaging.AddMessagingProviderWindow;
+import org.jboss.hal.testsuite.fragment.config.messaging.ProviderSettingsWindow;
+import org.jboss.hal.testsuite.fragment.config.messaging.MessagingConfigArea;
 import org.jboss.hal.testsuite.fragment.config.messaging.AddBridgeWizard;
 import org.jboss.hal.testsuite.fragment.config.messaging.AddBroadcastGroupWizard;
-import org.jboss.hal.testsuite.fragment.config.messaging.AddClusterConnectionWizard;
 import org.jboss.hal.testsuite.fragment.config.messaging.AddDiscoveryGroupWizard;
-import org.jboss.hal.testsuite.fragment.config.messaging.AddMessagingProviderWindow;
-import org.jboss.hal.testsuite.fragment.config.messaging.MessagingConfigArea;
-import org.jboss.hal.testsuite.fragment.config.messaging.ProviderSettingsWindow;
 import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConfigPropertiesFragment;
-import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConfigPropertyWizard;
+import org.jboss.hal.testsuite.fragment.config.ConfigPropertyWizard;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
 import org.jboss.hal.testsuite.fragment.shared.util.ResourceManager;
@@ -333,7 +333,7 @@ public class MessagingPage extends ConfigPage implements Navigatable {
 
     public boolean addProperty(String key, String value) {
         ConfigPropertiesFragment properties = getConfig().propertiesConfig();
-        ConfigPropertyWizard wizard = properties.addProperty();
+        ConfigPropertyWizard wizard = properties.getResourceManager().addResource(ConfigPropertyWizard.class);
         wizard.name(key).value(value).clickSave();
 
         Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
