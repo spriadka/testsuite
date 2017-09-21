@@ -14,7 +14,6 @@ import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.dmr.ModelNodeGenerator;
 import org.jboss.hal.testsuite.page.config.ResourceAdaptersPage;
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -26,7 +25,6 @@ import org.wildfly.extras.creaper.core.online.operations.OperationException;
 import org.wildfly.extras.creaper.core.online.operations.Operations;
 import org.wildfly.extras.creaper.core.online.operations.Values;
 import org.wildfly.extras.creaper.core.online.operations.admin.Administration;
-
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -39,11 +37,7 @@ public class ResourceAdaptersPolicyTestCase {
     private static final String
         RESOURCE_ADAPTER_NAME = "RA_ResourceAdaptersPolicyTestCase",
         CONNECTION_DEFINITIONS_NAME = "CD_test",
-        JNDINAME = "java:/" + CONNECTION_DEFINITIONS_NAME,
-        CAPACITY_DECREMENTER_CLASS = "capacity-decrementer-class",
-        CAPACITY_DECREMENTER_PROPERTIES = "capacity-decrementer-properties",
-        CAPACITY_INCREMENTER_CLASS = "capacity-incrementer-class",
-        CAPACITY_INCREMENTER_PROPERTIES = "capacity-incrementer-properties";
+        JNDINAME = "java:/" + CONNECTION_DEFINITIONS_NAME;
     private static final OnlineManagementClient client = ManagementClientProvider.createOnlineManagementClient();
     private static final Administration adminOps = new Administration(client);
     private static final Operations ops = new Operations(client);
@@ -53,6 +47,7 @@ public class ResourceAdaptersPolicyTestCase {
 
     private final ResourceVerifier verifier = new ResourceVerifier(connectionDefinitionsAddress, client);
     private final ModelNodeGenerator nodeGenerator = new ModelNodeGenerator();
+    private static final PoolOperations poolOperations = new PoolOperations(client, connectionDefinitionsAddress);
 
     @BeforeClass
     public static void setUp() throws IOException {
@@ -76,8 +71,7 @@ public class ResourceAdaptersPolicyTestCase {
     @Page
     private ResourceAdaptersPage resourceAdaptersPage;
 
-    @Before
-    public void before() {
+    private void navigateToResourceAdapter() {
         resourceAdaptersPage.navigateToResourceAdapter(RESOURCE_ADAPTER_NAME);
         resourceAdaptersPage.switchToConnectionDefinitions();
         resourceAdaptersPage.getPoolConfig().edit();
@@ -86,78 +80,104 @@ public class ResourceAdaptersPolicyTestCase {
 
     @Test
     public void setDecrementerClass() throws Exception {
+        navigateToResourceAdapter();
         final String decrementerClass = "org.jboss.jca.core.connectionmanager.pool.capacity.WatermarkDecrementer";
         resourceAdaptersPage.setDecrementerClass(decrementerClass);
         boolean finished = resourceAdaptersPage.getConfigFragment().save();
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(CAPACITY_DECREMENTER_CLASS, "org.jboss.jca.core.connectionmanager.pool.capacity.WatermarkDecrementer");
+        verifier.verifyAttribute(PoolConfigurationConstants.CAPACITY_DECREMENTER_CLASS, "org.jboss.jca.core.connectionmanager.pool.capacity.WatermarkDecrementer");
     }
 
     @Test
     public void setDecrementerProperty() throws Exception {
+        final String decrementerClass = "org.jboss.jca.core.connectionmanager.pool.capacity.WatermarkDecrementer";
         final String propertyKey = "Watermark";
         final String propertyValue = "9";
+        poolOperations.setCapacityDecrementerClassInModel(decrementerClass);
+        navigateToResourceAdapter();
         resourceAdaptersPage.setDecrementerProperty(propertyKey, propertyValue);
         boolean finished = resourceAdaptersPage.getConfigFragment().save();
         assertTrue("Config should be saved and closed.", finished);
         adminOps.reloadIfRequired();
         ModelNode expectedPropertiesNode = nodeGenerator.createObjectNodeWithPropertyChild(propertyKey, propertyValue);
-        verifier.verifyAttribute(CAPACITY_DECREMENTER_PROPERTIES, expectedPropertiesNode);
+        verifier.verifyAttribute(PoolConfigurationConstants.CAPACITY_DECREMENTER_PROPERTIES, expectedPropertiesNode);
 
     }
 
     @Test
     public void unsetDecrementerProperty() throws Exception {
+        final String decrementerClass = "org.jboss.jca.core.connectionmanager.pool.capacity.WatermarkDecrementer";
+        final String propertyKey = "key";
+        final String propertyValue = "value";
+        poolOperations.setCapacityDecrementerClassInModel(decrementerClass);
+        poolOperations.setCapacityDecrementerPropertyInModel(propertyKey, propertyValue);
+        navigateToResourceAdapter();
         resourceAdaptersPage.unsetDecrementerProperty();
         boolean finished = resourceAdaptersPage.getConfigFragment().save();
         assertTrue("Config should be saved and closed.", finished);
         adminOps.reloadIfRequired();
-        verifier.verifyAttributeIsUndefined(CAPACITY_DECREMENTER_PROPERTIES, "See https://issues.jboss.org/browse/HAL-1112 ");
+        verifier.verifyAttributeIsUndefined(PoolConfigurationConstants.CAPACITY_DECREMENTER_PROPERTIES, "See https://issues.jboss.org/browse/HAL-1112 ");
     }
 
     @Test
     public void unsetDecrementerClass() throws Exception {
+        final String decrementerClass = "org.jboss.jca.core.connectionmanager.pool.capacity.WatermarkDecrementer";
+        poolOperations.setCapacityDecrementerClassInModel(decrementerClass);
+        navigateToResourceAdapter();
         resourceAdaptersPage.unsetDecrementerClass();
         boolean finished = resourceAdaptersPage.getConfigFragment().save();
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttributeIsUndefined(CAPACITY_DECREMENTER_CLASS);
+        verifier.verifyAttributeIsUndefined(PoolConfigurationConstants.CAPACITY_DECREMENTER_CLASS);
     }
 
     @Test
     public void setIncrementerClass() throws Exception {
+        navigateToResourceAdapter();
         final String incrementerClass = "org.jboss.jca.core.connectionmanager.pool.capacity.SizeIncrementer";
         resourceAdaptersPage.setIncrementerClass(incrementerClass);
         boolean finished = resourceAdaptersPage.getConfigFragment().save();
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttribute(CAPACITY_INCREMENTER_CLASS, "org.jboss.jca.core.connectionmanager.pool.capacity.SizeIncrementer");
+        verifier.verifyAttribute(PoolConfigurationConstants.CAPACITY_INCREMENTER_CLASS, "org.jboss.jca.core.connectionmanager.pool.capacity.SizeIncrementer");
     }
 
     @Test
     public void setIncrementerProperty() throws Exception {
+        final String incrementerClass = "org.jboss.jca.core.connectionmanager.pool.capacity.SizeIncrementer";
         final String propertyKey = "Size";
         final String propertyValue = "7";
+        poolOperations.setCapacityIncrementerClassInModel(incrementerClass);
+        navigateToResourceAdapter();
         resourceAdaptersPage.setIncrementerProperty(propertyKey, propertyValue);
         boolean finished = resourceAdaptersPage.getConfigFragment().save();
         assertTrue("Config should be saved and closed.", finished);
         adminOps.reloadIfRequired();
         ModelNode expectedPropertiesNode = nodeGenerator.createObjectNodeWithPropertyChild(propertyKey, propertyValue);
-        verifier.verifyAttribute(CAPACITY_INCREMENTER_PROPERTIES, expectedPropertiesNode);
+        verifier.verifyAttribute(PoolConfigurationConstants.CAPACITY_INCREMENTER_PROPERTIES, expectedPropertiesNode);
     }
 
     @Test
     public void unsetIncrementerProperty() throws Exception {
+        final String incrementerClass = "org.jboss.jca.core.connectionmanager.pool.capacity.SizeIncrementer";
+        final String propertyKey = "key";
+        final String propertyValue = "value";
+        poolOperations.setCapacityIncrementerClassInModel(incrementerClass);
+        poolOperations.setCapacityIncrementerPropertyInModel(propertyKey, propertyValue);
+        navigateToResourceAdapter();
         resourceAdaptersPage.unsetIncrementerProperty();
         boolean finished = resourceAdaptersPage.getConfigFragment().save();
         assertTrue("Config should be saved and closed.", finished);
         adminOps.reloadIfRequired();
-        verifier.verifyAttributeIsUndefined(CAPACITY_INCREMENTER_PROPERTIES, "See https://issues.jboss.org/browse/HAL-1112 ");
+        verifier.verifyAttributeIsUndefined(PoolConfigurationConstants.CAPACITY_INCREMENTER_PROPERTIES, "See https://issues.jboss.org/browse/HAL-1112 ");
     }
 
     @Test
     public void unsetIncrementerClass() throws Exception {
+        final String incrementerClass = "org.jboss.jca.core.connectionmanager.pool.capacity.SizeIncrementer";
+        poolOperations.setCapacityIncrementerClassInModel(incrementerClass);
+        navigateToResourceAdapter();
         resourceAdaptersPage.unsetIncrementerClass();
         boolean finished = resourceAdaptersPage.getConfigFragment().save();
         assertTrue("Config should be saved and closed.", finished);
-        verifier.verifyAttributeIsUndefined(CAPACITY_INCREMENTER_CLASS);
+        verifier.verifyAttributeIsUndefined(PoolConfigurationConstants.CAPACITY_INCREMENTER_CLASS);
     }
 }
