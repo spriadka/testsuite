@@ -1,13 +1,14 @@
 package org.jboss.hal.testsuite.test.configuration.logging;
 
 import org.apache.commons.lang.RandomStringUtils;
+import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.dmr.ModelNode;
-import org.jboss.dmr.Property;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.creaper.command.BackupAndRestoreAttributes;
+import org.jboss.hal.testsuite.dmr.ModelNodeGenerator;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.page.config.LoggingPage;
 import org.jboss.hal.testsuite.util.Console;
@@ -27,6 +28,7 @@ import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
 @RunWith(Arquillian.class)
+@RunAsClient
 public class CustomFormatterTestCase extends LoggingAbstractTestCase {
 
     private static final String
@@ -113,7 +115,7 @@ public class CustomFormatterTestCase extends LoggingAbstractTestCase {
         Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
         administration.reloadIfRequired();
         config.editTextAndSave(PROPERTIES, PATTERN + "=" + PATTERN_VALUE);
-        ModelNode expected = new ModelNode().add(new Property(PATTERN, new ModelNode(PATTERN_VALUE)));
+        ModelNode expected = new ModelNodeGenerator.ModelNodePropertiesBuilder().addProperty(PATTERN, PATTERN_VALUE).build();
         new ResourceVerifier(CUSTOM_FORMATTER_ADDRESS, client)
                 .verifyAttribute(PROPERTIES, expected, "Failed probably due https://issues.jboss.org/browse/HAL-1174");
     }
