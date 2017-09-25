@@ -1,16 +1,15 @@
 package org.jboss.hal.testsuite.test.configuration.undertow;
 
 import org.apache.commons.lang.RandomStringUtils;
+import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
-import org.jboss.hal.testsuite.fragment.formeditor.Editor;
-import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
+import org.jboss.hal.testsuite.fragment.config.undertow.AddHTTPListenerWizard;
 import org.jboss.hal.testsuite.page.config.UndertowHTTPPage;
 import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -24,6 +23,7 @@ import java.io.IOException;
 import java.util.concurrent.TimeoutException;
 
 @RunWith(Arquillian.class)
+@RunAsClient
 @Category(Shared.class)
 public class HTTPListenerTestCase extends UndertowTestCaseAbstract {
 
@@ -87,12 +87,11 @@ public class HTTPListenerTestCase extends UndertowTestCaseAbstract {
         administration.reloadIfRequired();
     }
 
-    @Before
-    public void before() {
+    private void navigateToHTTPListener() {
         page.navigate();
         page.viewHTTPServer(HTTP_SERVER)
-                .switchToHTTPListeners()
-                .selectItemInTableByText(HTTP_LISTENER);
+            .switchToHTTPListeners()
+            .selectItemInTableByText(HTTP_LISTENER);
     }
 
     @AfterClass
@@ -105,66 +104,79 @@ public class HTTPListenerTestCase extends UndertowTestCaseAbstract {
 
     @Test
     public void setAllowEncodedSlashToTrue() throws Exception {
+        navigateToHTTPListener();
         editCheckboxAndVerify(HTTP_LISTENER_ADDRESS, ALLOW_ENCODED_SLASH, true);
     }
 
     @Test
     public void setAllowEncodedSlashToFalse() throws Exception {
+        navigateToHTTPListener();
         editCheckboxAndVerify(HTTP_LISTENER_ADDRESS, ALLOW_ENCODED_SLASH, false);
     }
 
     @Test
     public void setAllowEqualsInCookieValueToTrue() throws Exception {
+        navigateToHTTPListener();
         editCheckboxAndVerify(HTTP_LISTENER_ADDRESS, ALLOW_EQUALS_IN_COOKIE_VALUE, true);
     }
 
     @Test
     public void setAllowEqualsInCookieValueToFalse() throws Exception {
+        navigateToHTTPListener();
         editCheckboxAndVerify(HTTP_LISTENER_ADDRESS, ALLOW_EQUALS_IN_COOKIE_VALUE, false);
     }
 
     @Test
     public void setAlwaysSetKeepAliveToTrue() throws Exception {
+        navigateToHTTPListener();
         editCheckboxAndVerify(HTTP_LISTENER_ADDRESS, ALWAYS_SET_KEEP_ALIVE, true);
     }
 
     @Test
     public void setAlwaysSetKeepAliveToFalse() throws Exception {
+        navigateToHTTPListener();
         editCheckboxAndVerify(HTTP_LISTENER_ADDRESS, ALWAYS_SET_KEEP_ALIVE, false);
     }
 
     @Test
     public void setBufferPipelinedDataToTrue() throws Exception {
+        navigateToHTTPListener();
         editCheckboxAndVerify(HTTP_LISTENER_ADDRESS, BUFFER_PIPELINED_DATA, true);
     }
 
     @Test
     public void setBufferPipelinedDataToFalse() throws Exception {
+        navigateToHTTPListener();
         editCheckboxAndVerify(HTTP_LISTENER_ADDRESS, BUFFER_PIPELINED_DATA, false);
     }
 
     @Test
     public void editBufferPool() throws Exception {
+        navigateToHTTPListener();
         editTextAndVerify(HTTP_LISTENER_ADDRESS, BUFFER_POOL, undertowOps.createBufferPool());
     }
 
     @Test
     public void setCertificateForwardingToTrue() throws Exception {
+        navigateToHTTPListener();
         editCheckboxAndVerify(HTTP_LISTENER_ADDRESS, CERTIFICATE_FORWARDING, true);
     }
 
     @Test
     public void setCertificateForwardingToFalse() throws Exception {
+        navigateToHTTPListener();
         editCheckboxAndVerify(HTTP_LISTENER_ADDRESS, CERTIFICATE_FORWARDING, false);
     }
 
     @Test
     public void setDecodeURLToTrue() throws Exception {
+        navigateToHTTPListener();
         editCheckboxAndVerify(HTTP_LISTENER_ADDRESS, DECODE_URL, true);
     }
 
     @Test
     public void setDecodeURLToFalse() throws Exception {
+        navigateToHTTPListener();
         editCheckboxAndVerify(HTTP_LISTENER_ADDRESS, DECODE_URL, false);
     }
 
@@ -172,186 +184,223 @@ public class HTTPListenerTestCase extends UndertowTestCaseAbstract {
 
     @Test
     public void setEnableHTTP2ToTrue() throws Exception {
+        navigateToHTTPListener();
         editCheckboxAndVerify(HTTP_LISTENER_ADDRESS, ENABLE_HTTP2, true);
     }
 
     @Test
     public void setEnableHTTP2ToFalse() throws Exception {
+        navigateToHTTPListener();
         editCheckboxAndVerify(HTTP_LISTENER_ADDRESS, ENABLE_HTTP2, false);
     }
 
     @Test
     public void editMaxBufferedRequestSize() throws Exception {
+        navigateToHTTPListener();
         editTextAndVerify(HTTP_LISTENER_ADDRESS, MAX_BUFFERED_REQUEST_SIZE, NUMERIC_VALID);
     }
 
     @Test
     public void editMaxBufferedRequestSizeInvalid() {
+        navigateToHTTPListener();
         verifyIfErrorAppears(MAX_BUFFERED_REQUEST_SIZE, NUMERIC_INVALID);
     }
 
     @Test
     public void editMaxConnections() throws Exception {
+        navigateToHTTPListener();
         editTextAndVerify(HTTP_LISTENER_ADDRESS, MAX_CONNECTIONS, NUMERIC_VALID);
     }
 
     @Test
     public void editMaxConnectionsInvalid() {
+        navigateToHTTPListener();
         verifyIfErrorAppears(MAX_CONNECTIONS, NUMERIC_INVALID);
     }
 
     @Test
     public void editMaxCookies() throws Exception {
+        navigateToHTTPListener();
         editTextAndVerify(HTTP_LISTENER_ADDRESS, MAX_COOKIES, NUMERIC_VALID);
     }
 
     @Test
     public void editMaxCookiesInvalid() {
+        navigateToHTTPListener();
         verifyIfErrorAppears(MAX_COOKIES, NUMERIC_INVALID);
     }
 
     @Test
     public void editMaxHeaderSize() throws Exception {
+        navigateToHTTPListener();
         editTextAndVerify(HTTP_LISTENER_ADDRESS, MAX_HEADER_SIZE, NUMERIC_VALID);
     }
 
     @Test
     public void editMaxHeaderSizeInvalid() {
+        navigateToHTTPListener();
         verifyIfErrorAppears(MAX_HEADER_SIZE, NUMERIC_INVALID);
     }
 
     @Test
     public void editMaxHeaders() throws Exception {
+        navigateToHTTPListener();
         editTextAndVerify(HTTP_LISTENER_ADDRESS, MAX_HEADERS, NUMERIC_VALID);
     }
 
     @Test
     public void editMaxHeadersInvalid() {
+        navigateToHTTPListener();
         verifyIfErrorAppears(MAX_HEADERS, NUMERIC_INVALID);
     }
 
     @Test
     public void editMaxParameters() throws Exception {
+        navigateToHTTPListener();
         editTextAndVerify(HTTP_LISTENER_ADDRESS, MAX_PARAMETERS, NUMERIC_VALID);
     }
 
     @Test
     public void editMaxParametersInvalid() {
+        navigateToHTTPListener();
         verifyIfErrorAppears(MAX_PARAMETERS, NUMERIC_INVALID);
     }
 
     @Test
     public void editMaxPostSize() throws Exception {
+        navigateToHTTPListener();
         editTextAndVerify(HTTP_LISTENER_ADDRESS, MAX_POST_SIZE, NUMERIC_VALID_LONG);
     }
 
     @Test
     public void editMaxPostSizeInvalid() {
+        navigateToHTTPListener();
         verifyIfErrorAppears(MAX_POST_SIZE, NUMERIC_INVALID);
     }
 
     @Test
     public void editNoRequestTimeout() throws Exception {
+        navigateToHTTPListener();
         editTextAndVerify(HTTP_LISTENER_ADDRESS, NO_REQUEST_TIMEOUT, NUMERIC_VALID);
     }
 
     @Test
     public void editNoRequestInvalid() {
+        navigateToHTTPListener();
         verifyIfErrorAppears(NO_REQUEST_TIMEOUT, NUMERIC_INVALID);
     }
 
     @Test
     public void setProxyAddressForwardingToTrue() throws Exception {
+        navigateToHTTPListener();
         editCheckboxAndVerify(HTTP_LISTENER_ADDRESS, PROXY_ADDRESS_FORWARDING, true);
     }
 
     @Test
     public void setProxyAddressForwardingToFalse() throws Exception {
+        navigateToHTTPListener();
         editCheckboxAndVerify(HTTP_LISTENER_ADDRESS, PROXY_ADDRESS_FORWARDING, false);
     }
 
     @Test
     public void editReadTimeout() throws Exception {
+        navigateToHTTPListener();
         editTextAndVerify(HTTP_LISTENER_ADDRESS, READ_TIMEOUT, NUMERIC_VALID);
     }
 
     @Test
     public void editReadTimeoutInvalid() throws Exception {
+        navigateToHTTPListener();
         verifyIfErrorAppears(READ_TIMEOUT, NUMERIC_INVALID);
     }
 
     @Test
     public void editReceiveBuffer() throws Exception {
+        navigateToHTTPListener();
         editTextAndVerify(HTTP_LISTENER_ADDRESS, RECEIVE_BUFFER, NUMERIC_VALID);
     }
 
     @Test
     public void editReceiveBufferInvalid() {
+        navigateToHTTPListener();
         verifyIfErrorAppears(RECEIVE_BUFFER, NUMERIC_INVALID);
     }
 
     @Test
     public void setRecordRequestStartTimeToTrue() throws Exception {
+        navigateToHTTPListener();
         editCheckboxAndVerify(HTTP_LISTENER_ADDRESS, RECORD_REQUEST_START_TIME, true);
     }
 
     @Test
     public void setRecordRequestStartTimeToFalse() throws Exception {
+        navigateToHTTPListener();
         editCheckboxAndVerify(HTTP_LISTENER_ADDRESS, RECORD_REQUEST_START_TIME, false);
     }
 
     @Test
     public void editRedirectSocket() throws Exception {
+        navigateToHTTPListener();
         editTextAndVerify(HTTP_LISTENER_ADDRESS, REDIRECT_SOCKET, undertowOps.createSocketBinding());
     }
 
     @Test
     public void editRequestParseTimeout() throws Exception {
+        navigateToHTTPListener();
         editTextAndVerify(HTTP_LISTENER_ADDRESS, REQUEST_PARSE_TIMEOUT, NUMERIC_VALID);
     }
 
     @Test
     public void editRequestParseTimeoutInvalid() throws Exception {
+        navigateToHTTPListener();
         verifyIfErrorAppears(REQUEST_PARSE_TIMEOUT, NUMERIC_INVALID);
     }
 
     @Test
     public void setResolvePeerAddressToTrue() throws Exception {
+        navigateToHTTPListener();
         editCheckboxAndVerify(HTTP_LISTENER_ADDRESS, RESOLVE_PEER_ADDRESS, true);
     }
 
     @Test
     public void setResolvePeerAddressToFalse() throws Exception {
+        navigateToHTTPListener();
         editCheckboxAndVerify(HTTP_LISTENER_ADDRESS, RESOLVE_PEER_ADDRESS, false);
     }
 
     @Test
     public void editSendBuffer() throws Exception {
+        navigateToHTTPListener();
         editTextAndVerify(HTTP_LISTENER_ADDRESS, SEND_BUFFER, NUMERIC_VALID);
     }
 
     @Test
     public void editSendBufferInvalid() throws Exception {
+        navigateToHTTPListener();
         verifyIfErrorAppears(SEND_BUFFER, NUMERIC_INVALID);
     }
 
     @Test
     public void editSocketBinding() throws Exception {
+        navigateToHTTPListener();
         editTextAndVerify(HTTP_LISTENER_ADDRESS, SOCKET_BINDING, undertowOps.createSocketBinding());
     }
 
     @Test
     public void editTCPBacklog() throws Exception {
+        navigateToHTTPListener();
         editTextAndVerify(HTTP_LISTENER_ADDRESS, TCP_BACKLOG, NUMERIC_VALID);
     }
 
     @Test
     public void editTCPBacklogInvalid() {
+        navigateToHTTPListener();
         verifyIfErrorAppears(TCP_BACKLOG, NUMERIC_INVALID);
     }
 
     @Test
     public void setTCPKeepAliveToTrue() throws Exception {
+        navigateToHTTPListener();
         editCheckboxAndVerify(HTTP_LISTENER_ADDRESS, TCP_KEEP_ALIVE, true);
     }
 
@@ -359,44 +408,43 @@ public class HTTPListenerTestCase extends UndertowTestCaseAbstract {
     public void setTCPKeepAliveToFalse() throws Exception {
         operations.writeAttribute(HTTP_LISTENER_ADDRESS, TCP_KEEP_ALIVE, true);
         administration.reloadIfRequired();
-        page.navigate();
-        page.viewHTTPServer(HTTP_SERVER)
-                .switchToHTTPListeners()
-                .selectItemInTableByText(HTTP_LISTENER);
+        navigateToHTTPListener();
         editCheckboxAndVerify(HTTP_LISTENER_ADDRESS, TCP_KEEP_ALIVE, false);
     }
 
     @Test
     public void editURLCharset() throws Exception {
+        navigateToHTTPListener();
         editTextAndVerify(HTTP_LISTENER_ADDRESS, URL_CHARSET);
     }
 
     @Test
     public void editWorker() throws Exception {
+        navigateToHTTPListener();
         editTextAndVerify(HTTP_LISTENER_ADDRESS, WORKER, undertowOps.createWorker());
     }
 
     @Test
     public void editWriteTimeout() throws Exception {
+        navigateToHTTPListener();
         editTextAndVerify(HTTP_LISTENER_ADDRESS, WRITE_TIMEOUT, NUMERIC_VALID);
     }
 
     @Test
     public void editWriteTimeoutInvalid() throws Exception {
+        navigateToHTTPListener();
         verifyIfErrorAppears(WRITE_TIMEOUT, NUMERIC_INVALID);
     }
 
     @Test
     public void addHTTPListenerInGUI() throws Exception {
         String socketBinding = undertowOps.createSocketBinding();
-        WizardWindow wizard = page.getResourceManager().addResource();
-
-        Editor editor = wizard.getEditor();
-        editor.text("name", HTTP_LISTENER_TBA);
-        editor.text(SOCKET_BINDING, socketBinding);
-        boolean result = wizard.finishAndDismissReloadRequiredWindow();
-
-        Assert.assertTrue("Window should be closed", result);
+        navigateToHTTPListener();
+        page.getResourceManager().addResource(AddHTTPListenerWizard.class)
+            .name(HTTP_LISTENER_TBA)
+            .socketBinding(socketBinding)
+            .saveAndDismissReloadRequiredWindowWithState()
+            .assertWindowClosed();
         Assert.assertTrue("HTTP listener should be present in table", page.getResourceManager().isResourcePresent(HTTP_LISTENER_TBA));
         ResourceVerifier verifier = new ResourceVerifier(HTTP_LISTENER_TBA_ADDRESS, client);
         verifier.verifyExists();
@@ -405,6 +453,7 @@ public class HTTPListenerTestCase extends UndertowTestCaseAbstract {
 
     @Test
     public void removeHTTPListenerInGUI() throws Exception {
+        navigateToHTTPListener();
         page.getResourceManager()
                 .removeResource(HTTP_LISTENER_TBR)
                 .confirmAndDismissReloadRequiredMessage();
