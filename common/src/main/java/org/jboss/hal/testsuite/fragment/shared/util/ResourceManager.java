@@ -85,10 +85,13 @@ public class ResourceManager extends BaseFragment {
 
     public <T extends WindowFragment> T removeResource(String name, Class<T> clazz) {
         selectByName(name);
+        invokeRemove();
+        return Console.withBrowser(browser).openedWindow(clazz);
+    }
+
+    public void invokeRemove() {
         String label = PropUtils.get("config.shared.remove.label");
         clickButton(label);
-
-        return Console.withBrowser(browser).openedWindow(clazz);
     }
 
     public ConfirmationWindow removeResource(String name) {
