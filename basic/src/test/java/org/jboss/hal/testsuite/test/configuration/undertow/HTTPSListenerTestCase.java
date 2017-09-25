@@ -1,20 +1,18 @@
 package org.jboss.hal.testsuite.test.configuration.undertow;
 
 import org.apache.commons.lang.RandomStringUtils;
+import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
-import org.jboss.hal.testsuite.fragment.formeditor.Editor;
-import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
+import org.jboss.hal.testsuite.fragment.config.undertow.AddHTTPSListenerWizard;
 import org.jboss.hal.testsuite.page.config.UndertowHTTPPage;
 import org.jboss.hal.testsuite.test.configuration.elytron.ElytronOperations;
 import org.jboss.hal.testsuite.util.ConfigChecker;
-import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -24,7 +22,6 @@ import org.wildfly.extras.creaper.commands.undertow.SslVerifyClient;
 import org.wildfly.extras.creaper.core.CommandFailedException;
 import org.wildfly.extras.creaper.core.online.ModelNodeResult;
 import org.wildfly.extras.creaper.core.online.operations.Address;
-import org.wildfly.extras.creaper.core.online.operations.Values;
 import org.wildfly.extras.creaper.core.online.operations.Batch;
 import org.wildfly.extras.creaper.core.online.operations.OperationException;
 import org.wildfly.extras.creaper.core.online.operations.ReadAttributeOption;
@@ -40,6 +37,7 @@ import static org.jboss.hal.testsuite.util.ConfigChecker.InputType.SELECT;
 import static org.jboss.hal.testsuite.util.ConfigChecker.InputType.TEXT;
 
 @RunWith(Arquillian.class)
+@RunAsClient
 @Category(Shared.class)
 public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
 
@@ -99,40 +97,33 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
     private static final String CLIENT_SSL_CONTEXT_NAME = "my_client_ssl_context_" + RandomStringUtils.randomAlphanumeric(7);
     private static final Address CLIENT_SSL_CONTEXT_ADDRESS = ElytronOperations.getElytronSubsystemAddress()
             .and(ElytronOperations.CLIENT_SSL_CONTEXT, CLIENT_SSL_CONTEXT_NAME);
-    private static final String HAL_1372_WORKAROUND_PROPERTY = "hal1372workaround";
 
     @BeforeClass
     public static void setUp() throws IOException, CommandFailedException, TimeoutException, InterruptedException, OperationException {
         operations.add(HTTP_SERVER_ADDRESS);
         administration.reloadIfRequired();
-        if (ConfigUtils.get(HAL_1372_WORKAROUND_PROPERTY) != null) {
-            operations.add(CLIENT_SSL_CONTEXT_ADDRESS);
-            operations.add(HTTPS_LISTENER_ADDRESS, Values.of(SOCKET_BINDING, undertowOps.createSocketBinding()).and(SSL_CONTEXT, CLIENT_SSL_CONTEXT_NAME));
-            operations.add(HTTPS_LISTENER_TBR_ADDRESS, Values.of(SOCKET_BINDING, undertowOps.createSocketBinding()).and(SSL_CONTEXT, CLIENT_SSL_CONTEXT_NAME));
-        } else {
-            client.apply(new AddUndertowListener.HttpsBuilder(HTTPS_LISTENER, HTTP_SERVER,
-                    undertowOps.createSocketBinding())
-                    .securityRealm(undertowOps.createSecurityRealm())
-                    .verifyClient(SslVerifyClient.NOT_REQUESTED)
-                    .enabled(true)
-                    .build());
-            client.apply(new AddUndertowListener.HttpsBuilder(HTTPS_LISTENER_TBR, HTTP_SERVER,
-                    undertowOps.createSocketBinding())
-                    .securityRealm(undertowOps.createSecurityRealm())
-                    .verifyClient(SslVerifyClient.NOT_REQUESTED)
-                    .enabled(true)
-                    .build());
-        }
+        operations.add(CLIENT_SSL_CONTEXT_ADDRESS);
+        client.apply(new AddUndertowListener.HttpsBuilder(HTTPS_LISTENER, HTTP_SERVER,
+                undertowOps.createSocketBinding())
+                .securityRealm(undertowOps.createSecurityRealm())
+                .verifyClient(SslVerifyClient.NOT_REQUESTED)
+                .enabled(true)
+                .build());
+        client.apply(new AddUndertowListener.HttpsBuilder(HTTPS_LISTENER_TBR, HTTP_SERVER,
+                undertowOps.createSocketBinding())
+                .securityRealm(undertowOps.createSecurityRealm())
+                .verifyClient(SslVerifyClient.NOT_REQUESTED)
+                .enabled(true)
+                .build());
         administration.reloadIfRequired();
     }
 
 
-    @Before
-    public void before() {
+    private void navigateToHTTPSListener() {
         page.navigate();
         page.viewHTTPServer(HTTP_SERVER)
-                .switchToHTTPSListeners()
-                .selectItemInTableByText(HTTPS_LISTENER);
+            .switchToHTTPSListeners()
+            .selectItemInTableByText(HTTPS_LISTENER);
     }
 
     @AfterClass
@@ -147,206 +138,247 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
 
     @Test
     public void setAllowEncodedSlashToTrue() throws Exception {
+        navigateToHTTPSListener();
         editCheckboxAndVerify(HTTPS_LISTENER_ADDRESS, ALLOW_ENCODED_SLASH, true);
     }
 
     @Test
     public void setAllowEncodedSlashToFalse() throws Exception {
+        navigateToHTTPSListener();
         editCheckboxAndVerify(HTTPS_LISTENER_ADDRESS, ALLOW_ENCODED_SLASH, false);
     }
 
     @Test
     public void setAllowEqualsInCookieValueToTrue() throws Exception {
+        navigateToHTTPSListener();
         editCheckboxAndVerify(HTTPS_LISTENER_ADDRESS, ALLOW_EQUALS_IN_COOKIE_VALUE, true);
     }
 
     @Test
     public void setAllowEqualsInCookieValueToFalse() throws Exception {
+        navigateToHTTPSListener();
         editCheckboxAndVerify(HTTPS_LISTENER_ADDRESS, ALLOW_EQUALS_IN_COOKIE_VALUE, false);
     }
 
     @Test
     public void setAlwaysSetKeepAliveToTrue() throws Exception {
+        navigateToHTTPSListener();
         editCheckboxAndVerify(HTTPS_LISTENER_ADDRESS, ALWAYS_SET_KEEP_ALIVE, true);
     }
 
     @Test
     public void setAlwaysSetKeepAliveToFalse() throws Exception {
+        navigateToHTTPSListener();
         editCheckboxAndVerify(HTTPS_LISTENER_ADDRESS, ALWAYS_SET_KEEP_ALIVE, false);
     }
 
     @Test
     public void setBufferPipelinedDataToTrue() throws Exception {
+        navigateToHTTPSListener();
         editCheckboxAndVerify(HTTPS_LISTENER_ADDRESS, BUFFER_PIPELINED_DATA, true);
     }
 
     @Test
     public void setBufferPipelinedDataToFalse() throws Exception {
+        navigateToHTTPSListener();
         editCheckboxAndVerify(HTTPS_LISTENER_ADDRESS, BUFFER_PIPELINED_DATA, false);
     }
 
     @Test
     public void editBufferPool() throws Exception {
+        navigateToHTTPSListener();
         editTextAndVerify(HTTPS_LISTENER_ADDRESS, BUFFER_POOL, undertowOps.createBufferPool());
     }
 
     @Test
     public void setDecodeURLToTrue() throws Exception {
+        navigateToHTTPSListener();
         editCheckboxAndVerify(HTTPS_LISTENER_ADDRESS, DECODE_URL, true);
     }
 
     @Test
     public void setDecodeURLToFalse() throws Exception {
+        navigateToHTTPSListener();
         editCheckboxAndVerify(HTTPS_LISTENER_ADDRESS, DECODE_URL, false);
     }
 
     @Test
     public void setEnableHTTP2ToTrue() throws Exception {
+        navigateToHTTPSListener();
         editCheckboxAndVerify(HTTPS_LISTENER_ADDRESS, ENABLE_HTTP2, true);
     }
 
     @Test
     public void setEnableHTTP2ToFalse() throws Exception {
+        navigateToHTTPSListener();
         editCheckboxAndVerify(HTTPS_LISTENER_ADDRESS, ENABLE_HTTP2, false);
     }
 
     @Test
     public void editMaxBufferedRequestSize() throws Exception {
+        navigateToHTTPSListener();
         editTextAndVerify(HTTPS_LISTENER_ADDRESS, MAX_BUFFERED_REQUEST_SIZE, NUMERIC_VALID);
     }
 
     @Test
     public void editMaxBufferedRequestSizeInvalid() {
+        navigateToHTTPSListener();
         verifyIfErrorAppears(MAX_BUFFERED_REQUEST_SIZE, NUMERIC_INVALID);
     }
 
     @Test
     public void editMaxConnections() throws Exception {
+        navigateToHTTPSListener();
         editTextAndVerify(HTTPS_LISTENER_ADDRESS, MAX_CONNECTIONS, NUMERIC_VALID);
     }
 
     @Test
     public void editMaxConnectionsInvalid() {
+        navigateToHTTPSListener();
         verifyIfErrorAppears(MAX_CONNECTIONS, NUMERIC_INVALID);
     }
 
     @Test
     public void editMaxCookies() throws Exception {
+        navigateToHTTPSListener();
         editTextAndVerify(HTTPS_LISTENER_ADDRESS, MAX_COOKIES, NUMERIC_VALID);
     }
 
     @Test
     public void editMaxCookiesInvalid() {
+        navigateToHTTPSListener();
         verifyIfErrorAppears(MAX_COOKIES, NUMERIC_INVALID);
     }
 
     @Test
     public void editMaxHeaderSize() throws Exception {
+        navigateToHTTPSListener();
         editTextAndVerify(HTTPS_LISTENER_ADDRESS, MAX_HEADER_SIZE, NUMERIC_VALID);
     }
 
     @Test
     public void editMaxHeaderSizeInvalid() {
+        navigateToHTTPSListener();
         verifyIfErrorAppears(MAX_HEADER_SIZE, NUMERIC_INVALID);
     }
 
     @Test
     public void editMaxHeaders() throws Exception {
+        navigateToHTTPSListener();
         editTextAndVerify(HTTPS_LISTENER_ADDRESS, MAX_HEADERS, NUMERIC_VALID);
     }
 
     @Test
     public void editMaxHeadersInvalid() {
+        navigateToHTTPSListener();
         verifyIfErrorAppears(MAX_HEADERS, NUMERIC_INVALID);
     }
 
     @Test
     public void editMaxParameters() throws Exception {
+        navigateToHTTPSListener();
         editTextAndVerify(HTTPS_LISTENER_ADDRESS, MAX_PARAMETERS, NUMERIC_VALID);
     }
 
     @Test
     public void editMaxParametersInvalid() {
+        navigateToHTTPSListener();
         verifyIfErrorAppears(MAX_PARAMETERS, NUMERIC_INVALID);
     }
 
     @Test
     public void editMaxPostSize() throws Exception {
+        navigateToHTTPSListener();
         editTextAndVerify(HTTPS_LISTENER_ADDRESS, MAX_POST_SIZE, NUMERIC_VALID_LONG);
     }
 
     @Test
     public void editMaxPostSizeInvalid() {
+        navigateToHTTPSListener();
         verifyIfErrorAppears(MAX_POST_SIZE, NUMERIC_INVALID);
     }
 
     @Test
     public void editNoRequestTimeout() throws Exception {
+        navigateToHTTPSListener();
         editTextAndVerify(HTTPS_LISTENER_ADDRESS, NO_REQUEST_TIMEOUT, NUMERIC_VALID);
     }
 
     @Test
     public void editNoRequestInvalid() {
+        navigateToHTTPSListener();
         verifyIfErrorAppears(NO_REQUEST_TIMEOUT, NUMERIC_INVALID);
     }
 
     @Test
     public void editReadTimeout() throws Exception {
+        navigateToHTTPSListener();
         editTextAndVerify(HTTPS_LISTENER_ADDRESS, READ_TIMEOUT, NUMERIC_VALID);
     }
 
     @Test
     public void editReadTimeoutInvalid() throws Exception {
+        navigateToHTTPSListener();
         verifyIfErrorAppears(READ_TIMEOUT, NUMERIC_INVALID);
     }
 
     @Test
     public void editReceiveBuffer() throws Exception {
+        navigateToHTTPSListener();
         editTextAndVerify(HTTPS_LISTENER_ADDRESS, RECEIVE_BUFFER, NUMERIC_VALID);
     }
 
     @Test
     public void editReceiveBufferInvalid() {
+        navigateToHTTPSListener();
         verifyIfErrorAppears(RECEIVE_BUFFER, NUMERIC_INVALID);
     }
 
     @Test
     public void setRecordRequestStartTimeToTrue() throws Exception {
+        navigateToHTTPSListener();
         editCheckboxAndVerify(HTTPS_LISTENER_ADDRESS, RECORD_REQUEST_START_TIME, true);
     }
 
     @Test
     public void setRecordRequestStartTimeToFalse() throws Exception {
+        navigateToHTTPSListener();
         editCheckboxAndVerify(HTTPS_LISTENER_ADDRESS, RECORD_REQUEST_START_TIME, false);
     }
 
     @Test
     public void editRequestParseTimeout() throws Exception {
+        navigateToHTTPSListener();
         editTextAndVerify(HTTPS_LISTENER_ADDRESS, REQUEST_PARSE_TIMEOUT, NUMERIC_VALID);
     }
 
     @Test
     public void editRequestParseTimeoutInvalid() throws Exception {
+        navigateToHTTPSListener();
         verifyIfErrorAppears(REQUEST_PARSE_TIMEOUT, NUMERIC_INVALID);
     }
 
     @Test
     public void setResolvePeerAddressToTrue() throws Exception {
+        navigateToHTTPSListener();
         editCheckboxAndVerify(HTTPS_LISTENER_ADDRESS, RESOLVE_PEER_ADDRESS, true);
     }
 
     @Test
     public void setResolvePeerAddressToFalse() throws Exception {
+        navigateToHTTPSListener();
         editCheckboxAndVerify(HTTPS_LISTENER_ADDRESS, RESOLVE_PEER_ADDRESS, false);
     }
 
     @Test
     public void editSendBuffer() throws Exception {
+        navigateToHTTPSListener();
         editTextAndVerify(HTTPS_LISTENER_ADDRESS, SEND_BUFFER, NUMERIC_VALID);
     }
 
     @Test
     public void editSendBufferInvalid() throws Exception {
+        navigateToHTTPSListener();
         verifyIfErrorAppears(SEND_BUFFER, NUMERIC_INVALID);
     }
 
@@ -356,6 +388,7 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
         ModelNode originalSocketBindingValue = operations.readAttribute(HTTPS_LISTENER_ADDRESS, SOCKET_BINDING,
                 ReadAttributeOption.NOT_INCLUDE_DEFAULTS).value();
         try {
+            navigateToHTTPSListener();
             editTextAndVerify(HTTPS_LISTENER_ADDRESS, SOCKET_BINDING, socketBinding);
         } finally {
             operations.writeAttribute(HTTPS_LISTENER_ADDRESS, SOCKET_BINDING, originalSocketBindingValue);
@@ -375,6 +408,7 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
         securityRealmModelNodeResult.assertSuccess();
 
         try {
+            navigateToHTTPSListener();
             new ConfigChecker.Builder(client, HTTPS_LISTENER_ADDRESS)
                     .configFragment(page.getConfigFragment())
                     .edit(TEXT, SSL_CONTEXT, serverSSLContextAddress.getLastPairValue())
@@ -419,6 +453,7 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
         sslContextModelNodeResult.assertSuccess();
 
         try {
+            navigateToHTTPSListener();
             final ConfigChecker.Builder builder = new ConfigChecker.Builder(client, HTTPS_LISTENER_ADDRESS)
                     .configFragment(page.getConfigFragment())
                     .edit(TEXT, SSL_CONTEXT, serverSSLContextAddress.getLastPairValue());
@@ -441,36 +476,43 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
 
     @Test
     public void editSSLSessionCacheSize() throws Exception {
+        navigateToHTTPSListener();
         editTextAndVerify(HTTPS_LISTENER_ADDRESS, SSL_SESSION_CACHE_SIZE, NUMERIC_VALID);
     }
 
     @Test
     public void editSSLSessionCacheSizeInvalid() throws Exception {
+        navigateToHTTPSListener();
         verifyIfErrorAppears(SSL_SESSION_CACHE_SIZE, NUMERIC_INVALID);
     }
 
     @Test
     public void editSSLSessionTimeout() throws Exception {
+        navigateToHTTPSListener();
         editTextAndVerify(HTTPS_LISTENER_ADDRESS, SSL_SESSION_TIMEOUT, NUMERIC_VALID);
     }
 
     @Test
     public void editSSLSessionTimeoutInvalid() throws Exception {
+        navigateToHTTPSListener();
         verifyIfErrorAppears(SSL_SESSION_TIMEOUT, NUMERIC_INVALID);
     }
 
     @Test
     public void editTCPBacklog() throws Exception {
+        navigateToHTTPSListener();
         editTextAndVerify(HTTPS_LISTENER_ADDRESS, TCP_BACKLOG, NUMERIC_VALID);
     }
 
     @Test
     public void editTCPBacklogInvalid() {
+        navigateToHTTPSListener();
         verifyIfErrorAppears(TCP_BACKLOG, NUMERIC_INVALID);
     }
 
     @Test
     public void setTCPKeepAliveToTrue() throws Exception {
+        navigateToHTTPSListener();
         editCheckboxAndVerify(HTTPS_LISTENER_ADDRESS, TCP_KEEP_ALIVE, true);
     }
 
@@ -478,45 +520,44 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
     public void setTCPKeepAliveToFalse() throws Exception {
         operations.writeAttribute(HTTPS_LISTENER_ADDRESS, TCP_KEEP_ALIVE, true);
         administration.reloadIfRequired();
-        page.navigate();
-        page.viewHTTPServer(HTTP_SERVER)
-                .switchToHTTPSListeners()
-                .selectItemInTableByText(HTTPS_LISTENER);
+        navigateToHTTPSListener();
         editCheckboxAndVerify(HTTPS_LISTENER_ADDRESS, TCP_KEEP_ALIVE, false);
     }
 
     @Test
     public void editURLCharset() throws Exception {
+        navigateToHTTPSListener();
         editTextAndVerify(HTTPS_LISTENER_ADDRESS, URL_CHARSET);
     }
 
     @Test
     public void editWorker() throws Exception {
+        navigateToHTTPSListener();
         editTextAndVerify(HTTPS_LISTENER_ADDRESS, WORKER, undertowOps.createWorker());
     }
 
     @Test
     public void editWriteTimeout() throws Exception {
+        navigateToHTTPSListener();
         editTextAndVerify(HTTPS_LISTENER_ADDRESS, WRITE_TIMEOUT, NUMERIC_VALID);
     }
 
     @Test
     public void editWriteTimeoutInvalid() throws Exception {
+        navigateToHTTPSListener();
         verifyIfErrorAppears(WRITE_TIMEOUT, NUMERIC_INVALID);
     }
 
     @Test
     public void addHTTPSListenerInGUI() throws Exception {
         String socketBinding = undertowOps.createSocketBinding();
-        WizardWindow wizard = page.getResourceManager().addResource();
-
-        Editor editor = wizard.getEditor();
-        editor.text("name", HTTPS_LISTENER_TBA);
-        editor.text(SOCKET_BINDING, socketBinding);
-        if (ConfigUtils.get(HAL_1372_WORKAROUND_PROPERTY) != null) {
-            editor.text(SSL_CONTEXT, CLIENT_SSL_CONTEXT_NAME);
-        }
-        wizard.saveAndDismissReloadRequiredWindowWithState().assertWindowClosed();
+        navigateToHTTPSListener();
+        page.getResourceManager().addResource(AddHTTPSListenerWizard.class)
+                .name(HTTPS_LISTENER_TBA)
+                .socketBinding(socketBinding)
+                .sslContext(CLIENT_SSL_CONTEXT_NAME)
+                .saveAndDismissReloadRequiredWindowWithState()
+                .assertWindowClosed();
         Assert.assertTrue("HTTPS listener should be present in table", page.getResourceManager().isResourcePresent(HTTPS_LISTENER_TBA));
         new ResourceVerifier(HTTPS_LISTENER_TBA_ADDRESS, client)
                 .verifyAttribute(SOCKET_BINDING, socketBinding);
@@ -524,6 +565,7 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
 
     @Test
     public void removeHTTPSListenerInGUI() throws Exception {
+        navigateToHTTPSListener();
         page.getResourceManager()
                 .removeResource(HTTPS_LISTENER_TBR)
                 .confirmAndDismissReloadRequiredMessage();
@@ -535,45 +577,30 @@ public class HTTPSListenerTestCase extends UndertowTestCaseAbstract {
     @Override
     public void editTextAndVerify(Address address, String identifier, String value) throws Exception {
         ConfigChecker.Builder builder = new ConfigChecker.Builder(client, address).configFragment(page.getConfigFragment());
-        if (ConfigUtils.get(HAL_1372_WORKAROUND_PROPERTY) != null) {
-            builder.edit(SELECT, VERIFY_CLIENT, "");
-        }
         builder.editAndSave(TEXT, identifier, value).verifyFormSaved().verifyAttribute(identifier, value);
     }
 
     @Override
     public void editTextAndVerify(Address address, String identifier, int value) throws Exception {
         ConfigChecker.Builder builder = new ConfigChecker.Builder(client, address).configFragment(page.getConfigFragment());
-        if (ConfigUtils.get(HAL_1372_WORKAROUND_PROPERTY) != null) {
-            builder.edit(SELECT, VERIFY_CLIENT, "");
-        }
         builder.editAndSave(TEXT, identifier, value).verifyFormSaved().verifyAttribute(identifier, value);
     }
 
     @Override
     public void editTextAndVerify(Address address, String identifier, long value) throws Exception {
         ConfigChecker.Builder builder = new ConfigChecker.Builder(client, address).configFragment(page.getConfigFragment());
-        if (ConfigUtils.get(HAL_1372_WORKAROUND_PROPERTY) != null) {
-            builder.edit(SELECT, VERIFY_CLIENT, "");
-        }
         builder.editAndSave(TEXT, identifier, value).verifyFormSaved().verifyAttribute(identifier, value);
     }
 
     @Override
     public void editCheckboxAndVerify(Address address, String attributeName, Boolean value) throws Exception {
         ConfigChecker.Builder builder = new ConfigChecker.Builder(client, address).configFragment(page.getConfigFragment());
-        if (ConfigUtils.get(HAL_1372_WORKAROUND_PROPERTY) != null) {
-            builder.edit(SELECT, VERIFY_CLIENT, "");
-        }
         builder.editAndSave(CHECKBOX, attributeName, value).verifyFormSaved().verifyAttribute(attributeName, value);
     }
 
     @Override
     public void editCheckboxAndVerify(Address address, String identifier, String attributeName, Boolean value) throws Exception {
         ConfigChecker.Builder builder = new ConfigChecker.Builder(client, address).configFragment(page.getConfigFragment());
-        if (ConfigUtils.get(HAL_1372_WORKAROUND_PROPERTY) != null) {
-            builder.edit(SELECT, VERIFY_CLIENT, "");
-        }
         builder.editAndSave(CHECKBOX, identifier, value).verifyFormSaved().verifyAttribute(attributeName, value);
     }
 }
