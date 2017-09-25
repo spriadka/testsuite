@@ -1,7 +1,10 @@
 package org.jboss.hal.testsuite.page.config.elytron;
 
 import org.jboss.arquillian.graphene.Graphene;
+import org.jboss.arquillian.graphene.findby.ByJQuery;
+import org.jboss.hal.testsuite.fragment.config.elytron.permissionmapper.PermissionMappingResourceManager;
 import org.jboss.hal.testsuite.fragment.config.elytron.permissionmapper.PermissionsTableFragment;
+import org.jboss.hal.testsuite.util.PropUtils;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebElement;
 
@@ -42,6 +45,11 @@ public class MapperDecoderPage extends AbstractElytronConfigPage<MapperDecoderPa
     public PermissionsTableFragment getPermissionsTable() {
         WebElement windowPanel = browser.findElement(By.className("default-window-content"));
         return Graphene.createPageFragment(PermissionsTableFragment.class, windowPanel);
+    }
+
+    public PermissionMappingResourceManager getPermissionMappingResourceManager() {
+        By configAreaContentSelector = ByJQuery.selector("." + PropUtils.get("configarea.content.class") + ":visible");
+        return Graphene.createPageFragment(PermissionMappingResourceManager.class, browser.findElement(configAreaContentSelector));
     }
 
 }

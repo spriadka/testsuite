@@ -169,6 +169,7 @@ public class ElytronPermissionMapperTestCase extends AbstractElytronTestCase {
             principal3name = randomAlphanumeric(5),
             role1name = randomAlphanumeric(5),
             role2name = randomAlphanumeric(5);
+        String principals = String.join(",", principal1name, principal2name, principal3name);
         Address simplePermissionMapperAddress =
                 elyOps.getElytronAddress(SIMPLE_PERMISSION_MAPPER, simplePermissionMapperName);
 
@@ -184,7 +185,7 @@ public class ElytronPermissionMapperTestCase extends AbstractElytronTestCase {
                     .text(ROLES, role1name + "\n" + role2name)
                     .saveAndDismissReloadRequiredWindowWithState().assertWindowClosed();
             assertTrue("Created resource should be present in the table!",
-                    page.resourceIsPresentInConfigAreaTable(getArrayString(principal1name, principal2name, principal3name)));
+                    page.getPermissionMappingResourceManager().isResourcePresentByPrincipals(principals));
             new ResourceVerifier(simplePermissionMapperAddress, client).verifyAttribute(PERMISSION_MAPPINGS,
                         new ModelNodeListBuilder()
                                 .addNode(new ModelNodePropertiesBuilder()
@@ -216,7 +217,7 @@ public class ElytronPermissionMapperTestCase extends AbstractElytronTestCase {
                 principal3name = randomAlphanumeric(5),
                 role1name = randomAlphanumeric(5),
                 role2name = randomAlphanumeric(5);
-        final String arrayStringOfPrincipals = getArrayString(principal1name, principal2name, principal3name);
+        final String arrayStringOfPrincipals = String.join(",", principal1name, principal2name, principal3name);
         final String permissionClassName = "ClassName_" + randomAlphanumeric(7),
                 permissionTargetName = "TargetName_" + randomAlphanumeric(7),
                 permissionModule = "Module_" + randomAlphanumeric(7),
@@ -243,8 +244,8 @@ public class ElytronPermissionMapperTestCase extends AbstractElytronTestCase {
                     .selectByName(simplePermissionMapperName);
             page.switchToConfigAreaTab(PERMISSION_MAPPINGS_LABEL);
             assertTrue("Created permission mappings should be present in the table!",
-                    page.resourceIsPresentInConfigAreaTable(arrayStringOfPrincipals));
-            page.getConfigAreaResourceManager().selectByName(arrayStringOfPrincipals).view();
+                    page.getPermissionMappingResourceManager().isResourcePresentByPrincipals(arrayStringOfPrincipals));
+            page.getPermissionMappingResourceManager().viewByPrincipals(arrayStringOfPrincipals);
             PermissionsTableRowFragment permissionTableRow = page.getPermissionsTable().getRow(0);
             assertEquals("Permission class name should be same in Web Console as in model", permissionClassName, permissionTableRow.getClassNameValue());
             assertEquals("Permission module should be same in Web Console as in model", permissionModule, permissionTableRow.getModuleValue());
@@ -266,8 +267,7 @@ public class ElytronPermissionMapperTestCase extends AbstractElytronTestCase {
     public void removePermissionMappingItemOfSimplePermissionMapperTest() throws Exception {
         String
             simplePermissionMapperName = randomAlphanumeric(5),
-            principalItemName = randomAlphanumeric(5),
-            principalsListValue = getArrayString(principalItemName);
+            principalItemName = randomAlphanumeric(5);
         Address simplePermissionMapperAddress =
             elyOps.getElytronAddress(SIMPLE_PERMISSION_MAPPER, simplePermissionMapperName);
 
@@ -284,11 +284,11 @@ public class ElytronPermissionMapperTestCase extends AbstractElytronTestCase {
                 .selectByName(simplePermissionMapperName);
             page.switchToConfigAreaTab(PERMISSION_MAPPINGS_LABEL);
 
-            page.getConfigAreaResourceManager()
-                    .removeResource(principalsListValue)
+            page.getPermissionMappingResourceManager()
+                    .removeResourceByPrincipals(principalItemName)
                     .confirmAndDismissReloadRequiredMessage().assertClosed();
             assertFalse("Deleted resource should not be present in the table any more!",
-                page.resourceIsPresentInConfigAreaTable(principalsListValue));
+                page.getPermissionMappingResourceManager().isResourcePresentByPrincipals(principalItemName));
             new ResourceVerifier(simplePermissionMapperAddress, client).verifyAttribute(PERMISSION_MAPPINGS,
                     new ModelNodeListBuilder().empty().build());
         } finally {
@@ -709,15 +709,5 @@ public class ElytronPermissionMapperTestCase extends AbstractElytronTestCase {
             ops.removeIfExists(constantPermissionMapperAddress);
             adminOps.reloadIfRequired();
         }
-    }
-
-    /**
-     * @return String representation of the array like {@code ["foo","boo"]}
-     */
-    private String getArrayString(String... strings) {
-        if (strings.length == 0) {
-            return "";
-        }
-        return "[\"" + String.join("\",\"", strings) + "\"]";
     }
 }
