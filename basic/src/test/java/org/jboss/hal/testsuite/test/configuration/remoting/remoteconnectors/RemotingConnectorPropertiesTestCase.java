@@ -24,6 +24,10 @@ import java.util.concurrent.TimeoutException;
 @RunAsClient
 public class RemotingConnectorPropertiesTestCase extends RemotingConnectorTestCaseAbstract {
 
+    private static final String PROPERTIES_LABEL = "Properties";
+    private static final String PROPERTY = "property";
+    private static final String VALUE = "value";
+
     @BeforeClass
     public static void setUp() throws CommandFailedException, IOException, TimeoutException, InterruptedException {
         createSocketBinding(CONNECTOR_SOCKET_BINDING);
@@ -46,11 +50,11 @@ public class RemotingConnectorPropertiesTestCase extends RemotingConnectorTestCa
     public void addProperty() throws Exception {
         final String propertyName = "prop_" + RandomStringUtils.randomAlphanumeric(7);
         final String propertyValue = RandomStringUtils.randomAlphanumeric(5);
-        final Address propertyAddress = CONNECTOR_ADDRESS.and("property", propertyName);
+        final Address propertyAddress = CONNECTOR_ADDRESS.and(PROPERTY, propertyName);
         try {
             navigateToRemotingConnectorTab();
             page.getResourceManager().selectByName(CONNECTOR_ADDRESS.getLastPairValue());
-            page.getConfig().switchTo("Properties");
+            page.getConfig().switchTo(PROPERTIES_LABEL);
             page.getConfig().getResourceManager().addResource(RemotingPropertyWizard.class)
                     .name(propertyName)
                     .value(propertyValue)
@@ -60,7 +64,31 @@ public class RemotingConnectorPropertiesTestCase extends RemotingConnectorTestCa
                     , page.getConfig().getResourceManager().isResourcePresent(propertyName));
             new ResourceVerifier(propertyAddress, client)
                     .verifyExists()
-                    .verifyAttribute("value", propertyValue);
+                    .verifyAttribute(VALUE, propertyValue);
+        } finally {
+            operations.removeIfExists(propertyAddress);
+            administration.reloadIfRequired();
+        }
+    }
+
+    @Test
+    public void removeProperty() throws Exception {
+        final String propertyName = "prop_" + RandomStringUtils.randomAlphanumeric(7);
+        final String propertyValue = RandomStringUtils.randomAlphanumeric(5);
+        final Address propertyAddress = CONNECTOR_ADDRESS.and(PROPERTY, propertyName);
+        try {
+            operations.add(propertyAddress, Values.of(VALUE, propertyValue));
+            administration.reloadIfRequired();
+            navigateToRemotingConnectorTab();
+            page.getResourceManager().selectByName(CONNECTOR_ADDRESS.getLastPairValue());
+            page.getConfig().switchTo(PROPERTIES_LABEL);
+            page.getConfig().getResourceManager().removeResource(propertyName)
+                    .confirmAndDismissReloadRequiredMessage()
+                    .assertClosed();
+            Assert.assertFalse("Newly removed property should not be present in the properties table"
+                    , page.getConfig().getResourceManager().isResourcePresent(propertyName));
+            new ResourceVerifier(propertyAddress, client)
+                    .verifyDoesNotExist();
         } finally {
             operations.removeIfExists(propertyAddress);
             administration.reloadIfRequired();
