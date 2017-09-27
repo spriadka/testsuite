@@ -20,21 +20,15 @@ import java.util.concurrent.TimeoutException;
 
 @RunWith(Arquillian.class)
 @RunAsClient
-public class HttpRemoteConnectorSecurityPropertiesTestCase extends HttpRemotingConnectorTestCaseAbstract {
-
-    private static final String SECURITY_PROPERTIES_LABEL = "Security Properties";
+public class HttpRemotingConnectorPropertiesTestCase extends HttpRemotingConnectorTestCaseAbstract {
 
     private static final String PROPERTY = "property";
     private static final String VALUE = "value";
-    private static final String SECURITY = "security";
-    private static final String SASL_SECURITY = "sasl";
-    private static final Address HTTP_REMOTE_CONNECTOR_SECURITY_ADDRESS = HTTP_CONNECTOR_ADDRESS
-            .and(SECURITY, SASL_SECURITY);
+    private static final String PROPERTIES_TAB_LABEL = "Properties";
 
     @BeforeClass
     public static void setUp() throws IOException, TimeoutException, InterruptedException {
         createHttpRemotingConnector(HTTP_CONNECTOR_ADDRESS);
-        operations.add(HTTP_REMOTE_CONNECTOR_SECURITY_ADDRESS);
         administration.reloadIfRequired();
     }
 
@@ -50,22 +44,21 @@ public class HttpRemoteConnectorSecurityPropertiesTestCase extends HttpRemotingC
 
     @Test
     public void addProperty() throws Exception {
-        final String propertyName = "my_security_prop_" + RandomStringUtils.randomAlphanumeric(7);
+        final String propertyName = "my_prop_" + RandomStringUtils.randomAlphanumeric(7);
         final String propertyValue = RandomStringUtils.randomAlphanumeric(7);
-        final Address propertyAddress = HTTP_REMOTE_CONNECTOR_SECURITY_ADDRESS.and(PROPERTY, propertyName);
+        final Address propertyAddress = HTTP_CONNECTOR_ADDRESS.and(PROPERTY, propertyName);
         try {
             navigateToRemotingHttpConnectorsTab();
             remotingSubsystemPage.getResourceManager().selectByName(HTTP_CONNECTOR_ADDRESS.getLastPairValue());
-            remotingSubsystemPage.getConfig().switchTo(SECURITY_PROPERTIES_LABEL);
-            remotingSubsystemPage.getConfig()
-                    .getResourceManager()
+            remotingSubsystemPage.getConfig().switchTo(PROPERTIES_TAB_LABEL);
+            remotingSubsystemPage.getConfig().getResourceManager()
                     .addResource(RemotingPropertyWizard.class)
                     .name(propertyName)
                     .value(propertyValue)
                     .saveAndDismissReloadRequiredWindowWithState()
                     .assertWindowClosed();
-            Assert.assertTrue("Newly added security property should be present in the properties table",
-                    remotingSubsystemPage.getConfig().getResourceManager().isResourcePresent(propertyName));
+            Assert.assertTrue("Newly added property should be present in the properties table"
+                    , remotingSubsystemPage.getConfig().getResourceManager().isResourcePresent(propertyName));
             new ResourceVerifier(propertyAddress, client)
                     .verifyExists()
                     .verifyAttribute(VALUE, propertyValue);
@@ -73,31 +66,32 @@ public class HttpRemoteConnectorSecurityPropertiesTestCase extends HttpRemotingC
             operations.removeIfExists(propertyAddress);
             administration.reloadIfRequired();
         }
-
     }
 
     @Test
     public void removeProperty() throws Exception {
-        final String propertyName = "my_security_prop_" + RandomStringUtils.randomAlphanumeric(7);
+        final String propertyName = "property_to_be_removed_" + RandomStringUtils.randomAlphanumeric(7);
         final String propertyValue = RandomStringUtils.randomAlphanumeric(7);
-        final Address propertyAddress = HTTP_REMOTE_CONNECTOR_SECURITY_ADDRESS.and(PROPERTY, propertyName);
+        final Address propertyAddress = HTTP_CONNECTOR_ADDRESS.and(PROPERTY, propertyName);
         try {
-            operations.add(propertyAddress, Values.of(VALUE, propertyValue)).assertSuccess();
+            operations.add(propertyAddress, Values.of(VALUE, propertyValue));
             administration.reloadIfRequired();
             navigateToRemotingHttpConnectorsTab();
             remotingSubsystemPage.getResourceManager().selectByName(HTTP_CONNECTOR_ADDRESS.getLastPairValue());
-            remotingSubsystemPage.getConfig().switchTo(SECURITY_PROPERTIES_LABEL);
-            remotingSubsystemPage.getConfig().getResourceManager()
+            remotingSubsystemPage.getConfig().switchTo(PROPERTIES_TAB_LABEL);
+            remotingSubsystemPage
+                    .getConfig()
+                    .getResourceManager()
                     .removeResource(propertyName)
                     .confirmAndDismissReloadRequiredMessage();
-            Assert.assertFalse("Removed security property should not be present in the properties table",
+            Assert.assertFalse("Property should not be present in the properties table after removal",
                     remotingSubsystemPage.getConfig().getResourceManager().isResourcePresent(propertyName));
-            new ResourceVerifier(propertyAddress, client).verifyDoesNotExist();
+            new ResourceVerifier(propertyAddress, client)
+                    .verifyDoesNotExist();
         } finally {
             operations.removeIfExists(propertyAddress);
             administration.reloadIfRequired();
         }
-
     }
 
 }

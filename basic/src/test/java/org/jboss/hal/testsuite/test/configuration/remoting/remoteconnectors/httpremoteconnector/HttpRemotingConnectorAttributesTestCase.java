@@ -6,6 +6,7 @@ import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.util.ConfigChecker;
 import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,7 +18,7 @@ import java.util.concurrent.TimeoutException;
 
 @RunWith(Arquillian.class)
 @RunAsClient
-public class HttpRemoteConnectorAttributesTestCase extends HttpRemotingConnectorTestCaseAbstract {
+public class HttpRemotingConnectorAttributesTestCase extends HttpRemotingConnectorTestCaseAbstract {
 
     private static final String AUTHENTICATION_PROVIDER = "authentication-provider";
     private static final String SASL_AUTHENTICATION_FACTORY = "sasl-authentication-factory";
@@ -43,10 +44,15 @@ public class HttpRemoteConnectorAttributesTestCase extends HttpRemotingConnector
         }
     }
 
-    @Test
-    public void editAuthenticationProvider() throws Exception {
+    @Before
+    public void init() {
         navigateToRemotingHttpConnectorsTab();
         remotingSubsystemPage.getResourceManager().selectByName(HTTP_CONNECTOR_ADDRESS.getLastPairValue());
+        remotingSubsystemPage.getConfig().switchTo("Attributes");
+    }
+
+    @Test
+    public void editAuthenticationProvider() throws Exception {
         final String value = "new_authentication_provider_" + RandomStringUtils.randomAlphanumeric(7);
         final ModelNodeResult previousAuthenticationProvider = operations.readAttribute(HTTP_CONNECTOR_ADDRESS, AUTHENTICATION_PROVIDER);
         previousAuthenticationProvider.assertSuccess();
@@ -64,8 +70,6 @@ public class HttpRemoteConnectorAttributesTestCase extends HttpRemotingConnector
 
     @Test
     public void editConnectionRef() throws Exception {
-        navigateToRemotingHttpConnectorsTab();
-        remotingSubsystemPage.getResourceManager().selectByName(HTTP_CONNECTOR_ADDRESS.getLastPairValue());
         final String value = "new_connector_ref_" + RandomStringUtils.randomAlphanumeric(5);
         final ModelNodeResult originalModelNodeResult = operations.readAttribute(HTTP_CONNECTOR_ADDRESS, CONNECTOR_REF);
         originalModelNodeResult.assertSuccess();
@@ -83,8 +87,6 @@ public class HttpRemoteConnectorAttributesTestCase extends HttpRemotingConnector
 
     @Test
     public void editSASLAuthenticationFactory() throws Exception {
-        navigateToRemotingHttpConnectorsTab();
-        remotingSubsystemPage.getResourceManager().selectByName(HTTP_CONNECTOR_ADDRESS.getLastPairValue());
         final ModelNodeResult previousSASLAuthenticationFactory = operations.readAttribute(HTTP_CONNECTOR_ADDRESS,
                 SASL_AUTHENTICATION_FACTORY);
         previousSASLAuthenticationFactory.assertSuccess();
@@ -102,8 +104,6 @@ public class HttpRemoteConnectorAttributesTestCase extends HttpRemotingConnector
 
     @Test
     public void editSASLProtocol() throws Exception {
-        navigateToRemotingHttpConnectorsTab();
-        remotingSubsystemPage.getResourceManager().selectByName(HTTP_CONNECTOR_ADDRESS.getLastPairValue());
         final String value = "new_sasl_protocol_" + RandomStringUtils.randomAlphanumeric(7);
         final ModelNodeResult previousSASLProtocol = operations.readAttribute(HTTP_CONNECTOR_ADDRESS, SASL_PROTOCOL);
         previousSASLProtocol.assertSuccess();
@@ -121,8 +121,6 @@ public class HttpRemoteConnectorAttributesTestCase extends HttpRemotingConnector
 
     @Test
     public void editSecurityRealm() throws Exception {
-        navigateToRemotingHttpConnectorsTab();
-        remotingSubsystemPage.getResourceManager().selectByName(HTTP_CONNECTOR_ADDRESS.getLastPairValue());
         final String value = "new_security_realm_" + RandomStringUtils.randomAlphanumeric(7);
         final ModelNodeResult previousSecurityRealm = operations.readAttribute(HTTP_CONNECTOR_ADDRESS, SECURITY_REALM);
         previousSecurityRealm.assertSuccess();
@@ -140,8 +138,6 @@ public class HttpRemoteConnectorAttributesTestCase extends HttpRemotingConnector
 
     @Test
     public void editServerName() throws Exception {
-        navigateToRemotingHttpConnectorsTab();
-        remotingSubsystemPage.getResourceManager().selectByName(HTTP_CONNECTOR_ADDRESS.getLastPairValue());
         final String value = "new_server_name_" + RandomStringUtils.randomAlphanumeric(7);
         final ModelNodeResult previousServerName = operations.readAttribute(HTTP_CONNECTOR_ADDRESS, SERVER_NAME);
         previousServerName.assertSuccess();

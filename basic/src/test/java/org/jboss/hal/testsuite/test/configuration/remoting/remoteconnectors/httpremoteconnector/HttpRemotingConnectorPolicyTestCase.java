@@ -18,7 +18,7 @@ import java.util.concurrent.TimeoutException;
 
 @RunWith(Arquillian.class)
 @RunAsClient
-public class HttpRemoteConnectorPolicyTestCase extends HttpRemotingConnectorTestCaseAbstract {
+public class HttpRemotingConnectorPolicyTestCase extends HttpRemotingConnectorTestCaseAbstract {
 
     private static final String POLICY_LABEL = "Policy";
     private static final String FORWARD_SECRECY = "forward-secrecy";

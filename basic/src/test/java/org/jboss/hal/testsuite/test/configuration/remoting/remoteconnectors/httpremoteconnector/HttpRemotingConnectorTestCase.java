@@ -22,7 +22,7 @@ import java.util.concurrent.TimeoutException;
 @RunWith(Arquillian.class)
 @RunAsClient
 @Category(Shared.class)
-public class HttpRemoteConnectorTestCase extends HttpRemotingConnectorTestCaseAbstract {
+public class HttpRemotingConnectorTestCase extends HttpRemotingConnectorTestCaseAbstract {
 
     private static final String HAL1331_FAIL_MESSAGE = "Probably fails because of https://issues.jboss.org/browse/HAL-1331";
 
