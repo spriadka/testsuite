@@ -100,7 +100,8 @@ public class ElytronPrincipalDecoderTestCase extends AbstractElytronTestCase {
                 .addResource(AddResourceWizard.class)
                 .name(constantPrincipalDecoderName)
                 .text(CONSTANT, constantValue)
-                .saveWithState().assertWindowClosed();
+                .saveAndDismissReloadRequiredWindowWithState()
+                .assertWindowClosed();
 
             assertTrue("Created resource should be present in the table!",
                     page.resourceIsPresentInMainTable(constantPrincipalDecoderName));
@@ -195,7 +196,8 @@ public class ElytronPrincipalDecoderTestCase extends AbstractElytronTestCase {
                 .name(customPrincipalDecoderName)
                 .text(CLASS_NAME, LowercaseCustomPrincipalDecoder.class.getName())
                 .text(MODULE, customPrincipalDecoderModuleName)
-                .saveWithState().assertWindowClosed();
+                .saveAndDismissReloadRequiredWindowWithState()
+                .assertWindowClosed();
 
             assertTrue("Created resource should be present in the table!",
                     page.resourceIsPresentInMainTable(customPrincipalDecoderName));
@@ -309,7 +311,8 @@ public class ElytronPrincipalDecoderTestCase extends AbstractElytronTestCase {
                 .addResource(AddResourceWizard.class)
                 .name(aggregatePrincipalDecoderName)
                 .text(PRINCIPAL_DECODERS, constantPrincipalDecoder1name + "\n" + constantPrincipalDecoder2name)
-                .saveWithState().assertWindowClosed();
+                .saveAndDismissReloadRequiredWindowWithState()
+                .assertWindowClosed();
 
             assertTrue("Created resource should be present in the table!",
                     page.resourceIsPresentInMainTable(aggregatePrincipalDecoderName));
@@ -455,7 +458,8 @@ public class ElytronPrincipalDecoderTestCase extends AbstractElytronTestCase {
                 .addResource(AddResourceWizard.class)
                 .name(concatenatingPrincipalDecoderName)
                 .text(PRINCIPAL_DECODERS, constantPrincipalDecoder1name + "\n" + constantPrincipalDecoder2name)
-                .saveWithState().assertWindowClosed();
+                .saveAndDismissReloadRequiredWindowWithState()
+                .assertWindowClosed();
 
             assertTrue("Created resource should be present in the table!",
                     page.resourceIsPresentInMainTable(concatenatingPrincipalDecoderName));
@@ -597,7 +601,7 @@ public class ElytronPrincipalDecoderTestCase extends AbstractElytronTestCase {
                 .text(ATTRIBUTE_NAME, attributeNameValue)
                 .text(OID, oidValue);
                 wizard.saveWithState().assertWindowOpen(); // ATTRIBUTE_NAME and OID cannot be set at the same time
-                wizard.text(ATTRIBUTE_NAME, "").saveWithState().assertWindowClosed();
+                wizard.text(ATTRIBUTE_NAME, "").saveAndDismissReloadRequiredWindowWithState().assertWindowClosed();
 
             assertTrue("Created resource should be present in the table!",
                     page.resourceIsPresentInMainTable(x500AttributePrincipalDecoderName));
