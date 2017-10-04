@@ -15,6 +15,7 @@ import java.lang.reflect.ParameterizedType;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 
@@ -174,6 +175,41 @@ public class GenericResourceTableFragment<T extends ResourceTableRowFragment> ex
     }
 
     /**
+     * @param predicate to be used when searching for the row
+     * @return first row passing the predicate or null if none found
+     */
+    public T getRowBy(Predicate<T> predicate) {
+        T row = null;
+        if (this.hasPager()) {
+            this.getPager().goToFirstPage();
+            do {
+                List<T> rowsPassingPredicate = getVisibleRows().stream().filter(predicate).collect(Collectors.toList());
+
+                if (rowsPassingPredicate.isEmpty()) {
+                    log.debug("Row passing predicate not found on this page of table.");
+                } else {
+                    log.debug("Row passing predicate found at this table");
+                    row = rowsPassingPredicate.get(0);
+                    break;
+                }
+
+                log.debug("Trying to move to next page");
+            } while (this.getPager().goToNextPage());
+        } else {
+            List<T> rowsPassingPredicate = getVisibleRows().stream().filter(predicate).collect(Collectors.toList());
+            if (!rowsPassingPredicate.isEmpty()) {
+                row = rowsPassingPredicate.get(0);
+            }
+        }
+        if (row != null) {
+            log.debug("Row passing predicate found");
+        } else {
+            log.debug("Row passing predicate not found at this table.");
+        }
+        return row;
+    }
+
+    /**
      * Select first row (find and click on) that contains given text in given column.
      *
      * @param col  zero-based column index where to search
@@ -182,7 +218,11 @@ public class GenericResourceTableFragment<T extends ResourceTableRowFragment> ex
      */
     public T selectRowByText(int col, String text) {
         T row = this.getRowByText(col, text);
+        clickRowIfExists(row);
+        return row;
+    }
 
+    private void clickRowIfExists(T row) {
         if (row != null) {
             row.click();
             Graphene.waitModel().withTimeout(1500, TimeUnit.MILLISECONDS)
@@ -191,6 +231,16 @@ public class GenericResourceTableFragment<T extends ResourceTableRowFragment> ex
                     .attribute("class")
                     .contains(ResourceTableRowFragment.ROW_SELECTED_CLASS);
         }
+    }
+
+    /**
+     * Select first row (find and click on) that passes given predicate
+     * @param predicate predicate to be used when selecting row
+     * @return selected row or null if no such row found
+     */
+    public T selectRowBy(Predicate<T> predicate) {
+        T row = getRowBy(predicate);
+        clickRowIfExists(row);
         return row;
     }
 

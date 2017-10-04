@@ -6,7 +6,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.jboss.arquillian.graphene.findby.ByJQuery;
-import org.jboss.hal.testsuite.fragment.shared.table.ResourceTableRowFragment;
+import org.jboss.hal.testsuite.fragment.runtime.batch.BatchTableFragment;
+import org.jboss.hal.testsuite.fragment.runtime.batch.BatchTableRowFragment;
 import org.jboss.hal.testsuite.page.MetricsPage;
 import org.jboss.hal.testsuite.page.Navigatable;
 import org.jboss.hal.testsuite.util.Console;
@@ -33,46 +34,25 @@ public class BatchRuntimePage extends MetricsPage implements Navigatable {
         return this;
     }
 
-    public List<ResourceTableRowFragment> getAllRows() {
-        return getResourceManager().getResourceTable().getAllRows();
+    public List<BatchTableRowFragment> getAllRows() {
+        return getResourceManager().getResourceTable(BatchTableFragment.class).getAllRows();
     }
 
-    public Set<ResourceTableRowFragment> getRowsForJob(final String jobFileName) {
-        return getAllRows().stream().filter(row -> {
-            return row.getCell(1).getText().equals(jobFileName);
-        }).collect(toSet());
+    public Set<BatchTableRowFragment> getRowsForJobXmlName(final String jobFileName) {
+        return getAllRows()
+                .stream()
+                .filter(row -> row.getJobXmlNameValue().equals(jobFileName))
+                .collect(toSet());
     }
 
-    public ResourceTableRowFragment selectRowForJob(String jobFileName) {
-        return getResourceManager().getResourceTable().selectRowByText(1, jobFileName);
+    public BatchTableRowFragment selectRowForJobXmlName(String jobFileName) {
+        return getResourceManager().getResourceTable(BatchTableFragment.class)
+                .selectRowBy(row -> row.getJobXmlNameValue().equals(jobFileName));
     }
 
-    public ResourceTableRowFragment getRowByExecutionId(String executionId) {
-        return getResourceManager().getResourceTable().getRowByText(2, executionId);
-    }
-
-    public String getDeploymentFromRow(ResourceTableRowFragment jobTableRow) {
-        return jobTableRow.getCellValue(0);
-    }
-
-    public String getJobFileNameFromRow(ResourceTableRowFragment jobTableRow) {
-        return jobTableRow.getCellValue(1);
-    }
-
-    public String getExecutionIdFromRow(ResourceTableRowFragment jobTableRow) {
-        return jobTableRow.getCellValue(2);
-    }
-
-    public String getInstanceIdFromRow(ResourceTableRowFragment jobTableRow) {
-        return jobTableRow.getCellValue(3);
-    }
-
-    public String getBatchStatusFromRow(ResourceTableRowFragment jobTableRow) {
-        return jobTableRow.getCellValue(4);
-    }
-
-    public String getStartTimeFromRow(ResourceTableRowFragment jobTableRow) {
-        return jobTableRow.getCellValue(5);
+    public BatchTableRowFragment getRowByExecutionId(String executionId) {
+        return getResourceManager().getResourceTable(BatchTableFragment.class)
+                .getRowBy(row -> row.getExecutionIdValue().equals(executionId));
     }
 
     public void setFilterText(String text) {
