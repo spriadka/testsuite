@@ -9,15 +9,18 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeFormatterBuilder;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.fragment.MetricsAreaFragment;
-import org.jboss.hal.testsuite.fragment.shared.table.ResourceTableRowFragment;
+import org.jboss.hal.testsuite.fragment.runtime.batch.BatchTableRowFragment;
 import org.jboss.hal.testsuite.page.runtime.BatchRuntimePage;
 import org.jboss.hal.testsuite.test.runtime.deployments.DeploymentsOperations;
 import org.jboss.shrinkwrap.api.ShrinkWrap;
@@ -36,6 +39,7 @@ import org.wildfly.extras.creaper.core.online.OnlineManagementClient;
 import org.wildfly.extras.creaper.core.online.operations.OperationException;
 
 @RunWith(Arquillian.class)
+@RunAsClient
 @Category(Shared.class)
 public class BatchManagementTestCase {
 
@@ -70,26 +74,26 @@ public class BatchManagementTestCase {
 
     @Test
     public void jobsShownTest() throws Exception {
-        deployBatchApplication(0);
+        deployBatchApplicationWithChunks(0);
         page.navigate2jobs();
 
         assertEquals(2, page.getAllRows().size());
-        assertEquals(1, page.getRowsForJob(jobOneFileName).size());
-        assertEquals(1, page.getRowsForJob(jobTwoFileName).size());
-        assertTrue(page.getAllRows().stream().map(row -> page.getDeploymentFromRow(row))
+        assertEquals(1, page.getRowsForJobXmlName(jobOneFileName).size());
+        assertEquals(1, page.getRowsForJobXmlName(jobTwoFileName).size());
+        assertTrue(page.getAllRows().stream().map(row -> row.getDeploymentValue())
                 .allMatch(warNameInRow -> warNameInRow.equals(deploymentName)));
     }
 
     @Test
     public void executionsShownTest() throws Exception {
-        deployBatchApplication(0);
+        deployBatchApplicationWithChunks(0);
         batchOps.startJob(deploymentName, jobOneFileName);
         batchOps.startJob(deploymentName, jobOneFileName);
         batchOps.startJob(deploymentName, jobTwoFileName);
 
         page.navigate2jobs();
-        Set<ResourceTableRowFragment> jobOneExecutionRowSet = page.getRowsForJob(jobOneFileName);
-        Set<ResourceTableRowFragment> jobTwoExecutionRowSet = page.getRowsForJob(jobTwoFileName);
+        Set<BatchTableRowFragment> jobOneExecutionRowSet = page.getRowsForJobXmlName(jobOneFileName);
+        Set<BatchTableRowFragment> jobTwoExecutionRowSet = page.getRowsForJobXmlName(jobTwoFileName);
 
         assertEquals(2, jobOneExecutionRowSet.size());
         Set<Execution> quickExecutionSet = batchOps.getJobExecutions(deploymentName, jobOneName);
@@ -102,7 +106,7 @@ public class BatchManagementTestCase {
 
     @Test
     public void filterTest() throws Exception {
-        deployBatchApplication(0);
+        deployBatchApplicationWithChunks(0);
         batchOps.startJob(deploymentName, jobOneFileName);
         batchOps.startJob(deploymentName, jobOneFileName);
         batchOps.startJob(deploymentName, jobTwoFileName);
@@ -123,7 +127,7 @@ public class BatchManagementTestCase {
 
     @Test
     public void refreshJobListTest() throws Exception {
-        deployBatchApplication(0);
+        deployBatchApplicationWithChunks(0);
         page.navigate2jobs();
         assertEquals(2, page.getAllRows().size());
 
@@ -132,82 +136,99 @@ public class BatchManagementTestCase {
         batchOps.startJob(deploymentName, jobTwoFileName);
         page.clickButton("Refresh");
 
-        List<ResourceTableRowFragment> allRows = page.getAllRows();
+        List<BatchTableRowFragment> allRows = page.getAllRows();
         assertEquals(3, allRows.size());
-        assertTrue(allRows.stream().map(row -> page.getExecutionIdFromRow(row)) // stream of all executionIds in table
+        assertTrue(allRows.stream().map(row -> row.getExecutionIdValue()) // stream of all executionIds in table
                 .allMatch(executionIdTextValue -> !executionIdTextValue.trim().isEmpty())); // none of executionIds is empty
     }
 
     @Test
     public void jobStatusTest() throws Exception {
-        deployBatchApplication(1000);
+        deployBatchApplicationWithChunks(1000);
         long executionId = batchOps.startJob(deploymentName, jobOneFileName);
         Execution execution = batchOps.getExecution(deploymentName, jobOneName, executionId);
         page.navigate2jobs();
 
-        page.selectRowForJob(jobOneFileName);
+        page.selectRowForJobXmlName(jobOneFileName);
         assertExecutionMatchJobDetail(execution);
 
         batchOps.stopJob(deploymentName, executionId);
         execution = batchOps.getExecution(deploymentName, jobOneName, executionId);
         page.clickButton("Refresh");
-        page.selectRowForJob(jobOneFileName);
+        page.selectRowForJobXmlName(jobOneFileName);
         assertExecutionMatchJobDetail(execution);
     }
 
     @Test
     public void startJobTest() throws Exception {
-        deployBatchApplication(1000);
+        deployBatchApplicationWithChunks(1000);
         page.navigate2jobs();
-        ResourceTableRowFragment jobRow = page.selectRowForJob(jobTwoFileName);
-        assertEquals("", page.getBatchStatusFromRow(jobRow));
+        BatchTableRowFragment jobRow = page.selectRowForJobXmlName(jobTwoFileName);
+        assertEquals("", jobRow.getBatchStatusValue());
         assertEquals(0, batchOps.getJobExecutions(deploymentName, jobTwoName).size());
 
         page.clickButton("Start");
-        assertEquals(STARTED, page.getBatchStatusFromRow(jobRow));
+        assertEquals(STARTED, jobRow.getBatchStatusValue());
         Set<Execution> jobExecutionSet = batchOps.getJobExecutions(deploymentName, jobTwoName);
         assertEquals(1, jobExecutionSet.size());
     }
 
     @Test
     public void stopJobTest() throws Exception {
-        deployBatchApplication(1000);
+        final long stoppingInterval = 5000;
+        deployBatchApplicationWithBatchlet(stoppingInterval);
         long executionId = batchOps.startJob(deploymentName, jobOneFileName);
         page.navigate2jobs();
-        ResourceTableRowFragment jobRow = page.selectRowForJob(jobOneFileName);
-        assertEquals(STARTED, page.getBatchStatusFromRow(jobRow));
-
+        BatchTableRowFragment jobRow = page.selectRowForJobXmlName(jobOneFileName);
+        assertEquals(STARTED, jobRow.getBatchStatusValue());
         page.clickButton("Stop");
-        assertEquals(STOPPING, page.getBatchStatusFromRow(jobRow));
+        assertEquals(STOPPING, jobRow.getBatchStatusValue());
         String actualStatus = batchOps.getExecution(deploymentName, jobOneName, executionId).batchStatus;
         assertTrue("We expected STOPPING or STOPPED but got '" + actualStatus + "'.",
                 actualStatus.equals(STOPPING) || actualStatus.equals(STOPPED));
+        assertJobHasStoppedOrFail(jobOneFileName, stoppingInterval);
+    }
+
+    private void assertJobHasStoppedOrFail(String jobName, long timeoutInMillis) throws InterruptedException {
+        BatchTableRowFragment jobRow = page.selectRowForJobXmlName(jobName);
+        long currentTime = System.currentTimeMillis();
+        long endTime = currentTime + timeoutInMillis;
+        while (currentTime < endTime + 1000) {
+            page.clickButton("Refresh");
+            if (jobRow.getBatchStatusValue().equals("STOPPED")) {
+                return;
+            }
+            TimeUnit.MILLISECONDS.sleep(500);
+            currentTime = System.currentTimeMillis();
+        }
+        fail("Job should have been STOPPED by now");
     }
 
     @Test
     public void restartJobTest() throws Exception {
-        deployBatchApplication(1000);
+        deployBatchApplicationWithChunks(1000);
         long executionId = batchOps.startJob(deploymentName, jobOneFileName);
         batchOps.stopJob(deploymentName, executionId);
         page.navigate2jobs();
-        ResourceTableRowFragment jobRow = page.selectRowForJob(jobOneFileName);
-        assertEquals(STOPPED, page.getBatchStatusFromRow(jobRow));
+        BatchTableRowFragment jobRow = page.selectRowForJobXmlName(jobOneFileName);
+        assertEquals(STOPPED, jobRow.getBatchStatusValue());
 
         page.clickButton("Restart");
-        assertEquals(STARTED, page.getBatchStatusFromRow(page.getRowByExecutionId(String.valueOf(executionId + 1))));
+        assertEquals(STARTED, page.getRowByExecutionId(String.valueOf(executionId + 1)).getBatchStatusValue());
         String actualStatus = batchOps.getExecution(deploymentName, jobOneName, executionId + 1).batchStatus;
         assertEquals(STARTED, actualStatus);
     }
 
-    private void assertExecutionsMatchRows(Set<Execution> executionSet, Set<ResourceTableRowFragment> rowSet) {
+    private void assertExecutionsMatchRows(Set<Execution> executionSet, Set<BatchTableRowFragment> rowSet) {
         assertEquals(executionSet.size(), rowSet.size());
         executionSet.forEach(execution -> {
-            ResourceTableRowFragment actualRow = rowSet.stream().filter(row -> {
-                        return Long.valueOf(page.getExecutionIdFromRow(row)).equals(execution.executionId);
-                     }).findFirst().get();
-            assertEquals(execution.instanceId, (long) Long.valueOf(page.getInstanceIdFromRow(actualRow)));
-            assertEquals(execution.batchStatus, page.getBatchStatusFromRow(actualRow));
-            assertEquals(execution.startTime, page.getStartTimeFromRow(actualRow));
+            BatchTableRowFragment actualRow = rowSet
+                    .stream()
+                    .filter(row -> Long.valueOf(row.getExecutionIdValue()).equals(execution.executionId))
+                    .findFirst().get();
+            assertEquals(execution.instanceId, (long) Long.valueOf(actualRow.getInstanceIdValue()));
+            assertEquals(execution.batchStatus, actualRow.getBatchStatusValue());
+            assertEquals(execution.startTime, actualRow.getStartTimeValue());
         });
     }
 
@@ -251,34 +272,51 @@ public class BatchManagementTestCase {
     }
 
     private boolean everyJobFileNameInTableEquals(String expectedJobFileName) {
-        return page.getAllRows().stream().map(row -> page.getJobFileNameFromRow(row))
+        return page.getAllRows().stream().map(row -> row.getJobXmlNameValue())
                 .allMatch(jobFileName -> jobFileName.equals(expectedJobFileName));
     }
 
     /**
      * Deploy batch application as web archive with {@link #deploymentName} name containing two batch jobs named
      * {@link #jobOneName} and {@link #jobTwoName} with configuration files named {@link #jobOneFileName}
-     * and {@link #jobTwoFileName}
+     * and {@link #jobTwoFileName} configured to run batch job executing chunks
      * @param itemProcessingSleep - if set greater than zero it will slow down processing of each item in running batch
      * job for given number of milliseconds
      */
-    private void deployBatchApplication(long itemProcessingSleep) throws CommandFailedException {
+    private void deployBatchApplicationWithChunks(long itemProcessingSleep) throws CommandFailedException {
         String randomString = "-" + RandomStringUtils.randomAlphabetic(6);
-        deploymentName = BatchManagementTestCase.class.getSimpleName() + randomString + ".war";
-        jobOneName = "job-one" + randomString;
-        jobTwoName = "job-two" + randomString;
-        jobOneFileName = jobOneName + "-config.xml";
-        jobTwoFileName = jobTwoName + "-config.xml";
+        deploymentName = String.format("%s-chunks-%s.war", BatchManagementTestCase.class.getSimpleName(), randomString);
+        jobOneName = "job-one-" + randomString;
+        jobTwoName = "job-two-" + randomString;
+        jobOneFileName = jobOneName + ".xml";
+        jobTwoFileName = jobTwoName + ".xml";
         WebArchive archive = ShrinkWrap.create(WebArchive.class, deploymentName)
                 .addClasses(Checkpoint.class, Reader.class, Processor.class, Writer.class)
-                .addAsWebInfResource(getBatchConfigAsset(jobOneName, itemProcessingSleep), "classes/META-INF/batch-jobs/" + jobOneFileName)
-                .addAsWebInfResource(getBatchConfigAsset(jobTwoName, itemProcessingSleep), "classes/META-INF/batch-jobs/" + jobTwoFileName)
+                .addAsWebInfResource(getBatchJobWithChunksConfigAsset(jobOneName, itemProcessingSleep), "classes/META-INF/batch-jobs/" + jobOneFileName)
+                .addAsWebInfResource(getBatchJobWithChunksConfigAsset(jobTwoName, itemProcessingSleep), "classes/META-INF/batch-jobs/" + jobTwoFileName)
                 .addAsWebInfResource("batch/names.txt", "classes/org/jboss/hal/testsuite/test/runtime/batch/names.txt")
                 .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml");
         deploymentOps.deploy(archive);
     }
 
-    private StringAsset getBatchConfigAsset(String jobId, long itemProcessingSleep) {
+    /**
+     * Deploy batch application as web archive with {@link #deploymentName} name containing one batch job named
+     * {@link #jobOneName}  with configuration files named {@link #jobOneFileName} configured to run batch job executing batchlet
+     * @param stoppingInterval - interval after which the batch job is going to be stopped
+     */
+    private void deployBatchApplicationWithBatchlet(long stoppingInterval) throws CommandFailedException {
+        String randomString = "-" + RandomStringUtils.randomAlphabetic(6);
+        deploymentName = String.format("%s-batchlet-%s.war", BatchManagementTestCase.class.getSimpleName(), randomString);
+        jobOneName = "job-one" + randomString;
+        jobOneFileName = jobOneName + ".xml";
+        WebArchive archive = ShrinkWrap.create(WebArchive.class, deploymentName)
+                .addClasses(Batchlet.class)
+                .addAsWebInfResource(getBatchJobWithBatchletConfigAsset(jobOneName, stoppingInterval), "classes/META-INF/batch-jobs/" + jobOneFileName)
+                .addAsWebInfResource(EmptyAsset.INSTANCE, "beans.xml");
+        deploymentOps.deploy(archive);
+    }
+
+    private StringAsset getBatchJobWithChunksConfigAsset(String jobId, long itemProcessingSleep) {
         return new StringAsset(
                 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" +
                 "<job id=\"" + jobId + "\" xmlns=\"http://xmlns.jcp.org/xml/ns/javaee\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
@@ -296,6 +334,21 @@ public class BatchManagementTestCase {
                 "        <end on=\"END\"/>\n" +
                 "    </step>\n" +
                 "</job>\n");
+    }
+
+    private StringAsset getBatchJobWithBatchletConfigAsset(String jobId, long stoppingInterval) {
+        return new StringAsset(
+                "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
+                        "<job id=\"" + jobId +  "\" xmlns=\"http://xmlns.jcp.org/xml/ns/javaee\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n" +
+                        " xsi:schemaLocation=\"http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/jobXML_1_0.xsd\" version=\"1.0\">\n" +
+                        "    <step id=\"run-batchlet-step\">\n" +
+                        "        <batchlet ref=\"testBatchlet\">\n" +
+                        "            <properties>\n" +
+                        "                <property name=\"stoppingInterval\" value=\"" + stoppingInterval + "\"/>\n" +
+                        "            </properties>\n" +
+                        "        </batchlet>\n" +
+                        "    </step>\n" +
+                        "</job>");
     }
 
 }
