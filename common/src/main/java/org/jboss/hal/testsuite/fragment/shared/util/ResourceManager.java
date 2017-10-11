@@ -7,6 +7,7 @@ import org.jboss.hal.testsuite.fragment.BaseFragment;
 import org.jboss.hal.testsuite.fragment.WindowFragment;
 import org.jboss.hal.testsuite.fragment.shared.modal.ConfirmationWindow;
 import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
+import org.jboss.hal.testsuite.fragment.shared.table.GenericResourceTableFragment;
 import org.jboss.hal.testsuite.fragment.shared.table.ResourceTableFragment;
 import org.jboss.hal.testsuite.fragment.shared.table.ResourceTableRowFragment;
 import org.jboss.hal.testsuite.util.Console;
@@ -32,9 +33,10 @@ public class ResourceManager extends BaseFragment {
 
     /**
      * Get resource table on page
+     * @param clazz Class for the {@link ResourceTableFragment} to be converted to
      * @return {@link ResourceTableFragment} if found
      */
-    public ResourceTableFragment getResourceTable() {
+    public <T extends GenericResourceTableFragment> T getResourceTable(Class<T> clazz) {
 
         WebElement tableRoot;
         if (!getRoot().findElements(RHS_CONTENT_PANEL_SELECTOR).isEmpty()) {
@@ -56,7 +58,11 @@ public class ResourceManager extends BaseFragment {
             throw new NotFoundException("No resource table was found within specified root!");
         }
 
-        return Graphene.createPageFragment(ResourceTableFragment.class, tableRoot);
+        return Graphene.createPageFragment(clazz, tableRoot);
+    }
+
+    public ResourceTableFragment getResourceTable() {
+        return getResourceTable(ResourceTableFragment.class);
     }
 
     /**
