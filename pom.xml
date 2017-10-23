@@ -160,6 +160,12 @@
         <version>3.0.0.Beta22</version>
       </dependency>
 
+      <dependency>
+        <groupId>javax.security.jacc</groupId>
+        <artifactId>javax.security.jacc-api</artifactId>
+        <version>1.5</version>
+      </dependency>
+
     </dependencies>
 
   </dependencyManagement>
