@@ -112,6 +112,13 @@ public class WizardWindow extends WindowFragment {
         return getWizardState();
     }
 
+    public State nextAndDismissReloadRequiredWindowWithState() {
+        String label = PropUtils.get("modals.wizard.next.label");
+        clickButton(label);
+        dismissReloadRequiredWindow();
+        return getWizardState();
+    }
+
     /**
      * Clicks cancel button, dismiss 'Reload required' window if appears and waits unit the wizard
      * window is closed.
