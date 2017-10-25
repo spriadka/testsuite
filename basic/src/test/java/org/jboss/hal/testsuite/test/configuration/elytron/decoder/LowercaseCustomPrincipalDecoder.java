@@ -1,4 +1,4 @@
-package org.jboss.hal.testsuite.test.configuration.elytron.principal.decoder;
+package org.jboss.hal.testsuite.test.configuration.elytron.decoder;
 
 import java.security.Principal;
 
