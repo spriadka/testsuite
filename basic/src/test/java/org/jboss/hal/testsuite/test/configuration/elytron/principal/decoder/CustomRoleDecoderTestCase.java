@@ -61,6 +61,13 @@ public class CustomRoleDecoderTestCase extends AbstractElytronTestCase {
         moduleUtils.removeModule(CUSTOM_ROLE_DECODER_PATH);
     }
 
+    /**
+     * @tpTestDetails Try to create Elytron Custom Role Decoder instance in Web Console's Elytron subsystem
+     * configuration.
+     * Validate created resource is visible in Custom Role Decoder table.
+     * Validate created resource is present in model.
+     * Validate value of created resource in model.
+     */
     @Test
     public void addCustomRoleDecoderTest() throws Exception {
 
@@ -89,6 +96,12 @@ public class CustomRoleDecoderTestCase extends AbstractElytronTestCase {
         }
     }
 
+    /**
+     * @tpTestDetails Create Elytron Custom Role Decoder instance in model
+     * and try to remove it in Web Console's Elytron subsystem configuration.
+     * Validate the resource is not any more visible in Custom Role Decoder table.
+     * Validate created resource is not any more present in the model.
+     */
     @Test
     public void removeCustomRoleDecoderTest() throws Exception {
         final String customRoleDecoderName = "custom_role_decoder_" + RandomStringUtils.randomAlphanumeric(7);
@@ -120,6 +133,11 @@ public class CustomRoleDecoderTestCase extends AbstractElytronTestCase {
         adminOps.reloadIfRequired();
     }
 
+    /**
+     * @tpTestDetails Create Elytron Custom Role Decoder instance in model
+     * and try to edit it's value in Web Console's Elytron subsystem configuration.
+     * Validate edited attribute values in the model.
+     */
     @Test
     public void editAttributesTest() throws Exception {
         final String customRoleDecoderName = "custom_role_decoder_" + RandomStringUtils.randomAlphanumeric(7);

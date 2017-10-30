@@ -9,7 +9,7 @@ import java.util.Iterator;
 
 public class ThorRoleDecoder implements RoleDecoder {
 
-    private static final String[] ASGARD = {"Thor","Loki"};
+    private static final String[] ASGARD = {"Thor", "Loki"};
 
     @Override
     public Roles decodeRoles(AuthorizationIdentity authorizationIdentity) {
