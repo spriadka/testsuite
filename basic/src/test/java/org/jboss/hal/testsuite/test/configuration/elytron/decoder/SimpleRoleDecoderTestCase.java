@@ -1,4 +1,4 @@
-package org.jboss.hal.testsuite.test.configuration.elytron.principal.decoder;
+package org.jboss.hal.testsuite.test.configuration.elytron.decoder;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.container.test.api.RunAsClient;
@@ -6,7 +6,7 @@ import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Elytron;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
-import org.jboss.hal.testsuite.fragment.config.AddResourceWizard;
+import org.jboss.hal.testsuite.fragment.config.elytron.decoder.AddSimpleRoleDecoderWizard;
 import org.jboss.hal.testsuite.page.config.elytron.MapperDecoderPage;
 import org.jboss.hal.testsuite.test.configuration.elytron.AbstractElytronTestCase;
 import org.jboss.hal.testsuite.util.ConfigChecker;
@@ -49,9 +49,9 @@ public class SimpleRoleDecoderTestCase extends AbstractElytronTestCase {
             page.navigateToDecoder()
                     .selectResource(SIMPLE_ROLE_DECODER_LABEL)
                     .getResourceManager()
-                    .addResource(AddResourceWizard.class)
+                    .addResource(AddSimpleRoleDecoderWizard.class)
                     .name(simpleRoleDecoderName)
-                    .text(ATTRIBUTE, attributeValue)
+                    .attribute(attributeValue)
                     .saveAndDismissReloadRequiredWindowWithState()
                     .assertWindowClosed();
             Assert.assertTrue("Newly created simple role decoder should be present in the table",

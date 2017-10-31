@@ -1,4 +1,4 @@
-package org.jboss.hal.testsuite.test.configuration.elytron.principal.decoder;
+package org.jboss.hal.testsuite.test.configuration.elytron.decoder;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.container.test.api.RunAsClient;
@@ -6,7 +6,7 @@ import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Elytron;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
-import org.jboss.hal.testsuite.fragment.config.AddResourceWizard;
+import org.jboss.hal.testsuite.fragment.config.elytron.decoder.AddCustomRoleDecoderWizard;
 import org.jboss.hal.testsuite.page.config.elytron.MapperDecoderPage;
 import org.jboss.hal.testsuite.test.configuration.elytron.AbstractElytronTestCase;
 import org.jboss.hal.testsuite.util.ConfigChecker;
@@ -43,6 +43,7 @@ public class CustomRoleDecoderTestCase extends AbstractElytronTestCase {
             , "elytron", "custom", "role", "decoder_" + RandomStringUtils.randomAlphanumeric(7));
     private static final String CLASS_NAME = "class-name";
     private static final String MODULE = "module";
+    private static final String[] ELYTRON_DEPENDENCY_MODULE_NAMES = {"org.wildfly.extension.elytron", "org.wildfly.security.elytron-private"};
 
     @Page
     private MapperDecoderPage page;
@@ -53,7 +54,7 @@ public class CustomRoleDecoderTestCase extends AbstractElytronTestCase {
         customRoleDecoderModule = moduleUtils.createModule(CUSTOM_ROLE_DECODER_PATH,
                 ShrinkWrap.create(JavaArchive.class, ARCHIVE_NAME)
                         .addClasses(RandomizedRoleDecoder.class),
-                "org.wildfly.extension.elytron", "org.wildfly.security.elytron-private");
+                ELYTRON_DEPENDENCY_MODULE_NAMES);
     }
 
     @AfterClass
@@ -78,18 +79,18 @@ public class CustomRoleDecoderTestCase extends AbstractElytronTestCase {
             page.navigateToDecoder()
                     .selectResource(CUSTOM_ROLE_DECODER_LABEL)
                     .getResourceManager()
-                    .addResource(AddResourceWizard.class)
+                    .addResource(AddCustomRoleDecoderWizard.class)
                     .name(customRoleDecoderName)
-                    .text("class-name", className)
-                    .text("module", customRoleDecoderModule)
+                    .className(className)
+                    .module(customRoleDecoderModule)
                     .saveAndDismissReloadRequiredWindowWithState()
                     .assertWindowClosed();
             Assert.assertTrue("Newly created custom role decoder should be present in the table",
                     page.getResourceManager().isResourcePresent(customRoleDecoderName));
             new ResourceVerifier(customRoleDecoderAddress, client)
                     .verifyExists()
-                    .verifyAttribute("class-name", className)
-                    .verifyAttribute("module", customRoleDecoderModule);
+                    .verifyAttribute(CLASS_NAME, className)
+                    .verifyAttribute(MODULE, customRoleDecoderModule);
         } finally {
             ops.removeIfExists(customRoleDecoderAddress);
             adminOps.reloadIfRequired();
@@ -145,7 +146,7 @@ public class CustomRoleDecoderTestCase extends AbstractElytronTestCase {
                 "custom_role_decoder_to_be_edited_" + RandomStringUtils.randomAlphanumeric(7));
         final String editingModule = moduleUtils.createModule(editingModulePath,
                 ShrinkWrap.create(JavaArchive.class).addClass(ThorRoleDecoder.class),
-                "org.wildfly.extension.elytron", "org.wildfly.security.elytron-private");
+                ELYTRON_DEPENDENCY_MODULE_NAMES);
         final String className = ThorRoleDecoder.class.getCanonicalName();
         final Address customRoleDecoderAddress = elyOps.getElytronAddress(CUSTOM_DOLE_DECODER, customRoleDecoderName);
         try {

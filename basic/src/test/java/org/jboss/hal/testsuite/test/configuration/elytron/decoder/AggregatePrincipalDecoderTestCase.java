@@ -1,4 +1,4 @@
-package org.jboss.hal.testsuite.test.configuration.elytron.principal.decoder;
+package org.jboss.hal.testsuite.test.configuration.elytron.decoder;
 
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.graphene.page.Page;
@@ -6,7 +6,7 @@ import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Elytron;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.dmr.ModelNodeGenerator;
-import org.jboss.hal.testsuite.fragment.config.AddResourceWizard;
+import org.jboss.hal.testsuite.fragment.config.elytron.decoder.AddAggregatePrincipalDecoderWizard;
 import org.jboss.hal.testsuite.page.config.elytron.MapperDecoderPage;
 import org.jboss.hal.testsuite.test.configuration.elytron.AbstractElytronTestCase;
 import org.jboss.hal.testsuite.util.ConfigChecker;
@@ -15,6 +15,8 @@ import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.Values;
+
+import java.io.IOException;
 
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.jboss.hal.testsuite.util.ConfigChecker.InputType.TEXT;
@@ -25,59 +27,58 @@ import static org.junit.Assert.assertTrue;
 @RunWith(Arquillian.class)
 @RunAsClient
 @Category(Elytron.class)
-public class ConcatenatingPrincipalDecoderTestCase extends AbstractElytronTestCase {
+public class AggregatePrincipalDecoderTestCase extends AbstractElytronTestCase {
 
-    private static final String CONCATENATING_PRINCIPAL_DECODER = "concatenating-principal-decoder";
-    private static final String CONCATENATING_PRINCIPAL_DECODER_LABEL = "Concatenating Principal Decoder";
-    private static final String CONSTANT_PRINCIPAL_DECODER = "constant-principal-decoder";
-    private static final String CONSTANT = "constant";
+    private static final String AGGREGATE_PRINCIPAL_DECODER = "aggregate-principal-decoder";
+    private static final String AGGREGATE_PRINCIPAL_DECODER_LABEL = "Aggregate Principal Decoder";
     private static final String PRINCIPAL_DECODERS = "principal-decoders";
-    private static final String JOINER = "joiner";
-
+    private static final String CONSTANT = "constant";
+    private static final String CONSTANT_PRINCIPAL_DECODER = "constant-principal-decoder";
 
     @Page
     private MapperDecoderPage page;
 
     /**
-     * @tpTestDetails Try to create Elytron Concatenating Principal Decoder instance in Web Console's Elytron subsystem
+     * @tpTestDetails Try to create Elytron Aggregate Principal Decoder instance in Web Console's Elytron subsystem
      * configuration.
-     * Validate created resource is visible in Concatenating Principal Decoder table.
+     * Validate created resource is visible in Aggregate Principal Decoder table.
      * Validate created resource is present in model.
      * Validate value of created resource in model.
      */
     @Test
-    public void addConcatenatingPrincipalDecoderTest() throws Exception {
-        final String concatenatingPrincipalDecoderName = randomAlphanumeric(5);
+    public void addAggregatePrincipalDecoderTest() throws Exception {
+        final String aggregatePrincipalDecoderName = randomAlphanumeric(5);
         final String constantPrincipalDecoder1name = randomAlphanumeric(5);
         final String constantPrincipalDecoder2name = randomAlphanumeric(5);
         final String constant1value = randomAlphanumeric(5);
         final String constant2value = randomAlphanumeric(5);
-        final Address concatenatingPrincipalDecoderAddress = elyOps.getElytronAddress(CONCATENATING_PRINCIPAL_DECODER,
-                concatenatingPrincipalDecoderName);
+        final Address aggregatePrincipalDecoderAddress = elyOps.getElytronAddress(AGGREGATE_PRINCIPAL_DECODER,
+                aggregatePrincipalDecoderName);
         final Address constantPrincipalDecoder1address = elyOps.getElytronAddress(CONSTANT_PRINCIPAL_DECODER,
                 constantPrincipalDecoder1name);
-        final Address constantPrincipalDecoder2address = elyOps.getElytronAddress(CONSTANT_PRINCIPAL_DECODER, constantPrincipalDecoder2name);
+        final Address constantPrincipalDecoder2address = elyOps.getElytronAddress(CONSTANT_PRINCIPAL_DECODER,
+                constantPrincipalDecoder2name);
 
         try {
-            ops.add(constantPrincipalDecoder1address, Values.of(CONSTANT, constant1value)).assertSuccess();
-            ops.add(constantPrincipalDecoder2address, Values.of(CONSTANT, constant2value)).assertSuccess();
+            createConstantPrincipalDecoderInModel(constantPrincipalDecoder1address, constant1value);
+            createConstantPrincipalDecoderInModel(constantPrincipalDecoder2address, constant2value);
             page.navigateToDecoder()
-                    .selectResource(CONCATENATING_PRINCIPAL_DECODER_LABEL)
+                    .selectResource(AGGREGATE_PRINCIPAL_DECODER_LABEL)
                     .getResourceManager()
-                    .addResource(AddResourceWizard.class)
-                    .name(concatenatingPrincipalDecoderName)
-                    .text(PRINCIPAL_DECODERS, constantPrincipalDecoder1name + "\n" + constantPrincipalDecoder2name)
-                    .saveWithState().assertWindowClosed();
-
+                    .addResource(AddAggregatePrincipalDecoderWizard.class)
+                    .name(aggregatePrincipalDecoderName)
+                    .principalDecoders(constantPrincipalDecoder1name + "\n" + constantPrincipalDecoder2name)
+                    .saveAndDismissReloadRequiredWindowWithState()
+                    .assertWindowClosed();
             assertTrue("Created resource should be present in the table!",
-                    page.resourceIsPresentInMainTable(concatenatingPrincipalDecoderName));
-            new ResourceVerifier(concatenatingPrincipalDecoderAddress, client)
+                    page.resourceIsPresentInMainTable(aggregatePrincipalDecoderName));
+            new ResourceVerifier(aggregatePrincipalDecoderAddress, client)
                     .verifyExists()
                     .verifyAttribute(PRINCIPAL_DECODERS, new ModelNodeGenerator.ModelNodeListBuilder()
                             .addAll(constantPrincipalDecoder1name, constantPrincipalDecoder2name)
                             .build());
         } finally {
-            ops.removeIfExists(concatenatingPrincipalDecoderAddress);
+            ops.removeIfExists(aggregatePrincipalDecoderAddress);
             ops.removeIfExists(constantPrincipalDecoder1address);
             ops.removeIfExists(constantPrincipalDecoder2address);
             adminOps.reloadIfRequired();
@@ -85,22 +86,21 @@ public class ConcatenatingPrincipalDecoderTestCase extends AbstractElytronTestCa
     }
 
     /**
-     * @tpTestDetails Create Elytron Concatenating Principal Decoder instance in model
+     * @tpTestDetails Create Elytron Aggregate Principal Decoder instance in model
      * and try to edit it's value in Web Console's Elytron subsystem configuration.
      * Validate edited attribute values in the model.
      */
     @Test
-    public void editConcatenatingPrincipalDecoderAttributesTest() throws Exception {
-        final String concatenatingPrincipalDecoderName = randomAlphanumeric(5);
+    public void editAggregatePrincipalDecoderAttributesTest() throws Exception {
+        final String aggregatePrincipalDecoderName = randomAlphanumeric(5);
         final String constantPrincipalDecoder1name = randomAlphanumeric(5);
         final String constantPrincipalDecoder2name = randomAlphanumeric(5);
         final String constantPrincipalDecoder3name = randomAlphanumeric(5);
         final String constant1value = randomAlphanumeric(5);
         final String constant2value = randomAlphanumeric(5);
         final String constant3value = randomAlphanumeric(5);
-        final String joinerValue = randomAlphanumeric(5);
-        final Address concatenatingPrincipalDecoderAddress = elyOps.getElytronAddress(CONCATENATING_PRINCIPAL_DECODER,
-                concatenatingPrincipalDecoderName);
+        final Address aggregatePrincipalDecoderAddress = elyOps.getElytronAddress(AGGREGATE_PRINCIPAL_DECODER,
+                aggregatePrincipalDecoderName);
         final Address constantPrincipalDecoder1address = elyOps.getElytronAddress(CONSTANT_PRINCIPAL_DECODER,
                 constantPrincipalDecoder1name);
         final Address constantPrincipalDecoder2address = elyOps.getElytronAddress(CONSTANT_PRINCIPAL_DECODER,
@@ -109,29 +109,29 @@ public class ConcatenatingPrincipalDecoderTestCase extends AbstractElytronTestCa
                 constantPrincipalDecoder3name);
 
         try {
-            ops.add(constantPrincipalDecoder1address, Values.of(CONSTANT, constant1value)).assertSuccess();
-            ops.add(constantPrincipalDecoder2address, Values.of(CONSTANT, constant2value)).assertSuccess();
-            ops.add(constantPrincipalDecoder3address, Values.of(CONSTANT, constant3value)).assertSuccess();
-            ops.add(concatenatingPrincipalDecoderAddress, Values.of(PRINCIPAL_DECODERS, new ModelNodeGenerator.ModelNodeListBuilder()
+            createConstantPrincipalDecoderInModel(constantPrincipalDecoder1address, constant1value);
+            createConstantPrincipalDecoderInModel(constantPrincipalDecoder2address, constant2value);
+            createConstantPrincipalDecoderInModel(constantPrincipalDecoder3address, constant3value);
+            ops.add(aggregatePrincipalDecoderAddress, Values.of(PRINCIPAL_DECODERS, new ModelNodeGenerator.ModelNodeListBuilder()
                     .addAll(constantPrincipalDecoder1name, constantPrincipalDecoder2name)
                     .build())).assertSuccess();
 
-            page.navigateToDecoder().selectResource(CONCATENATING_PRINCIPAL_DECODER_LABEL).getResourceManager()
-                    .selectByName(concatenatingPrincipalDecoderName);
+            page.navigateToDecoder()
+                    .selectResource(AGGREGATE_PRINCIPAL_DECODER_LABEL)
+                    .getResourceManager()
+                    .selectByName(aggregatePrincipalDecoderName);
             page.switchToConfigAreaTab(ATTRIBUTES_LABEL);
 
-            new ConfigChecker.Builder(client, concatenatingPrincipalDecoderAddress)
+            new ConfigChecker.Builder(client, aggregatePrincipalDecoderAddress)
                     .configFragment(page.getConfigFragment())
-                    .edit(TEXT, JOINER, joinerValue)
-                    .edit(TEXT, PRINCIPAL_DECODERS, constantPrincipalDecoder3name + "\n"
+                    .editAndSave(TEXT, PRINCIPAL_DECODERS, constantPrincipalDecoder3name + "\n"
                             + constantPrincipalDecoder1name)
-                    .andSave().verifyFormSaved()
-                    .verifyAttribute(JOINER, joinerValue)
+                    .verifyFormSaved()
                     .verifyAttribute(PRINCIPAL_DECODERS, new ModelNodeGenerator.ModelNodeListBuilder()
                             .addAll(constantPrincipalDecoder3name, constantPrincipalDecoder1name)
                             .build());
         } finally {
-            ops.removeIfExists(concatenatingPrincipalDecoderAddress);
+            ops.removeIfExists(aggregatePrincipalDecoderAddress);
             ops.removeIfExists(constantPrincipalDecoder1address);
             ops.removeIfExists(constantPrincipalDecoder2address);
             ops.removeIfExists(constantPrincipalDecoder3address);
@@ -139,46 +139,52 @@ public class ConcatenatingPrincipalDecoderTestCase extends AbstractElytronTestCa
         }
     }
 
+    private void createConstantPrincipalDecoderInModel(Address constantPrincipalDecoderAddress, String constantValue) throws IOException {
+        ops.add(constantPrincipalDecoderAddress, Values.of(CONSTANT, constantValue)).assertSuccess();
+    }
+
     /**
-     * @tpTestDetails Create Elytron Concatenating Principal Decoder instance in model
+     * @tpTestDetails Create Elytron Aggregate Principal Decoder instance in model
      * and try to remove it in Web Console's Elytron subsystem configuration.
-     * Validate the resource is not any more visible in Concatenating Principal Decoder table.
+     * Validate the resource is not any more visible in Aggregate Principal Decoder table.
      * Validate created resource is not any more present in the model.
      */
     @Test
-    public void removeConcatenatingPrincipalDecoderTest() throws Exception {
-        final String concatenatingPrincipalDecoderName = randomAlphanumeric(5);
+    public void removeAggregatePrincipalDecoderTest() throws Exception {
+        final String aggregatePrincipalDecoderName = randomAlphanumeric(5);
         final String constantPrincipalDecoder1name = randomAlphanumeric(5);
         final String constantPrincipalDecoder2name = randomAlphanumeric(5);
         final String constant1value = randomAlphanumeric(5);
         final String constant2value = randomAlphanumeric(5);
-        final Address concatenatingPrincipalDecoderAddress = elyOps.getElytronAddress(CONCATENATING_PRINCIPAL_DECODER,
-                concatenatingPrincipalDecoderName);
+        final Address aggregatePrincipalDecoderAddress = elyOps.getElytronAddress(AGGREGATE_PRINCIPAL_DECODER,
+                aggregatePrincipalDecoderName);
         final Address constantPrincipalDecoder1address = elyOps.getElytronAddress(CONSTANT_PRINCIPAL_DECODER,
                 constantPrincipalDecoder1name);
         final Address constantPrincipalDecoder2address = elyOps.getElytronAddress(CONSTANT_PRINCIPAL_DECODER,
                 constantPrincipalDecoder2name);
-        ResourceVerifier concatenatingPrincipalDecoderVerifier = new ResourceVerifier(concatenatingPrincipalDecoderAddress, client);
+        ResourceVerifier aggregatePrincipalDecoderVerifier = new ResourceVerifier(aggregatePrincipalDecoderAddress, client);
 
         try {
-            ops.add(constantPrincipalDecoder1address, Values.of(CONSTANT, constant1value)).assertSuccess();
-            ops.add(constantPrincipalDecoder2address, Values.of(CONSTANT, constant2value)).assertSuccess();
-            ops.add(concatenatingPrincipalDecoderAddress, Values.of(PRINCIPAL_DECODERS, new ModelNodeGenerator.ModelNodeListBuilder()
+            createConstantPrincipalDecoderInModel(constantPrincipalDecoder1address, constant1value);
+            createConstantPrincipalDecoderInModel(constantPrincipalDecoder2address, constant2value);
+            ops.add(aggregatePrincipalDecoderAddress, Values.of(PRINCIPAL_DECODERS, new ModelNodeGenerator.ModelNodeListBuilder()
                     .addAll(constantPrincipalDecoder1name, constantPrincipalDecoder2name)
                     .build())).assertSuccess();
-            concatenatingPrincipalDecoderVerifier.verifyExists();
-
-            page.navigateToDecoder().selectResource(CONCATENATING_PRINCIPAL_DECODER_LABEL).getResourceManager()
-                    .removeResource(concatenatingPrincipalDecoderName).confirmAndDismissReloadRequiredMessage().assertClosed();
+            aggregatePrincipalDecoderVerifier.verifyExists();
+            page.navigateToDecoder()
+                    .selectResource(AGGREGATE_PRINCIPAL_DECODER_LABEL)
+                    .getResourceManager()
+                    .removeResource(aggregatePrincipalDecoderName)
+                    .confirmAndDismissReloadRequiredMessage()
+                    .assertClosed();
             assertFalse("Removed resource should not be present in the table any more!",
-                    page.resourceIsPresentInMainTable(concatenatingPrincipalDecoderName));
-            concatenatingPrincipalDecoderVerifier.verifyDoesNotExist();
+                    page.resourceIsPresentInMainTable(aggregatePrincipalDecoderName));
+            aggregatePrincipalDecoderVerifier.verifyDoesNotExist();
         } finally {
-            ops.removeIfExists(concatenatingPrincipalDecoderAddress);
+            ops.removeIfExists(aggregatePrincipalDecoderAddress);
             ops.removeIfExists(constantPrincipalDecoder1address);
             ops.removeIfExists(constantPrincipalDecoder2address);
             adminOps.reloadIfRequired();
         }
     }
-
 }

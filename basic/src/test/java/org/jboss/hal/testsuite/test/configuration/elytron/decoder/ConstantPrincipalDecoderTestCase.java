@@ -1,11 +1,11 @@
-package org.jboss.hal.testsuite.test.configuration.elytron.principal.decoder;
+package org.jboss.hal.testsuite.test.configuration.elytron.decoder;
 
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Elytron;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
-import org.jboss.hal.testsuite.fragment.config.AddResourceWizard;
+import org.jboss.hal.testsuite.fragment.config.elytron.decoder.AddConstantPrincipalDecoderWizard;
 import org.jboss.hal.testsuite.page.config.elytron.MapperDecoderPage;
 import org.jboss.hal.testsuite.test.configuration.elytron.AbstractElytronTestCase;
 import org.jboss.hal.testsuite.util.ConfigChecker;
@@ -14,6 +14,8 @@ import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.Values;
+
+import java.io.IOException;
 
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.jboss.hal.testsuite.util.ConfigChecker.InputType.TEXT;
@@ -49,10 +51,11 @@ public class ConstantPrincipalDecoderTestCase extends AbstractElytronTestCase {
             page.navigateToDecoder()
                     .selectResource(CONSTANT_PRINCIPAL_DECODER_LABEL)
                     .getResourceManager()
-                    .addResource(AddResourceWizard.class)
+                    .addResource(AddConstantPrincipalDecoderWizard.class)
                     .name(constantPrincipalDecoderName)
-                    .text(CONSTANT, constantValue)
-                    .saveWithState().assertWindowClosed();
+                    .constant(constantValue)
+                    .saveAndDismissReloadRequiredWindowWithState()
+                    .assertWindowClosed();
 
             assertTrue("Created resource should be present in the table!",
                     page.resourceIsPresentInMainTable(constantPrincipalDecoderName));
@@ -77,9 +80,11 @@ public class ConstantPrincipalDecoderTestCase extends AbstractElytronTestCase {
         final Address constantPrincipalDecoderAddress = elyOps.getElytronAddress(CONSTANT_PRINCIPAL_DECODER,
                 constantPrincipalDecoderName);
         try {
-            ops.add(constantPrincipalDecoderAddress, Values.of(CONSTANT, originalAttributeValue)).assertSuccess();
+            createConstantPrincipalDecoderInModel(constantPrincipalDecoderAddress, originalAttributeValue);
 
-            page.navigateToDecoder().selectResource(CONSTANT_PRINCIPAL_DECODER_LABEL).getResourceManager()
+            page.navigateToDecoder()
+                    .selectResource(CONSTANT_PRINCIPAL_DECODER_LABEL)
+                    .getResourceManager()
                     .selectByName(constantPrincipalDecoderName);
             page.switchToConfigAreaTab(ATTRIBUTES_LABEL);
 
@@ -92,6 +97,10 @@ public class ConstantPrincipalDecoderTestCase extends AbstractElytronTestCase {
             ops.removeIfExists(constantPrincipalDecoderAddress);
             adminOps.reloadIfRequired();
         }
+    }
+
+    private void createConstantPrincipalDecoderInModel(Address constantPrincipalDecoderAddress, String originalAttributeValue) throws IOException {
+        ops.add(constantPrincipalDecoderAddress, Values.of(CONSTANT, originalAttributeValue)).assertSuccess();
     }
 
     /**
@@ -109,11 +118,14 @@ public class ConstantPrincipalDecoderTestCase extends AbstractElytronTestCase {
         ResourceVerifier constantPrincipalDecoderVerifier = new ResourceVerifier(constantPrincipalDecoderAddress, client);
 
         try {
-            ops.add(constantPrincipalDecoderAddress, Values.of(CONSTANT, constantValue)).assertSuccess();
+            createConstantPrincipalDecoderInModel(constantPrincipalDecoderAddress, constantValue);
             constantPrincipalDecoderVerifier.verifyExists();
-
-            page.navigateToDecoder().selectResource(CONSTANT_PRINCIPAL_DECODER_LABEL).getResourceManager()
-                    .removeResource(constantPrincipalDecoderName).confirmAndDismissReloadRequiredMessage().assertClosed();
+            page.navigateToDecoder()
+                    .selectResource(CONSTANT_PRINCIPAL_DECODER_LABEL)
+                    .getResourceManager()
+                    .removeResource(constantPrincipalDecoderName)
+                    .confirmAndDismissReloadRequiredMessage()
+                    .assertClosed();
             assertFalse("Removed resource should not be present in the table any more!",
                     page.resourceIsPresentInMainTable(constantPrincipalDecoderName));
             constantPrincipalDecoderVerifier.verifyDoesNotExist();

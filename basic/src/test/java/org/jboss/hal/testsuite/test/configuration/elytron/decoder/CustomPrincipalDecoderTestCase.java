@@ -1,4 +1,4 @@
-package org.jboss.hal.testsuite.test.configuration.elytron.principal.decoder;
+package org.jboss.hal.testsuite.test.configuration.elytron.decoder;
 
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.graphene.page.Page;
@@ -6,7 +6,7 @@ import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Elytron;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.dmr.ModelNodeGenerator;
-import org.jboss.hal.testsuite.fragment.config.AddResourceWizard;
+import org.jboss.hal.testsuite.fragment.config.elytron.decoder.AddCustomPrincipalDecoderWizard;
 import org.jboss.hal.testsuite.page.config.elytron.MapperDecoderPage;
 import org.jboss.hal.testsuite.test.configuration.elytron.AbstractElytronTestCase;
 import org.jboss.hal.testsuite.util.ConfigChecker;
@@ -40,6 +40,7 @@ public class CustomPrincipalDecoderTestCase extends AbstractElytronTestCase {
     private static final Path CUSTOM_PRINCIPAL_DECODER_PATH = Paths.get("test", "elytron",
             "principal", "decoder" + randomAlphanumeric(5));
     private static String customPrincipalDecoderModuleName;
+    private static final String[] ELYTRON_DEPENDENCY_MODULE_NAMES = {"org.wildfly.extension.elytron", "org.wildfly.security.elytron-private"};
 
     private static ModuleUtils moduleUtils;
 
@@ -52,7 +53,7 @@ public class CustomPrincipalDecoderTestCase extends AbstractElytronTestCase {
         JavaArchive jar = ShrinkWrap.create(JavaArchive.class, ARCHIVE_NAME);
         jar.addClasses(LowercaseCustomPrincipalDecoder.class, UppercaseCustomPrincipalDecoder.class);
         customPrincipalDecoderModuleName = moduleUtils.createModule(CUSTOM_PRINCIPAL_DECODER_PATH, jar,
-                "org.wildfly.extension.elytron", "org.wildfly.security.elytron-private");
+                ELYTRON_DEPENDENCY_MODULE_NAMES);
     }
 
     @AfterClass
@@ -77,11 +78,12 @@ public class CustomPrincipalDecoderTestCase extends AbstractElytronTestCase {
             page.navigateToDecoder()
                     .selectResource(CUSTOM_PRINCIPAL_DECODER_LABEL)
                     .getResourceManager()
-                    .addResource(AddResourceWizard.class)
+                    .addResource(AddCustomPrincipalDecoderWizard.class)
                     .name(customPrincipalDecoderName)
-                    .text(CLASS_NAME, LowercaseCustomPrincipalDecoder.class.getName())
-                    .text(MODULE, customPrincipalDecoderModuleName)
-                    .saveWithState().assertWindowClosed();
+                    .className(LowercaseCustomPrincipalDecoder.class.getName())
+                    .module(customPrincipalDecoderModuleName)
+                    .saveAndDismissReloadRequiredWindowWithState()
+                    .assertWindowClosed();
 
             assertTrue("Created resource should be present in the table!",
                     page.resourceIsPresentInMainTable(customPrincipalDecoderName));
@@ -112,7 +114,9 @@ public class CustomPrincipalDecoderTestCase extends AbstractElytronTestCase {
             ops.add(customPrincipalDecoderAddress, Values.of(CLASS_NAME, LowercaseCustomPrincipalDecoder.class.getName())
                     .and(MODULE, customPrincipalDecoderModuleName)).assertSuccess();
 
-            page.navigateToDecoder().selectResource(CUSTOM_PRINCIPAL_DECODER_LABEL).getResourceManager()
+            page.navigateToDecoder()
+                    .selectResource(CUSTOM_PRINCIPAL_DECODER_LABEL)
+                    .getResourceManager()
                     .selectByName(customPrincipalDecoderName);
             page.switchToConfigAreaTab(ATTRIBUTES_LABEL);
 
@@ -149,9 +153,12 @@ public class CustomPrincipalDecoderTestCase extends AbstractElytronTestCase {
             ops.add(customPrincipalDecoderAddress, Values.of(CLASS_NAME, LowercaseCustomPrincipalDecoder.class.getName())
                     .and(MODULE, customPrincipalDecoderModuleName)).assertSuccess();
             customPrincipalDecoderVerifier.verifyExists();
-
-            page.navigateToDecoder().selectResource(CUSTOM_PRINCIPAL_DECODER_LABEL).getResourceManager()
-                    .removeResource(customPrincipalDecoderName).confirmAndDismissReloadRequiredMessage().assertClosed();
+            page.navigateToDecoder()
+                    .selectResource(CUSTOM_PRINCIPAL_DECODER_LABEL)
+                    .getResourceManager()
+                    .removeResource(customPrincipalDecoderName)
+                    .confirmAndDismissReloadRequiredMessage()
+                    .assertClosed();
             assertFalse("Removed resource should not be present in the table any more!",
                     page.resourceIsPresentInMainTable(customPrincipalDecoderName));
             customPrincipalDecoderVerifier.verifyDoesNotExist();

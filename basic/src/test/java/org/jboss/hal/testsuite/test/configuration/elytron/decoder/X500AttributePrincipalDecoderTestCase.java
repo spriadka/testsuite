@@ -1,11 +1,11 @@
-package org.jboss.hal.testsuite.test.configuration.elytron.principal.decoder;
+package org.jboss.hal.testsuite.test.configuration.elytron.decoder;
 
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Elytron;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
-import org.jboss.hal.testsuite.fragment.config.AddResourceWizard;
+import org.jboss.hal.testsuite.fragment.config.elytron.decoder.AddX500PrincipalDecoderWizard;
 import org.jboss.hal.testsuite.page.config.elytron.MapperDecoderPage;
 import org.jboss.hal.testsuite.test.configuration.elytron.AbstractElytronTestCase;
 import org.jboss.hal.testsuite.util.ConfigChecker;
@@ -28,7 +28,6 @@ public class X500AttributePrincipalDecoderTestCase extends AbstractElytronTestCa
     private static final String JOINER = "joiner";
     private static final String X500_ATTRIBUTE_PRINCIPAL_DECODER = "x500-attribute-principal-decoder";
     private static final String X500_ATTRIBUTE_PRINCIPAL_DECODER_LABEL = "X500 Attribute Principal Decoder";
-    private static final String ATTRIBUTE_NAME = "attribute-name";
     private static final String MAXIMUM_SEGMENTS = "maximum-segments";
     private static final String OID = "oid";
     private static final String REVERSE = "reverse";
@@ -46,26 +45,56 @@ public class X500AttributePrincipalDecoderTestCase extends AbstractElytronTestCa
     @Test
     public void addX500AttributePrincipalDecoderTest() throws Exception {
         final String x500AttributePrincipalDecoderName = randomAlphanumeric(5);
+        final String oidValue = randomAlphanumeric(5);
+        final Address x500AttributePrincipalDecoderAddress = elyOps.getElytronAddress(X500_ATTRIBUTE_PRINCIPAL_DECODER,
+                x500AttributePrincipalDecoderName);
+
+        try {
+            page.navigateToDecoder()
+                    .selectResource(X500_ATTRIBUTE_PRINCIPAL_DECODER_LABEL)
+                    .getResourceManager()
+                    .addResource(AddX500PrincipalDecoderWizard.class)
+                    .name(x500AttributePrincipalDecoderName)
+                    .oid(oidValue)
+                    .saveAndDismissReloadRequiredWindowWithState()
+                    .assertWindowClosed();
+            assertTrue("Created resource should be present in the table!",
+                    page.resourceIsPresentInMainTable(x500AttributePrincipalDecoderName));
+            new ResourceVerifier(x500AttributePrincipalDecoderAddress, client).verifyExists()
+                    .verifyAttribute(OID, oidValue);
+        } finally {
+            ops.removeIfExists(x500AttributePrincipalDecoderAddress);
+            adminOps.reloadIfRequired();
+        }
+    }
+
+    /**
+     * @tpTestDetails Try to create Elytron X500 Attribute Principal Decoder instance in Web Console's Elytron subsystem
+     * configuration.
+     * Validate created resource is visible in X500 Attribute Principal Decoder table.
+     * Validate created resource is present in model.
+     * Validate value of created resource in model.
+     */
+    @Test
+    public void addX500AttributePrincipalDecoderInvalidCombinationTest() throws Exception {
+        final String x500AttributePrincipalDecoderName = randomAlphanumeric(5);
         final String attributeNameValue = randomAlphanumeric(5);
         final String oidValue = randomAlphanumeric(5);
         final Address x500AttributePrincipalDecoderAddress = elyOps.getElytronAddress(X500_ATTRIBUTE_PRINCIPAL_DECODER,
                 x500AttributePrincipalDecoderName);
 
         try {
-            AddResourceWizard wizard = page.navigateToDecoder()
+            AddX500PrincipalDecoderWizard wizard = page.navigateToDecoder()
                     .selectResource(X500_ATTRIBUTE_PRINCIPAL_DECODER_LABEL)
                     .getResourceManager()
-                    .addResource(AddResourceWizard.class)
-                    .name(x500AttributePrincipalDecoderName)
-                    .text(ATTRIBUTE_NAME, attributeNameValue)
-                    .text(OID, oidValue);
-            wizard.saveWithState().assertWindowOpen(); // ATTRIBUTE_NAME and OID cannot be set at the same time
-            wizard.text(ATTRIBUTE_NAME, "").saveWithState().assertWindowClosed();
-
-            assertTrue("Created resource should be present in the table!",
-                    page.resourceIsPresentInMainTable(x500AttributePrincipalDecoderName));
-            new ResourceVerifier(x500AttributePrincipalDecoderAddress, client).verifyExists()
-                    .verifyAttribute(OID, oidValue);
+                    .addResource(AddX500PrincipalDecoderWizard.class);
+            wizard.name(x500AttributePrincipalDecoderName)
+                    .attributeName(attributeNameValue)
+                    .oid(oidValue)
+                    .saveAndDismissReloadRequiredWindowWithState()
+                    .assertWindowOpen();
+            assertTrue("Validation error regarding using both \"attribute-name\" and \"oid\" at the same time should be visible",
+                    page.getWindowFragment().isErrorShownInForm());
         } finally {
             ops.removeIfExists(x500AttributePrincipalDecoderAddress);
             adminOps.reloadIfRequired();
@@ -90,7 +119,9 @@ public class X500AttributePrincipalDecoderTestCase extends AbstractElytronTestCa
         try {
             ops.add(x500AttributePrincipalDecoderAddress, Values.of(OID, originalOidValue)).assertSuccess();
 
-            page.navigateToDecoder().selectResource(X500_ATTRIBUTE_PRINCIPAL_DECODER_LABEL).getResourceManager()
+            page.navigateToDecoder()
+                    .selectResource(X500_ATTRIBUTE_PRINCIPAL_DECODER_LABEL)
+                    .getResourceManager()
                     .selectByName(x500AttributePrincipalDecoderName);
             page.switchToConfigAreaTab(ATTRIBUTES_LABEL);
 
@@ -128,9 +159,11 @@ public class X500AttributePrincipalDecoderTestCase extends AbstractElytronTestCa
         try {
             ops.add(x500AttributePrincipalDecoderAddress, Values.of(OID, oidValue)).assertSuccess();
             x500AttributePrincipalDecoderVerifier.verifyExists();
-
-            page.navigateToDecoder().selectResource(X500_ATTRIBUTE_PRINCIPAL_DECODER_LABEL).getResourceManager()
-                    .removeResource(x500AttributePrincipalDecoderName).confirmAndDismissReloadRequiredMessage().assertClosed();
+            page.navigateToDecoder()
+                    .selectResource(X500_ATTRIBUTE_PRINCIPAL_DECODER_LABEL)
+                    .getResourceManager()
+                    .removeResource(x500AttributePrincipalDecoderName)
+                    .confirmAndDismissReloadRequiredMessage().assertClosed();
             assertFalse("Removed resource should not be present in the table any more!",
                     page.resourceIsPresentInMainTable(x500AttributePrincipalDecoderName));
             x500AttributePrincipalDecoderVerifier.verifyDoesNotExist();
