@@ -2,6 +2,7 @@ package org.jboss.hal.testsuite.test.configuration.elytron.securityrealm;
 
 
 import org.apache.commons.lang.RandomStringUtils;
+import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.dmr.ModelNode;
@@ -20,17 +21,17 @@ import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.Values;
 
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.concurrent.TimeoutException;
 
 @Category(Elytron.class)
 @RunWith(Arquillian.class)
+@RunAsClient
 public class ElytronIdentitySecurityRealmTestCase extends AbstractElytronTestCase {
 
-    private static final String
-            ATTRIBUTE_NAME = "attribute-name",
-            ATTRIBUTE_VALUES = "attribute-values",
-            IDENTITY_REALM = "identity-realm",
-            IDENTITY = "identity";
+    private static final String ATTRIBUTE_NAME = "attribute-name";
+    private static final String ATTRIBUTE_VALUES = "attribute-values";
+    private static final String IDENTITY_REALM = "identity-realm";
+    private static final String IDENTITY = "identity";
 
     @Page
     private SecurityRealmPage page;
@@ -44,22 +45,20 @@ public class ElytronIdentitySecurityRealmTestCase extends AbstractElytronTestCas
      */
     @Test
     public void testAddIdentitySecurityRealm() throws Exception {
-        final Address realmAddress = elyOps.getElytronAddress(IDENTITY_REALM, RandomStringUtils.randomAlphabetic(7));
+        final String realmName = "identity_security_realm_" + RandomStringUtils.randomAlphanumeric(7);
         final String identityValue = RandomStringUtils.randomAlphanumeric(7);
-
-        page.navigate();
-        page.switchToIdentityRealms();
-
+        final Address realmAddress = elyOps.getElytronAddress(IDENTITY_REALM, realmName);
         try {
+            page.navigate();
+            page.switchToIdentityRealms();
             page.getResourceManager().addResource(AddIdentitySecurityRealm.class)
-                    .name(realmAddress.getLastPairValue())
+                    .name(realmName)
                     .identity(identityValue)
                     .saveWithState()
                     .assertWindowClosed();
 
             Assert.assertTrue("Resource should be present in table!",
-                    page.getResourceManager().isResourcePresent(realmAddress.getLastPairValue()));
-
+                    page.getResourceManager().isResourcePresent(realmName));
             new ResourceVerifier(realmAddress, client)
                     .verifyExists()
                     .verifyAttribute(IDENTITY, identityValue);
@@ -77,24 +76,20 @@ public class ElytronIdentitySecurityRealmTestCase extends AbstractElytronTestCas
      */
     @Test
     public void testRemoveIdentitySecurityRealm() throws Exception {
-        Address realmAddress = null;
-
+        final String realmName = "identity_security_realm_" + RandomStringUtils.randomAlphanumeric(7);
+        final Address realmAddress = elyOps.getElytronAddress(IDENTITY_REALM, realmName);
         try {
-            realmAddress = createIdentityRealm();
+            createIdentityRealm(realmAddress);
             page.navigate();
             page.switchToIdentityRealms()
                     .getResourceManager()
-                    .removeResource(realmAddress.getLastPairValue())
+                    .removeResource(realmName)
                     .confirmAndDismissReloadRequiredMessage()
                     .assertClosed();
-
-            Assert.assertFalse(page.getResourceManager().isResourcePresent(realmAddress.getLastPairValue()));
-
+            Assert.assertFalse(page.getResourceManager().isResourcePresent(realmName));
             new ResourceVerifier(realmAddress, client).verifyDoesNotExist();
         } finally {
-            if (realmAddress != null) {
-                ops.removeIfExists(realmAddress);
-            }
+            ops.removeIfExists(realmAddress);
             adminOps.reloadIfRequired();
         }
     }
@@ -106,26 +101,23 @@ public class ElytronIdentitySecurityRealmTestCase extends AbstractElytronTestCas
      */
     @Test
     public void editAttributeName() throws Exception {
-        Address realmAddress = null;
-
+        final String realmName = "identity_security_realm_" + RandomStringUtils.randomAlphanumeric(7);
+        final String attributeNameValue = RandomStringUtils.randomAlphanumeric(7);
+        final Address realmAddress = elyOps.getElytronAddress(IDENTITY_REALM, realmName);
         try {
-            realmAddress = createIdentityRealm();
+            createIdentityRealm(realmAddress);
             page.navigate();
             page.switchToIdentityRealms()
                     .getResourceManager()
-                    .selectByName(realmAddress.getLastPairValue());
-
-            final String value = RandomStringUtils.randomAlphanumeric(7);
+                    .selectByName(realmName);
             new ConfigChecker.Builder(client, realmAddress)
                     .configFragment(page.getConfigFragment())
-                    .editAndSave(ConfigChecker.InputType.TEXT, ATTRIBUTE_NAME, value)
+                    .editAndSave(ConfigChecker.InputType.TEXT, ATTRIBUTE_NAME, attributeNameValue)
                     .verifyFormSaved()
-                    .verifyAttribute(ATTRIBUTE_NAME, value);
+                    .verifyAttribute(ATTRIBUTE_NAME, attributeNameValue);
 
         } finally {
-            if (realmAddress != null) {
-                ops.removeIfExists(realmAddress);
-            }
+            ops.removeIfExists(realmAddress);
             adminOps.reloadIfRequired();
         }
 
@@ -138,26 +130,24 @@ public class ElytronIdentitySecurityRealmTestCase extends AbstractElytronTestCas
      */
     @Test
     public void editIdentity() throws Exception {
-        Address realmAddress = null;
-
+        final String realmName = "identity_security_realm_" + RandomStringUtils.randomAlphanumeric(7);
+        final String identityValue = RandomStringUtils.randomAlphanumeric(7);
+        final Address realmAddress = elyOps.getElytronAddress(IDENTITY_REALM, realmName);
         try {
-            realmAddress = createIdentityRealm();
+            createIdentityRealm(realmAddress);
             page.navigate();
             page.switchToIdentityRealms()
                     .getResourceManager()
-                    .selectByName(realmAddress.getLastPairValue());
+                    .selectByName(realmName);
 
-            final String value = RandomStringUtils.randomAlphanumeric(7);
             new ConfigChecker.Builder(client, realmAddress)
                     .configFragment(page.getConfigFragment())
-                    .editAndSave(ConfigChecker.InputType.TEXT, IDENTITY, value)
+                    .editAndSave(ConfigChecker.InputType.TEXT, IDENTITY, identityValue)
                     .verifyFormSaved()
-                    .verifyAttribute(IDENTITY, value);
+                    .verifyAttribute(IDENTITY, identityValue);
 
         } finally {
-            if (realmAddress != null) {
-                ops.removeIfExists(realmAddress);
-            }
+            ops.removeIfExists(realmAddress);
             adminOps.reloadIfRequired();
         }
 
@@ -170,40 +160,36 @@ public class ElytronIdentitySecurityRealmTestCase extends AbstractElytronTestCas
      */
     @Test
     public void editAttributeValues() throws Exception {
-        Address realmAddress = null;
-
+        final String realmName = "identity_security_realm_" + RandomStringUtils.randomAlphanumeric(7);
+        final String[] values = new String[] {
+                RandomStringUtils.randomAlphanumeric(7),
+                RandomStringUtils.randomAlphanumeric(7)
+        };
+        final ModelNode attributeValues = new ModelNodeGenerator.ModelNodeListBuilder()
+                .addAll(values)
+                .build();
+        final Address realmAddress = elyOps.getElytronAddress(IDENTITY_REALM, realmName);
         try {
-            realmAddress = createIdentityRealm();
+            createIdentityRealm(realmAddress);
             page.navigate();
             page.switchToIdentityRealms()
                     .getResourceManager()
-                    .selectByName(realmAddress.getLastPairValue());
-
-            final String[] value = new String[] {
-                    RandomStringUtils.randomAlphanumeric(7),
-                    RandomStringUtils.randomAlphanumeric(7)
-            };
-            final ModelNodeGenerator.ModelNodeListBuilder nodeBuilder = new ModelNodeGenerator.ModelNodeListBuilder();
-            Arrays.stream(value).forEach(item -> nodeBuilder.addNode(new ModelNode(item)));
-
+                    .selectByName(realmName);
             new ConfigChecker.Builder(client, realmAddress)
                     .configFragment(page.getConfigFragment())
-                    .editAndSave(ConfigChecker.InputType.TEXT, ATTRIBUTE_VALUES, String.join("\n", value))
+                    .editAndSave(ConfigChecker.InputType.TEXT, ATTRIBUTE_VALUES, String.join("\n", values))
                     .verifyFormSaved()
-                    .verifyAttribute(ATTRIBUTE_VALUES, nodeBuilder.build());
+                    .verifyAttribute(ATTRIBUTE_VALUES, attributeValues);
 
         } finally {
-            if (realmAddress != null) {
-                ops.removeIfExists(realmAddress);
-            }
+            ops.removeIfExists(realmAddress);
             adminOps.reloadIfRequired();
         }
 
     }
 
-    private Address createIdentityRealm() throws IOException {
-        final Address realmAddress = elyOps.getElytronAddress(IDENTITY_REALM, RandomStringUtils.randomAlphabetic(7));
-        ops.add(realmAddress, Values.of(IDENTITY, RandomStringUtils.randomAlphanumeric(7)));
-        return realmAddress;
+    private void createIdentityRealm(Address realmAddress) throws IOException, TimeoutException, InterruptedException {
+        ops.add(realmAddress, Values.of(IDENTITY, RandomStringUtils.randomAlphanumeric(7))).assertSuccess();
+        adminOps.reloadIfRequired();
     }
 }

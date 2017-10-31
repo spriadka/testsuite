@@ -1,6 +1,7 @@
 package org.jboss.hal.testsuite.test.configuration.elytron.securityrealm;
 
 import org.apache.commons.lang.RandomStringUtils;
+import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.dmr.ModelNode;
@@ -21,21 +22,22 @@ import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.Values;
 
 import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
 @Category(Elytron.class)
 @RunWith(Arquillian.class)
+@RunAsClient
 public class ElytronPropertiesSecurityRealmTestCase extends AbstractElytronTestCase {
 
-    private static final String
-            USERS_PROPERTIES = "users-properties",
-            GROUPS_PROPERTIES = "groups-properties",
-            GROUPS_ATTRIBUTE = "groups-attribute",
-            PROPERTIES_REALM = "properties-realm",
-            DIGEST_REALM_NAME = "digest-realm-name",
-            PATH = "path",
-            PLAIN_TEXT = "plain-text",
-            RELATIVE_TO = "relative-to",
-            CONFIG_DIR_PATH_NAME = ConfigUtils.getConfigDirPathName();
+    private static final String USERS_PROPERTIES = "users-properties";
+    private static final String GROUPS_PROPERTIES = "groups-properties";
+    private static final String GROUPS_ATTRIBUTE = "groups-attribute";
+    private static final String PROPERTIES_REALM = "properties-realm";
+    private static final String DIGEST_REALM_NAME = "digest-realm-name";
+    private static final String PATH = "path";
+    private static final String PLAIN_TEXT = "plain-text";
+    private static final String RELATIVE_TO = "relative-to";
+    private static final String CONFIG_DIR_PATH_NAME = ConfigUtils.getConfigDirPathName();
 
     @Page
     private SecurityRealmPage page;
@@ -49,23 +51,20 @@ public class ElytronPropertiesSecurityRealmTestCase extends AbstractElytronTestC
      */
     @Test
     public void testAddPropertiesSecurityRealm() throws Exception {
-        final Address realmAddress = elyOps.getElytronAddress(PROPERTIES_REALM, RandomStringUtils.randomAlphabetic(7));
-
+        final String realmName = "properties_security_realm_" + RandomStringUtils.randomAlphanumeric(7);
         final String usersPropertiesPathValue = "mgmt-users.properties";
-
-        page.navigate();
-
+        final Address realmAddress = elyOps.getElytronAddress(PROPERTIES_REALM, realmName);
         try {
-            page.getResourceManager().addResource(AddPropertiesSecurityRealmWizard.class)
+            page.navigate();
+            page.getResourceManager()
+                    .addResource(AddPropertiesSecurityRealmWizard.class)
                     .name(realmAddress.getLastPairValue())
                     .usersPropertiesPath(usersPropertiesPathValue)
                     .relativeTo(CONFIG_DIR_PATH_NAME)
                     .saveWithState()
                     .assertWindowClosed("Failed probably because of https://issues.jboss.org/browse/HAL-1347");
-
             Assert.assertTrue("Resource should be present in table!",
                     page.getResourceManager().isResourcePresent(realmAddress.getLastPairValue()));
-
             new ResourceVerifier(realmAddress, client).verifyExists()
                     .verifyAttribute(USERS_PROPERTIES + "." + RELATIVE_TO, CONFIG_DIR_PATH_NAME)
                     .verifyAttribute(USERS_PROPERTIES + "." + PATH, usersPropertiesPathValue);
@@ -83,19 +82,17 @@ public class ElytronPropertiesSecurityRealmTestCase extends AbstractElytronTestC
      */
     @Test
     public void testRemovePropertiesSecurityRealm() throws Exception {
-        final Address securityRealmAddress = elyOps.getElytronAddress(PROPERTIES_REALM, RandomStringUtils.randomAlphanumeric(7));
-
+        final String securityRealmName = "properties_security_realm_" + RandomStringUtils.randomAlphanumeric(7);
+        final Address securityRealmAddress = elyOps.getElytronAddress(PROPERTIES_REALM, securityRealmName);
         try {
             createPropertiesSecurityRealm(securityRealmAddress);
-
             page.navigate();
             page.getResourceManager()
                     .removeResource(securityRealmAddress.getLastPairValue())
                     .confirmAndDismissReloadRequiredMessage()
                     .assertClosed();
-
-            Assert.assertFalse(page.getResourceManager().isResourcePresent(securityRealmAddress.getLastPairValue()));
-
+            Assert.assertFalse("Newly removed property security realm should not be present in the table",
+                    page.getResourceManager().isResourcePresent(securityRealmAddress.getLastPairValue()));
             new ResourceVerifier(securityRealmAddress, client).verifyDoesNotExist();
 
         } finally {
@@ -111,20 +108,16 @@ public class ElytronPropertiesSecurityRealmTestCase extends AbstractElytronTestC
      */
     @Test
     public void editUsersProperties() throws Exception {
-        final Address securityRealmAddress = elyOps.getElytronAddress(PROPERTIES_REALM, RandomStringUtils.randomAlphanumeric(7));
-
+        final String securityRealmName = "properties_security_realm_" + RandomStringUtils.randomAlphanumeric(7);
+        final String digestRealmNameValue = RandomStringUtils.randomAlphabetic(7);
+        final String pathValue = RandomStringUtils.randomAlphanumeric(7);
+        final String relativeToValue = org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric(7);
+        final Address securityRealmAddress = elyOps.getElytronAddress(PROPERTIES_REALM, securityRealmName);
         try {
             createPropertiesSecurityRealm(securityRealmAddress);
-
             page.navigate();
-            page.getResourceManager().selectByName(securityRealmAddress.getLastPairValue());
-
+            page.getResourceManager().selectByName(securityRealmName);
             final ConfigFragment configFragment = page.getConfig().switchTo("Users Properties");
-
-            final String
-                    digestRealmNameValue = RandomStringUtils.randomAlphabetic(7),
-                    pathValue = RandomStringUtils.randomAlphanumeric(7),
-                    relativeToValue = org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric(7);
             new ConfigChecker.Builder(client, securityRealmAddress)
                     .configFragment(configFragment)
                     .edit(ConfigChecker.InputType.TEXT, DIGEST_REALM_NAME, digestRealmNameValue)
@@ -153,19 +146,16 @@ public class ElytronPropertiesSecurityRealmTestCase extends AbstractElytronTestC
      */
     @Test
     public void editGroupsProperties() throws Exception {
-        final Address securityRealmAddress = elyOps.getElytronAddress(PROPERTIES_REALM, RandomStringUtils.randomAlphanumeric(7));
-
+        final String securityRealmName = "properties_security_realm_" + RandomStringUtils.randomAlphanumeric(7);
+        final String pathValue = RandomStringUtils.randomAlphanumeric(7);
+        final String relativeToValue = RandomStringUtils.randomAlphanumeric(7);
+        final Address securityRealmAddress = elyOps.getElytronAddress(PROPERTIES_REALM, securityRealmName);
         try {
             createPropertiesSecurityRealm(securityRealmAddress);
-
             page.navigate();
-            page.getResourceManager().selectByName(securityRealmAddress.getLastPairValue());
-
+            page.getResourceManager()
+                    .selectByName(securityRealmAddress.getLastPairValue());
             final ConfigFragment configFragment = page.getConfig().switchTo("Groups Properties");
-
-            final String
-                    pathValue = RandomStringUtils.randomAlphanumeric(7),
-                    relativeToValue = org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric(7);
             new ConfigChecker.Builder(client, securityRealmAddress)
                     .configFragment(configFragment)
                     .edit(ConfigChecker.InputType.TEXT, PATH, pathValue)
@@ -190,15 +180,14 @@ public class ElytronPropertiesSecurityRealmTestCase extends AbstractElytronTestC
      */
     @Test
     public void editGroupsAttribute() throws Exception {
-        final Address securityRealmAddress = elyOps.getElytronAddress(PROPERTIES_REALM, RandomStringUtils.randomAlphanumeric(7));
-
+        final String securityRealmName = "properties_security_realm_" + RandomStringUtils.randomAlphanumeric(7);
+        final String value = RandomStringUtils.randomAlphanumeric(7);
+        final Address securityRealmAddress = elyOps.getElytronAddress(PROPERTIES_REALM, securityRealmName);
         try {
             createPropertiesSecurityRealm(securityRealmAddress);
-
             page.navigate();
-            page.getResourceManager().selectByName(securityRealmAddress.getLastPairValue());
-
-            final String value = RandomStringUtils.randomAlphanumeric(7);
+            page.getResourceManager()
+                    .selectByName(securityRealmName);
             new ConfigChecker.Builder(client, securityRealmAddress)
                     .configFragment(page.getConfigFragment())
                     .editAndSave(ConfigChecker.InputType.TEXT, GROUPS_ATTRIBUTE, value)
@@ -210,18 +199,13 @@ public class ElytronPropertiesSecurityRealmTestCase extends AbstractElytronTestC
         }
     }
 
-    private Address createPropertiesSecurityRealm(Address securityRealmAddress) throws IOException {
-        if (securityRealmAddress == null) {
-            securityRealmAddress = elyOps.getElytronAddress(PROPERTIES_REALM, RandomStringUtils.randomAlphanumeric(7));
-        }
-
+    private void createPropertiesSecurityRealm(Address securityRealmAddress) throws IOException, TimeoutException, InterruptedException {
         ops.add(securityRealmAddress, Values.of(USERS_PROPERTIES, new ModelNodeGenerator.ModelNodePropertiesBuilder()
                 .addProperty(PATH, "mgmt-users.properties")
                 .addProperty(RELATIVE_TO, CONFIG_DIR_PATH_NAME)
                 .build()))
                 .assertSuccess();
-
-        return securityRealmAddress;
+        adminOps.reloadIfRequired();
     }
 
 }
