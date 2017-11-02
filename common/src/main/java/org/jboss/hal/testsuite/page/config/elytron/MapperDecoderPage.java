@@ -2,10 +2,7 @@ package org.jboss.hal.testsuite.page.config.elytron;
 
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.ByJQuery;
-<<<<<<< HEAD
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
-=======
->>>>>>> 23313482e11415c44dcaf3df40615db729fc7afe
 import org.jboss.hal.testsuite.fragment.config.elytron.permissionmapper.PermissionMappingResourceManager;
 import org.jboss.hal.testsuite.fragment.config.elytron.permissionmapper.PermissionsTableFragment;
 import org.jboss.hal.testsuite.util.PropUtils;
@@ -56,12 +53,9 @@ public class MapperDecoderPage extends AbstractElytronConfigPage<MapperDecoderPa
         return Graphene.createPageFragment(PermissionMappingResourceManager.class, browser.findElement(configAreaContentSelector));
     }
 
-<<<<<<< HEAD
     public ConfigFragment getWindowFragment() {
         WebElement contentWindow = browser.findElement(By.className("default-window-content"));
         return Graphene.createPageFragment(ConfigFragment.class, contentWindow);
     }
 
-=======
->>>>>>> 23313482e11415c44dcaf3df40615db729fc7afe
 }
