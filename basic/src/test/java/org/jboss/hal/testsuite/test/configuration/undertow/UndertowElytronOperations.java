@@ -41,7 +41,11 @@ public class UndertowElytronOperations {
     }
 
     public Address createSecurityRealm() throws IOException {
-        Address realmAddress = elyOps.getElytronAddress("properties-realm", RandomStringUtils.randomAlphanumeric(7));
+        return createSecurityRealm(RandomStringUtils.randomAlphanumeric(7));
+    }
+
+    public Address createSecurityRealm(String securityRealmName) throws IOException {
+        Address realmAddress = elyOps.getElytronAddress("properties-realm", securityRealmName);
         ModelNode userPropertiesNode = new ModelNodeGenerator.ModelNodePropertiesBuilder().addProperty("path", "mgmt-users.properties")
                 .addProperty("relative-to", ConfigUtils.getConfigDirPathName()).build();
         operations.add(realmAddress, Values.of("users-properties", userPropertiesNode)).assertSuccess();

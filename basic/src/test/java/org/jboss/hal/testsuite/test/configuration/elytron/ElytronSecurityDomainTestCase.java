@@ -7,7 +7,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
+import org.apache.commons.lang3.RandomStringUtils;
+import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.dmr.ModelNode;
@@ -28,6 +31,7 @@ import org.wildfly.extras.creaper.core.online.operations.Values;
 
 @Category(Elytron.class)
 @RunWith(Arquillian.class)
+@RunAsClient
 public class ElytronSecurityDomainTestCase extends AbstractElytronTestCase {
 
     private static final String
@@ -66,12 +70,10 @@ public class ElytronSecurityDomainTestCase extends AbstractElytronTestCase {
      */
     @Test
     public void addSecurityDomainTest() throws Exception {
-        String securityDomainName = randomAlphanumeric(5);
-        Address securityDomainAddress = elyOps.getElytronAddress(SECURITY_DOMAIN, securityDomainName);
-
-        page.navigateToApplication().selectResource(SECURITY_DOMAIN_LABEL);
-
+        final String securityDomainName = "security_domain_"  + randomAlphanumeric(5);
+        final Address securityDomainAddress = elyOps.getElytronAddress(SECURITY_DOMAIN, securityDomainName);
         try {
+            page.navigateToApplication().selectResource(SECURITY_DOMAIN_LABEL);
             WizardWindowWithOptionalFields wizard = page.getResourceManager()
                     .addResource(WizardWindowWithOptionalFields.class);
             Editor editor = wizard.getEditor();
@@ -108,10 +110,10 @@ public class ElytronSecurityDomainTestCase extends AbstractElytronTestCase {
      */
     @Test
     public void removeSecurityDomainTest() throws Exception {
-        Address securityDomainAddress = createSecurityDomain();
-        String securityDomainName = securityDomainAddress.getLastPairValue();
-
+        final String securityDomainName = "security_domain_" + RandomStringUtils.randomAlphanumeric(7);
+        final Address securityDomainAddress = elyOps.getElytronAddress(SECURITY_DOMAIN, securityDomainName);
         try {
+            createSecurityDomain(securityDomainAddress);
             page.navigateToApplication().selectResource(SECURITY_DOMAIN_LABEL).getResourceManager()
                     .removeResource(securityDomainName).confirmAndDismissReloadRequiredMessage().assertClosed();
             assertFalse("Removed resource should not be present in the table any more!",
@@ -130,10 +132,10 @@ public class ElytronSecurityDomainTestCase extends AbstractElytronTestCase {
      */
     @Test
     public void editSecurityDomainAttributesTest() throws Exception {
-        Address securityDomainAddress = createSecurityDomain();
-        String securityDomainName = securityDomainAddress.getLastPairValue();
-
+        final String securityDomainName = "security_domain_" + RandomStringUtils.randomAlphanumeric(7);
+        final Address securityDomainAddress = elyOps.getElytronAddress(SECURITY_DOMAIN, securityDomainName);
         try {
+            createSecurityDomain(securityDomainAddress);
             page.navigateToApplication().selectResource(SECURITY_DOMAIN_LABEL).getResourceManager()
                     .selectByName(securityDomainName);
             page.switchToConfigAreaTab(ATTRIBUTES_LABEL);
@@ -167,14 +169,12 @@ public class ElytronSecurityDomainTestCase extends AbstractElytronTestCase {
      */
     @Test
     public void securityDomainAddRealmsTest() throws Exception {
-        Address
-            securityDomainAddress = createSecurityDomain(),
-            newRealmAddress = new UndertowElytronOperations(client).createSecurityRealm();
-        String
-            securityDomainName = securityDomainAddress.getLastPairValue(),
-            newRealmName = newRealmAddress.getLastPairValue();
-
+        final String securityDomainName = "security_domain_" + RandomStringUtils.randomAlphanumeric(7);
+        final String newRealmName = "security_realm_" + RandomStringUtils.randomAlphanumeric(7);
+        final Address securityDomainAddress = elyOps.getElytronAddress(SECURITY_DOMAIN, securityDomainName);
+        final Address newRealmAddress = new UndertowElytronOperations(client).createSecurityRealm(newRealmName);
         try {
+            createSecurityDomain(securityDomainAddress);
             page.navigateToApplication().selectResource(SECURITY_DOMAIN_LABEL).getResourceManager()
                     .selectByName(securityDomainName);
             page.switchToConfigAreaTab(REALMS_LABEL);
@@ -220,10 +220,10 @@ public class ElytronSecurityDomainTestCase extends AbstractElytronTestCase {
      */
     @Test
     public void securityDomainRemoveRealmsTest() throws Exception {
-        Address securityDomainAddress = createSecurityDomain();
-        String securityDomainName = securityDomainAddress.getLastPairValue();
-
+        final String securityDomainName = "security_domain_" + RandomStringUtils.randomAlphanumeric(7);
+        final Address securityDomainAddress = elyOps.getElytronAddress(SECURITY_DOMAIN, securityDomainName);
         try {
+            createSecurityDomain(securityDomainAddress);
             page.navigateToApplication().selectResource(SECURITY_DOMAIN_LABEL).getResourceManager()
                     .selectByName(securityDomainName);
             page.switchToConfigAreaTab(REALMS_LABEL);
@@ -253,8 +253,7 @@ public class ElytronSecurityDomainTestCase extends AbstractElytronTestCase {
     /**
      * Create security domain with random name
      */
-    private Address createSecurityDomain() throws IOException {
-        Address securityDomainAddress = elyOps.getElytronAddress(SECURITY_DOMAIN, randomAlphanumeric(5));
+    private void createSecurityDomain(Address securityDomainAddress) throws IOException, TimeoutException, InterruptedException {
         ModelNode realmsNode = new ModelNodeListBuilder()
                 .addNode(new ModelNodePropertiesBuilder()
                         .addProperty(REALM, LOCAL_REALM_NAME)
@@ -267,7 +266,7 @@ public class ElytronSecurityDomainTestCase extends AbstractElytronTestCase {
                 .of(DEFAULT_REALM, LOCAL_REALM_NAME)
                 .and(PERMISSION_MAPPER, DEFAULT_PERMISSION_MAPPER_NAME)
                 .and(REALMS, realmsNode)).assertSuccess();
-        return securityDomainAddress;
+        adminOps.reloadIfRequired();
     }
 
 }
