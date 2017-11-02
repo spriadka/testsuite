@@ -49,7 +49,6 @@ import static junit.framework.TestCase.assertEquals;
  */
 @RunWith(Arquillian.class)
 @RunAsClient
-@Category(Shared.class)
 public class SimpleWebserviceEndpointTestCase {
     private static final String RESPONSES = "Responses";
     private static final String NUMBER_OF_REQUEST = "Number of request";
