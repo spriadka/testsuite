@@ -1,4 +1,4 @@
-package org.jboss.hal.testsuite.test.configuration.elytron;
+package org.jboss.hal.testsuite.test.configuration.elytron.other.ssl;
 
 import static org.jboss.hal.testsuite.util.ConfigChecker.InputType.TEXT;
 import static org.junit.Assert.assertFalse;
@@ -18,6 +18,7 @@ import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
 import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindowWithOptionalFields;
 import org.jboss.hal.testsuite.page.config.elytron.SSLPage;
+import org.jboss.hal.testsuite.test.configuration.elytron.AbstractElytronTestCase;
 import org.jboss.hal.testsuite.util.ConfigChecker;
 import org.jboss.hal.testsuite.util.ElytronIntegrationChecker;
 import org.junit.Test;
@@ -32,7 +33,6 @@ public class ElytronStoreTestCase extends AbstractElytronTestCase {
 
     private static final String
             KEY_STORE = "key-store",
-            KEY_STORE_LABEL = "Key Store",
             TYPE = "type",
             JKS = "jks",
             CREDENTIAL_REFERENCE = "credential-reference",
@@ -63,124 +63,6 @@ public class ElytronStoreTestCase extends AbstractElytronTestCase {
 
     @Page
     private SSLPage page;
-
-    @Test
-    public void addKeyStoreTest() throws Exception {
-        final String keyStoreName = RandomStringUtils.randomAlphanumeric(5),
-                password = RandomStringUtils.randomAlphanumeric(5);
-        final Address keyStoreAddress = elyOps.getElytronAddress(KEY_STORE, keyStoreName);
-        final ModelNode expectedCredentialReferenceNode = new ModelNodePropertiesBuilder()
-                .addProperty(CLEAR_TEXT, password).build();
-
-        page.navigateToApplication().selectResource(KEY_STORE_LABEL);
-
-        try {
-            WizardWindowWithOptionalFields wizard = page.getResourceManager()
-                    .addResource(WizardWindowWithOptionalFields.class);
-            wizard.openOptionalFieldsTab();
-            Editor editor = wizard.getEditor();
-            editor.text(NAME, keyStoreName);
-            editor.text(TYPE, JKS);
-            editor.text(CREDENTIAL_REFERENCE_CLEAR_TEXT_IDENTIFIER, password);
-            boolean closed = wizard.finish();
-
-            assertTrue("Dialog should be closed!", closed);
-            assertTrue("Created resource should be present in the table!",
-                    page.resourceIsPresentInMainTable(keyStoreName));
-            new ResourceVerifier(keyStoreAddress, client).verifyExists().verifyAttribute(TYPE, JKS)
-                    .verifyAttribute(CREDENTIAL_REFERENCE, expectedCredentialReferenceNode);
-
-        } finally {
-            ops.removeIfExists(keyStoreAddress);
-            adminOps.reloadIfRequired();
-        }
-    }
-
-    @Test
-    public void removeKeyStoreTest() throws Exception {
-        final String keyStoreName = RandomStringUtils.randomAlphanumeric(5),
-                password = RandomStringUtils.randomAlphanumeric(5);
-        final Address keyStoreAddress = elyOps.getElytronAddress(KEY_STORE, keyStoreName);
-        final ModelNode credentialReferenceNode = new ModelNodePropertiesBuilder().addProperty(CLEAR_TEXT, password)
-                .build();
-        final ResourceVerifier keyStoreVerifier = new ResourceVerifier(keyStoreAddress, client);
-
-        try {
-            ops.add(keyStoreAddress, Values.of(TYPE, JKS).and(CREDENTIAL_REFERENCE, credentialReferenceNode))
-                    .assertSuccess();
-            keyStoreVerifier.verifyExists();
-
-            page.navigateToApplication().selectResource(KEY_STORE_LABEL).getResourceManager()
-                    .removeResource(keyStoreName).confirmAndDismissReloadRequiredMessage().assertClosed();
-            assertFalse("Removed resource should not be present in the table any more!",
-                    page.resourceIsPresentInMainTable(keyStoreName));
-            keyStoreVerifier.verifyDoesNotExist();
-
-        } finally {
-            ops.removeIfExists(keyStoreAddress);
-            adminOps.reloadIfRequired();
-        }
-    }
-
-    @Test
-    public void editKeyStoreAttributesTest() throws Exception {
-        final String keyStoreName = RandomStringUtils.randomAlphanumeric(5),
-                password = RandomStringUtils.randomAlphanumeric(5),
-                aliasFilterValue = RandomStringUtils.randomAlphanumeric(5),
-                providerNameValue = RandomStringUtils.randomAlphanumeric(5);
-        final Address keyStoreAddress = elyOps.getElytronAddress(KEY_STORE, keyStoreName);
-        final ModelNode initialCredentialReferenceNode = new ModelNodePropertiesBuilder().addProperty(CLEAR_TEXT, password)
-                .build();
-
-        try {
-            ops.add(keyStoreAddress, Values.of(TYPE, JKS).and(CREDENTIAL_REFERENCE, initialCredentialReferenceNode))
-                    .assertSuccess();
-
-            page.navigateToApplication().selectResource(KEY_STORE_LABEL).getResourceManager()
-                    .selectByName(keyStoreName);
-            page.switchToConfigAreaTab(ATTRIBUTES_LABEL);
-
-            new ConfigChecker.Builder(client, keyStoreAddress).configFragment(page.getConfigFragment())
-                    .editAndSave(TEXT, ALIAS_FILTER, aliasFilterValue).verifyFormSaved()
-                    .verifyAttribute(ALIAS_FILTER, aliasFilterValue);
-
-            new ConfigChecker.Builder(client, keyStoreAddress).configFragment(page.getConfigFragment())
-                    .editAndSave(TEXT, PROVIDER_NAME, providerNameValue).verifyFormSaved()
-                    .verifyAttribute(PROVIDER_NAME, providerNameValue);
-
-        } finally {
-            ops.removeIfExists(keyStoreAddress);
-            adminOps.reloadIfRequired();
-        }
-    }
-
-    @Test
-    public void editKeyStoreCredentialReferenceTest() throws Exception {
-        final String keyStoreName = RandomStringUtils.randomAlphanumeric(5),
-                initialPassword = RandomStringUtils.randomAlphanumeric(5);
-        final Address keyStoreAddress = elyOps.getElytronAddress(KEY_STORE, keyStoreName);
-        final ModelNode initialCredentialReferenceNode = new ModelNodePropertiesBuilder()
-                .addProperty(CLEAR_TEXT, initialPassword).build();
-
-        try {
-            ops.add(keyStoreAddress, Values.of(TYPE, JKS).and(CREDENTIAL_REFERENCE, initialCredentialReferenceNode))
-                    .assertSuccess();
-
-            page.navigateToApplication().selectResource(KEY_STORE_LABEL).getResourceManager()
-                    .selectByName(keyStoreName);
-            page.switchToConfigAreaTab(CREDENTIAL_REFERENCE_LABEL);
-
-            ElytronIntegrationChecker credentialReferenceChecker = new ElytronIntegrationChecker.Builder(client)
-                    .address(keyStoreAddress).configFragment(page.getConfigFragment()).build();
-            credentialReferenceChecker.setCredentialStoreCredentialReferenceAndVerify();
-            credentialReferenceChecker.testIllegalCombinationCredentialReferenceAttributes();
-            credentialReferenceChecker.setClearTextCredentialReferenceAndVerify();
-
-        } finally {
-            ops.removeIfExists(keyStoreAddress);
-            adminOps.reloadIfRequired();
-        }
-    }
 
     @Test
     public void addCredentialStoreTest() throws Exception {
