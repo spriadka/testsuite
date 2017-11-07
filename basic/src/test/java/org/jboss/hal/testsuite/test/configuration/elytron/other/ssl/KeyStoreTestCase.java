@@ -71,8 +71,8 @@ public class KeyStoreTestCase extends AbstractElytronTestCase {
 
     @Test
     public void removeKeyStoreTest() throws Exception {
-        final String keyStoreName = RandomStringUtils.randomAlphanumeric(5),
-                password = RandomStringUtils.randomAlphanumeric(5);
+        final String keyStoreName = RandomStringUtils.randomAlphanumeric(5);
+        final String password = RandomStringUtils.randomAlphanumeric(5);
         final Address keyStoreAddress = elyOps.getElytronAddress(KEY_STORE, keyStoreName);
         final ModelNode credentialReferenceNode = new ModelNodeGenerator.ModelNodePropertiesBuilder().addProperty(CLEAR_TEXT, password)
                 .build();
@@ -100,10 +100,10 @@ public class KeyStoreTestCase extends AbstractElytronTestCase {
 
     @Test
     public void editKeyStoreAttributesTest() throws Exception {
-        final String keyStoreName = RandomStringUtils.randomAlphanumeric(5),
-                password = RandomStringUtils.randomAlphanumeric(5),
-                aliasFilterValue = RandomStringUtils.randomAlphanumeric(5),
-                providerNameValue = RandomStringUtils.randomAlphanumeric(5);
+        final String keyStoreName = RandomStringUtils.randomAlphanumeric(5);
+        final String password = RandomStringUtils.randomAlphanumeric(5);
+        final String aliasFilterValue = RandomStringUtils.randomAlphanumeric(5);
+        final String providerNameValue = RandomStringUtils.randomAlphanumeric(5);
         final Address keyStoreAddress = elyOps.getElytronAddress(KEY_STORE, keyStoreName);
         final ModelNode initialCredentialReferenceNode = new ModelNodeGenerator.ModelNodePropertiesBuilder().addProperty(CLEAR_TEXT, password)
                 .build();
@@ -131,8 +131,8 @@ public class KeyStoreTestCase extends AbstractElytronTestCase {
 
     @Test
     public void editKeyStoreCredentialReferenceTest() throws Exception {
-        final String keyStoreName = RandomStringUtils.randomAlphanumeric(5),
-                initialPassword = RandomStringUtils.randomAlphanumeric(5);
+        final String keyStoreName = RandomStringUtils.randomAlphanumeric(5);
+        final String initialPassword = RandomStringUtils.randomAlphanumeric(5);
         final Address keyStoreAddress = elyOps.getElytronAddress(KEY_STORE, keyStoreName);
         final ModelNode initialCredentialReferenceNode = new ModelNodeGenerator.ModelNodePropertiesBuilder()
                 .addProperty(CLEAR_TEXT, initialPassword).build();
