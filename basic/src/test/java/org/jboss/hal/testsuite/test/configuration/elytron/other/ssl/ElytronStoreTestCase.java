@@ -15,7 +15,6 @@ import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.dmr.ModelNodeGenerator.ModelNodePropertiesBuilder;
 import org.jboss.hal.testsuite.dmr.ModelNodeGenerator.ModelNodeListBuilder;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
-import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
 import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindowWithOptionalFields;
 import org.jboss.hal.testsuite.page.config.elytron.SSLPage;
 import org.jboss.hal.testsuite.test.configuration.elytron.AbstractElytronTestCase;
@@ -31,14 +30,8 @@ import org.wildfly.extras.creaper.core.online.operations.Values;
 public class ElytronStoreTestCase extends AbstractElytronTestCase {
 
     private static final String
-            KEY_STORE = "key-store",
-            TYPE = "type",
-            JKS = "jks",
             CREDENTIAL_REFERENCE = "credential-reference",
             CLEAR_TEXT = "clear-text",
-            ALIAS_FILTER = "alias-filter",
-            FILTERING_KEY_STORE = "filtering-key-store",
-            FILTERING_KEY_STORE_LABEL = "Filtering Key Store",
             LDAP_KEY_STORE = "ldap-key-store",
             LDAP_KEY_STORE_LABEL = "Ldap Key Store",
             DIR_CONTEXT = "dir-context",
@@ -55,117 +48,6 @@ public class ElytronStoreTestCase extends AbstractElytronTestCase {
 
     @Page
     private SSLPage page;
-
-    @Test
-    public void addFilteringKeyStoreTest() throws Exception {
-        final String keyStoreName = RandomStringUtils.randomAlphanumeric(5),
-                filteringKeyStoreName = RandomStringUtils.randomAlphanumeric(5),
-                aliasFilterValue = RandomStringUtils.randomAlphanumeric(5),
-                password = RandomStringUtils.randomAlphanumeric(5);
-        final Address keyStoreAddress = elyOps.getElytronAddress(KEY_STORE, keyStoreName),
-                filteringKeyStoreAddress = elyOps.getElytronAddress(FILTERING_KEY_STORE, filteringKeyStoreName);
-        final ModelNode credentialReferenceNode = new ModelNodePropertiesBuilder().addProperty(CLEAR_TEXT, password)
-                .build();
-
-        page.navigateToApplication().selectResource(FILTERING_KEY_STORE_LABEL);
-
-        try {
-            ops.add(keyStoreAddress, Values.of(TYPE, JKS).and(CREDENTIAL_REFERENCE, credentialReferenceNode))
-                    .assertSuccess();
-            WizardWindow wizard = page.getResourceManager().addResource();
-            Editor editor = wizard.getEditor();
-            editor.text(NAME, filteringKeyStoreName);
-            editor.text(ALIAS_FILTER, aliasFilterValue);
-            editor.text(KEY_STORE, keyStoreName);
-            boolean closed = wizard.finish();
-
-            assertTrue("Dialog should be closed!", closed);
-            assertTrue("Created resource should be present in the table!",
-                    page.resourceIsPresentInMainTable(filteringKeyStoreName));
-            new ResourceVerifier(filteringKeyStoreAddress, client).verifyExists()
-                    .verifyAttribute(ALIAS_FILTER, aliasFilterValue)
-                    .verifyAttribute(KEY_STORE, keyStoreName);
-
-        } finally {
-            ops.removeIfExists(filteringKeyStoreAddress);
-            ops.removeIfExists(keyStoreAddress);
-            adminOps.reloadIfRequired();
-        }
-    }
-
-    @Test
-    public void removeFilteringKeyStoreTest() throws Exception {
-        final String keyStoreName = RandomStringUtils.randomAlphanumeric(5),
-                filteringKeyStoreName = RandomStringUtils.randomAlphanumeric(5),
-                aliasFilterValue = RandomStringUtils.randomAlphanumeric(5),
-                password = RandomStringUtils.randomAlphanumeric(5);
-        final Address keyStoreAddress = elyOps.getElytronAddress(KEY_STORE, keyStoreName),
-                filteringKeyStoreAddress = elyOps.getElytronAddress(FILTERING_KEY_STORE, filteringKeyStoreName);
-        final ModelNode credentialReferenceNode = new ModelNodePropertiesBuilder().addProperty(CLEAR_TEXT, password)
-                .build();
-        final ResourceVerifier filteringKeyStoreVerifier = new ResourceVerifier(filteringKeyStoreAddress, client);
-
-        try {
-            ops.add(keyStoreAddress, Values.of(TYPE, JKS).and(CREDENTIAL_REFERENCE, credentialReferenceNode))
-                    .assertSuccess();
-            ops.add(filteringKeyStoreAddress, Values.of(ALIAS_FILTER, aliasFilterValue).and(KEY_STORE, keyStoreName))
-                    .assertSuccess();
-            filteringKeyStoreVerifier.verifyExists();
-
-            page.navigateToApplication().selectResource(FILTERING_KEY_STORE_LABEL).getResourceManager()
-                    .removeResource(filteringKeyStoreName).confirmAndDismissReloadRequiredMessage().assertClosed();
-            assertFalse("Removed resource should not be present in the table any more!",
-                    page.resourceIsPresentInMainTable(filteringKeyStoreName));
-            filteringKeyStoreVerifier.verifyDoesNotExist();
-
-        } finally {
-            ops.removeIfExists(filteringKeyStoreAddress);
-            ops.removeIfExists(keyStoreAddress);
-            adminOps.reloadIfRequired();
-        }
-    }
-
-    @Test
-    public void editFilteringKeyStoreAttributesTest() throws Exception {
-        final String originalKeyStoreName = RandomStringUtils.randomAlphanumeric(5),
-                newKeyStoreName = RandomStringUtils.randomAlphanumeric(5),
-                filteringKeyStoreName = RandomStringUtils.randomAlphanumeric(5),
-                password = RandomStringUtils.randomAlphanumeric(5),
-                originalAliasFilterValue = RandomStringUtils.randomAlphanumeric(5),
-                newAliasFilterValue = RandomStringUtils.randomAlphanumeric(5);
-        final Address originalKeyStoreAddress = elyOps.getElytronAddress(KEY_STORE, originalKeyStoreName),
-                newKeyStoreAddress = elyOps.getElytronAddress(KEY_STORE, newKeyStoreName),
-                filteringKeyStoreAddress = elyOps.getElytronAddress(FILTERING_KEY_STORE, filteringKeyStoreName);
-        final ModelNode credentialReferenceNode = new ModelNodePropertiesBuilder().addProperty(CLEAR_TEXT, password)
-                .build();
-
-        try {
-            ops.add(originalKeyStoreAddress, Values.of(TYPE, JKS).and(CREDENTIAL_REFERENCE, credentialReferenceNode))
-                    .assertSuccess();
-            ops.add(newKeyStoreAddress, Values.of(TYPE, JKS).and(CREDENTIAL_REFERENCE, credentialReferenceNode))
-                    .assertSuccess();
-            ops.add(filteringKeyStoreAddress, Values.of(ALIAS_FILTER, originalAliasFilterValue)
-                    .and(KEY_STORE, originalKeyStoreName)).assertSuccess();
-
-            page.navigateToApplication().selectResource(FILTERING_KEY_STORE_LABEL).getResourceManager()
-                    .selectByName(filteringKeyStoreName);
-            page.switchToConfigAreaTab(ATTRIBUTES_LABEL);
-
-            new ConfigChecker.Builder(client, filteringKeyStoreAddress).configFragment(page.getConfigFragment())
-                    .editAndSave(TEXT, ALIAS_FILTER, newAliasFilterValue).verifyFormSaved()
-                    .verifyAttribute(ALIAS_FILTER, newAliasFilterValue);
-
-            new ConfigChecker.Builder(client, filteringKeyStoreAddress).configFragment(page.getConfigFragment())
-                    .editAndSave(TEXT, KEY_STORE, newKeyStoreName).verifyFormSaved()
-                    .verifyAttribute(KEY_STORE, newKeyStoreName);
-
-        } finally {
-            ops.removeIfExists(filteringKeyStoreAddress);
-            ops.removeIfExists(originalKeyStoreAddress);
-            ops.removeIfExists(newKeyStoreAddress);
-            adminOps.reloadIfRequired();
-        }
-    }
 
     @Test
     public void addLDAPKeyStoreTest() throws Exception {
