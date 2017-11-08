@@ -18,7 +18,6 @@ import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
 import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindowWithOptionalFields;
 import org.jboss.hal.testsuite.page.config.elytron.SSLPage;
 import org.jboss.hal.testsuite.util.ConfigChecker;
-import org.jboss.hal.testsuite.util.ElytronIntegrationChecker;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
@@ -36,8 +35,7 @@ public class ElytronSslContextTestCase extends AbstractElytronTestCase {
         JKS = "jks",
         CREDENTIAL_REFERENCE = "credential-reference",
         ALGORITH_VALUE_1 = "PKIX",
-        ALGORITH_VALUE_2 = "SunX509",
-        KEY_MANAGER_LABEL = "Key Manager",
+            ALGORITH_VALUE_2 = "SunX509",
         KEY_MANAGER = "key-manager",
         TRUST_MANAGER_LABEL = "Trust Manager",
         TRUST_MANAGER = "trust-manager",
@@ -62,165 +60,6 @@ public class ElytronSslContextTestCase extends AbstractElytronTestCase {
 
     @Page
     private SSLPage page;
-
-    /**
-     * @tpTestDetails Try to create Elytron Key Manager instance in Web Console's Elytron subsystem configuration.
-     * Validate created resource is visible in Key Manager table.
-     * Validate created resource is in model.
-     * Validate attribute values of created resource in model.
-     */
-    @Test
-    public void addKeyManagerTest() throws Exception {
-        Address keyStoreAddress = createKeyStore();
-        String keyManagerName = randomAlphanumeric(5), password = randomAlphanumeric(5),
-                keyStoreName = keyStoreAddress.getLastPairValue();
-        Address keyManagerAddress = elyOps.getElytronAddress(KEY_MANAGER, keyManagerName);
-        ModelNode expectedCredentialReferenceNode = new ModelNodePropertiesBuilder().addProperty(CLEAR_TEXT, password)
-                .build();
-
-        page.navigateToApplication().selectResource(KEY_MANAGER_LABEL);
-
-        try {
-            WizardWindowWithOptionalFields wizard = page.getResourceManager()
-                    .addResource(WizardWindowWithOptionalFields.class);
-            wizard.maximizeWindow();
-            Editor editor = wizard.getEditor();
-            editor.text(NAME, keyManagerName);
-            wizard.openOptionalFieldsTab();
-            editor.text(ALGORITHM, ALGORITH_VALUE_1);
-            editor.text(KEY_STORE, keyStoreName);
-            editor.text(CREDENTIAL_REFERENCE_CLEAR_TEXT_IDENTIFIER, password);
-
-            assertTrue("Dialog should be closed!", wizard.finish());
-            assertTrue("Created resource should be present in the table!",
-                    page.resourceIsPresentInMainTable(keyManagerName));
-            new ResourceVerifier(keyManagerAddress, client).verifyExists()
-                .verifyAttribute(ALGORITHM, ALGORITH_VALUE_1)
-                .verifyAttribute(KEY_STORE, keyStoreName)
-                .verifyAttribute(CREDENTIAL_REFERENCE, expectedCredentialReferenceNode);
-        } finally {
-            ops.removeIfExists(keyManagerAddress);
-            ops.removeIfExists(keyStoreAddress);
-            adminOps.reloadIfRequired();
-        }
-    }
-
-    /**
-     * @tpTestDetails Create Elytron Key Manager instance in model
-     * and try to remove it in Web Console's Elytron subsystem configuration.
-     * Validate the resource is not any more visible in Key Manager table.
-     * Validate created resource is not any more present in the model.
-     */
-    @Test
-    public void removeKeyManagerTest() throws Exception {
-        String keyManagerName = randomAlphanumeric(5), password = randomAlphanumeric(5);
-        Address keyStoreAddress = createKeyStore(),
-                keyManagerAddress = elyOps.getElytronAddress(KEY_MANAGER, keyManagerName);
-        ModelNode credentialReferenceNode = new ModelNodePropertiesBuilder().addProperty(CLEAR_TEXT, password).build();
-        ResourceVerifier keyManagerVerifier = new ResourceVerifier(keyManagerAddress, client);
-
-        try {
-            ops.add(keyManagerAddress, Values.of(ALGORITHM, ALGORITH_VALUE_1).and(KEY_STORE, keyStoreAddress.getLastPairValue())
-                    .and(CREDENTIAL_REFERENCE, credentialReferenceNode));
-            keyManagerVerifier.verifyExists();
-
-            page.navigateToApplication().selectResource(KEY_MANAGER_LABEL).getResourceManager()
-                    .removeResource(keyManagerName).confirmAndDismissReloadRequiredMessage().assertClosed();
-            assertFalse("Removed resource should not be present in the table any more!",
-                    page.resourceIsPresentInMainTable(keyManagerName));
-            keyManagerVerifier.verifyDoesNotExist();
-        } finally {
-            ops.removeIfExists(keyManagerAddress);
-            ops.removeIfExists(keyStoreAddress);
-            adminOps.reloadIfRequired();
-        }
-    }
-
-    /**
-     * @tpTestDetails Create Elytron Key Manager instance in model
-     * and try to edit it's attributes in Web Console's Elytron subsystem configuration.
-     * Validate edited attribute values in the model.
-     */
-    @Test
-    public void editKeyManagerAttributesTest() throws Exception {
-        String keyManagerName = randomAlphanumeric(5), password = randomAlphanumeric(5),
-                newAliasFilter = randomAlphanumeric(5), newProviderName = randomAlphanumeric(5),
-                newProviders = randomAlphanumeric(5);
-        Address originalKeyStoreAddress = createKeyStore(),
-                newKeyStoreAddress = createKeyStore(),
-                keyManagerAddress = elyOps.getElytronAddress(KEY_MANAGER, keyManagerName);
-        ModelNode credentialReferenceNode = new ModelNodePropertiesBuilder().addProperty(CLEAR_TEXT, password).build();
-
-        try {
-            elyOps.addProviderLoader(newProviders);
-            ops.add(keyManagerAddress, Values.of(ALGORITHM, ALGORITH_VALUE_1)
-                    .and(KEY_STORE, originalKeyStoreAddress.getLastPairValue())
-                    .and(CREDENTIAL_REFERENCE, credentialReferenceNode)).assertSuccess();
-
-            page.navigateToApplication().selectResource(KEY_MANAGER_LABEL).getResourceManager()
-                    .selectByName(keyManagerName);
-            page.switchToConfigAreaTab(ATTRIBUTES_LABEL);
-
-            new ConfigChecker.Builder(client, keyManagerAddress).configFragment(page.getConfigFragment())
-                    .edit(TEXT, ALGORITHM, ALGORITH_VALUE_2)
-                    .edit(TEXT, ALIAS_FILTER, newAliasFilter)
-                    .edit(TEXT, KEY_STORE, newKeyStoreAddress.getLastPairValue())
-                    .andSave().verifyFormSaved()
-                    .verifyAttribute(ALGORITHM, ALGORITH_VALUE_2)
-                    .verifyAttribute(ALIAS_FILTER, newAliasFilter)
-                    .verifyAttribute(KEY_STORE, newKeyStoreAddress.getLastPairValue());
-            new ConfigChecker.Builder(client, keyManagerAddress).configFragment(page.getConfigFragment())
-                    .edit(TEXT, PROVIDER_NAME, newProviderName)
-                    .edit(TEXT, PROVIDERS, newProviders)
-                    .andSave().verifyFormSaved()
-                    .verifyAttribute(PROVIDER_NAME, newProviderName)
-                    .verifyAttribute(PROVIDERS, newProviders);
-        } finally {
-            ops.removeIfExists(keyManagerAddress);
-            ops.removeIfExists(originalKeyStoreAddress);
-            ops.removeIfExists(newKeyStoreAddress);
-            elyOps.removeProviderLoader(newProviders);
-            adminOps.reloadIfRequired();
-        }
-    }
-
-    /**
-     * @tpTestDetails Create Elytron Key Manager instance in model
-     * and try to edit it's credential reference in Web Console's Elytron subsystem configuration.
-     * Validate edited attribute values in the model.
-     * Test setting <ul>
-     * <li>store + alias</li>
-     * <li>clear text</li>
-     * <li>illegal combination of both</li></ul>
-     */
-    @Test
-    public void editKeyManagerCredentialReferenceTest() throws Exception {
-        String keyManagerName = randomAlphanumeric(5), password = randomAlphanumeric(5);
-        Address keyStoreAddress = createKeyStore(),
-                keyManagerAddress = elyOps.getElytronAddress(KEY_MANAGER, keyManagerName);
-        ModelNode originalCredentialReferenceNode = new ModelNodePropertiesBuilder().addProperty(CLEAR_TEXT, password)
-                .build();
-
-        try {
-            ops.add(keyManagerAddress, Values.of(ALGORITHM, ALGORITH_VALUE_1)
-                    .and(KEY_STORE, keyStoreAddress.getLastPairValue())
-                    .and(CREDENTIAL_REFERENCE, originalCredentialReferenceNode)).assertSuccess();
-
-            page.navigateToApplication().selectResource(KEY_MANAGER_LABEL).getResourceManager()
-                    .selectByName(keyManagerName);
-            page.switchToConfigAreaTab(CREDENTIAL_REFERENCE_LABEL);
-
-            ElytronIntegrationChecker credentialReferenceChecker = new ElytronIntegrationChecker.Builder(client)
-                    .address(keyManagerAddress).configFragment(page.getConfigFragment()).build();
-            credentialReferenceChecker.setCredentialStoreCredentialReferenceAndVerify();
-            credentialReferenceChecker.setClearTextCredentialReferenceAndVerify();
-            credentialReferenceChecker.testIllegalCombinationCredentialReferenceAttributes();
-        } finally {
-            ops.removeIfExists(keyManagerAddress);
-            ops.removeIfExists(keyStoreAddress);
-            adminOps.reloadIfRequired();
-        }
-    }
 
     /**
      * @tpTestDetails Try to create Elytron Trust Manager instance in Web Console's Elytron subsystem configuration.
