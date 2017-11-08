@@ -11,9 +11,7 @@ import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Elytron;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.dmr.ModelNodeGenerator.ModelNodePropertiesBuilder;
-import org.jboss.hal.testsuite.dmr.ModelNodeGenerator.ModelNodeListBuilder;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
-import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindow;
 import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindowWithOptionalFields;
 import org.jboss.hal.testsuite.page.config.elytron.SSLPage;
 import org.jboss.hal.testsuite.util.ConfigChecker;
@@ -35,17 +33,11 @@ public class ElytronSslContextTestCase extends AbstractElytronTestCase {
         CREDENTIAL_REFERENCE = "credential-reference",
         ALGORITH_VALUE_1 = "PKIX",
             ALGORITH_VALUE_2 = "SunX509",
-        KEY_MANAGER = "key-manager",
         TRUST_MANAGER_LABEL = "Trust Manager",
         TRUST_MANAGER = "trust-manager",
         ALGORITHM = "algorithm",
         ALIAS_FILTER = "alias-filter",
         PROVIDERS = "providers",
-        CLIENT_SSL_CONTEXT = "client-ssl-context",
-        CLIENT_SSL_CONTEXT_LABEL = "Client SSL Context",
-        TLS_V11 = "TLSv1.1",
-        TLS_V12 = "TLSv1.2",
-        PROTOCOLS = "protocols",
         CERTIFICATE_REVOCATION_LIST = "certificate-revocation-list",
         CERTIFICATE_REVOCATION_LIST_LABEL = "Certificate Revocation List",
         PATH = "path",
@@ -215,132 +207,6 @@ public class ElytronSslContextTestCase extends AbstractElytronTestCase {
         } finally {
             ops.removeIfExists(trustManagerAddress);
             ops.removeIfExists(keyStoreAddress);
-            adminOps.reloadIfRequired();
-        }
-    }
-
-    /**
-     * @tpTestDetails Try to create Elytron Client SSL Context instance in Web Console's Elytron subsystem configuration.
-     * Validate created resource is visible in Client SSL Context table.
-     * Validate created resource is in model.
-     * Validate attribute values of created resource in model.
-     */
-    @Test
-    public void addClientSSLContextTest() throws Exception {
-        String clientSSLContextName = randomAlphanumeric(5), keyManagerName = randomAlphanumeric(5),
-                password = randomAlphanumeric(5), protocolValues = TLS_V11 + "\n" + TLS_V12;
-        Address keyStoreAddress = createKeyStore(),
-                keyManagerAddress = elyOps.getElytronAddress(KEY_MANAGER, keyManagerName),
-                clientSSLContextAddress = elyOps.getElytronAddress(CLIENT_SSL_CONTEXT, clientSSLContextName);
-        ModelNode credentialReferenceNode = new ModelNodePropertiesBuilder().addProperty(CLEAR_TEXT, password).build(),
-                expectedProtocolList = new ModelNodeListBuilder(new ModelNode(TLS_V11)).addNode(new ModelNode(TLS_V12))
-                        .build();
-
-        page.navigateToApplication().selectResource(CLIENT_SSL_CONTEXT_LABEL);
-
-        try {
-            ops.add(keyManagerAddress, Values.of(ALGORITHM, ALGORITH_VALUE_1).and(KEY_STORE,
-                    keyStoreAddress.getLastPairValue()).and(CREDENTIAL_REFERENCE, credentialReferenceNode));
-            WizardWindow wizard = page.getResourceManager().addResource();
-            wizard.maximizeWindow();
-            Editor editor = wizard.getEditor();
-            editor.text(NAME, clientSSLContextName);
-            editor.text(KEY_MANAGER, keyManagerName);
-            editor.text(PROTOCOLS, protocolValues);
-
-            assertTrue("Dialog should be closed!", wizard.finish());
-            assertTrue("Created resource should be present in the table!",
-                    page.resourceIsPresentInMainTable(clientSSLContextName));
-            new ResourceVerifier(clientSSLContextAddress, client).verifyExists()
-                .verifyAttribute(KEY_MANAGER, keyManagerName)
-                .verifyAttribute(PROTOCOLS, expectedProtocolList);
-        } finally {
-            ops.removeIfExists(clientSSLContextAddress);
-            ops.removeIfExists(keyManagerAddress);
-            ops.removeIfExists(keyStoreAddress);
-            adminOps.reloadIfRequired();
-        }
-    }
-
-    /**
-     * @tpTestDetails Create Elytron Client SSL Context instance in model
-     * and try to remove it in Web Console's Elytron subsystem configuration.
-     * Validate the resource is not any more visible in Client SSL Context table.
-     * Validate created resource is not any more present in the model.
-     */
-    @Test
-    public void removeClientSSLContextTest() throws Exception {
-        String clientSSLContextName = randomAlphanumeric(5), keyManagerName = randomAlphanumeric(5),
-                password = randomAlphanumeric(5);
-        Address keyStoreAddress = createKeyStore(),
-                keyManagerAddress = elyOps.getElytronAddress(KEY_MANAGER, keyManagerName),
-                clientSSLContextAddress = elyOps.getElytronAddress(CLIENT_SSL_CONTEXT, clientSSLContextName);
-        ModelNode credentialReferenceNode = new ModelNodePropertiesBuilder().addProperty(CLEAR_TEXT, password).build(),
-                protocolList = new ModelNodeListBuilder(new ModelNode(TLS_V11)).addNode(new ModelNode(TLS_V12))
-                        .build();
-        ResourceVerifier clientSSLContextVerifier = new ResourceVerifier(clientSSLContextAddress, client);
-
-        try {
-            ops.add(keyManagerAddress, Values.of(ALGORITHM, ALGORITH_VALUE_1).and(KEY_STORE,
-                    keyStoreAddress.getLastPairValue()).and(CREDENTIAL_REFERENCE, credentialReferenceNode));
-            ops.add(clientSSLContextAddress, Values.of(KEY_MANAGER, keyManagerName).and(PROTOCOLS, protocolList));
-            clientSSLContextVerifier.verifyExists();
-
-            page.navigateToApplication().selectResource(CLIENT_SSL_CONTEXT_LABEL).getResourceManager()
-                    .removeResource(clientSSLContextName).confirmAndDismissReloadRequiredMessage().assertClosed();
-            assertFalse("Removed resource should not be present in the table any more!",
-                    page.resourceIsPresentInMainTable(clientSSLContextName));
-            clientSSLContextVerifier.verifyDoesNotExist();
-        } finally {
-            ops.removeIfExists(clientSSLContextAddress);
-            ops.removeIfExists(keyManagerAddress);
-            ops.removeIfExists(keyStoreAddress);
-            adminOps.reloadIfRequired();
-        }
-    }
-
-    /**
-     * @tpTestDetails Create Elytron Client SSL Context instance in model
-     * and try to edit it's attributes in Web Console's Elytron subsystem configuration.
-     * Validate edited attribute values in the model.
-     */
-    @Test
-    public void editClientSSLContextAttributesTest() throws Exception {
-        String clientSSLContextName = randomAlphanumeric(5), keyManagerName = randomAlphanumeric(5),
-                password = randomAlphanumeric(5), trustManagerName = randomAlphanumeric(5);
-        Address keyStoreAddress = createKeyStore(),
-                keyManagerAddress = elyOps.getElytronAddress(KEY_MANAGER, keyManagerName),
-                clientSSLContextAddress = elyOps.getElytronAddress(CLIENT_SSL_CONTEXT, clientSSLContextName),
-                trustManagerAddress = elyOps.getElytronAddress(TRUST_MANAGER, trustManagerName);
-        ModelNode credentialReferenceNode = new ModelNodePropertiesBuilder().addProperty(CLEAR_TEXT, password).build(),
-                protocolList = new ModelNodeListBuilder(new ModelNode(TLS_V11)).addNode(new ModelNode(TLS_V12))
-                        .build(),
-                newProtocolList = new ModelNodeListBuilder(new ModelNode(TLS_V12)).build();
-
-        try {
-            ops.add(keyManagerAddress, Values.of(ALGORITHM, ALGORITH_VALUE_1).and(KEY_STORE,
-                    keyStoreAddress.getLastPairValue()).and(CREDENTIAL_REFERENCE, credentialReferenceNode))
-                    .assertSuccess();
-            ops.add(clientSSLContextAddress, Values.of(KEY_MANAGER, keyManagerName).and(PROTOCOLS, protocolList))
-                    .assertSuccess();
-            ops.add(trustManagerAddress, Values.of(ALGORITHM, ALGORITH_VALUE_1)
-                    .and(KEY_STORE, keyStoreAddress.getLastPairValue())).assertSuccess();
-
-            page.navigateToApplication().selectResource(CLIENT_SSL_CONTEXT_LABEL).getResourceManager()
-                    .selectByName(clientSSLContextName);
-            page.switchToConfigAreaTab(ATTRIBUTES_LABEL);
-
-            new ConfigChecker.Builder(client, clientSSLContextAddress).configFragment(page.getConfigFragment())
-                    .edit(TEXT, PROTOCOLS, TLS_V12)
-                    .edit(TEXT, TRUST_MANAGER, trustManagerName)
-                    .andSave().verifyFormSaved()
-                    .verifyAttribute(PROTOCOLS, newProtocolList)
-                    .verifyAttribute(TRUST_MANAGER, trustManagerName);
-        } finally {
-            ops.removeIfExists(clientSSLContextAddress);
-            ops.removeIfExists(trustManagerAddress);
-            ops.removeIfExists(keyManagerAddress);
-            ops.remove(keyStoreAddress);
             adminOps.reloadIfRequired();
         }
     }
