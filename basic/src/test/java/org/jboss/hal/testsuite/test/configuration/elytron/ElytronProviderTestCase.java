@@ -26,106 +26,13 @@ import org.wildfly.extras.creaper.core.online.operations.Values;
 public class ElytronProviderTestCase extends AbstractElytronTestCase {
 
     private static final String
-        ELYTRON_MODULE_NAME = "org.wildfly.security.elytron",
-        BC_MODULE_NAME = "org.bouncycastle",
-        BC_CLASS_NAME = "org.bouncycastle.jce.provider.BouncyCastleProvider",
         PROVIDER_LOADER = "provider-loader",
-        PROVIDER_LOADER_LABEL = "Provider Loader",
-        CLASS_NAMES = "class-names",
-        MODULE = "module",
         AGGREGATE_PROVIDERS = "aggregate-providers",
         AGGREGATE_PROVIDERS_LABEL = "Aggregate Providers",
         PROVIDERS = "providers";
 
     @Page
     private SSLPage page;
-
-    /**
-     * @tpTestDetails Try to create Elytron provider loader instance in Web Console's Elytron subsystem configuration.
-     * Validate created resource is visible in provider loader table.
-     * Validate created resource is present in model.
-     * Validate attributes of created resource in model.
-     */
-    @Test
-    public void addProviderLoaderTest() throws Exception {
-        String providerLoaderName = randomAlphanumeric(5);
-        Address providerLoaderAddress = elyOps.getElytronAddress(PROVIDER_LOADER, providerLoaderName);
-
-        page.navigateToApplication().selectResource(PROVIDER_LOADER_LABEL);
-
-        try {
-            WizardWindow wizard = page.getResourceManager().addResource();
-            Editor editor = wizard.getEditor();
-            editor.text(NAME, providerLoaderName);
-            editor.text(CLASS_NAMES, BC_CLASS_NAME);
-            editor.text(MODULE, BC_MODULE_NAME);
-
-            assertTrue("Dialog should be closed!", wizard.finish());
-            assertTrue("Created resource should be present in the table!",
-                    page.resourceIsPresentInMainTable(providerLoaderName));
-            new ResourceVerifier(providerLoaderAddress, client).verifyExists()
-                    .verifyAttribute(MODULE, BC_MODULE_NAME)
-                    .verifyAttribute(CLASS_NAMES, new ModelNodeListBuilder(new ModelNode(BC_CLASS_NAME)).build());
-        } finally {
-            ops.removeIfExists(providerLoaderAddress);
-            adminOps.reloadIfRequired();
-        }
-    }
-
-    /**
-     * @tpTestDetails Create Elytron provider loader instance and try to remove it in Web Console's Elytron subsystem
-     * configuration.
-     * Validate removed resource is not any more visible in provider loader table.
-     * Validate removed resource is not any more present in model.
-     */
-    @Test
-    public void removeProviderLoaderTest() throws Exception {
-        String providerLoaderName = randomAlphanumeric(5);
-        Address providerLoaderAddress = elyOps.getElytronAddress(PROVIDER_LOADER, providerLoaderName);
-
-        try {
-            ops.add(providerLoaderAddress).assertSuccess();
-
-            page.navigateToApplication().selectResource(PROVIDER_LOADER_LABEL).getResourceManager()
-                    .removeResource(providerLoaderName).confirmAndDismissReloadRequiredMessage().assertClosed();
-            assertFalse("Removed resource should not be present in the table any more!",
-                    page.resourceIsPresentInMainTable(providerLoaderName));
-            new ResourceVerifier(providerLoaderAddress, client).verifyDoesNotExist();
-        } finally {
-            ops.removeIfExists(providerLoaderAddress);
-            adminOps.reloadIfRequired();
-        }
-    }
-
-    /**
-     * @tpTestDetails Create Elytron provider loader instance and try to edit it's attributes in Web Console's Elytron
-     * subsystem configuration.
-     * Validate edited attributes in model.
-     */
-    @Test
-    public void editProviderLoaderAttributesTest() throws Exception {
-        String providerLoaderName = randomAlphanumeric(5);
-        Address providerLoaderAddress = elyOps.getElytronAddress(PROVIDER_LOADER, providerLoaderName);
-
-        try {
-            ops.add(providerLoaderAddress, Values.of(MODULE, BC_MODULE_NAME)
-                    .and(CLASS_NAMES, new ModelNodeListBuilder(new ModelNode(BC_CLASS_NAME)).build()));
-
-            page.navigateToApplication().selectResource(PROVIDER_LOADER_LABEL).getResourceManager()
-                    .selectByName(providerLoaderName);
-            page.switchToConfigAreaTab(ATTRIBUTES_LABEL);
-
-            new ConfigChecker.Builder(client, providerLoaderAddress).configFragment(page.getConfigFragment())
-                    .edit(TEXT, CLASS_NAMES, "")
-                    .edit(TEXT, MODULE, ELYTRON_MODULE_NAME)
-                    .andSave().verifyFormSaved()
-                    .verifyAttributeIsUndefined(CLASS_NAMES)
-                    .verifyAttribute(MODULE, ELYTRON_MODULE_NAME);
-        } finally {
-            ops.removeIfExists(providerLoaderAddress);
-            adminOps.reloadIfRequired();
-        }
-    }
 
     /**
      * @tpTestDetails Try to create Elytron aggregate provider loader instance in Web Console's Elytron subsystem
