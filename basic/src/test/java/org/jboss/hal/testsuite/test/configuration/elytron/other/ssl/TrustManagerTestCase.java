@@ -1,19 +1,22 @@
-package org.jboss.hal.testsuite.test.configuration.elytron;
+package org.jboss.hal.testsuite.test.configuration.elytron.other.ssl;
 
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 import static org.jboss.hal.testsuite.util.ConfigChecker.InputType.TEXT;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
+import org.apache.commons.lang3.RandomStringUtils;
+import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Elytron;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
+import org.jboss.hal.testsuite.dmr.ModelNodeGenerator;
 import org.jboss.hal.testsuite.dmr.ModelNodeGenerator.ModelNodePropertiesBuilder;
-import org.jboss.hal.testsuite.fragment.formeditor.Editor;
-import org.jboss.hal.testsuite.fragment.shared.modal.WizardWindowWithOptionalFields;
+import org.jboss.hal.testsuite.fragment.config.elytron.other.ssl.AddTrustManagerWizard;
 import org.jboss.hal.testsuite.page.config.elytron.SSLPage;
+import org.jboss.hal.testsuite.test.configuration.elytron.AbstractElytronTestCase;
 import org.jboss.hal.testsuite.util.ConfigChecker;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
@@ -21,28 +24,30 @@ import org.junit.runner.RunWith;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.Values;
 
-@RunWith(Arquillian.class)
-@Category(Elytron.class)
-public class ElytronSslContextTestCase extends AbstractElytronTestCase {
+import java.io.IOException;
 
-    private static final String
-        KEY_STORE = "key-store",
-        CLEAR_TEXT = "clear-text",
-        TYPE = "type",
-        JKS = "jks",
-        CREDENTIAL_REFERENCE = "credential-reference",
-        ALGORITH_VALUE_1 = "PKIX",
-            ALGORITH_VALUE_2 = "SunX509",
-        TRUST_MANAGER_LABEL = "Trust Manager",
-        TRUST_MANAGER = "trust-manager",
-        ALGORITHM = "algorithm",
-        ALIAS_FILTER = "alias-filter",
-        PROVIDERS = "providers",
-        CERTIFICATE_REVOCATION_LIST = "certificate-revocation-list",
-        CERTIFICATE_REVOCATION_LIST_LABEL = "Certificate Revocation List",
-        PATH = "path",
-        RELATIVE_TO = "relative-to",
-        MAXIMUM_CERT_PATH = "maximum-cert-path";
+@RunWith(Arquillian.class)
+@RunAsClient
+@Category(Elytron.class)
+public class TrustManagerTestCase extends AbstractElytronTestCase {
+
+    private static final String KEY_STORE = "key-store";
+    private static final String CLEAR_TEXT = "clear-text";
+    private static final String TYPE = "type";
+    private static final String JKS = "jks";
+    private static final String CREDENTIAL_REFERENCE = "credential-reference";
+    private static final String PKIX = "PKIX";
+    private static final String SUN_X509 = "SunX509";
+    private static final String TRUST_MANAGER_LABEL = "Trust Manager";
+    private static final String TRUST_MANAGER = "trust-manager";
+    private static final String ALGORITHM = "algorithm";
+    private static final String ALIAS_FILTER = "alias-filter";
+    private static final String PROVIDERS = "providers";
+    private static final String CERTIFICATE_REVOCATION_LIST = "certificate-revocation-list";
+    private static final String CERTIFICATE_REVOCATION_LIST_LABEL = "Certificate Revocation List";
+    private static final String PATH = "path";
+    private static final String RELATIVE_TO = "relative-to";
+    private static final String MAXIMUM_CERT_PATH = "maximum-cert-path";
 
     @Page
     private SSLPage page;
@@ -55,27 +60,25 @@ public class ElytronSslContextTestCase extends AbstractElytronTestCase {
      */
     @Test
     public void addTrustManagerTest() throws Exception {
-        Address keyStoreAddress = createKeyStore();
-        String trustManagerName = randomAlphanumeric(5), keyStoreName = keyStoreAddress.getLastPairValue();
+        final String keyStoreName = "key_store_" + RandomStringUtils.randomAlphanumeric(7);
+        final String trustManagerName = randomAlphanumeric(5);
+        Address keyStoreAddress = elyOps.getElytronAddress(KEY_STORE, keyStoreName);
         Address trustManagerAddress = elyOps.getElytronAddress(TRUST_MANAGER, trustManagerName);
-
-        page.navigateToApplication().selectResource(TRUST_MANAGER_LABEL);
-
         try {
-            WizardWindowWithOptionalFields wizard = page.getResourceManager()
-                    .addResource(WizardWindowWithOptionalFields.class);
-            wizard.maximizeWindow();
-            Editor editor = wizard.getEditor();
-            editor.text(NAME, trustManagerName);
-            wizard.openOptionalFieldsTab();
-            editor.text(ALGORITHM, ALGORITH_VALUE_1);
-            editor.text(KEY_STORE, keyStoreName);
-
-            assertTrue("Dialog should be closed!", wizard.finish());
+            createKeyStore(keyStoreAddress);
+            page.navigateToApplication()
+                    .selectResource(TRUST_MANAGER_LABEL)
+                    .getResourceManager()
+                    .addResource(AddTrustManagerWizard.class)
+                    .name(trustManagerName)
+                    .algorithm(PKIX)
+                    .keyStore(keyStoreName)
+                    .saveAndDismissReloadRequiredWindowWithState()
+                    .assertWindowClosed();
             assertTrue("Created resource should be present in the table!",
                     page.resourceIsPresentInMainTable(trustManagerName));
             new ResourceVerifier(trustManagerAddress, client).verifyExists()
-                .verifyAttribute(ALGORITHM, ALGORITH_VALUE_1)
+                .verifyAttribute(ALGORITHM, PKIX)
                 .verifyAttribute(KEY_STORE, keyStoreName);
         } finally {
             ops.removeIfExists(trustManagerAddress);
@@ -92,18 +95,22 @@ public class ElytronSslContextTestCase extends AbstractElytronTestCase {
      */
     @Test
     public void removeTrustManagerTest() throws Exception {
-        String trustManagerName = randomAlphanumeric(5);
-        Address keyStoreAddress = createKeyStore(),
-                trustManagerAddress = elyOps.getElytronAddress(TRUST_MANAGER, trustManagerName);
-        ResourceVerifier trustManagerVerifier = new ResourceVerifier(trustManagerAddress, client);
-
+        final String keyStoreName = "key_store_" + randomAlphanumeric(7);
+        final String trustManagerName = "trust_manager_" + randomAlphanumeric(5);
+        final Address keyStoreAddress = elyOps.getElytronAddress(KEY_STORE, keyStoreName);
+        final Address trustManagerAddress = elyOps.getElytronAddress(TRUST_MANAGER, trustManagerName);
+        final ResourceVerifier trustManagerVerifier = new ResourceVerifier(trustManagerAddress, client);
         try {
-            ops.add(trustManagerAddress, Values.of(ALGORITHM, ALGORITH_VALUE_1)
+            createKeyStore(keyStoreAddress);
+            ops.add(trustManagerAddress, Values.of(ALGORITHM, PKIX)
                     .and(KEY_STORE, keyStoreAddress.getLastPairValue()));
             trustManagerVerifier.verifyExists();
-
-            page.navigateToApplication().selectResource(TRUST_MANAGER_LABEL).getResourceManager()
-                    .removeResource(trustManagerName).confirmAndDismissReloadRequiredMessage().assertClosed();
+            page.navigateToApplication()
+                    .selectResource(TRUST_MANAGER_LABEL)
+                    .getResourceManager()
+                    .removeResource(trustManagerName)
+                    .confirmAndDismissReloadRequiredMessage()
+                    .assertClosed();
             assertFalse("Removed resource should not be present in the table any more!",
                     page.resourceIsPresentInMainTable(trustManagerName));
             trustManagerVerifier.verifyDoesNotExist();
@@ -121,27 +128,33 @@ public class ElytronSslContextTestCase extends AbstractElytronTestCase {
      */
     @Test
     public void editTrustManagerAttributesTest() throws Exception {
-        String trustManagerName = randomAlphanumeric(5), newAliasFilter = randomAlphanumeric(5),
-                newProviderName = randomAlphanumeric(5), newProviders = randomAlphanumeric(5);
-        Address originalKeyStoreAddress = createKeyStore(),
-                newKeyStoreAddress = createKeyStore(),
-                trustManagerAddress = elyOps.getElytronAddress(TRUST_MANAGER, trustManagerName);
-
+        final String initialKeyStore = "initial_key_store_" + RandomStringUtils.randomAlphanumeric(7);
+        final String keyStoreName = "key_store_" + RandomStringUtils.randomAlphanumeric(7);
+        final String trustManagerName = "trust_manager_" + randomAlphanumeric(5);
+        final String newAliasFilter = randomAlphanumeric(5);
+        final String newProviderName = randomAlphanumeric(5);
+        final String newProviders = randomAlphanumeric(5);
+        final Address originalKeyStoreAddress = elyOps.getElytronAddress(KEY_STORE, initialKeyStore);
+        final Address newKeyStoreAddress = elyOps.getElytronAddress(KEY_STORE, keyStoreName);
+        final Address trustManagerAddress = elyOps.getElytronAddress(TRUST_MANAGER, trustManagerName);
         try {
+            createKeyStore(originalKeyStoreAddress);
+            createKeyStore(newKeyStoreAddress);
             elyOps.addProviderLoader(newProviders);
-            ops.add(trustManagerAddress, Values.of(ALGORITHM, ALGORITH_VALUE_1)
+            ops.add(trustManagerAddress, Values.of(ALGORITHM, PKIX)
                     .and(KEY_STORE, originalKeyStoreAddress.getLastPairValue())).assertSuccess();
 
-            page.navigateToApplication().selectResource(TRUST_MANAGER_LABEL).getResourceManager()
+            page.navigateToApplication()
+                    .selectResource(TRUST_MANAGER_LABEL)
+                    .getResourceManager()
                     .selectByName(trustManagerName);
             page.switchToConfigAreaTab(ATTRIBUTES_LABEL);
-
             new ConfigChecker.Builder(client, trustManagerAddress).configFragment(page.getConfigFragment())
-                    .edit(TEXT, ALGORITHM, ALGORITH_VALUE_2)
+                    .edit(TEXT, ALGORITHM, SUN_X509)
                     .edit(TEXT, ALIAS_FILTER, newAliasFilter)
                     .edit(TEXT, KEY_STORE, newKeyStoreAddress.getLastPairValue())
                     .andSave().verifyFormSaved()
-                    .verifyAttribute(ALGORITHM, ALGORITH_VALUE_2)
+                    .verifyAttribute(ALGORITHM, SUN_X509)
                     .verifyAttribute(ALIAS_FILTER, newAliasFilter)
                     .verifyAttribute(KEY_STORE, newKeyStoreAddress.getLastPairValue());
             new ConfigChecker.Builder(client, trustManagerAddress).configFragment(page.getConfigFragment())
@@ -166,34 +179,33 @@ public class ElytronSslContextTestCase extends AbstractElytronTestCase {
      */
     @Test
     public void editTrustManagerCertificateRevocationListTest() throws Exception {
-        String
-            trustManagerName = randomAlphanumeric(5),
-            pathValue = randomAlphanumeric(5),
-            newPathValue = randomAlphanumeric(5),
-            relativeToValue = randomAlphanumeric(5);
+        final String keyStoreName = "key_store_" + RandomStringUtils.randomAlphanumeric(7);
+        final String trustManagerName = "trust_manager" + randomAlphanumeric(5);
+        final String pathValue = randomAlphanumeric(5);
+        final String newPathValue = randomAlphanumeric(5);
+        final String relativeToValue = randomAlphanumeric(5);
         long maximumCertPathValue = 123L;
-        Address
-            keyStoreAddress = createKeyStore(),
-            trustManagerAddress = elyOps.getElytronAddress(TRUST_MANAGER, trustManagerName);
-        ModelNode
-            expectedFirstCertificateRevocationListNode = new ModelNodePropertiesBuilder()
+        final Address keyStoreAddress = elyOps.getElytronAddress(KEY_STORE, keyStoreName);
+        final Address trustManagerAddress = elyOps.getElytronAddress(TRUST_MANAGER, trustManagerName);
+        final ModelNode expectedFirstCertificateRevocationListNode = new ModelNodePropertiesBuilder()
                 .addProperty(PATH, pathValue)
                 .addProperty(RELATIVE_TO, relativeToValue)
-                .build(),
-            expectedSecondCertificateRevocationListNode = new ModelNodePropertiesBuilder()
+                .build();
+        final ModelNode expectedSecondCertificateRevocationListNode = new ModelNodePropertiesBuilder()
                 .addProperty(PATH, newPathValue)
                 .addProperty(RELATIVE_TO, relativeToValue)
                 .addProperty(MAXIMUM_CERT_PATH, new ModelNode(maximumCertPathValue))
                 .build();
 
         try {
-            ops.add(trustManagerAddress, Values.of(ALGORITHM, ALGORITH_VALUE_1)
+            createKeyStore(keyStoreAddress);
+            ops.add(trustManagerAddress, Values.of(ALGORITHM, PKIX)
                     .and(KEY_STORE, keyStoreAddress.getLastPairValue())).assertSuccess();
-
-            page.navigateToApplication().selectResource(TRUST_MANAGER_LABEL).getResourceManager()
+            page.navigateToApplication()
+                    .selectResource(TRUST_MANAGER_LABEL)
+                    .getResourceManager()
                     .selectByName(trustManagerName);
             page.switchToConfigAreaTab(CERTIFICATE_REVOCATION_LIST_LABEL);
-
             new ConfigChecker.Builder(client, trustManagerAddress).configFragment(page.getConfigFragment())
                     .edit(TEXT, PATH, pathValue)
                     .edit(TEXT, RELATIVE_TO, relativeToValue)
@@ -211,11 +223,10 @@ public class ElytronSslContextTestCase extends AbstractElytronTestCase {
         }
     }
 
-    private Address createKeyStore() throws Exception {
-        String keyStoreName = randomAlphanumeric(5), password = randomAlphanumeric(5);
-        Address keyStoreAddress = elyOps.getElytronAddress(KEY_STORE, keyStoreName);
-        ModelNode credentialReferenceNode = new ModelNodePropertiesBuilder().addProperty(CLEAR_TEXT, password).build();
-        ops.add(keyStoreAddress, Values.of(TYPE, JKS).and(CREDENTIAL_REFERENCE, credentialReferenceNode)).assertSuccess();
-        return keyStoreAddress;
+    private void createKeyStore(Address keyStoreAddress) throws IOException {
+        final String password = RandomStringUtils.randomAlphanumeric(7);
+        ops.add(keyStoreAddress, Values.of(TYPE, JKS).and(CREDENTIAL_REFERENCE, new ModelNodeGenerator.ModelNodePropertiesBuilder()
+                .addProperty(CLEAR_TEXT, password).build()))
+                .assertSuccess();
     }
 }
