@@ -114,10 +114,13 @@ public class SaslAuthenticationTestCase extends ElytronFactoryTestCaseAbstract {
 
     @Test
     public void editAttributestTest() throws Exception {
+        final String realmName = "dummy_realm_" + RandomStringUtils.randomAlphanumeric(7);
         final String saslAuthenticationName = "sasl_authentication_" + RandomStringUtils.randomAlphanumeric(7);
         final String saslAuthenticationFactoryName = "sasl_authentication_factory_" + RandomStringUtils.randomAlphanumeric(7);
-        final String securityDomain = "ManagementDomain";
+        final String securityDomain = "SecurityDomain_" + RandomStringUtils.randomAlphanumeric(7);
+        final Address realmAddress = elyOps.createSecurityRealm(realmName);
         final Address saslAuthenticationAddress = elyOps.getElytronAddress(SASL_AUTHENTICATION, saslAuthenticationName);
+        final Address securityDomainAddress = elyOps.createSecurityDomain(securityDomain, realmName);
         final Address saslAuthenticationFactoryAddress = elyOps.getElytronAddress(PROVIDER_SASL_SERVER_FACTORY, saslAuthenticationFactoryName);
         try {
             createSASLAuthenticationInModel(saslAuthenticationAddress);
@@ -138,6 +141,8 @@ public class SaslAuthenticationTestCase extends ElytronFactoryTestCaseAbstract {
         } finally {
             ops.removeIfExists(saslAuthenticationAddress);
             ops.removeIfExists(saslAuthenticationFactoryAddress);
+            ops.removeIfExists(securityDomainAddress);
+            ops.removeIfExists(realmAddress);
             adminOps.reloadIfRequired();
         }
     }
@@ -187,7 +192,7 @@ public class SaslAuthenticationTestCase extends ElytronFactoryTestCaseAbstract {
         final String saslAuthenticationName = "sasl_authentication_" + RandomStringUtils.randomAlphanumeric(7);
         final String mechanismName = "mechanism_" + RandomStringUtils.randomAlphanumeric(7);
         final String hostName = "host_" + RandomStringUtils.randomAlphanumeric(7);
-        final String protocol = "prorocol_" + RandomStringUtils.randomAlphanumeric(7);
+        final String protocol = "protocol_" + RandomStringUtils.randomAlphanumeric(7);
         final MechanismConfiguration configuration = new MechanismConfiguration().hostName(hostName)
                 .protocol(protocol)
                 .mechanismName(mechanismName);
