@@ -1,0 +1,8 @@
+target
+.settings
+.checkstyle
+.classpath
+.project
+.idea
+*.iml
+basic/periodic-handler.log
