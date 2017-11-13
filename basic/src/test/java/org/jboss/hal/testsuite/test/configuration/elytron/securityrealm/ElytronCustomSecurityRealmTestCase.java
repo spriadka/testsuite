@@ -1,6 +1,7 @@
 package org.jboss.hal.testsuite.test.configuration.elytron.securityrealm;
 
 import org.apache.commons.lang.RandomStringUtils;
+import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Elytron;
@@ -26,19 +27,20 @@ import org.wildfly.extras.creaper.core.online.operations.Values;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.concurrent.TimeoutException;
 
 import static org.apache.commons.lang3.RandomStringUtils.randomAlphanumeric;
 
 @Category(Elytron.class)
 @RunWith(Arquillian.class)
+@RunAsClient
 public class ElytronCustomSecurityRealmTestCase extends AbstractElytronTestCase {
 
     @Page
     private SecurityRealmPage page;
 
-    private static final String
-            CUSTOM_REALM = "custom-realm",
-            ARCHIVE_NAME = "elytron.securityrealm.custom.jar";
+    private static final String CUSTOM_REALM = "custom-realm";
+    private static final String ARCHIVE_NAME = "elytron.securityrealm.custom.jar";
 
     private static String customSecurityRealmModuleName;
 
@@ -68,27 +70,24 @@ public class ElytronCustomSecurityRealmTestCase extends AbstractElytronTestCase 
      */
     @Test
     public void testAddCustomSecurityRealm() throws Exception {
-        final Address securityRealmAddress = elyOps.getElytronAddress(CUSTOM_REALM, RandomStringUtils.randomAlphanumeric(7));
-
-        page.navigate();
-        page.switchToCustomRealms()
-                .getResourceManager()
-                .selectByName(securityRealmAddress.getLastPairValue());
-
+        final String securityRealmName = "custom_security_realm_" + RandomStringUtils.randomAlphanumeric(7);
+        final Address securityRealmAddress = elyOps.getElytronAddress(CUSTOM_REALM, securityRealmName);
         try {
-            page.getResourceManager()
+            page.navigate();
+            page.switchToCustomRealms()
+                    .getResourceManager()
                     .addResource(AddCustomSecurityRealmWizard.class)
-                    .name(securityRealmAddress.getLastPairValue())
+                    .name(securityRealmName)
                     .className(CustomSecurityRealm.class.getName())
                     .module(customSecurityRealmModuleName)
                     .saveAndDismissReloadRequiredWindowWithState()
                     .assertWindowClosed();
-
-            Assert.assertTrue(page.getResourceManager().isResourcePresent(securityRealmAddress.getLastPairValue()));
-
+            Assert.assertTrue("Newly created custom security realm should be present in the table",
+                    page.getResourceManager().isResourcePresent(securityRealmName));
             new ResourceVerifier(securityRealmAddress, client).verifyExists();
         } finally {
             ops.removeIfExists(securityRealmAddress);
+            adminOps.reloadIfRequired();
         }
     }
 
@@ -100,21 +99,22 @@ public class ElytronCustomSecurityRealmTestCase extends AbstractElytronTestCase 
      */
     @Test
     public void testRemoveCustomSecurityRealm() throws Exception {
-        final Address securityRealmAddress = createCustomSecurityRealm();
-
+        final String securityRealmName = "custom_security_realm_" + RandomStringUtils.randomAlphanumeric(7);
+        final Address securityRealmAddress = elyOps.getElytronAddress(CUSTOM_REALM, securityRealmName);
         try {
+            createCustomSecurityRealmInModel(securityRealmAddress);
             page.navigate();
             page.switchToCustomRealms()
                     .getResourceManager()
-                    .removeResource(securityRealmAddress.getLastPairValue())
+                    .removeResource(securityRealmName)
                     .confirmAndDismissReloadRequiredMessage()
                     .assertClosed();
-
-            Assert.assertFalse(page.getResourceManager().isResourcePresent(securityRealmAddress.getLastPairValue()));
-
+            Assert.assertFalse("Newly removed custom security realm should not be present in the table",
+                    page.getResourceManager().isResourcePresent(securityRealmName));
             new ResourceVerifier(securityRealmAddress, client).verifyDoesNotExist();
         } finally {
             ops.removeIfExists(securityRealmAddress);
+            adminOps.reloadIfRequired();
         }
     }
 
@@ -125,16 +125,15 @@ public class ElytronCustomSecurityRealmTestCase extends AbstractElytronTestCase 
      */
     @Test
     public void editClassName() throws Exception {
-        final Address securityRealmAddress = createCustomSecurityRealm();
-
+        final String securityRealmName = "custom_security_realm_" + RandomStringUtils.randomAlphanumeric(7);
         final String value = RandomStringUtils.randomAlphanumeric(7);
-
+        final Address securityRealmAddress = elyOps.getElytronAddress(CUSTOM_REALM, securityRealmName);
         try {
+            createCustomSecurityRealmInModel(securityRealmAddress);
             page.navigate();
             page.switchToCustomRealms()
                     .getResourceManager()
-                    .selectByName(securityRealmAddress.getLastPairValue());
-
+                    .selectByName(securityRealmName);
             new ConfigChecker.Builder(client, securityRealmAddress)
                     .configFragment(page.getConfigFragment())
                     .editAndSave(ConfigChecker.InputType.TEXT, CLASS_NAME, value)
@@ -142,6 +141,7 @@ public class ElytronCustomSecurityRealmTestCase extends AbstractElytronTestCase 
                     .verifyAttribute(CLASS_NAME, value);
         } finally {
             ops.removeIfExists(securityRealmAddress);
+            adminOps.reloadIfRequired();
         }
     }
 
@@ -152,16 +152,15 @@ public class ElytronCustomSecurityRealmTestCase extends AbstractElytronTestCase 
      */
     @Test
     public void editModule() throws Exception {
-        final Address securityRealmAddress = createCustomSecurityRealm();
-
         final String value = RandomStringUtils.randomAlphanumeric(7);
-
+        final String securityRealmName = "security_realm_" + RandomStringUtils.randomAlphanumeric(7);
+        final Address securityRealmAddress = elyOps.getElytronAddress(CUSTOM_REALM, securityRealmName);
         try {
+            createCustomSecurityRealmInModel(securityRealmAddress);
             page.navigate();
             page.switchToCustomRealms()
                     .getResourceManager()
-                    .selectByName(securityRealmAddress.getLastPairValue());
-
+                    .selectByName(securityRealmName);
             new ConfigChecker.Builder(client, securityRealmAddress)
                     .configFragment(page.getConfigFragment())
                     .editAndSave(ConfigChecker.InputType.TEXT, MODULE, value)
@@ -169,6 +168,7 @@ public class ElytronCustomSecurityRealmTestCase extends AbstractElytronTestCase 
                     .verifyAttribute(MODULE, value);
         } finally {
             ops.removeIfExists(securityRealmAddress);
+            adminOps.reloadIfRequired();
         }
     }
 
@@ -179,17 +179,16 @@ public class ElytronCustomSecurityRealmTestCase extends AbstractElytronTestCase 
      */
     @Test
     public void editConfiguration() throws Exception {
-        final Address securityRealmAddress = createCustomSecurityRealm();
-
-        final String key = RandomStringUtils.randomAlphanumeric(7),
-                value = RandomStringUtils.randomAlphanumeric(7);
-
+        final String securityRealmName = "security_realm_" + RandomStringUtils.randomAlphanumeric(7);
+        final String key = RandomStringUtils.randomAlphanumeric(7);
+        final String value = RandomStringUtils.randomAlphanumeric(7);
+        final Address securityRealmAddress = elyOps.getElytronAddress(CUSTOM_REALM, securityRealmName);
         try {
+            createCustomSecurityRealmInModel(securityRealmAddress);
             page.navigate();
             page.switchToCustomRealms()
                     .getResourceManager()
-                    .selectByName(securityRealmAddress.getLastPairValue());
-
+                    .selectByName(securityRealmName);
             new ConfigChecker.Builder(client, securityRealmAddress)
                     .configFragment(page.getConfigFragment())
                     .editAndSave(ConfigChecker.InputType.TEXT, CONFIGURATION, key + "=" + value)
@@ -198,14 +197,14 @@ public class ElytronCustomSecurityRealmTestCase extends AbstractElytronTestCase 
                             .addProperty(key, value).build());
         } finally {
             ops.removeIfExists(securityRealmAddress);
+            adminOps.reloadIfRequired();
         }
     }
 
-    private Address createCustomSecurityRealm() throws IOException {
-        final Address realmAddress = elyOps.getElytronAddress(CUSTOM_REALM, RandomStringUtils.randomAlphanumeric(7));
+    private void createCustomSecurityRealmInModel(Address realmAddress) throws IOException, TimeoutException, InterruptedException {
         ops.add(realmAddress, Values.of(MODULE, customSecurityRealmModuleName)
                 .and(CLASS_NAME, CustomSecurityRealm.class.getName())).assertSuccess();
-        return realmAddress;
+        adminOps.reloadIfRequired();
     }
 
 }

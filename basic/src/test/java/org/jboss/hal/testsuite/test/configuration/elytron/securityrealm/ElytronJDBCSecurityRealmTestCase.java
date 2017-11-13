@@ -1,6 +1,7 @@
 package org.jboss.hal.testsuite.test.configuration.elytron.securityrealm;
 
 import org.apache.commons.lang.RandomStringUtils;
+import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.dmr.ModelNode;
@@ -25,13 +26,13 @@ import java.io.IOException;
 
 @Category(Elytron.class)
 @RunWith(Arquillian.class)
+@RunAsClient
 public class ElytronJDBCSecurityRealmTestCase extends AbstractElytronTestCase {
 
-    private static final String
-            JDBC_REALM = "jdbc-realm",
-            DATASOURCE = "data-source",
-            SQL = "sql",
-            PRINCIPAL_QUERY = "principal-query";
+    private static final String JDBC_REALM = "jdbc-realm";
+    private static final String DATASOURCE = "data-source";
+    private static final String SQL = "sql";
+    private static final String PRINCIPAL_QUERY = "principal-query";
     @Page
     private SecurityRealmPage page;
 
@@ -44,26 +45,23 @@ public class ElytronJDBCSecurityRealmTestCase extends AbstractElytronTestCase {
      */
     @Test
     public void testAddJDBCSecurityRealm() throws Exception {
-        String sqlQueryValue = "SELECT 2",
-                datasourceName = null;
-
-        final Address realmAddress = elyOps.getElytronAddress(JDBC_REALM, RandomStringUtils.randomAlphabetic(7));
-
-        page.navigate();
-        page.switchToJDBCRealms();
-
+        final String realmName = "jdbc_security_realm_" + RandomStringUtils.randomAlphanumeric(7);
+        final String sqlQueryValue = "SELECT 2";
+        final String datasourceName = "jdbc_datasource_" + RandomStringUtils.randomAlphanumeric(7);
+        final Address realmAddress = elyOps.getElytronAddress(JDBC_REALM, realmName);
         try {
-            datasourceName = createDatasource();
-            page.getResourceManager().addResource(AddJDBCSecurityRealmWizard.class)
-                    .name(realmAddress.getLastPairValue())
+            createDatasource(datasourceName);
+            page.navigate();
+            page.switchToJDBCRealms();
+            page.getResourceManager()
+                    .addResource(AddJDBCSecurityRealmWizard.class)
+                    .name(realmName)
                     .principalQuerySQL(sqlQueryValue)
                     .principalQueryDatasource(datasourceName)
                     .saveWithState()
                     .assertWindowClosed();
-
             Assert.assertTrue("Resource should be present in table!",
-                    page.getResourceManager().isResourcePresent(realmAddress.getLastPairValue()));
-
+                    page.getResourceManager().isResourcePresent(realmName));
             new ResourceVerifier(realmAddress, client)
                     .verifyExists()
                     .verifyAttribute(PRINCIPAL_QUERY, new ModelNodeGenerator.ModelNodeListBuilder()
@@ -74,9 +72,7 @@ public class ElytronJDBCSecurityRealmTestCase extends AbstractElytronTestCase {
                             .build());
         } finally {
             ops.removeIfExists(realmAddress);
-            if (datasourceName != null) {
-                client.apply(new RemoveDataSource(datasourceName));
-            }
+            client.apply(new RemoveDataSource(datasourceName));
             adminOps.reloadIfRequired();
         }
     }
@@ -89,29 +85,27 @@ public class ElytronJDBCSecurityRealmTestCase extends AbstractElytronTestCase {
      */
     @Test
     public void testRemoveJDBCRealm() throws Exception {
-        String datasourceName = null;
-        Address realmAddress = null;
-
+        final String realmName = "jdbc_security_realm_" + RandomStringUtils.randomAlphanumeric(7);
+        final String datasourceName = "jdbc_datasource_" + RandomStringUtils.randomAlphanumeric(7);
+        final Address realmAddress = elyOps.getElytronAddress(JDBC_REALM, realmName);
         try {
-            datasourceName = createDatasource();
-            realmAddress = createJDBCRealm(datasourceName);
+            createDatasource(datasourceName);
+            new JDBCRealm.Builder()
+                    .address(realmAddress)
+                    .addPrincipalQuery(RandomStringUtils.randomAlphabetic(7), datasourceName)
+                    .build();
             page.navigate();
             page.switchToJDBCRealms()
                     .getResourceManager()
-                    .removeResource(realmAddress.getLastPairValue())
+                    .removeResource(realmName)
                     .confirmAndDismissReloadRequiredMessage()
                     .assertClosed();
 
-            Assert.assertFalse(page.getResourceManager().isResourcePresent(realmAddress.getLastPairValue()));
-
+            Assert.assertFalse(page.getResourceManager().isResourcePresent(realmName));
             new ResourceVerifier(realmAddress, client).verifyDoesNotExist();
         } finally {
-            if (realmAddress != null) {
-                ops.removeIfExists(realmAddress);
-            }
-            if (datasourceName != null) {
-                client.apply(new RemoveDataSource(datasourceName));
-            }
+            ops.removeIfExists(realmAddress);
+            client.apply(new RemoveDataSource(datasourceName));
             adminOps.reloadIfRequired();
         }
 
@@ -124,17 +118,20 @@ public class ElytronJDBCSecurityRealmTestCase extends AbstractElytronTestCase {
      */
     @Test
     public void testAddPrincipalQuery() throws Exception {
-        String datasourceName = null;
-        Address realmAddress = null;
+        final String realmName = "jdbc_security_realm_" + RandomStringUtils.randomAlphanumeric(7);
+        final String datasourceName = "jdbc_datasource_" + RandomStringUtils.randomAlphanumeric(7);
+        final Address realmAddress = elyOps.getElytronAddress(JDBC_REALM, realmName);
 
         try {
-            datasourceName = createDatasource();
-            realmAddress = createJDBCRealm(datasourceName);
+            createDatasource(datasourceName);
+            new JDBCRealm.Builder()
+                    .address(realmAddress)
+                    .addPrincipalQuery(RandomStringUtils.randomAlphabetic(5), datasourceName)
+                    .build();
             page.navigate();
             page.switchToJDBCRealms()
                     .getResourceManager()
-                    .selectByName(realmAddress.getLastPairValue());
-
+                    .selectByName(realmName);
             page.getConfig()
                     .getResourceManager()
                     .addResource(AddPrincipalQueryWizard.class)
@@ -142,17 +139,12 @@ public class ElytronJDBCSecurityRealmTestCase extends AbstractElytronTestCase {
                     .dataSource(datasourceName)
                     .saveAndDismissReloadRequiredWindowWithState()
                     .assertWindowClosed();
-
-            Assert.assertTrue(page.getConfigFragment().getResourceManager().isResourcePresent(realmAddress.getLastPairValue()));
+            Assert.assertTrue(page.getConfigFragment().getResourceManager().isResourcePresent(realmName));
 
             new ResourceVerifier(realmAddress, client).verifyExists();
         } finally {
-            if (realmAddress != null) {
-                ops.removeIfExists(realmAddress);
-            }
-            if (datasourceName != null) {
-                client.apply(new RemoveDataSource(datasourceName));
-            }
+            ops.removeIfExists(realmAddress);
+            client.apply(new RemoveDataSource(datasourceName));
             adminOps.reloadIfRequired();
         }
     }
@@ -165,58 +157,48 @@ public class ElytronJDBCSecurityRealmTestCase extends AbstractElytronTestCase {
      */
     @Test
     public void testRemovePrincipalQuery() throws Exception {
-        String datasourceName = null;
-        Address realmAddress = null;
-
+        final String realmName = "jdbc_security_realm_" + RandomStringUtils.randomAlphanumeric(7);
+        final String datasourceName = "jdbc_datasource_" + RandomStringUtils.randomAlphanumeric(7);
+        final String principalQueryToBeRemoved = "principal_query_to_be_removed_" + RandomStringUtils.randomAlphabetic(7);
+        final Address realmAddress = elyOps.getElytronAddress(JDBC_REALM, realmName);
         try {
-            final String principalQueryToBeRemoved = RandomStringUtils.randomAlphabetic(7);
-            datasourceName = createDatasource();
-            JDBCRealm jdbcRealm = new JDBCRealm.Builder(RandomStringUtils.randomAlphabetic(7), datasourceName)
+            createDatasource(datasourceName);
+            JDBCRealm jdbcRealm = new JDBCRealm.Builder()
+                    .address(realmAddress)
+                    .addPrincipalQuery(RandomStringUtils.randomAlphabetic(7), datasourceName)
                     .addPrincipalQuery(principalQueryToBeRemoved, datasourceName)
                     .build();
-
-            realmAddress = jdbcRealm.getAddress();
-
             page.navigate();
             page.switchToJDBCRealms()
                     .getResourceManager()
-                    .selectByName(realmAddress.getLastPairValue());
-
+                    .selectByName(realmName);
             page.getConfig()
                     .getResourceManager()
                     .removeResource(principalQueryToBeRemoved)
                     .confirmAndDismissReloadRequiredMessage()
                     .assertClosed();
-
             Assert.assertFalse("Resource shouldn't be present in resource table! Probably failed because of" +
                             "https://issues.jboss.org/browse/HAL-1348",
                     page.getConfig().getResourceManager().isResourcePresent(principalQueryToBeRemoved));
-
             new ResourceVerifier(realmAddress, client).verifyAttribute(PRINCIPAL_QUERY,
                     new ModelNode().add(jdbcRealm.getPrincipalQueries()
                             .asList().stream()
                             .filter(modelNode -> !modelNode.hasDefined(principalQueryToBeRemoved))
                             .findFirst().get()));
         } finally {
-            if (realmAddress != null) {
-                ops.removeIfExists(realmAddress);
-            }
-            if (datasourceName != null) {
-                client.apply(new RemoveDataSource(datasourceName));
-            }
+            ops.removeIfExists(realmAddress);
+            client.apply(new RemoveDataSource(datasourceName));
             adminOps.reloadIfRequired();
         }
     }
 
-    private String createDatasource() throws CommandFailedException {
-        final String datasourceName = RandomStringUtils.randomAlphanumeric(7);
+    private void createDatasource(String datasourceName) throws CommandFailedException {
         client.apply(new AddDataSource.Builder(datasourceName)
                 .jndiName("java:/" + datasourceName)
                 .driverName("h2")
                 .connectionUrl("jdbc:h2:mem:test2;DB_CLOSE_DELAY=-1")
                 .enableAfterCreate()
                 .build());
-        return datasourceName;
     }
 
     private static final class JDBCRealm {
@@ -240,10 +222,11 @@ public class ElytronJDBCSecurityRealmTestCase extends AbstractElytronTestCase {
         private static final class Builder {
 
             private final ModelNodeGenerator.ModelNodeListBuilder listBuilder = new ModelNodeGenerator.ModelNodeListBuilder();
-            private final Address address = elyOps.getElytronAddress(JDBC_REALM, RandomStringUtils.randomAlphanumeric(7));
+            private Address address;
 
-            Builder(String sqlQuery, String datasourceName) {
-                addPrincipalQuery(sqlQuery, datasourceName);
+            public Builder address(Address address) {
+                this.address = address;
+                return this;
             }
 
             public Builder addPrincipalQuery(String sqlQuery, String datasourceName) {
@@ -259,11 +242,5 @@ public class ElytronJDBCSecurityRealmTestCase extends AbstractElytronTestCase {
                 return new JDBCRealm(this);
             }
         }
-
-
-    }
-
-    private Address createJDBCRealm(String datasourceName) throws IOException {
-        return new JDBCRealm.Builder(RandomStringUtils.randomAlphabetic(7), datasourceName).build().getAddress();
     }
 }

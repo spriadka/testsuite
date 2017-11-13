@@ -1,6 +1,7 @@
 package org.jboss.hal.testsuite.test.configuration.elytron.securityrealm;
 
 import org.apache.commons.lang.RandomStringUtils;
+import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.hal.testsuite.category.Elytron;
@@ -13,20 +14,22 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
+import org.wildfly.common.annotation.NotNull;
 import org.wildfly.extras.creaper.core.online.operations.Address;
 import org.wildfly.extras.creaper.core.online.operations.Values;
 
 import java.io.IOException;
+import java.util.concurrent.TimeoutException;
 
 @Category(Elytron.class)
 @RunWith(Arquillian.class)
+@RunAsClient
 public class ElytronFilesystemSecurityRealmTestCase extends AbstractElytronTestCase {
 
-    private static final String
-            PATH = "path",
-            LEVELS = "levels",
-            RELATIVE_TO = "relative-to",
-            FILESYSTEM_REALM = "filesystem-realm";
+    private static final String PATH = "path";
+    private static final String LEVELS = "levels";
+    private static final String RELATIVE_TO = "relative-to";
+    private static final String FILESYSTEM_REALM = "filesystem-realm";
 
     @Page
     private SecurityRealmPage page;
@@ -40,22 +43,20 @@ public class ElytronFilesystemSecurityRealmTestCase extends AbstractElytronTestC
      */
     @Test
     public void testAddFilesystemSecurityRealm() throws Exception {
-        final Address realmAddress = elyOps.getElytronAddress(FILESYSTEM_REALM, RandomStringUtils.randomAlphabetic(7));
+        final String realmName = "filesystem_security_realm_" + RandomStringUtils.randomAlphanumeric(7);
+        final Address realmAddress = elyOps.getElytronAddress(FILESYSTEM_REALM, realmName);
         final String pathValue = RandomStringUtils.randomAlphanumeric(7);
-
-        page.navigate();
-        page.switchToFilesystemRealms();
-
         try {
-            page.getResourceManager().addResource(AddFilesystemSecurityRealmWizard.class)
-                    .name(realmAddress.getLastPairValue())
+            page.navigate();
+            page.switchToFilesystemRealms();
+            page.getResourceManager()
+                    .addResource(AddFilesystemSecurityRealmWizard.class)
+                    .name(realmName)
                     .path(pathValue)
-                    .saveWithState()
+                    .saveAndDismissReloadRequiredWindowWithState()
                     .assertWindowClosed();
-
-            Assert.assertTrue("Resource should be present in table!",
-                    page.getResourceManager().isResourcePresent(realmAddress.getLastPairValue()));
-
+            Assert.assertTrue("Newly created filesystem security realm should be present in table!",
+                    page.getResourceManager().isResourcePresent(realmName));
             new ResourceVerifier(realmAddress, client)
                     .verifyExists()
                     .verifyAttribute(PATH, pathValue);
@@ -73,20 +74,19 @@ public class ElytronFilesystemSecurityRealmTestCase extends AbstractElytronTestC
      */
     @Test
     public void testRemoveFilesystemSecurityRealm() throws Exception {
-        final Address securityRealmAddress = elyOps.getElytronAddress(FILESYSTEM_REALM, RandomStringUtils.randomAlphanumeric(7));
-
+        final String securityRealmName = "filesystem_security_realm_" + RandomStringUtils.randomAlphanumeric(7);
+        final Address securityRealmAddress = elyOps.getElytronAddress(FILESYSTEM_REALM, securityRealmName);
         try {
-            createFilesystemSecurityRealm(securityRealmAddress);
-
+            createFilesystemSecurityRealmInModel(securityRealmAddress);
             page.navigate();
             page.switchToFilesystemRealms()
                     .getResourceManager()
-                    .removeResource(securityRealmAddress.getLastPairValue())
+                    .removeResource(securityRealmName)
                     .confirmAndDismissReloadRequiredMessage()
                     .assertClosed();
 
-            Assert.assertFalse(page.getResourceManager().isResourcePresent(securityRealmAddress.getLastPairValue()));
-
+            Assert.assertFalse("Newly removed filesystem security realm should not be present in the table",
+                    page.getResourceManager().isResourcePresent(securityRealmName));
             new ResourceVerifier(securityRealmAddress, client).verifyDoesNotExist();
 
         } finally {
@@ -102,17 +102,15 @@ public class ElytronFilesystemSecurityRealmTestCase extends AbstractElytronTestC
      */
     @Test
     public void editLevels() throws Exception {
-        final Address securityRealmAddress = elyOps.getElytronAddress(FILESYSTEM_REALM, RandomStringUtils.randomAlphanumeric(7));
-
+        final String securityRealmName = "filesystem_security_realm_" + RandomStringUtils.randomAlphanumeric(7);
+        final int value = 42;
+        final Address securityRealmAddress = elyOps.getElytronAddress(FILESYSTEM_REALM, securityRealmName);
         try {
-            createFilesystemSecurityRealm(securityRealmAddress);
-
+            createFilesystemSecurityRealmInModel(securityRealmAddress);
             page.navigate();
             page.switchToFilesystemRealms()
                     .getResourceManager()
-                    .selectByName(securityRealmAddress.getLastPairValue());
-
-            final int value = 42;
+                    .selectByName(securityRealmName);
             new ConfigChecker.Builder(client, securityRealmAddress)
                     .configFragment(page.getConfigFragment())
                     .editAndSave(ConfigChecker.InputType.TEXT, LEVELS, value)
@@ -131,17 +129,15 @@ public class ElytronFilesystemSecurityRealmTestCase extends AbstractElytronTestC
      */
     @Test
     public void editPath() throws Exception {
-        final Address securityRealmAddress = elyOps.getElytronAddress(FILESYSTEM_REALM, RandomStringUtils.randomAlphanumeric(7));
-
+        final String securityRealmName = "filesystem_security_realm_" + RandomStringUtils.randomAlphanumeric(7);
+        final String value = RandomStringUtils.randomAlphanumeric(7);
+        final Address securityRealmAddress = elyOps.getElytronAddress(FILESYSTEM_REALM, securityRealmName);
         try {
-            createFilesystemSecurityRealm(securityRealmAddress);
-
+            createFilesystemSecurityRealmInModel(securityRealmAddress);
             page.navigate();
             page.switchToFilesystemRealms()
                     .getResourceManager()
-                    .selectByName(securityRealmAddress.getLastPairValue());
-
-            final String value = RandomStringUtils.randomAlphanumeric(7);
+                    .selectByName(securityRealmName);
             new ConfigChecker.Builder(client, securityRealmAddress)
                     .configFragment(page.getConfigFragment())
                     .editAndSave(ConfigChecker.InputType.TEXT, PATH, value)
@@ -160,17 +156,15 @@ public class ElytronFilesystemSecurityRealmTestCase extends AbstractElytronTestC
      */
     @Test
     public void editRelativeTo() throws Exception {
-        final Address securityRealmAddress = elyOps.getElytronAddress(FILESYSTEM_REALM, RandomStringUtils.randomAlphanumeric(7));
-
+        final String securityRealmName = "filesystem_security_realm_" + RandomStringUtils.randomAlphanumeric(7);
+        final String value = RandomStringUtils.randomAlphanumeric(7);
+        final Address securityRealmAddress = elyOps.getElytronAddress(FILESYSTEM_REALM, securityRealmName);
         try {
-            createFilesystemSecurityRealm(securityRealmAddress);
-
+            createFilesystemSecurityRealmInModel(securityRealmAddress);
             page.navigate();
             page.switchToFilesystemRealms()
                     .getResourceManager()
-                    .selectByName(securityRealmAddress.getLastPairValue());
-
-            final String value = RandomStringUtils.randomAlphanumeric(7);
+                    .selectByName(securityRealmName);
             new ConfigChecker.Builder(client, securityRealmAddress)
                     .configFragment(page.getConfigFragment())
                     .editAndSave(ConfigChecker.InputType.TEXT, RELATIVE_TO, value)
@@ -182,14 +176,10 @@ public class ElytronFilesystemSecurityRealmTestCase extends AbstractElytronTestC
         }
     }
 
-    private Address createFilesystemSecurityRealm(Address securityRealmAddress) throws IOException {
-        if (securityRealmAddress == null) {
-            securityRealmAddress = elyOps.getElytronAddress(FILESYSTEM_REALM, RandomStringUtils.randomAlphanumeric(7));
-        }
-
-        ops.add(securityRealmAddress, Values.of(PATH, RandomStringUtils.randomAlphanumeric(5))).assertSuccess();
-
-        return securityRealmAddress;
+    private void createFilesystemSecurityRealmInModel(@NotNull Address securityRealmAddress) throws IOException, TimeoutException, InterruptedException {
+        ops.add(securityRealmAddress, Values.of(PATH, RandomStringUtils.randomAlphanumeric(5)))
+                .assertSuccess();
+        adminOps.reloadIfRequired();
     }
 
 }
