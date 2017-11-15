@@ -1,60 +1,116 @@
 package org.jboss.hal.testsuite.test.configuration.infinispan;
 
 import org.apache.commons.lang.RandomStringUtils;
-import org.jboss.arquillian.junit.Arquillian;
-import org.jboss.hal.testsuite.category.Shared;
+import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
-import org.jboss.hal.testsuite.fragment.config.infinispan.CacheWizard;
+import org.jboss.hal.testsuite.fragment.config.infinispan.AddLocalCacheWizard;
+import org.jboss.hal.testsuite.test.configuration.infinispan.cache.container.CacheContainerContext;
+import org.jboss.hal.testsuite.util.ConfigChecker;
+import org.jboss.hal.testsuite.util.junit.ArquillianParametrized;
 import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
-import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.wildfly.extras.creaper.core.online.operations.Address;
-import org.wildfly.extras.creaper.core.online.operations.Values;
 
-import java.io.IOException;
-import java.util.concurrent.TimeoutException;
+import java.util.Collection;
 
-/**
- * @author mkrajcov <mkrajcov@redhat.com>
- */
-@RunWith(Arquillian.class)
-@Category(Shared.class)
-public class LocalCacheTestCase extends AbstractCacheTestCase {
+@RunWith(ArquillianParametrized.class)
+@RunAsClient
+public class LocalCacheTestCase extends InfinispanTestCaseAbstract {
 
-    @Override
+    private static final String LOCAL_CACHE = "local-cache";
+    private static final String JNDI_NAME = "jndi-name";
+    private static final String MODULE = "module";
+    private static final String STATISTICS_ENABLED = "statistics-enabled";
+
+    public CacheContainerContext cacheContainerContext;
+
+    public LocalCacheTestCase(CacheContainerContext cacheContainerContext) {
+        this.cacheContainerContext = cacheContainerContext;
+    }
+
+    @Parameterized.Parameters(name = "Cache container: {0}")
+    public static Collection values() {
+        return new ParametersFactory(client).cacheContainerTable();
+    }
+
     @Test
-    public void testCreateCache() throws Exception {
-        CacheWizard wizard = page.content().addCache();
-
+    public void addLocalCacheRequiredFieldsOnlyTest() throws Exception {
+        final String localCacheName = "local_cache_" + RandomStringUtils.randomAlphanumeric(7);
+        final Address localCacheAddress = cacheContainerContext.getCacheContainerAddress().and(LOCAL_CACHE, localCacheName);
         try {
-            boolean result = wizard.name(CACHE_TBA_NAME).finishAndDismissReloadRequiredWindow();
-
-            Assert.assertTrue("Window should be closed", result);
+            cacheContainerContext.createCacheContainerInModel();
             administration.reloadIfRequired();
-            new ResourceVerifier(CACHE_TBA_ADDRESS, client).verifyExists();
+            cacheContainerContext.navigateToCacheContainer(page);
+            page.localCaches()
+                    .getResourceManager()
+                    .addResource(AddLocalCacheWizard.class)
+                    .name(localCacheName)
+                    .saveAndDismissReloadRequiredWindowWithState()
+                    .assertWindowClosed();
+            Assert.assertTrue("Newly created local cache should be present in the table",
+                    page.getResourceManager().isResourcePresent(localCacheName));
+            new ResourceVerifier(localCacheAddress, client).verifyExists();
         } finally {
-            operations.removeIfExists(CACHE_TBA_ADDRESS);
+            operations.removeIfExists(localCacheAddress);
+            cacheContainerContext.removeCacheContainerInModel();
+            administration.reloadIfRequired();
         }
     }
 
-    @BeforeClass
-    public static void beforeClass_() {
-        initializeTBAAddress(CacheType.LOCAL);
+    @Test
+    public void removeLocalCacheTest() throws Exception {
+        final String localCacheName = "local_cache_" + RandomStringUtils.randomAlphanumeric(7);
+        final Address localCacheAddress = cacheContainerContext.getCacheContainerAddress().and(LOCAL_CACHE, localCacheName);
+        try {
+            cacheContainerContext.createCacheContainerInModel();
+            operations.add(localCacheAddress);
+            administration.reloadIfRequired();
+            cacheContainerContext.navigateToCacheContainer(page);
+            page.localCaches()
+                    .getResourceManager()
+                    .removeResource(localCacheName)
+                    .confirmAndDismissReloadRequiredMessage()
+                    .assertClosed();
+            Assert.assertFalse("Newly removed local cache should not be present in the table anymore",
+                    page.getResourceManager().isResourcePresent(localCacheName));
+            new ResourceVerifier(localCacheAddress, client).verifyDoesNotExist();
+        } finally {
+            operations.removeIfExists(localCacheAddress);
+            cacheContainerContext.removeCacheContainerInModel();
+            administration.reloadIfRequired();
+        }
     }
 
-    @Before
-    public void before_() {
-        page.local();
-        page.selectCache(CACHE_ADDRESS.getLastPairValue());
-    }
-
-    protected Address createCache() throws IOException, TimeoutException, InterruptedException {
-        final Address address = ABSTRACT_CACHE_ADDRESS.and(CacheType.LOCAL.getAddressName(), RandomStringUtils.randomAlphabetic(7));
-        operations.add(address, Values.of("mode", "SYNC")).assertSuccess();
-        return address;
+    @Test
+    public void editAttributesTest() throws Exception {
+        final String localCacheName = "local_cache_" + RandomStringUtils.randomAlphanumeric(7);
+        final String jndiName = "jndi:" + RandomStringUtils.randomAlphanumeric(7);
+        final String module = "module_" + RandomStringUtils.randomAlphanumeric(7);
+        final Address localCacheAddress = cacheContainerContext.getCacheContainerAddress().and(LOCAL_CACHE, localCacheName);
+        try {
+            cacheContainerContext.createCacheContainerInModel();
+            operations.add(localCacheAddress);
+            administration.reloadIfRequired();
+            cacheContainerContext.navigateToCacheContainer(page);
+            page.localCaches()
+                    .getResourceManager().selectByName(localCacheName);
+            new ConfigChecker.Builder(client, localCacheAddress)
+                    .configFragment(page.getConfigFragment())
+                    .edit(ConfigChecker.InputType.TEXT, JNDI_NAME, jndiName)
+                    .edit(ConfigChecker.InputType.TEXT, MODULE, module)
+                    .edit(ConfigChecker.InputType.CHECKBOX, STATISTICS_ENABLED, true)
+                    .andSave()
+                    .verifyFormSaved()
+                    .verifyAttribute(JNDI_NAME, jndiName)
+                    .verifyAttribute(MODULE, module)
+                    .verifyAttribute(STATISTICS_ENABLED, true);
+        } finally {
+            operations.removeIfExists(localCacheAddress);
+            cacheContainerContext.removeCacheContainerInModel();
+            administration.reloadIfRequired();
+        }
     }
 }
 
