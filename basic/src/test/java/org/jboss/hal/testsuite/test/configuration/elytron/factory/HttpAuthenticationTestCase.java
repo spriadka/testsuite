@@ -54,7 +54,7 @@ public class HttpAuthenticationTestCase extends ElytronFactoryTestCaseAbstract {
     @Test
     public void addHttpAuthenticationTest() throws Exception {
         final String httpAuthenticationName = "http_authentication_" + RandomStringUtils.randomAlphanumeric(7);
-        final String securityDomain = "ApplicationDomain";
+        final String securityDomainName = "ApplicationDomain";
         final Address httpAuthenticationAddress = elyOps.getElytronAddress(HTTP_AUTHENTICATION_FACTORY, httpAuthenticationName);
         try {
             page.navigateToApplication()
@@ -62,7 +62,7 @@ public class HttpAuthenticationTestCase extends ElytronFactoryTestCaseAbstract {
                     .getResourceManager()
                     .addResource(AddHttpAuthenticationWizard.class)
                     .name(httpAuthenticationName)
-                    .securityDomain(securityDomain)
+                    .securityDomain(securityDomainName)
                     .httpServerMechanismFactory(httpMechanismFactoryAddress.getLastPairValue())
                     .saveAndDismissReloadRequiredWindowWithState()
                     .assertWindowClosed();
@@ -71,7 +71,7 @@ public class HttpAuthenticationTestCase extends ElytronFactoryTestCaseAbstract {
             new ResourceVerifier(httpAuthenticationAddress, client)
                     .verifyExists()
                     .verifyAttribute(HTTP_SERVER_MECHANISM_FACTORY, httpMechanismFactoryAddress.getLastPairValue())
-                    .verifyAttribute(SECURITY_DOMAIN, securityDomain);
+                    .verifyAttribute(SECURITY_DOMAIN, securityDomainName);
         } finally {
             ops.removeIfExists(httpAuthenticationAddress);
             adminOps.reloadIfRequired();
@@ -115,10 +115,14 @@ public class HttpAuthenticationTestCase extends ElytronFactoryTestCaseAbstract {
 
     @Test
     public void editAttributesTest() throws Exception {
+        final String realmName = "realm_" + RandomStringUtils.randomAlphanumeric(7);
         final String httpAuthenticationName = "http_authentication_" + RandomStringUtils.randomAlphanumeric(7);
         final String httpFactory = "factory_" + RandomStringUtils.randomAlphanumeric(7);
-        final String oldSecurityDomain = "ApplicationDomain";
-        final String securityDomain = "ManagementDomain";
+        final String oldSecurityDomain = "OldSecurityDomain_" + RandomStringUtils.randomAlphanumeric(7);
+        final String securityDomain = "NewSecurityDomain_" + RandomStringUtils.randomAlphanumeric(7);
+        final Address realmAddress = elyOps.createSecurityRealm(realmName);
+        final Address oldSecurityDomainAddress = elyOps.createSecurityDomain(oldSecurityDomain, realmName);
+        final Address securityDomainAddress = elyOps.createSecurityDomain(securityDomain, realmName);
         final Address httpAuthenticationAddress = elyOps.getElytronAddress(HTTP_AUTHENTICATION_FACTORY, httpAuthenticationName);
         final Address httpFactoryAddress = elyOps.getElytronAddress(SERVICE_LOADER_HTTP_SERVER_MECHANISM_FACTORY, httpFactory);
 
@@ -142,6 +146,9 @@ public class HttpAuthenticationTestCase extends ElytronFactoryTestCaseAbstract {
         } finally {
             ops.removeIfExists(httpAuthenticationAddress);
             ops.removeIfExists(httpFactoryAddress);
+            ops.removeIfExists(oldSecurityDomainAddress);
+            ops.removeIfExists(securityDomainAddress);
+            ops.removeIfExists(realmAddress);
             adminOps.reloadIfRequired();
         }
     }
@@ -150,7 +157,7 @@ public class HttpAuthenticationTestCase extends ElytronFactoryTestCaseAbstract {
     public void addMechanismConfigurationTest() throws Exception {
         final String httpAuthenticationName = "http_authentication_" + RandomStringUtils.randomAlphanumeric(7);
         final String httpFactory = "factory_" + RandomStringUtils.randomAlphanumeric(7);
-        final String securityDomain = "ManagementDomain";
+        final String securityDomain = "ApplicationDomain";
         final String mechanismName = RandomStringUtils.randomAlphanumeric(7);
         final String hostName = RandomStringUtils.randomAlphanumeric(7);
         final String protocol = RandomStringUtils.randomAlphanumeric(7);
@@ -201,7 +208,7 @@ public class HttpAuthenticationTestCase extends ElytronFactoryTestCaseAbstract {
     public void removeMechanismConfigurationTest() throws Exception {
         final String httpAuthenticationName = "http_authentication_" + RandomStringUtils.randomAlphanumeric(7);
         final String httpFactory = "factory_" + RandomStringUtils.randomAlphanumeric(7);
-        final String securityDomain = "ManagementDomain";
+        final String securityDomainName = "ApplicationDomain";
         final String mechanismName = RandomStringUtils.randomAlphanumeric(7);
         final String hostName = RandomStringUtils.randomAlphanumeric(7);
         final String protocol = RandomStringUtils.randomAlphanumeric(7);
@@ -214,7 +221,7 @@ public class HttpAuthenticationTestCase extends ElytronFactoryTestCaseAbstract {
         try {
             ops.add(httpFactoryAddress, Values.of(MODULE, MODULE_NAME_1)).assertSuccess();
             ops.add(httpAuthenticationAddress, Values.of(HTTP_SERVER_MECHANISM_FACTORY, httpFactory)
-                    .and(SECURITY_DOMAIN, securityDomain)).assertSuccess();
+                    .and(SECURITY_DOMAIN, securityDomainName)).assertSuccess();
             ops.writeAttribute(httpAuthenticationAddress, MECHANISM_CONFIGURATIONS
                     , new ModelNodeGenerator.ModelNodeListBuilder().addNode(new ModelNodeGenerator.ModelNodePropertiesBuilder()
                             .addProperty("host-name", hostName)

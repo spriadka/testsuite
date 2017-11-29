@@ -66,11 +66,12 @@ public class ElytronOperations {
     }
 
     /**
-     * Create properties-realm capability resource with random name
+     * Create properties-realm capability resource with given name
+     * @param realmName name of the realm to be created
      * @return address of newly created security realm
      */
-    public Address createSecurityRealm() throws IOException {
-        Address realmAddress = getElytronAddress("properties-realm", RandomStringUtils.randomAlphanumeric(7));
+    public Address createSecurityRealm(String realmName) throws IOException {
+        Address realmAddress = getElytronAddress("properties-realm", realmName);
         ModelNode userPropertiesNode = new ModelNodeGenerator.ModelNodePropertiesBuilder().addProperty("path", "mgmt-users.properties")
                 .addProperty("relative-to", ConfigUtils.getConfigDirPathName()).build();
         ops.add(realmAddress, Values.of("users-properties", userPropertiesNode)).assertSuccess();
@@ -78,15 +79,25 @@ public class ElytronOperations {
     }
 
     /**
+     * Creates properties-realm capability resource with random name
+     * @return address of newly created security realm
+     */
+    public Address createSecurityRealm() throws IOException {
+        return createSecurityRealm(RandomStringUtils.randomAlphanumeric(7));
+    }
+
+
+
+    /**
      * Create security domain resource with random name
-     * @param realmName name of security realm needed to create security domain
+     * @param securityDomainName name of security domain
      * @return address of new security domain
      */
-    public Address createSecurityDomain(String realmName) throws IOException {
-        Address domainAddress = getElytronAddress(SECURITY_DOMAIN, RandomStringUtils.randomAlphanumeric(7));
-        ModelNode realmsNode = new ModelNodeGenerator.ModelNodeListBuilder()
-                .addNode(new ModelNodeGenerator.ModelNodePropertiesBuilder().addProperty("realm", realmName).build()).build();
-        ops.add(domainAddress, Values.of("default-realm", realmName).and("realms", realmsNode)).assertSuccess();
+    public Address createSecurityDomain(String securityDomainName, String securityRealm) throws IOException {
+        final Address domainAddress = getElytronAddress(SECURITY_DOMAIN, securityDomainName);
+        final ModelNode realmsNode = new ModelNodeGenerator.ModelNodeListBuilder()
+                .addNode(new ModelNodeGenerator.ModelNodePropertiesBuilder().addProperty("realm", securityRealm).build()).build();
+        ops.add(domainAddress, Values.of("default-realm", securityRealm).and("realms", realmsNode)).assertSuccess();
         return domainAddress;
     }
 
