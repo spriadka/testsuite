@@ -6,6 +6,7 @@ import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.dmr.ModelNode;
 import org.jboss.hal.testsuite.category.Elytron;
+import org.jboss.hal.testsuite.category.KnownIssue;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
 import org.jboss.hal.testsuite.dmr.ModelNodeGenerator;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
@@ -291,6 +292,7 @@ public class ElytronPolicyTestCase extends AbstractElytronTestCase {
     }
 
     @Test
+    @Category(KnownIssue.class)
     public void testEditJACCPolicySingleAttribute() throws Exception {
         final String jaccPolicyName = randomAlphabetic(7);
         final String defaultModuleName = policyModuleName;

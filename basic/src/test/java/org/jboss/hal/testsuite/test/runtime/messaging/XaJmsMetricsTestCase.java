@@ -16,6 +16,7 @@ import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
 import org.jboss.dmr.ModelNode;
+import org.jboss.hal.testsuite.category.KnownIssue;
 import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
@@ -121,6 +122,7 @@ public class XaJmsMetricsTestCase {
      * the connection factory and verify against management model that displayed statistics have changed correctly.
      */
     @Test
+    @Category(KnownIssue.class)
     public void jmsXaPoolStatisticsTest() throws Exception {
         generateStats();
         page.navigateToDefaultProviderStats().switchToPooledConnectionFactory()

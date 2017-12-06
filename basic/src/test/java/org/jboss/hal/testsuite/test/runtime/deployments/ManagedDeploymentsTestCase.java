@@ -4,6 +4,7 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.drone.api.annotation.Drone;
 import org.jboss.arquillian.graphene.page.Page;
 import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.hal.testsuite.category.KnownIssue;
 import org.jboss.hal.testsuite.category.Standalone;
 import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.creaper.command.DeployCommand;
@@ -391,6 +392,7 @@ public class ManagedDeploymentsTestCase {
     }
 
     @Test
+    @Category(KnownIssue.class)
     public void medExplodedDeploymentFlagTrueInViewInfoSuccessExpected() {
         page.navigateToDeploymentAndInvokeView(DEPLOYMENT_MANAGED_ENABLED_8);
 

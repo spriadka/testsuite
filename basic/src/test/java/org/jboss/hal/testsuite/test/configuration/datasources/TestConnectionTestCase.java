@@ -4,6 +4,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.jboss.arquillian.container.test.api.RunAsClient;
 import org.jboss.arquillian.junit.Arquillian;
+import org.jboss.hal.testsuite.category.KnownIssue;
 import org.jboss.hal.testsuite.category.Shared;
 import org.jboss.hal.testsuite.creaper.ManagementClientProvider;
 import org.jboss.hal.testsuite.creaper.ResourceVerifier;
@@ -171,6 +172,7 @@ public class TestConnectionTestCase extends AbstractTestConnectionTestCase {
     }
 
     @Test
+    @Category(KnownIssue.class)
     public void testValidXAConnectionInWizardAndCancel() throws Exception {
         datasourcesPage.invokeAddXADatasource();
 
