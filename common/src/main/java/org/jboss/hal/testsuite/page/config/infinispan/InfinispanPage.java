@@ -1,4 +1,4 @@
-package org.jboss.hal.testsuite.page.config;
+package org.jboss.hal.testsuite.page.config.infinispan;
 
 import org.jboss.arquillian.graphene.Graphene;
 import org.jboss.arquillian.graphene.findby.ByJQuery;
@@ -6,21 +6,21 @@ import org.jboss.hal.testsuite.finder.Application;
 import org.jboss.hal.testsuite.finder.FinderNames;
 import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
-import org.jboss.hal.testsuite.fragment.config.infinispan.CacheFragment;
 import org.jboss.hal.testsuite.fragment.formeditor.Editor;
-import org.jboss.hal.testsuite.page.ConfigPage;
+import org.jboss.hal.testsuite.page.BasePage;
 import org.jboss.hal.testsuite.page.Navigatable;
+import org.jboss.hal.testsuite.page.config.DomainConfigEntryPoint;
+import org.jboss.hal.testsuite.page.config.StandaloneConfigEntryPoint;
 import org.jboss.hal.testsuite.util.ConfigUtils;
 import org.jboss.hal.testsuite.util.Console;
-import org.jboss.hal.testsuite.util.PropUtils;
 import org.openqa.selenium.By;
 
-/**
- * @author mkrajcov <mkrajcov@redhat.com>
- */
-public class HibernateCachePage extends ConfigPage implements Navigatable {
+public class InfinispanPage extends BasePage implements Navigatable {
 
-    public void navigate() {
+    private static final String INFINISPAN_LABEL = "Infinispan";
+    private static final String CACHE_CONTAINER_LABEL = "Cache Container";
+
+    public void navigateToCacheContainer(String cacheContainer) {
         FinderNavigation navigation;
         if (ConfigUtils.isDomain()) {
             navigation = new FinderNavigation(browser, DomainConfigEntryPoint.class)
@@ -30,37 +30,35 @@ public class HibernateCachePage extends ConfigPage implements Navigatable {
             navigation = new FinderNavigation(browser, StandaloneConfigEntryPoint.class)
                     .step(FinderNames.CONFIGURATION, FinderNames.SUBSYSTEMS);
         }
-        navigation.step(FinderNames.SUBSYSTEM, "Infinispan")
-                .step("Cache Container", "hibernate");
+        navigation.step(FinderNames.SUBSYSTEM, INFINISPAN_LABEL)
+                .step(CACHE_CONTAINER_LABEL, cacheContainer);
         navigation.selectRow().invoke(FinderNames.VIEW);
         Application.waitUntilVisible(50);
         Console.withBrowser(browser).dismissReloadRequiredWindowIfPresent();
     }
 
-    private static final By CONTENT = By.id(PropUtils.get("page.content.id"));
-
-    public CacheFragment content() {
-        return Graphene.createPageFragment(CacheFragment.class, getContentRoot().findElement(CONTENT));
+    public void navigate() {
+        navigateToCacheContainer("hibernate");
     }
 
-    public CacheFragment local() {
+    public InfinispanPage localCaches() {
         switchTab("Local Caches");
-        return content();
+        return this;
     }
 
-    public CacheFragment replicated() {
+    public InfinispanPage replicatedCaches() {
         switchTab("Replicated Caches");
-        return content();
+        return this;
     }
 
-    public CacheFragment distributed() {
+    public InfinispanPage distributed() {
         switchTab("Distributed Caches");
-        return content();
+        return this;
     }
 
-    public CacheFragment invalidation() {
+    public InfinispanPage invalidation() {
         switchTab("Invalidation Caches");
-        return content();
+        return this;
     }
 
     public boolean editTextAndSave(String identifier, String value) {
@@ -99,6 +97,4 @@ public class HibernateCachePage extends ConfigPage implements Navigatable {
     public void selectCache(String name) {
         getResourceManager().selectByName(name);
     }
-
-
 }
