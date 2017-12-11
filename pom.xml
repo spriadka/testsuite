@@ -354,9 +354,6 @@
         <test.included.category>
           org.jboss.hal.testsuite.category.Elytron
         </test.included.category>
-        <test.excluded.category>
-          org.jboss.hal.testsuite.category.KnownIssue
-        </test.excluded.category>
       </properties>
     </profile>
 
@@ -367,9 +364,6 @@
           org.jboss.hal.testsuite.category.PicketBox,
           org.jboss.hal.testsuite.category.PicketLink
         </test.included.category>
-        <test.excluded.category>
-          org.jboss.hal.testsuite.category.KnownIssue
-        </test.excluded.category>
       </properties>
     </profile>
 
@@ -377,10 +371,18 @@
       <id>noSecurity</id>
       <properties>
         <test.excluded.category>
-          org.jboss.hal.testsuite.category.KnownIssue,
           org.jboss.hal.testsuite.category.Elytron,
           org.jboss.hal.testsuite.category.PicketBox,
           org.jboss.hal.testsuite.category.PicketLink
+        </test.excluded.category>
+      </properties>
+    </profile>
+
+    <profile>
+      <id>withoutKnownIssues</id>
+      <properties>
+        <test.excluded.category>
+          org.jboss.hal.testsuite.category.KnownIssue
         </test.excluded.category>
       </properties>
     </profile>
