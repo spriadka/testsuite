@@ -5,4 +5,9 @@ target
 .project
 .idea
 *.iml
+.vscode/
 basic/periodic-handler.log
+
+# Smart Testing Exclusions
+.smart-testing/
+
