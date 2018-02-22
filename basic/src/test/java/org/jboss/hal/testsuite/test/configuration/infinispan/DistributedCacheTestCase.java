@@ -23,9 +23,7 @@ public class DistributedCacheTestCase extends InfinispanTestCaseAbstract {
     private static final String DISTRIBUTED_CACHE = "distributed-cache";
     private static final String CAPACITY_FACTOR = "capacity-factor";
     private static final String CONSISTENT_HASH_STRATEGY = "consistent-hash-strategy";
-    private static final String JNDI_NAME = "jndi-name";
     private static final String L1_LIFESPAN = "l1-lifespan";
-    private static final String MODE = "mode";
     private static final String MODULE = "module";
     private static final String OWNERS = "owners";
     private static final String REMOTE_TIMEOUT = "remote-timeout";
@@ -99,9 +97,7 @@ public class DistributedCacheTestCase extends InfinispanTestCaseAbstract {
     public void editAttributesTest() throws Exception {
         final double capacityFactor = 20;
         final HashStrategy hashStrategy = HashStrategy.INTRA_CACHE;
-        final String jndiName = "jndi://" + RandomStringUtils.randomAlphanumeric(7);
         final long l1Lifespan = 250;
-        final SyncMode syncMode = SyncMode.SYNC;
         final String module = "module_" + RandomStringUtils.randomAlphanumeric(7);
         final int owners = 20;
         final long remoteTimeout = 250;
@@ -122,9 +118,7 @@ public class DistributedCacheTestCase extends InfinispanTestCaseAbstract {
                     .configFragment(page.getConfigFragment())
                     .edit(ConfigChecker.InputType.TEXT, CAPACITY_FACTOR, String.valueOf(capacityFactor))
                     .edit(ConfigChecker.InputType.SELECT, CONSISTENT_HASH_STRATEGY, hashStrategy.getHashStrategyValue())
-                    .edit(ConfigChecker.InputType.TEXT, JNDI_NAME, jndiName)
                     .edit(ConfigChecker.InputType.TEXT, L1_LIFESPAN, String.valueOf(l1Lifespan))
-                    .edit(ConfigChecker.InputType.SELECT, MODE, syncMode.getSyncModeValue())
                     .edit(ConfigChecker.InputType.TEXT, MODULE, module)
                     .edit(ConfigChecker.InputType.TEXT, OWNERS, String.valueOf(owners))
                     .edit(ConfigChecker.InputType.TEXT, REMOTE_TIMEOUT, String.valueOf(remoteTimeout))
@@ -134,9 +128,7 @@ public class DistributedCacheTestCase extends InfinispanTestCaseAbstract {
                     .verifyFormSaved()
                     .verifyAttribute(CAPACITY_FACTOR, new ModelNode(capacityFactor))
                     .verifyAttribute(CONSISTENT_HASH_STRATEGY, hashStrategy.getHashStrategyValue())
-                    .verifyAttribute(JNDI_NAME, jndiName)
                     .verifyAttribute(L1_LIFESPAN, l1Lifespan)
-                    .verifyAttribute(MODE, syncMode.getSyncModeValue())
                     .verifyAttribute(MODULE, module)
                     .verifyAttribute(OWNERS, owners)
                     .verifyAttribute(REMOTE_TIMEOUT, remoteTimeout)

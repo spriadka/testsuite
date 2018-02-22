@@ -361,9 +361,10 @@ public class RemoteStoreTestCase extends InfinispanTestCaseAbstract {
     }
 
     private void addRemoteStoreInModel(Address storeAddress) throws IOException {
+        final String initialCacheName = "initial_cache_" + RandomStringUtils.randomAlphanumeric(7);
         operations.headers(Values.of(ALLOW_RESOURCE_SERVICE_RESTART, true))
                 .add(storeAddress, Values.of(REMOTE_SERVERS, new ModelNodeGenerator.ModelNodeListBuilder()
-                        .addAll(MAIL_SMTP).build()))
+                        .addAll(MAIL_SMTP).build()).and(CACHE, initialCacheName))
                 .assertSuccess();
     }
 }
