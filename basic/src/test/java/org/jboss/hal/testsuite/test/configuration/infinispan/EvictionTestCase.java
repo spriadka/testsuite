@@ -19,8 +19,7 @@ public class EvictionTestCase extends InfinispanTestCaseAbstract {
     private static final String EVICTION = "eviction";
     private static final String EVICTION_LABEL = "Eviction";
     private static final String COMPONENT = "component";
-    private static final String MAX_ENTRIES = "max-entries";
-    private static final String STRATEGY = "strategy";
+    private static final String SIZE = "size";
 
     public CacheContainerContext cacheContainerContext;
     public CacheContext cacheContext;
@@ -38,8 +37,7 @@ public class EvictionTestCase extends InfinispanTestCaseAbstract {
 
     @Test
     public void editEvictionTest() throws Exception {
-        final long maxEntries = 1000;
-        final StrategyType strategy = StrategyType.FIFO;
+        final long size = 1245678;
         final Address evictionAddress = cacheContext.getCacheAddress().and(COMPONENT, EVICTION);
         try {
             cacheContainerContext.createCacheContainerInModel();
@@ -50,12 +48,10 @@ public class EvictionTestCase extends InfinispanTestCaseAbstract {
             page.getConfig().switchTo(EVICTION_LABEL);
             new ConfigChecker.Builder(client, evictionAddress)
                     .configFragment(page.getConfigFragment())
-                    .edit(ConfigChecker.InputType.TEXT, MAX_ENTRIES, String.valueOf(maxEntries))
-                    .edit(ConfigChecker.InputType.SELECT, STRATEGY, strategy.getStrategyValue())
+                    .edit(ConfigChecker.InputType.TEXT, SIZE, String.valueOf(size))
                     .andSave()
                     .verifyFormSaved()
-                    .verifyAttribute(STRATEGY, strategy.getStrategyValue())
-                    .verifyAttribute(MAX_ENTRIES, maxEntries);
+                    .verifyAttribute(SIZE, size);
         } finally {
             cacheContext.removeCacheInModel();
             cacheContainerContext.removeCacheContainerInModel();

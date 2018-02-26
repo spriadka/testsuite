@@ -20,7 +20,6 @@ import java.util.Collection;
 public class LocalCacheTestCase extends InfinispanTestCaseAbstract {
 
     private static final String LOCAL_CACHE = "local-cache";
-    private static final String JNDI_NAME = "jndi-name";
     private static final String MODULE = "module";
     private static final String STATISTICS_ENABLED = "statistics-enabled";
 
@@ -86,7 +85,6 @@ public class LocalCacheTestCase extends InfinispanTestCaseAbstract {
     @Test
     public void editAttributesTest() throws Exception {
         final String localCacheName = "local_cache_" + RandomStringUtils.randomAlphanumeric(7);
-        final String jndiName = "jndi:" + RandomStringUtils.randomAlphanumeric(7);
         final String module = "module_" + RandomStringUtils.randomAlphanumeric(7);
         final Address localCacheAddress = cacheContainerContext.getCacheContainerAddress().and(LOCAL_CACHE, localCacheName);
         try {
@@ -98,12 +96,10 @@ public class LocalCacheTestCase extends InfinispanTestCaseAbstract {
                     .getResourceManager().selectByName(localCacheName);
             new ConfigChecker.Builder(client, localCacheAddress)
                     .configFragment(page.getConfigFragment())
-                    .edit(ConfigChecker.InputType.TEXT, JNDI_NAME, jndiName)
                     .edit(ConfigChecker.InputType.TEXT, MODULE, module)
                     .edit(ConfigChecker.InputType.CHECKBOX, STATISTICS_ENABLED, true)
                     .andSave()
                     .verifyFormSaved()
-                    .verifyAttribute(JNDI_NAME, jndiName)
                     .verifyAttribute(MODULE, module)
                     .verifyAttribute(STATISTICS_ENABLED, true);
         } finally {

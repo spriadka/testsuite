@@ -20,8 +20,6 @@ import java.util.Collection;
 public class InvalidationCacheTestCase extends InfinispanTestCaseAbstract {
 
     private static final String INVALIDATION_CACHE = "invalidation-cache";
-    private static final String JNDI_NAME = "jndi-name";
-    private static final String MODE = "mode";
     private static final String MODULE = "module";
     private static final String REMOTE_TIMEOUT = "remote-timeout";
     private static final String STATISTICS_ENABLED = "statistics-enabled";
@@ -91,8 +89,6 @@ public class InvalidationCacheTestCase extends InfinispanTestCaseAbstract {
 
     @Test
     public void editAttributesTest() throws Exception {
-        final String jndiName = "jndi://" + RandomStringUtils.randomAlphanumeric(7);
-        final SyncMode mode = SyncMode.ASYNC;
         final String module = "module_" + RandomStringUtils.randomAlphanumeric(7);
         final long remoteTimeout = 10000;
         final boolean statisticsEnabled = true;
@@ -109,15 +105,11 @@ public class InvalidationCacheTestCase extends InfinispanTestCaseAbstract {
                     .selectByName(invalidationCacheName);
             new ConfigChecker.Builder(client, invalidationCacheAddress)
                     .configFragment(page.getConfigFragment())
-                    .edit(ConfigChecker.InputType.TEXT, JNDI_NAME, jndiName)
-                    .edit(ConfigChecker.InputType.SELECT, MODE, mode.getSyncModeValue())
                     .edit(ConfigChecker.InputType.TEXT, MODULE, module)
                     .edit(ConfigChecker.InputType.TEXT, REMOTE_TIMEOUT, String.valueOf(remoteTimeout))
                     .edit(ConfigChecker.InputType.CHECKBOX, STATISTICS_ENABLED, statisticsEnabled)
                     .andSave()
                     .verifyFormSaved()
-                    .verifyAttribute(JNDI_NAME, jndiName)
-                    .verifyAttribute(MODE, mode.getSyncModeValue())
                     .verifyAttribute(MODULE, module)
                     .verifyAttribute(REMOTE_TIMEOUT, remoteTimeout)
                     .verifyAttribute(STATISTICS_ENABLED, statisticsEnabled);

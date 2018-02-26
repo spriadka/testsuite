@@ -6,3 +6,4 @@ target
 .idea
 *.iml
 basic/periodic-handler.log
+.vscode/
