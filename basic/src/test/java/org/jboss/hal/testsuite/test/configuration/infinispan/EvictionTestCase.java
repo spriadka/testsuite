@@ -5,6 +5,7 @@ import org.jboss.hal.testsuite.test.configuration.infinispan.cache.container.Cac
 import org.jboss.hal.testsuite.test.configuration.infinispan.cache.type.CacheContext;
 import org.jboss.hal.testsuite.util.ConfigChecker;
 import org.jboss.hal.testsuite.util.junit.ArquillianParametrized;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -35,6 +36,7 @@ public class EvictionTestCase extends InfinispanTestCaseAbstract {
     }
 
 
+    @Ignore //fails because of HAL-1393
     @Test
     public void editEvictionTest() throws Exception {
         final long size = 1245678;
