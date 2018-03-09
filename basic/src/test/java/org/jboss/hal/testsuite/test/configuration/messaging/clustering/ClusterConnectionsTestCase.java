@@ -104,7 +104,7 @@ public class ClusterConnectionsTestCase extends AbstractMessagingTestCase {
 
     @Test
     public void updateClusterConnectionReconnectAttempts() throws Exception {
-        editTextAndVerify(CC_ADDRESS, "reconnect-attempts", "reconnect-attempts", 0);
+        editTextAndVerify(CC_ADDRESS, "reconnect-attempts", "reconnect-attempts", 1);
     }
 
     @Test
