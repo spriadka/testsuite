@@ -10,6 +10,7 @@ import javax.jms.JMSException;
 import javax.jms.MessageProducer;
 import javax.jms.Queue;
 import javax.jms.Session;
+import javax.transaction.SystemException;
 import javax.transaction.UserTransaction;
 
 @Stateless
@@ -45,7 +46,7 @@ public class MessagingStatisticsBean {
         }
     }
 
-    private void sendMessage() throws JMSException {
+    private void sendMessage() throws JMSException, IllegalStateException, SecurityException, SystemException {
         Connection connection = null;
         try {
             connection = connectionFactory.createConnection();
@@ -53,6 +54,9 @@ public class MessagingStatisticsBean {
             MessageProducer producer = session.createProducer(queue);
             connection.start();
             producer.send(session.createTextMessage("Sample message."));
+        } catch (Throwable t) {
+            tx.rollback();
+            throw t;
         } finally {
             if (connection != null) {
                 connection.close();
