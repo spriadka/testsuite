@@ -38,9 +38,11 @@ import org.jboss.hal.testsuite.finder.FinderNavigation;
 import org.jboss.hal.testsuite.fragment.ConfigFragment;
 import org.jboss.hal.testsuite.fragment.config.iiop.IIOPPropertyWizard;
 import org.jboss.hal.testsuite.fragment.config.resourceadapters.ConfigPropertiesFragment;
+import org.jboss.hal.testsuite.fragment.formeditor.Editor;
 import org.jboss.hal.testsuite.fragment.shared.table.ResourceTableRowFragment;
 import org.jboss.hal.testsuite.page.config.IIOPPage;
 import org.jboss.hal.testsuite.page.config.StandaloneConfigurationPage;
+import org.jboss.hal.testsuite.util.Console;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
@@ -78,6 +80,8 @@ public class IIOPTestCase {
     private static final Logger log = LoggerFactory.getLogger(IIOPTestCase.class);
     private static final String KEY_VALUE = "IIOPKey_" + RandomStringUtils.randomAlphanumeric(5);
     private static final String VALUE = "IIOPValue_" + RandomStringUtils.randomAlphanumeric(5);
+    private static final String HIGH_WATER_MARK = "high-water-mark";
+    private static final String SECURITY_DOMAIN = "security-domain";
 
     private FinderNavigation navigation;
     private FinderNavigation transactionNavigation;
@@ -180,7 +184,9 @@ public class IIOPTestCase {
         navigateToIIOPSubsystemPage();
         page.switchToEditMode();
         ConfigFragment editPanelFragment = page.getConfigFragment();
-        editPanelFragment.getEditor().text("high-water-mark", "7");
+        Editor editor = editPanelFragment.getEditor();
+        Console.withBrowser(browser).scrollIntoView(editor.getText(HIGH_WATER_MARK));
+        editor.text(HIGH_WATER_MARK, "7");
         boolean finished = editPanelFragment.save();
 
         assertTrue("Config should be saved and closed.", finished);
@@ -294,22 +300,28 @@ public class IIOPTestCase {
 
     @Test
     public void setSecurityDomainValues() throws Exception {
-        navigateToIIOPSubsystemPage();
-        page.switchToEditMode();
-        ConfigFragment editPanelFragment = page.getConfigFragment();
-        editPanelFragment.getEditor().text("security-domain", VALUE);
-        boolean finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        new ResourceVerifier(iiopSubsystemAddress, client).verifyAttribute("security-domain", VALUE);
-
-        page.switchToEditMode();
-        editPanelFragment = page.getConfigFragment();
-        editPanelFragment.getEditor().text("security-domain", "");
-        finished = editPanelFragment.save();
-
-        assertTrue("Config should be saved and closed.", finished);
-        new ResourceVerifier(iiopSubsystemAddress, client).verifyAttributeIsUndefined("security-domain");
+        final ModelNodeResult originalModelNodeResult = operations.readAttribute(iiopSubsystemAddress, SECURITY_DOMAIN);
+        originalModelNodeResult.assertSuccess();
+        Address securityDomainAddress = Address.subsystem("security").and(SECURITY_DOMAIN, VALUE);
+        try {
+            operations.add(securityDomainAddress);
+            navigateToIIOPSubsystemPage();
+            page.switchToEditMode();
+            ConfigFragment editPanelFragment = page.getConfigFragment();
+            editPanelFragment.getEditor().text(SECURITY_DOMAIN, VALUE);
+            boolean finished = editPanelFragment.save();
+            assertTrue("Config should be saved and closed.", finished);
+            new ResourceVerifier(iiopSubsystemAddress, client).verifyAttribute(SECURITY_DOMAIN, VALUE);
+            page.switchToEditMode();
+            editPanelFragment = page.getConfigFragment();
+            editPanelFragment.getEditor().text(SECURITY_DOMAIN, "");
+            finished = editPanelFragment.save();
+            assertTrue("Config should be saved and closed.", finished);
+            new ResourceVerifier(iiopSubsystemAddress, client).verifyAttributeIsUndefined(SECURITY_DOMAIN);
+        } finally {
+            operations.writeAttribute(iiopSubsystemAddress, SECURITY_DOMAIN, originalModelNodeResult.value());
+            operations.removeIfExists(securityDomainAddress);
+        }
     }
 
     @Test

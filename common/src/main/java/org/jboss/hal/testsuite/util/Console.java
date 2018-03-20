@@ -16,6 +16,7 @@ import org.jboss.hal.testsuite.page.BasePage;
 import org.jboss.hal.testsuite.page.home.HomePage;
 import org.openqa.selenium.By;
 import org.openqa.selenium.Dimension;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.Keys;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.TimeoutException;
@@ -359,5 +360,9 @@ public class Console {
         } catch (TimeoutException e) {
             log.debug("Reload required message window not present e.g. since it was already closed before.");
         }
+    }
+
+    public void scrollIntoView(WebElement element) {
+        ((JavascriptExecutor) browser).executeScript("arguments[0].scrollIntoView(true);", element);
     }
 }
